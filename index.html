@@ -98,7 +98,41 @@ body{
     background:#666;
     color:white;
 }
+.home-page{
 
+    background-image:url('images/home-bg.png');
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    position:relative;
+}
+
+.start-btn{
+
+    position:absolute;
+
+    bottom:90px;
+
+    width:75%;
+
+    height:120px;
+
+    border:none;
+
+    border-radius:60px;
+
+    background:#FFB703;
+
+    color:white;
+
+    font-size:52px;
+
+    font-weight:bold;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+}
 </style>
 </head>
 
@@ -106,13 +140,9 @@ body{
 
 <!-- 首頁 -->
 
-<div id="homePage" class="page active">
+<div id="homePage" class="page active home-page">
 
-    <div class="title">
-        親子樂園售票機
-    </div>
-
-    <button class="big-btn"
+    <button class="start-btn"
     onclick="showPage('ticketPage')">
         開始購票
     </button>
@@ -201,15 +231,15 @@ body{
 
     </div>
 
-    <button class="big-btn"
-    onclick="showPage('successPage')">
-        LINE Pay 付款
-    </button>
+   <button class="big-btn"
+onclick="showSuccessPage()">
+    LINE Pay 付款
+</button>
 
-    <button class="big-btn"
-    onclick="showPage('successPage')">
-        現金付款
-    </button>
+<button class="big-btn"
+onclick="showSuccessPage()">
+    現金付款
+</button>
 
 </div>
 
@@ -230,7 +260,9 @@ body{
         並至櫃台領取：<br><br>
 
         ✓ 代幣<br>
-        ✓ 玩具
+        ✓ 玩具 <br><br>
+
+        <span id="countdown">5</span> 秒後返回首頁
     </div>
 
     <button class="big-btn"
@@ -252,6 +284,8 @@ function showPage(pageId){
 
     document.getElementById(pageId)
     .classList.add('active');
+
+    startIdleTimer();
 }
 
 function showDetail(title,content,price){
@@ -267,6 +301,54 @@ function showDetail(title,content,price){
 
     showPage('detailPage');
 }
+let countdownTimer;
+let idleTimer;
+
+function showSuccessPage(){
+
+    showPage('successPage');
+
+    let seconds = 5;
+
+    document.getElementById('countdown').innerHTML = seconds;
+
+    clearInterval(countdownTimer);
+
+    countdownTimer = setInterval(function(){
+
+        seconds--;
+
+        document.getElementById('countdown').innerHTML = seconds;
+
+        if(seconds <= 0){
+
+            clearInterval(countdownTimer);
+
+            showPage('homePage');
+
+        }
+
+    },1000);
+
+}
+function startIdleTimer(){
+
+    clearTimeout(idleTimer);
+
+    idleTimer = setTimeout(function(){
+
+        showPage('homePage');
+
+    },60000);
+
+}
+document.addEventListener('click', function(){
+
+    startIdleTimer();
+
+});
+
+startIdleTimer();
 
 </script>
 
