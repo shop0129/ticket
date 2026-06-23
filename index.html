@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>親子樂園售票機</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:0;
+    font-family:sans-serif;
+    background:#f5f5f5;
+    overflow:hidden;
+}
+
+/* 共用頁面 */
+
+.page{
+    width:100vw;
+    height:100vh;
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+.active{
+    display:flex;
+}
+
+/* 標題 */
+
+.title{
+    font-size:55px;
+    font-weight:bold;
+    margin-bottom:40px;
+}
+
+/* 大按鈕 */
+
+.big-btn{
+    width:80%;
+    max-width:700px;
+    height:100px;
+    font-size:36px;
+    border:none;
+    border-radius:20px;
+    margin:15px;
+    background:#ff9800;
+    color:white;
+}
+/* 票券卡片 */
+
+.ticket-card{
+    background:white;
+    width:85%;
+    max-width:750px;
+    border-radius:25px;
+    padding:30px;
+    margin-bottom:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+.ticket-title{
+    font-size:42px;
+    font-weight:bold;
+}
+
+.ticket-content{
+    font-size:30px;
+    margin-top:15px;
+    line-height:1.8;
+}
+
+.ticket-price{
+    font-size:60px;
+    color:red;
+    margin-top:20px;
+    font-weight:bold;
+}
+
+/* 返回按鈕 */
+
+.back-btn{
+    position:absolute;
+    top:20px;
+    left:20px;
+    width:150px;
+    height:70px;
+    font-size:28px;
+    border:none;
+    border-radius:15px;
+    background:#666;
+    color:white;
+}
+.home-page{
+
+    background-image:url('images/home-bg.png');
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    position:relative;
+}
+
+.start-btn{
+
+    position:absolute;
+
+    bottom:90px;
+
+    width:75%;
+
+    height:120px;
+
+    border:none;
+
+    border-radius:60px;
+
+    background:#FFB703;
+
+    color:white;
+
+    font-size:52px;
+
+    font-weight:bold;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+}
+</style>
+</head>
+
+<body>
+
+<!-- 首頁 -->
+
+<div id="homePage" class="page active home-page">
+
+    <button class="start-btn"
+    onclick="showPage('ticketPage')">
+        開始購票
+    </button>
+
+</div>
+
+<!-- 票種頁 -->
+
+<div id="ticketPage" class="page">
+
+    <button class="back-btn"
+    onclick="showPage('homePage')">
+        返回
+    </button>
+
+    <div class="title">
+        請選擇方案
+    </div>
+
+    <button class="big-btn"
+    onclick="showDetail(
+    '2H 遊玩方案',
+    '20枚代幣<br>送綠標玩具',
+    '$250'
+    )">
+        2H 綠標 $250
+    </button>
+
+    <button class="big-btn"
+    onclick="showDetail(
+    '2H 遊玩方案',
+    '25枚代幣<br>送紅標玩具',
+    '$300'
+    )">
+        2H 紅標 $300
+    </button>
+
+    <button class="big-btn"
+    onclick="showDetail(
+    '3H 遊玩方案',
+    '25枚代幣<br>送綠標玩具',
+    '$300'
+    )">
+        3H 綠標 $300
+    </button>
+
+    <button class="big-btn"
+    onclick="showDetail(
+    '3H 遊玩方案',
+    '30枚代幣<br>送紅標玩具',
+    '$350'
+    )">
+        3H 紅標 $350
+    </button>
+
+    <button class="big-btn"
+    onclick="showDetail(
+    '代幣兌換',
+    '10枚代幣',
+    '$100'
+    )">
+        代幣兌換 $100
+    </button>
+
+</div>
+
+<!-- 詳細頁 -->
+
+<div id="detailPage" class="page">
+
+    <button class="back-btn"
+    onclick="showPage('ticketPage')">
+        返回
+    </button>
+
+    <div class="ticket-card">
+
+        <div class="ticket-title" id="detailTitle">
+        </div>
+
+        <div class="ticket-content" id="detailContent">
+        </div>
+
+        <div class="ticket-price" id="detailPrice">
+        </div>
+
+    </div>
+
+   <button class="big-btn"
+onclick="showSuccessPage()">
+    LINE Pay 付款
+</button>
+
+<button class="big-btn"
+onclick="showSuccessPage()">
+    現金付款
+</button>
+
+</div>
+
+<!-- 成功頁 -->
+
+<div id="successPage" class="page">
+
+    <div class="title">
+        付款成功
+    </div>
+
+    <div style="
+        font-size:35px;
+        line-height:2;
+        text-align:center;
+    ">
+        請領取票券<br>
+        並至櫃台領取：<br><br>
+
+        ✓ 代幣<br>
+        ✓ 玩具 <br><br>
+
+        <span id="countdown">5</span> 秒後返回首頁
+    </div>
+
+    <button class="big-btn"
+    onclick="showPage('homePage')">
+        返回首頁
+    </button>
+
+</div>
+
+<script>
+
+function showPage(pageId){
+
+    let pages = document.querySelectorAll('.page');
+
+    pages.forEach(function(page){
+        page.classList.remove('active');
+    });
+
+    document.getElementById(pageId)
+    .classList.add('active');
+
+    startIdleTimer();
+}
+
+function showDetail(title,content,price){
+
+    document.getElementById('detailTitle')
+    .innerHTML = title;
+
+    document.getElementById('detailContent')
+    .innerHTML = content;
+
+    document.getElementById('detailPrice')
+    .innerHTML = price;
+
+    showPage('detailPage');
+}
+let countdownTimer;
+let idleTimer;
+
+function showSuccessPage(){
+
+    showPage('successPage');
+
+    let seconds = 5;
+
+    document.getElementById('countdown').innerHTML = seconds;
+
+    clearInterval(countdownTimer);
+
+    countdownTimer = setInterval(function(){
+
+        seconds--;
+
+        document.getElementById('countdown').innerHTML = seconds;
+
+        if(seconds <= 0){
+
+            clearInterval(countdownTimer);
+
+            showPage('homePage');
+
+        }
+
+    },1000);
+
+}
+function startIdleTimer(){
+
+    clearTimeout(idleTimer);
+
+    idleTimer = setTimeout(function(){
+
+        showPage('homePage');
+
+    },60000);
+
+}
+document.addEventListener('click', function(){
+
+    startIdleTimer();
+
+});
+
+startIdleTimer();
+
+</script>
+
+</body>
+</html>
