@@ -1,6 +1,7 @@
-/* ===========================================
-   基本設定
-=========================================== */
+/* ==========================================
+   小怪獸放電所 售票機 V3
+   Style Part 1
+========================================== */
 
 *{
     margin:0;
@@ -14,17 +15,13 @@ body{
     width:100%;
     height:100%;
 
+    overflow:hidden;
+
     font-family:"Microsoft JhengHei",sans-serif;
 
     background:#f5f5f5;
 
-    overflow:hidden;
-
 }
-
-/* ===========================================
-   共用頁面
-=========================================== */
 
 .page{
 
@@ -38,19 +35,17 @@ body{
 
 }
 
-.page.show{
+.page.active{
 
     display:flex;
 
 }
 
-/* ===========================================
+/* ==========================================
    首頁
-=========================================== */
+========================================== */
 
 #homePage{
-
-    display:flex;
 
     justify-content:center;
 
@@ -66,7 +61,13 @@ body{
 
     inset:0;
 
-    background:url("images/home-bg.png") center center/cover no-repeat;
+    background:url("images/home-bg.png");
+
+    background-size:cover;
+
+    background-position:center;
+
+    background-repeat:no-repeat;
 
 }
 
@@ -86,7 +87,7 @@ body{
 
     transition:.25s;
 
-    z-index:10;
+    z-index:5;
 
 }
 
@@ -101,23 +102,26 @@ body{
     transform:translateX(-50%) scale(.95);
 
 }
-/* ===========================================
+
+/* ==========================================
    票種頁
-=========================================== */
+========================================== */
 
 #ticketPage{
 
     flex-direction:column;
 
-    background:url("images/ticket-bg.png") center center/cover no-repeat;
-
     overflow-y:auto;
 
     overflow-x:hidden;
 
-}
+    background:url("images/ticket-bg.png");
 
-/* 半透明白底 */
+    background-size:cover;
+
+    background-position:center;
+
+}
 
 #ticketPage::before{
 
@@ -132,16 +136,17 @@ body{
     pointer-events:none;
 
 }
-
-/* ===========================================
+/* ==========================================
    Header
-=========================================== */
+========================================== */
 
 .ticket-header{
 
     position:sticky;
 
     top:0;
+
+    z-index:100;
 
     width:100%;
 
@@ -155,11 +160,9 @@ body{
 
     background:rgba(255,255,255,.92);
 
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(8px);
 
-    box-shadow:0 2px 12px rgba(0,0,0,.12);
-
-    z-index:100;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
 
 }
 
@@ -173,7 +176,12 @@ body{
 
 }
 
-#backBtn{
+/* ==========================================
+   返回按鈕
+========================================== */
+
+#backBtn,
+#detailBackBtn{
 
     position:absolute;
 
@@ -193,21 +201,24 @@ body{
 
     font-size:22px;
 
+    font-weight:bold;
+
     cursor:pointer;
 
     transition:.2s;
 
 }
 
-#backBtn:hover{
+#backBtn:hover,
+#detailBackBtn:hover{
 
-    background:#ff8c00;
+    background:#fb8c00;
 
 }
 
-/* ===========================================
+/* ==========================================
    內容
-=========================================== */
+========================================== */
 
 .ticket-content{
 
@@ -217,13 +228,13 @@ body{
 
     width:100%;
 
-    padding:20px 0 120px;
+    padding:25px 0 120px;
 
 }
 
-/* ===========================================
-   分類圖片
-=========================================== */
+/* ==========================================
+   分類標題
+========================================== */
 
 .category-title{
 
@@ -235,15 +246,15 @@ body{
 
 }
 
-/* ===========================================
+/* ==========================================
    兩欄排列
-=========================================== */
+========================================== */
 
 .ticket-grid{
 
     width:900px;
 
-    margin:0 auto 20px;
+    margin:0 auto 25px;
 
     display:grid;
 
@@ -255,9 +266,9 @@ body{
 
 }
 
-/* ===========================================
+/* ==========================================
    單張票
-=========================================== */
+========================================== */
 
 .ticket-single{
 
@@ -270,18 +281,21 @@ body{
     justify-content:center;
 
 }
-
-/* ===========================================
+/* ==========================================
    票卡
-=========================================== */
+========================================== */
 
 .ticket-btn{
 
     width:420px;
 
+    display:block;
+
     cursor:pointer;
 
-    transition:.2s;
+    transition:.25s;
+
+    border-radius:20px;
 
 }
 
@@ -289,16 +303,22 @@ body{
 
     width:860px;
 
+    display:block;
+
     cursor:pointer;
 
-    transition:.2s;
+    transition:.25s;
+
+    border-radius:20px;
 
 }
 
 .ticket-btn:hover,
 .ticket-btn-wide:hover{
 
-    transform:translateY(-4px) scale(1.02);
+    transform:translateY(-5px) scale(1.02);
+
+    filter:drop-shadow(0 10px 20px rgba(0,0,0,.18));
 
 }
 
@@ -309,9 +329,211 @@ body{
 
 }
 
-/* ===========================================
-   15.6 吋以下
-=========================================== */
+/* ==========================================
+   詳細頁
+========================================== */
+
+#detailPage{
+
+    flex-direction:column;
+
+    justify-content:flex-start;
+
+    align-items:center;
+
+    background:#f7f7f7;
+
+}
+
+.detail-card{
+
+    width:900px;
+
+    margin-top:40px;
+
+    padding:35px;
+
+    background:#fff;
+
+    border-radius:30px;
+
+    text-align:center;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.12);
+
+}
+
+.detail-ticket{
+
+    width:650px;
+
+    margin-bottom:20px;
+
+}
+
+#detailTitle{
+
+    font-size:46px;
+
+    color:#333;
+
+    margin-bottom:15px;
+
+}
+
+#detailPrice{
+
+    font-size:76px;
+
+    color:#ff4d4d;
+
+    font-weight:bold;
+
+    margin-bottom:15px;
+
+}
+
+#detailInfo{
+
+    font-size:30px;
+
+    line-height:1.8;
+
+    color:#555;
+
+}
+
+/* ==========================================
+   付款按鈕
+========================================== */
+
+.payment-buttons{
+
+    display:flex;
+
+    gap:30px;
+
+    margin-top:35px;
+
+}
+
+#linePayBtn,
+#cashBtn{
+
+    width:300px;
+
+    height:90px;
+
+    border:none;
+
+    border-radius:18px;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    color:#fff;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+#linePayBtn{
+
+    background:#06C755;
+
+}
+
+#cashBtn{
+
+    background:#ff9800;
+
+}
+
+#linePayBtn:hover,
+#cashBtn:hover{
+
+    transform:scale(1.04);
+
+}
+
+/* ==========================================
+   成功頁
+========================================== */
+
+#successPage{
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#f5f5f5;
+
+}
+
+.success-box{
+
+    width:700px;
+
+    background:#fff;
+
+    border-radius:35px;
+
+    padding:50px;
+
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+}
+
+.success-icon{
+
+    font-size:90px;
+
+}
+
+.success-box h1{
+
+    margin:20px 0;
+
+    font-size:52px;
+
+}
+
+.success-box p{
+
+    font-size:34px;
+
+    line-height:1.8;
+
+}
+
+.countdown{
+
+    margin-top:30px;
+
+    font-size:30px;
+
+    color:#666;
+
+}
+
+#countdownNumber{
+
+    font-size:56px;
+
+    color:#ff4d4d;
+
+    font-weight:bold;
+
+}
+
+/* ==========================================
+   15.6 吋售票機最佳化
+========================================== */
 
 @media (max-width:1080px){
 
@@ -340,6 +562,18 @@ body{
     }
 
     .ticket-btn-wide{
+
+        width:100%;
+
+    }
+
+    .detail-card{
+
+        width:92%;
+
+    }
+
+    .detail-ticket{
 
         width:100%;
 
