@@ -197,9 +197,9 @@ body{
 
 .category-title{
 
-    width:320px;
+    width:420px;
 
-    margin:35px 0 15px;
+    margin:35px auto 20px;
 
 }
 
@@ -207,7 +207,7 @@ body{
 
 .ticket-btn{
 
-    width:340px;
+    width:410px;
 
     height:auto;
 
@@ -228,16 +228,20 @@ body{
     transform:scale(.98);
 
 }
-    .ticket-grid{
+   .ticket-grid{
+
     display:grid;
-    grid-template-columns:repeat(2,minmax(320px,420px));
+
+    grid-template-columns:repeat(2,410px);
+
     justify-content:center;
+
     gap:20px;
+
     width:100%;
-    max-width:900px;
-    position:relative;
-    z-index:1;
-    margin:15px auto;
+
+    margin:20px auto;
+
 }
 .ticket-row{
     display:flex;
@@ -248,6 +252,18 @@ body{
     position:relative;
     z-index:1;
 }
+    <div class="ticket-header">
+
+    <button class="back-btn"
+    onclick="showPage('homePage')">
+        ← 返回
+    </button>
+
+    <div class="header-title">
+        請選擇票種
+    </div>
+
+</div>
 </style>
 </head>
 
@@ -266,10 +282,18 @@ body{
 
 <div id="ticketPage" class="page">
 
-<button class="back-btn"
-onclick="showPage('homePage')">
-返回
-</button>
+<div class="ticket-header">
+
+    <button class="back-btn"
+    onclick="showPage('homePage')">
+        ← 返回
+    </button>
+
+    <div class="header-title">
+        請選擇票種
+    </div>
+
+</div>
 
 <!-- 一般票 -->
 
