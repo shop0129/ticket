@@ -3,170 +3,195 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width,initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-    <title>親子樂園售票機</title>
+<title>小怪獸放電所 售票機</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
 </head>
 
 <body>
 
-    <!-- 首頁 -->
-    <section id="homePage" class="page">
+<!-- ==========================
+首頁
+========================== -->
 
-    <!-- 背景 -->
+<section id="homePage" class="page">
+
     <div class="home-bg"></div>
 
-    <!-- 開始購票 -->
     <img
         src="images/btn-buy-default.png"
-        class="start-btn"
         id="startBtn"
+        class="start-btn"
         alt="開始購票">
 
 </section>
 
-    <!-- 票種頁 -->
+<!-- ==========================
+票種頁
+========================== -->
+
 <section id="ticketPage" class="page">
 
-    <div class="ticket-header">
+    <!-- Header -->
+
+    <header class="ticket-header">
 
         <button id="backBtn">
+
             ← 返回
+
         </button>
 
-        <h1>請選擇票種</h1>
+        <h1>
 
-    </div>
+            請選擇票種
 
-    <div class="ticket-content">
+        </h1>
+
+    </header>
+
+    <!-- 內容 -->
+
+    <main class="ticket-content">
 
         <!-- 一般票 -->
 
-        <img src="images/category-general.png"
-        class="category-title">
+        <img
+            src="images/category-general.png"
+            class="category-title">
 
         <div class="ticket-grid">
-<img
-    src="images/ticket-2h-green.png"
-    class="ticket-btn"
-    data-title="2H 綠怪獸"
-    data-price="$250"
-    data-info="10枚代幣<br>送綠色玩具">
+                        <!-- 一般票 -->
+
             <img
-    src="images/ticket-2h-red.png"
-    class="ticket-btn"
-    data-title="2H 紅怪獸"
-    data-price="$300"
-    data-info="15枚代幣<br>送紅色玩具">
+                src="images/ticket-2h-green.png"
+                class="ticket-btn"
+                data-title="2H 綠怪獸"
+                data-price="$250"
+                data-info="10枚代幣<br>送綠色玩具">
+
             <img
-    src="images/ticket-3h-green.png"
-    class="ticket-btn"
-    data-title="3H 綠怪獸"
-    data-price="$300"
-    data-info="15枚代幣<br>送綠色玩具">
+                src="images/ticket-2h-red.png"
+                class="ticket-btn"
+                data-title="2H 紅怪獸"
+                data-price="$300"
+                data-info="15枚代幣<br>送紅色玩具">
+
             <img
-    src="images/ticket-3h-red.png"
-    class="ticket-btn"
-    data-title="3H 紅怪獸"
-    data-price="$350"
-    data-info="20枚代幣<br>送紅色玩具">
-        
+                src="images/ticket-3h-green.png"
+                class="ticket-btn"
+                data-title="3H 綠怪獸"
+                data-price="$300"
+                data-info="15枚代幣<br>送綠色玩具">
+
+            <img
+                src="images/ticket-3h-red.png"
+                class="ticket-btn"
+                data-title="3H 紅怪獸"
+                data-price="$350"
+                data-info="20枚代幣<br>送紅色玩具">
 
         </div>
 
         <!-- 平日早鳥 -->
 
-        <img src="images/category-early.png"
-        class="category-title">
+        <img
+            src="images/category-early.png"
+            class="category-title">
 
         <div class="ticket-single">
 
             <img
-    src="images/ticket-early.png"
-    class="ticket-btn-wide"
-    data-title="平日早鳥票"
-    data-price="$300"
-    data-info="14:00~15:30 入場<br>可暢玩至18:00<br>20枚代幣<br>送紅色玩具">
+                src="images/ticket-early.png"
+                class="ticket-btn-wide"
+                data-title="平日早鳥票"
+                data-price="$350"
+                data-info="14:00~15:30 入場<br>可暢玩至18:00<br>20枚代幣<br>送紅色玩具">
 
         </div>
 
         <!-- 寒暑假 -->
 
-        <img src="images/category-summer.png"
-        class="category-title">
+        <img
+            src="images/category-summer.png"
+            class="category-title">
 
         <div class="ticket-single">
 
             <img
-    src="images/ticket-summer.png"
-    class="ticket-btn-wide"
-    data-title="寒暑假限定"
-    data-price="$350"
-    data-info="10:00~11:30 入場<br>可暢玩至16:00<br>15枚代幣<br>送紅色玩具<br>每日限量20名">
+                src="images/ticket-summer.png"
+                class="ticket-btn-wide"
+                data-title="寒暑假限定"
+                data-price="$350"
+                data-info="10:00~11:30 入場<br>可暢玩至16:00<br>15枚代幣<br>送紅色玩具<br>每日限量20名">
 
         </div>
 
-        <!-- 其他 -->
+        <!-- 其他票種 -->
 
-        <img src="images/category-other.png"
-        class="category-title">
+        <img
+            src="images/category-other.png"
+            class="category-title">
 
         <div class="ticket-grid">
+                        <img
+                src="images/ticket-baby.png"
+                class="ticket-btn"
+                data-title="幼幼票"
+                data-price="$100"
+                data-info="未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣">
 
             <img
-    src="images/ticket-baby.png"
-    class="ticket-btn"
-    data-title="幼幼票"
-    data-price="$100"
-    data-info="未滿12個月<br>免費陪同一位家長<br>不送玩具<br>不送代幣">
+                src="images/ticket-parent.png"
+                class="ticket-btn"
+                data-title="陪同票"
+                data-price="$80"
+                data-info="限陪同家長使用<br>須有兒童同行">
 
             <img
-    src="images/ticket-parent.png"
-    class="ticket-btn"
-    data-title="陪同票"
-    data-price="$80"
-    data-info="限陪同家長使用<br>需有兒童同行">
+                src="images/ticket-token10.png"
+                class="ticket-btn"
+                data-title="10枚代幣"
+                data-price="$100"
+                data-info="兌換10枚遊戲代幣">
 
             <img
-    src="images/ticket-token10.png"
-    class="ticket-btn"
-    data-title="10枚代幣"
-    data-price="$100"
-    data-info="兌換10枚遊戲代幣">
-
-           <img
-    src="images/ticket-token25.png"
-    class="ticket-btn"
-    data-title="25枚代幣"
-    data-price="$200"
-    data-info="兌換25枚遊戲代幣">
+                src="images/ticket-token25.png"
+                class="ticket-btn"
+                data-title="25枚代幣"
+                data-price="$200"
+                data-info="兌換25枚遊戲代幣">
 
         </div>
 
         <div class="ticket-single">
 
-           <img
-    src="images/ticket-powerbank.png"
-    class="ticket-btn-wide"
-    data-title="行動電源出租"
-    data-price="$50"
-    data-info="館內租借<br>離場前請歸還">
+            <img
+                src="images/ticket-powerbank.png"
+                class="ticket-btn-wide"
+                data-title="行動電源出租"
+                data-price="$50"
+                data-info="館內租借<br>離場前請歸還">
 
         </div>
 
-    </div>
+    </main>
 
 </section>
 
-   <section id="detailPage" class="page">
+<!-- ==========================
+確認票券頁
+========================== -->
 
-    <div class="ticket-header">
+<section id="detailPage" class="page">
+
+    <header class="ticket-header">
 
         <button id="detailBackBtn">
             ← 返回
@@ -174,13 +199,15 @@
 
         <h1>確認票券</h1>
 
-    </div>
+    </header>
 
     <div class="detail-card">
 
         <img
             id="detailImage"
-            class="detail-ticket">
+            class="detail-ticket"
+            src=""
+            alt="票券">
 
         <h2 id="detailTitle"></h2>
 
@@ -203,19 +230,45 @@
     </div>
 
 </section>
+<!-- ==========================
+付款成功頁
+========================== -->
 
-    <!-- 付款頁 -->
-    <section id="paymentPage">
+<section id="successPage" class="page">
 
-    </section>
+    <div class="success-box">
 
-    <!-- 成功頁 -->
-    <section id="successPage">
+        <div class="success-icon">
+            ✅
+        </div>
 
-    </section>
+        <h1>
+            付款成功
+        </h1>
 
-    <script src="script.js"></script>
+        <p>
+            請至櫃檯領取：<br><br>
+
+            🎁 玩具<br>
+            🪙 代幣<br>
+            🎫 入場手環
+        </p>
+
+        <div class="countdown">
+
+            <span id="countdownNumber">
+                5
+            </span>
+
+            秒後返回首頁
+
+        </div>
+
+    </div>
+
+</section>
+
+<script src="script.js"></script>
 
 </body>
-
 </html>
