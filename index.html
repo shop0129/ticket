@@ -207,13 +207,9 @@ body{
 
 .ticket-btn{
 
-    width:700px;
-
-    max-width:95%;
+    width:340px;
 
     height:auto;
-
-    margin:12px 0;
 
     cursor:pointer;
 
@@ -231,6 +227,18 @@ body{
 
     transform:scale(.98);
 
+}
+    .ticket-row{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+
+    width:100%;
+
+    margin-bottom:15px;
+
+    position:relative;
+    z-index:1;
 }
 </style>
 </head>
@@ -260,6 +268,8 @@ onclick="showPage('homePage')">
 <img src="images/category-general.png"
 class="category-title">
 
+<div class="ticket-row">
+
 <img src="images/ticket-2h-green.png"
 class="ticket-btn"
 onclick="showDetail(
@@ -276,6 +286,10 @@ onclick="showDetail(
 '$300'
 )">
 
+</div>
+
+<div class="ticket-row">
+
 <img src="images/ticket-3h-green.png"
 class="ticket-btn"
 onclick="showDetail(
@@ -291,6 +305,93 @@ onclick="showDetail(
 '20枚代幣<br>送紅色玩具',
 '$350'
 )">
+
+</div>
+平日早鳥
+<img src="images/category-early.png"
+class="category-title">
+
+<div class="ticket-row">
+
+<img src="images/ticket-early.png"
+class="ticket-btn"
+onclick="showDetail(
+'平日早鳥票',
+'14:00-15:30入場<br>暢玩至18:00<br>20枚代幣<br>送紅色玩具',
+'$350'
+)">
+
+</div>
+寒暑假
+<img src="images/category-summer.png"
+class="category-title">
+
+<div class="ticket-row">
+
+<img src="images/ticket-summer.png"
+class="ticket-btn"
+onclick="showDetail(
+'寒暑假限定',
+'10:00-11:30入場<br>暢玩至16:00<br>15枚代幣<br>送紅色玩具',
+'$350'
+)">
+
+</div>
+其他票種
+<img src="images/category-other.png"
+class="category-title">
+
+<div class="ticket-row">
+
+<img src="images/ticket-baby.png"
+class="ticket-btn"
+onclick="showDetail(
+'幼幼票',
+'未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣',
+'$100'
+)">
+
+<img src="images/ticket-parent.png"
+class="ticket-btn"
+onclick="showDetail(
+'陪同票',
+'限陪同家長<br>須有兒童同行',
+'$80'
+)">
+
+</div>
+
+<div class="ticket-row">
+
+<img src="images/ticket-token10.png"
+class="ticket-btn"
+onclick="showDetail(
+'代幣兌換',
+'10枚代幣',
+'$100'
+)">
+
+<img src="images/ticket-token25.png"
+class="ticket-btn"
+onclick="showDetail(
+'代幣兌換',
+'25枚代幣',
+'$200'
+)">
+
+</div>
+
+<div class="ticket-row">
+
+<img src="images/ticket-powerbank.png"
+class="ticket-btn"
+onclick="showDetail(
+'行動電源出租',
+'限館內租借<br>離場歸還',
+'$50'
+)">
+
+</div>
 
 <!-- 平日早鳥 -->
 
@@ -323,6 +424,8 @@ onclick="showDetail(
 <img src="images/category-other.png"
 class="category-title">
 
+<div class="ticket-row">
+
 <img src="images/ticket-baby.png"
 class="ticket-btn"
 onclick="showDetail(
@@ -338,6 +441,10 @@ onclick="showDetail(
 '限陪同家長<br>須有兒童同行',
 '$80'
 )">
+
+</div>
+
+<div class="ticket-row">
 
 <img src="images/ticket-token10.png"
 class="ticket-btn"
@@ -355,6 +462,10 @@ onclick="showDetail(
 '$200'
 )">
 
+</div>
+
+<div class="ticket-row">
+
 <img src="images/ticket-powerbank.png"
 class="ticket-btn"
 onclick="showDetail(
@@ -362,6 +473,7 @@ onclick="showDetail(
 '限館內租借<br>離場歸還',
 '$50'
 )">
+
 </div>
 <!-- 詳細頁 -->
 
