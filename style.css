@@ -237,3 +237,88 @@ Ticket Page
     overflow-x:hidden;
 
 }
+/*====================
+Detail
+====================*/
+
+.detail-card{
+
+    width:900px;
+
+    margin:40px auto;
+
+    background:white;
+
+    border-radius:30px;
+
+    padding:30px;
+
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+}
+
+.detail-ticket{
+
+    width:700px;
+
+}
+
+#detailTitle{
+
+    margin-top:20px;
+
+    font-size:44px;
+
+}
+
+#detailPrice{
+
+    margin-top:15px;
+
+    font-size:72px;
+
+    color:#ff4d4d;
+
+    font-weight:bold;
+
+}
+
+#detailInfo{
+
+    margin-top:20px;
+
+    font-size:30px;
+
+    line-height:1.8;
+
+}
+
+.payment-buttons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:30px;
+
+    margin-top:30px;
+
+}
+
+.payment-buttons button{
+
+    width:280px;
+
+    height:80px;
+
+    border:none;
+
+    border-radius:18px;
+
+    font-size:32px;
+
+    cursor:pointer;
+
+}
