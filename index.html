@@ -21,10 +21,16 @@ body{
 .page{
     width:100vw;
     height:100vh;
+
     display:none;
+
     flex-direction:column;
-    justify-content:center;
+
     align-items:center;
+
+    overflow-y:auto;
+
+    padding:30px 0 50px;
 }
 
 .active{
@@ -153,13 +159,14 @@ body{
     z-index:0;
 }
 
-#ticketPage .title,
-#ticketPage .big-btn{
+#ticketPage .category-title,
+#ticketPage .ticket-btn,
+#ticketPage .back-btn{
     position:relative;
     z-index:1;
 }
-    .start-btn:hover{
-    transform:translateX(-50%) scale(1.03);
+    .start-btn:active{
+    transform:translateX(-50%) scale(0.95);
 }
 
 .start-btn:active{
@@ -189,6 +196,45 @@ body{
 .start-btn:hover{
     transform:translateX(-50%) scale(1.03);
 }
+    /* 分類標題 */
+
+.category-title{
+
+    width:320px;
+
+    margin:35px 0 15px;
+
+}
+
+/* 票券圖片 */
+
+.ticket-btn{
+
+    width:700px;
+
+    max-width:95%;
+
+    height:auto;
+
+    margin:12px 0;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.ticket-btn:hover{
+
+    transform:scale(1.02);
+
+}
+
+.ticket-btn:active{
+
+    transform:scale(.98);
+
+}
 </style>
 </head>
 
@@ -214,54 +260,120 @@ body{
         返回
     </button>
 
-    <div class="title">
-        請選擇方案
-    </div>
+<div id="ticketPage" class="page">
 
-    <button class="big-btn"
-    onclick="showDetail(
-    '2H 遊玩方案',
-    '20枚代幣<br>送綠標玩具',
-    '$250'
-    )">
-        2H 綠標 $250
-    </button>
+<button class="back-btn"
+onclick="showPage('homePage')">
+返回
+</button>
 
-    <button class="big-btn"
-    onclick="showDetail(
-    '2H 遊玩方案',
-    '25枚代幣<br>送紅標玩具',
-    '$300'
-    )">
-        2H 紅標 $300
-    </button>
+<!-- 一般票 -->
 
-    <button class="big-btn"
-    onclick="showDetail(
-    '3H 遊玩方案',
-    '25枚代幣<br>送綠標玩具',
-    '$300'
-    )">
-        3H 綠標 $300
-    </button>
+<img src="images/category-general.png"
+class="category-title">
 
-    <button class="big-btn"
-    onclick="showDetail(
-    '3H 遊玩方案',
-    '30枚代幣<br>送紅標玩具',
-    '$350'
-    )">
-        3H 紅標 $350
-    </button>
+<img src="images/ticket-2h-green.png"
+class="ticket-btn"
+onclick="showDetail(
+'2H 遊玩方案',
+'10枚代幣<br>送綠色玩具',
+'$250'
+)">
 
-    <button class="big-btn"
-    onclick="showDetail(
-    '代幣兌換',
-    '10枚代幣',
-    '$100'
-    )">
-        代幣兌換 $100
-    </button>
+<img src="images/ticket-2h-red.png"
+class="ticket-btn"
+onclick="showDetail(
+'2H 遊玩方案',
+'15枚代幣<br>送紅色玩具',
+'$300'
+)">
+
+<img src="images/ticket-3h-green.png"
+class="ticket-btn"
+onclick="showDetail(
+'3H 遊玩方案',
+'15枚代幣<br>送綠色玩具',
+'$300'
+)">
+
+<img src="images/ticket-3h-red.png"
+class="ticket-btn"
+onclick="showDetail(
+'3H 遊玩方案',
+'20枚代幣<br>送紅色玩具',
+'$350'
+)">
+
+<!-- 平日早鳥 -->
+
+<img src="images/category-early.png"
+class="category-title">
+
+<img src="images/ticket-early.png"
+class="ticket-btn"
+onclick="showDetail(
+'平日早鳥票',
+'14:00-15:30入場<br>暢玩至18:00<br>20枚代幣<br>送紅色玩具',
+'$300'
+)">
+
+<!-- 寒暑假 -->
+
+<img src="images/category-summer.png"
+class="category-title">
+
+<img src="images/ticket-summer.png"
+class="ticket-btn"
+onclick="showDetail(
+'寒暑假限定',
+'10:00-11:30入場<br>暢玩至16:00<br>20枚代幣<br>送紅色玩具',
+'$350'
+)">
+
+<!-- 其他 -->
+
+<img src="images/category-other.png"
+class="category-title">
+
+<img src="images/ticket-baby.png"
+class="ticket-btn"
+onclick="showDetail(
+'幼幼票',
+'未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣',
+'$100'
+)">
+
+<img src="images/ticket-parent.png"
+class="ticket-btn"
+onclick="showDetail(
+'陪同票',
+'限陪同家長<br>須有兒童同行',
+'$80'
+)">
+
+<img src="images/ticket-token10.png"
+class="ticket-btn"
+onclick="showDetail(
+'代幣兌換',
+'10枚代幣',
+'$100'
+)">
+
+<img src="images/ticket-token25.png"
+class="ticket-btn"
+onclick="showDetail(
+'代幣兌換',
+'25枚代幣',
+'$200'
+)">
+
+<img src="images/ticket-powerbank.png"
+class="ticket-btn"
+onclick="showDetail(
+'行動電源出租',
+'限館內租借<br>離場歸還',
+'$50'
+)">
 
 </div>
 
