@@ -582,3 +582,17 @@ body{
     }
 
 }
+/*==========================
+票卡點擊發光
+==========================*/
+
+.ticket-selected{
+
+    transform:scale(1.05);
+
+    filter:
+        brightness(1.08)
+        drop-shadow(0 0 15px #ff9800)
+        drop-shadow(0 0 35px #ff9800);
+
+}
