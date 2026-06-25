@@ -49,16 +49,37 @@ document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
 
     ticket.onclick=function(){
 
-        alert(
+       document
+.querySelectorAll(".ticket-btn,.ticket-btn-wide")
+.forEach(ticket=>{
 
-            this.dataset.title +
+    ticket.onclick=function(){
 
-            "\n\n價格：" +
+        document
+        .getElementById("detailImage")
+        .src=this.src;
 
-            this.dataset.price
+        document
+        .getElementById("detailTitle")
+        .innerHTML=this.dataset.title;
 
-        );
+        document
+        .getElementById("detailPrice")
+        .innerHTML=this.dataset.price;
+
+        document
+        .getElementById("detailInfo")
+        .innerHTML="請確認票種後選擇付款方式";
+
+        showPage("detailPage");
 
     }
 
 });
+        document
+.getElementById("detailBackBtn")
+.onclick=function(){
+
+    showPage("ticketPage");
+
+}
