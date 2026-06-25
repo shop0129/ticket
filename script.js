@@ -1,149 +1,237 @@
-let selectedReward = "";
 // ==========================
-// 小怪獸放電所 售票機 V3
+// 小怪獸放電所 售票機 V3.6
 // ==========================
+
+// --------------------------
+// 全域變數
+// --------------------------
 
 let idleTimer;
 let countdownTimer;
 
-// ==========================
+let selectedReward = "";
+
+// --------------------------
+// 取得元件
+// --------------------------
+
+const detailImage = document.getElementById("detailImage");
+const detailTitle = document.getElementById("detailTitle");
+const detailPrice = document.getElementById("detailPrice");
+const detailInfo = document.getElementById("detailInfo");
+
+const countdownNumber = document.getElementById("countdownNumber");
+
+const linePayBtn = document.getElementById("linePayBtn");
+const cashBtn = document.getElementById("cashBtn");
+
+// --------------------------
 // 換頁
-// ==========================
+// --------------------------
 
 function showPage(pageId){
 
     document.querySelectorAll(".page").forEach(page=>{
+
         page.classList.remove("active");
+
     });
 
-    document.getElementById(pageId).classList.add("active");
+    document
+    .getElementById(pageId)
+    .classList.add("active");
 
     resetIdleTimer();
 
 }
 
-// ==========================
+// --------------------------
 // 首頁
-// ==========================
+// --------------------------
 
-document.getElementById("startBtn").addEventListener("click",()=>{
+document
+.getElementById("startBtn")
+.addEventListener("click",()=>{
 
     showPage("ticketPage");
 
 });
 
-// ==========================
+// --------------------------
 // 返回
-// ==========================
+// --------------------------
 
-document.getElementById("backBtn").addEventListener("click",()=>{
+document
+.getElementById("backBtn")
+.addEventListener("click",()=>{
 
     showPage("homePage");
 
 });
 
-document.getElementById("detailBackBtn").addEventListener("click",()=>{
+document
+.getElementById("detailBackBtn")
+.addEventListener("click",()=>{
 
     showPage("ticketPage");
 
 });
 
-// ==========================
+// --------------------------
 // 點票
-// ==========================
+// --------------------------
 
-document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
-
+document
+.querySelectorAll(".ticket-btn,.ticket-btn-wide")
 .forEach(ticket=>{
 
     ticket.addEventListener("click",()=>{
 
-    // 先清除其他票卡發光
-    document
-    .querySelectorAll(".ticket-btn,.ticket-btn-wide")
-    .forEach(card=>{
+        document
+        .querySelectorAll(".ticket-btn,.ticket-btn-wide")
+        .forEach(card=>{
 
-        card.classList.remove("ticket-selected");
+            card.classList.remove("ticket-selected");
+
+        });
+
+        ticket.classList.add("ticket-selected");
+
+        setTimeout(()=>{
+
+            selectedReward = ticket.dataset.reward;
+
+            detailImage.src = ticket.src;
+
+            detailTitle.innerHTML = ticket.dataset.title;
+
+            detailPrice.innerHTML = ticket.dataset.price;
+
+            detailInfo.innerHTML = ticket.dataset.info;
+
+            ticket.classList.remove("ticket-selected");
+
+            showPage("detailPage");
+
+        },150);
 
     });
 
-    // 自己發光
-    ticket.classList.add("ticket-selected");
-
-    // 延遲切換頁面
-    setTimeout(()=>{
-
-// 記錄目前票種的領取項目
-selectedReward = ticket.dataset.reward;
-
-detailImage.src=ticket.src;
-
-detailTitle.innerHTML=ticket.dataset.title;
-
-detailPrice.innerHTML=ticket.dataset.price;
-
-detailInfo.innerHTML=ticket.dataset.info;
-
-ticket.classList.remove("ticket-selected");
-
-showPage("detailPage");
-
-},150);
 });
-
-});
-
-// ==========================
-// 付款
-// ==========================
+// --------------------------
+// 付款成功
+// --------------------------
 
 function paymentSuccess(){
+
+    updateSuccessItems();
+
+    showPage("successPage");
+
+    let sec = 5;
+
+    countdownNumber.innerHTML = sec;
+
+    clearInterval(countdownTimer);
+
+    countdownTimer = setInterval(()=>{
+
+        sec--;
+
+        countdownNumber.innerHTML = sec;
+
+        if(sec <= 0){
+
+            clearInterval(countdownTimer);
+
+            showPage("homePage");
+
+        }
+
+    },1000);
+
+}
+
+linePayBtn.addEventListener("click", paymentSuccess);
+
+cashBtn.addEventListener("click", paymentSuccess);
+
+// --------------------------
+// 成功頁領取項目
+// --------------------------
+
 function updateSuccessItems(){
 
-```
-const successItems =
-document.getElementById("successItems");
+    const successItems =
+    document.getElementById("successItems");
 
-let html = "";
+    let html = "";
 
-// 一般票
-if(selectedReward==="token,band,toy"){
+    switch(selectedReward){
 
-    html += "<div>🪙 請領取代幣</div>";
-    html += "<div>🎫 請領取入場手環</div>";
-    html += "<div>🎁 玩具請於離場時憑手環兌換</div>";
+        case "token,band,toy":
+
+            html += "<div>🪙 請領取代幣</div>";
+            html += "<div>🎫 請領取入場手環</div>";
+            html += "<div>🎁 玩具請於離場時憑手環兌換</div>";
+            break;
+
+        case "band":
+
+            html += "<div>🎫 請領取入場手環</div>";
+            break;
+
+        case "token10":
+
+            html += "<div>🪙 請領取10枚代幣</div>";
+            break;
+
+        case "token25":
+
+            html += "<div>🪙 請領取25枚代幣</div>";
+            break;
+
+        case "powerbank":
+
+            html += "<div>🔋 請向櫃檯領取行動電源</div>";
+            break;
+
+        default:
+
+            html = "<div>請至櫃檯確認領取項目</div>";
+
+    }
+
+    successItems.innerHTML = html;
+
+}
+// --------------------------
+// 閒置60秒自動回首頁
+// --------------------------
+
+function resetIdleTimer(){
+
+    clearTimeout(idleTimer);
+
+    idleTimer = setTimeout(()=>{
+
+        // 如果不是首頁就回首頁
+        if(!document.getElementById("homePage").classList.contains("active")){
+
+            showPage("homePage");
+
+        }
+
+    },60000);
 
 }
 
-// 幼幼票、陪同票
-else if(selectedReward==="band"){
+document.addEventListener("click", resetIdleTimer);
 
-    html += "<div>🎫 請領取入場手環</div>";
+document.addEventListener("touchstart", resetIdleTimer);
 
-}
+// --------------------------
+// 啟動
+// --------------------------
 
-// 10枚代幣
-else if(selectedReward==="token10"){
-
-    html += "<div>🪙 請領取10枚代幣</div>";
-
-}
-
-// 25枚代幣
-else if(selectedReward==="token25"){
-
-    html += "<div>🪙 請領取25枚代幣</div>";
-
-}
-
-// 行動電源
-else if(selectedReward==="powerbank"){
-
-    html += "<div>🔋 請向櫃檯領取行動電源</div>";
-
-}
-
-successItems.innerHTML = html;
-```
-
-}
+showPage("homePage");
