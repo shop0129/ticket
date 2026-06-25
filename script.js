@@ -1,3 +1,4 @@
+let selectedReward = "";
 // ==========================
 // 小怪獸放電所 售票機 V3
 // ==========================
@@ -72,20 +73,22 @@ document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
     // 延遲切換頁面
     setTimeout(()=>{
 
-        detailImage.src=ticket.src;
+// 記錄目前票種的領取項目
+selectedReward = ticket.dataset.reward;
 
-        detailTitle.innerHTML=ticket.dataset.title;
+detailImage.src=ticket.src;
 
-        detailPrice.innerHTML=ticket.dataset.price;
+detailTitle.innerHTML=ticket.dataset.title;
 
-        detailInfo.innerHTML=ticket.dataset.info;
+detailPrice.innerHTML=ticket.dataset.price;
 
-        ticket.classList.remove("ticket-selected");
+detailInfo.innerHTML=ticket.dataset.info;
 
-        showPage("detailPage");
+ticket.classList.remove("ticket-selected");
 
-    },150);
+showPage("detailPage");
 
+},150);
 });
 
 });
@@ -95,59 +98,52 @@ document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
 // ==========================
 
 function paymentSuccess(){
+function updateSuccessItems(){
 
-    showPage("successPage");
+```
+const successItems =
+document.getElementById("successItems");
 
-    let sec=5;
+let html = "";
 
-    countdownNumber.innerHTML=sec;
+// 一般票
+if(selectedReward==="token,band,toy"){
 
-    clearInterval(countdownTimer);
-
-    countdownTimer=setInterval(()=>{
-
-        sec--;
-
-        countdownNumber.innerHTML=sec;
-
-        if(sec<=0){
-
-            clearInterval(countdownTimer);
-
-            showPage("homePage");
-
-        }
-
-    },1000);
+    html += "<div>🪙 請領取代幣</div>";
+    html += "<div>🎫 請領取入場手環</div>";
+    html += "<div>🎁 玩具請於離場時憑手環兌換</div>";
 
 }
 
-linePayBtn.addEventListener("click",paymentSuccess);
+// 幼幼票、陪同票
+else if(selectedReward==="band"){
 
-cashBtn.addEventListener("click",paymentSuccess);
-
-// ==========================
-// 閒置60秒
-// ==========================
-
-function resetIdleTimer(){
-
-    clearTimeout(idleTimer);
-
-    idleTimer=setTimeout(()=>{
-
-        showPage("homePage");
-
-    },60000);
+    html += "<div>🎫 請領取入場手環</div>";
 
 }
 
-document.addEventListener("click",resetIdleTimer);
+// 10枚代幣
+else if(selectedReward==="token10"){
 
-document.addEventListener("touchstart",resetIdleTimer);
+    html += "<div>🪙 請領取10枚代幣</div>";
 
-// ==========================
-// 啟動
-// ==========================
+}
 
-showPage("homePage");
+// 25枚代幣
+else if(selectedReward==="token25"){
+
+    html += "<div>🪙 請領取25枚代幣</div>";
+
+}
+
+// 行動電源
+else if(selectedReward==="powerbank"){
+
+    html += "<div>🔋 請向櫃檯領取行動電源</div>";
+
+}
+
+successItems.innerHTML = html;
+```
+
+}
