@@ -57,6 +57,21 @@ document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
 
     ticket.addEventListener("click",()=>{
 
+    // 先清除其他票卡發光
+    document
+    .querySelectorAll(".ticket-btn,.ticket-btn-wide")
+    .forEach(card=>{
+
+        card.classList.remove("ticket-selected");
+
+    });
+
+    // 自己發光
+    ticket.classList.add("ticket-selected");
+
+    // 延遲切換頁面
+    setTimeout(()=>{
+
         detailImage.src=ticket.src;
 
         detailTitle.innerHTML=ticket.dataset.title;
@@ -65,9 +80,13 @@ document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
 
         detailInfo.innerHTML=ticket.dataset.info;
 
+        ticket.classList.remove("ticket-selected");
+
         showPage("detailPage");
 
-    });
+    },150);
+
+});
 
 });
 
