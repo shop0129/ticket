@@ -25,9 +25,7 @@ body{
 
     position:relative;
 
-    overflow-y:auto;
-
-    overflow-x:hidden;
+    overflow:hidden;
 
 }
 .home-bg{
@@ -226,4 +224,16 @@ Ticket Page
     transform:translateX(-50%) scale(.95);
 
 }
+#ticketPage{
 
+    display:none;
+
+    flex-direction:column;
+
+    background:url("images/ticket-bg.png") center/cover;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+}
