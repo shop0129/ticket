@@ -1,72 +1,51 @@
-// ==========================
-// 頁面切換
-// ==========================
-
 function showPage(pageId){
 
     document.querySelectorAll(".page").forEach(page=>{
-        page.style.display="none";
+
+        page.classList.remove("show");
+
     });
 
-    document.getElementById(pageId).style.display="flex";
+    document.getElementById(pageId).classList.add("show");
+
 }
 
-// ==========================
-// 首頁
-// ==========================
-
-document.getElementById("startBtn").onclick=function(){
+document.getElementById("startBtn").onclick=()=>{
 
     showPage("ticketPage");
 
 }
 
-// ==========================
-// 返回首頁
-// ==========================
-
-document.getElementById("backBtn").onclick=function(){
+document.getElementById("backBtn").onclick=()=>{
 
     showPage("homePage");
 
 }
 
-// ==========================
-// 點選票卡
-// ==========================
-
-document
-.querySelectorAll(".ticket-btn,.ticket-btn-wide")
-.forEach(ticket=>{
-
-    ticket.onclick=function(){
-
-        document.getElementById("detailImage").src=this.src;
-
-        document.getElementById("detailTitle").innerHTML=this.dataset.title;
-
-        document.getElementById("detailPrice").innerHTML=this.dataset.price;
-
-        document.getElementById("detailInfo").innerHTML=this.dataset.info;
-
-        showPage("detailPage");
-
-    };
-
-});
-
-// ==========================
-// 詳細頁返回
-// ==========================
-
-document.getElementById("detailBackBtn").onclick=function(){
+document.getElementById("detailBackBtn").onclick=()=>{
 
     showPage("ticketPage");
 
 }
 
-// ==========================
-// 啟動
-// ==========================
+document
+.querySelectorAll(".ticket-btn,.ticket-btn-wide")
+.forEach(ticket=>{
+
+    ticket.onclick=()=>{
+
+        detailImage.src=ticket.src;
+
+        detailTitle.innerHTML=ticket.dataset.title;
+
+        detailPrice.innerHTML=ticket.dataset.price;
+
+        detailInfo.innerHTML=ticket.dataset.info;
+
+        showPage("detailPage");
+
+    }
+
+});
 
 showPage("homePage");
