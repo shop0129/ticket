@@ -5,13 +5,10 @@
 function showPage(pageId){
 
     document.querySelectorAll(".page").forEach(page=>{
-
         page.style.display="none";
-
     });
 
     document.getElementById(pageId).style.display="flex";
-
 }
 
 // ==========================
@@ -35,51 +32,41 @@ document.getElementById("backBtn").onclick=function(){
 }
 
 // ==========================
-// 啟動
+// 點選票卡
 // ==========================
 
-showPage("homePage");
-// ==========================
-// 點票卡
-// ==========================
-
-document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
-
-.forEach(ticket=>{
-
-    ticket.onclick=function(){
-
-       document
+document
 .querySelectorAll(".ticket-btn,.ticket-btn-wide")
 .forEach(ticket=>{
 
     ticket.onclick=function(){
 
-        document
-        .getElementById("detailImage")
-        .src=this.src;
+        document.getElementById("detailImage").src=this.src;
 
-        document
-        .getElementById("detailTitle")
-        .innerHTML=this.dataset.title;
+        document.getElementById("detailTitle").innerHTML=this.dataset.title;
 
-        document
-        .getElementById("detailPrice")
-        .innerHTML=this.dataset.price;
+        document.getElementById("detailPrice").innerHTML=this.dataset.price;
 
-        document
-        .getElementById("detailInfo")
-        .innerHTML="請確認票種後選擇付款方式";
+        document.getElementById("detailInfo").innerHTML=this.dataset.info;
 
         showPage("detailPage");
 
-    }
+    };
 
 });
-        document
-.getElementById("detailBackBtn")
-.onclick=function(){
+
+// ==========================
+// 詳細頁返回
+// ==========================
+
+document.getElementById("detailBackBtn").onclick=function(){
 
     showPage("ticketPage");
 
 }
+
+// ==========================
+// 啟動
+// ==========================
+
+showPage("homePage");
