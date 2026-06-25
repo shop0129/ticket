@@ -1,38 +1,61 @@
+// ==========================
+// 小怪獸放電所 售票機 V3
+// ==========================
+
+let idleTimer;
+let countdownTimer;
+
+// ==========================
+// 換頁
+// ==========================
+
 function showPage(pageId){
 
     document.querySelectorAll(".page").forEach(page=>{
-
-        page.classList.remove("show");
-
+        page.classList.remove("active");
     });
 
-    document.getElementById(pageId).classList.add("show");
+    document.getElementById(pageId).classList.add("active");
+
+    resetIdleTimer();
 
 }
 
-document.getElementById("startBtn").onclick=()=>{
+// ==========================
+// 首頁
+// ==========================
+
+document.getElementById("startBtn").addEventListener("click",()=>{
 
     showPage("ticketPage");
 
-}
+});
 
-document.getElementById("backBtn").onclick=()=>{
+// ==========================
+// 返回
+// ==========================
+
+document.getElementById("backBtn").addEventListener("click",()=>{
 
     showPage("homePage");
 
-}
+});
 
-document.getElementById("detailBackBtn").onclick=()=>{
+document.getElementById("detailBackBtn").addEventListener("click",()=>{
 
     showPage("ticketPage");
 
-}
+});
 
-document
-.querySelectorAll(".ticket-btn,.ticket-btn-wide")
+// ==========================
+// 點票
+// ==========================
+
+document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
+
 .forEach(ticket=>{
 
-    ticket.onclick=()=>{
+    ticket.addEventListener("click",()=>{
 
         detailImage.src=ticket.src;
 
@@ -44,8 +67,68 @@ document
 
         showPage("detailPage");
 
-    }
+    });
 
 });
+
+// ==========================
+// 付款
+// ==========================
+
+function paymentSuccess(){
+
+    showPage("successPage");
+
+    let sec=5;
+
+    countdownNumber.innerHTML=sec;
+
+    clearInterval(countdownTimer);
+
+    countdownTimer=setInterval(()=>{
+
+        sec--;
+
+        countdownNumber.innerHTML=sec;
+
+        if(sec<=0){
+
+            clearInterval(countdownTimer);
+
+            showPage("homePage");
+
+        }
+
+    },1000);
+
+}
+
+linePayBtn.addEventListener("click",paymentSuccess);
+
+cashBtn.addEventListener("click",paymentSuccess);
+
+// ==========================
+// 閒置60秒
+// ==========================
+
+function resetIdleTimer(){
+
+    clearTimeout(idleTimer);
+
+    idleTimer=setTimeout(()=>{
+
+        showPage("homePage");
+
+    },60000);
+
+}
+
+document.addEventListener("click",resetIdleTimer);
+
+document.addEventListener("touchstart",resetIdleTimer);
+
+// ==========================
+// 啟動
+// ==========================
 
 showPage("homePage");
