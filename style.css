@@ -163,13 +163,11 @@ Ticket Page
 
 .ticket-grid{
 
-    width:900px;
-
-    margin:auto;
-
     display:grid;
 
-    grid-template-columns:repeat(2,1fr);
+    grid-template-columns:repeat(2,420px);
+
+    justify-content:center;
 
     gap:20px;
 
