@@ -39,3 +39,26 @@ document.getElementById("backBtn").onclick=function(){
 // ==========================
 
 showPage("homePage");
+// ==========================
+// 點票卡
+// ==========================
+
+document.querySelectorAll(".ticket-btn,.ticket-btn-wide")
+
+.forEach(ticket=>{
+
+    ticket.onclick=function(){
+
+        alert(
+
+            this.dataset.title +
+
+            "\n\n價格：" +
+
+            this.dataset.price
+
+        );
+
+    }
+
+});
