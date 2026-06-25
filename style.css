@@ -367,9 +367,9 @@ body{
 
 .detail-ticket{
 
-    width:650px;
+    width:820px;
 
-    margin-bottom:20px;
+    max-width:90%;
 
 }
 
@@ -385,16 +385,26 @@ body{
 
 #detailPrice{
 
-    font-size:76px;
+    font-size:96px;
 
-    color:#ff4d4d;
+    font-weight:900;
 
-    font-weight:bold;
-
-    margin-bottom:15px;
+    color:#ff5722;
 
 }
+.detail-tip{
 
+    margin:18px 0 25px;
+
+    font-size:26px;
+
+    color:#888;
+
+    text-align:center;
+
+    font-weight:600;
+
+}
 #detailInfo{
 
     font-size:30px;
@@ -422,15 +432,15 @@ body{
 #linePayBtn,
 #cashBtn{
 
-    width:300px;
+    width:340px;
 
-    height:90px;
+    height:95px;
 
     border:none;
 
-    border-radius:18px;
+    border-radius:22px;
 
-    font-size:34px;
+    font-size:38px;
 
     font-weight:bold;
 
@@ -594,5 +604,26 @@ body{
         brightness(1.08)
         drop-shadow(0 0 15px #ff9800)
         drop-shadow(0 0 35px #ff9800);
+
+}
+/*==========================
+詳細頁標籤
+==========================*/
+
+.detail-label{
+
+    margin-top:20px;
+
+    margin-bottom:20px;
+
+    text-align:center;
+
+    font-size:34px;
+
+    font-weight:700;
+
+    color:#ff9800;
+
+    letter-spacing:2px;
 
 }
