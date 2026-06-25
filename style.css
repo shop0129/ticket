@@ -101,3 +101,248 @@ body{
     transform:translateX(-50%) scale(.95);
 
 }
+/* ===========================================
+   票種頁
+=========================================== */
+
+#ticketPage{
+
+    flex-direction:column;
+
+    background:url("images/ticket-bg.png") center center/cover no-repeat;
+
+    overflow-y:auto;
+
+    overflow-x:hidden;
+
+}
+
+/* 半透明白底 */
+
+#ticketPage::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(255,255,255,.55);
+
+    pointer-events:none;
+
+}
+
+/* ===========================================
+   Header
+=========================================== */
+
+.ticket-header{
+
+    position:sticky;
+
+    top:0;
+
+    width:100%;
+
+    height:90px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:rgba(255,255,255,.92);
+
+    backdrop-filter:blur(10px);
+
+    box-shadow:0 2px 12px rgba(0,0,0,.12);
+
+    z-index:100;
+
+}
+
+.ticket-header h1{
+
+    font-size:42px;
+
+    color:#444;
+
+    font-weight:bold;
+
+}
+
+#backBtn{
+
+    position:absolute;
+
+    left:20px;
+
+    width:120px;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:15px;
+
+    background:#ff9800;
+
+    color:#fff;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+#backBtn:hover{
+
+    background:#ff8c00;
+
+}
+
+/* ===========================================
+   內容
+=========================================== */
+
+.ticket-content{
+
+    position:relative;
+
+    z-index:10;
+
+    width:100%;
+
+    padding:20px 0 120px;
+
+}
+
+/* ===========================================
+   分類圖片
+=========================================== */
+
+.category-title{
+
+    display:block;
+
+    width:420px;
+
+    margin:35px auto 20px;
+
+}
+
+/* ===========================================
+   兩欄排列
+=========================================== */
+
+.ticket-grid{
+
+    width:900px;
+
+    margin:0 auto 20px;
+
+    display:grid;
+
+    grid-template-columns:repeat(2,420px);
+
+    justify-content:center;
+
+    gap:20px;
+
+}
+
+/* ===========================================
+   單張票
+=========================================== */
+
+.ticket-single{
+
+    width:900px;
+
+    margin:0 auto 25px;
+
+    display:flex;
+
+    justify-content:center;
+
+}
+
+/* ===========================================
+   票卡
+=========================================== */
+
+.ticket-btn{
+
+    width:420px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.ticket-btn-wide{
+
+    width:860px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.ticket-btn:hover,
+.ticket-btn-wide:hover{
+
+    transform:translateY(-4px) scale(1.02);
+
+}
+
+.ticket-btn:active,
+.ticket-btn-wide:active{
+
+    transform:scale(.97);
+
+}
+
+/* ===========================================
+   15.6 吋以下
+=========================================== */
+
+@media (max-width:1080px){
+
+    .ticket-grid{
+
+        width:100%;
+
+        grid-template-columns:repeat(2,1fr);
+
+        padding:0 20px;
+
+    }
+
+    .ticket-btn{
+
+        width:100%;
+
+    }
+
+    .ticket-single{
+
+        width:100%;
+
+        padding:0 20px;
+
+    }
+
+    .ticket-btn-wide{
+
+        width:100%;
+
+    }
+
+}
