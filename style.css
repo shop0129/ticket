@@ -1,1 +1,81 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
+html,
+body{
+
+    width:100%;
+    height:100%;
+
+    overflow:hidden;
+
+    font-family:"Microsoft JhengHei",sans-serif;
+
+    background:#f5f5f5;
+
+}
+.page{
+
+    width:100vw;
+
+    height:100vh;
+
+    position:relative;
+
+    overflow:hidden;
+
+}
+.home-bg{
+
+    position:absolute;
+
+    top:0;
+
+    left:0;
+
+    width:100%;
+
+    height:100%;
+
+    background-image:url("images/home-bg.png");
+
+    background-size:cover;
+
+    background-position:center;
+
+    background-repeat:no-repeat;
+
+}
+.start-btn{
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:120px;
+
+    transform:translateX(-50%);
+
+    width:420px;
+
+    cursor:pointer;
+
+    transition:.25s;
+
+    z-index:10;
+
+}
+.start-btn:hover{
+
+    transform:translateX(-50%) scale(1.05);
+
+}
+
+.start-btn:active{
+
+    transform:translateX(-50%) scale(.95);
+
+}
