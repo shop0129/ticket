@@ -294,31 +294,33 @@ printStatus.classList.add("print-finish");
 
     // ===== 1秒後開始倒數 =====
 
-    setTimeout(()=>{
+   setTimeout(()=>{
 
-        let sec = 8;
+    let sec = 8;
 
-        countdownNumber.innerHTML = "";
+    clearInterval(countdownTimer);
 
-        clearInterval(countdownTimer);
+    countdownNumber.innerHTML = sec;
 
-        countdownTimer = setInterval(()=>{
+    countdownTimer = setInterval(()=>{
 
-            sec--;
+        if(sec === 0){
 
-            countdownNumber.innerHTML = sec;
+            clearInterval(countdownTimer);
 
-            if(sec<=0){
+            showPage("homePage");
 
-                clearInterval(countdownTimer);
+            return;
 
-                showPage("homePage");
+        }
 
-            }
+        sec--;
 
-        },1000);
+        countdownNumber.innerHTML = sec;
 
-    },2000);
+    },1000);
+
+},2000);
 
 }
         },220);  
