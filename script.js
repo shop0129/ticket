@@ -144,27 +144,7 @@ setTimeout(()=>{
 
 },1000);
 
-    let sec = 5;
-
-    countdownNumber.innerHTML = sec;
-
-    clearInterval(countdownTimer);
-
-    countdownTimer = setInterval(()=>{
-
-        sec--;
-
-        countdownNumber.innerHTML = sec;
-
-        if(sec <= 0){
-
-            clearInterval(countdownTimer);
-
-            showPage("homePage");
-
-        }
-
-    },1000);
+   
 
 }
 
@@ -261,6 +241,8 @@ function startPrintAnimation(){
 
     const printStatus =
     document.getElementById("printStatus");
+    
+    printStatus.classList.remove("print-finish");
 
     const successTitle =
     document.querySelector(".success-title");
@@ -268,9 +250,12 @@ function startPrintAnimation(){
     const successItems =
     document.querySelector(".success-items");
 
-    progressFill.style.width="0%";
+    progressFill.style.width = "0%";
 
-    progressText.innerHTML="0%";
+progressFill.style.background =
+"linear-gradient(90deg,#FFD54F,#FF9800)";
+
+progressText.innerHTML = "0%";
 
     successTitle.style.display="none";
 
@@ -280,25 +265,59 @@ function startPrintAnimation(){
 
     const timer=setInterval(()=>{
 
-        percent+=10;
+       percent += Math.floor(Math.random() * 8) + 8;
+
+if(percent > 100){
+    percent = 100;
+}
 
         progressFill.style.width=percent+"%";
 
         progressText.innerHTML=percent+"%";
 
-        if(percent>=100){
+       if(percent>=100){
 
-            clearInterval(timer);
+     clearInterval(timer);
 
-            printStatus.innerHTML=
-            "🎫 票券已準備完成";
+    progressFill.style.width="100%";
 
-            successTitle.style.display="block";
+    progressText.innerHTML="100%";
 
-            successItems.style.display="block";
+    printStatus.innerHTML =
+    "🎫 票券已準備完成";
+printStatus.classList.add("print-finish");
+    successTitle.style.display="block";
 
-        }
+    successItems.style.display="block";
 
-    },180);
+    // ===== 1秒後開始倒數 =====
+
+    setTimeout(()=>{
+
+        let sec = 8;
+
+        countdownNumber.innerHTML = sec;
+
+        clearInterval(countdownTimer);
+
+        countdownTimer = setInterval(()=>{
+
+            sec--;
+
+            countdownNumber.innerHTML = sec;
+
+            if(sec<=0){
+
+                clearInterval(countdownTimer);
+
+                showPage("homePage");
+
+            }
+
+        },1000);
+
+    },2000);
 
 }
+        },220);  
+}   
