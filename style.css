@@ -757,3 +757,26 @@ body{
     display:none;
 
 }
+.print-finish{
+
+    animation:finishPop .5s ease;
+
+}
+
+@keyframes finishPop{
+
+    0%{
+        transform:scale(.8);
+        opacity:0;
+    }
+
+    70%{
+        transform:scale(1.1);
+    }
+
+    100%{
+        transform:scale(1);
+        opacity:1;
+    }
+
+}
