@@ -128,7 +128,8 @@ ticket.dataset.info +
 // --------------------------
 
 function paymentSuccess(){
-
+     linePayBtn.disabled = true;
+    cashBtn.disabled = true;
     showPage("successPage");
 countdownNumber.innerHTML = "";
 updateSuccessItems();
@@ -310,7 +311,8 @@ countdownTimer = setInterval(()=>{
     if(sec <= 1){
 
         clearInterval(countdownTimer);
-
+    linePayBtn.disabled = false;
+    cashBtn.disabled = false;
         showPage("homePage");
 
         return;
