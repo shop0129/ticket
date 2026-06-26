@@ -167,8 +167,8 @@ function updateSuccessItems(){
 
         case "token,band,toy":
 
-            html += "<div>🪙 請領取代幣🪙</div>";
-            html += "<div>🎫 請領取入場手環🎫 </div>";
+            html += "<div>√請領取代幣</div>";
+            html += "<div>√請領取入場手環</div>";
             html += "<div>🎁 玩具請於離場時憑手環兌換🎁 </div>";
             break;
 
