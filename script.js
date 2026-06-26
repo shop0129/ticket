@@ -286,7 +286,7 @@ if(percent > 100){
     progressText.innerHTML="100%";
 
     printStatus.innerHTML =
-    "🎫 票券已準備完成";
+    "票券已準備完成";
 printStatus.classList.add("print-finish");
     successTitle.style.display="block";
 
