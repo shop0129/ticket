@@ -704,13 +704,15 @@ body{
 
 .progress-bg{
 
-    width:100%;
+    width:90%;
 
-    height:26px;
+    height:40px;
 
-    background:#ddd;
+    margin:30px auto;
 
-    border-radius:30px;
+    background:#E9ECEF;
+
+    border-radius:40px;
 
     overflow:hidden;
 
@@ -718,13 +720,17 @@ body{
 
 .progress-fill{
 
-    width:0%;
-
     height:100%;
 
-    background:#4CAF50;
+    width:0%;
 
-    border-radius:30px;
+    background:linear-gradient(
+        90deg,
+        #FFD54F,
+        #FF9800
+    );
+
+    border-radius:40px;
 
     transition:.2s;
 
