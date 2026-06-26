@@ -408,13 +408,13 @@ body{
 
 #detailInfo{
 
-    width:500px;
+    width:520px;
 
     margin:0 auto;
 
-    text-align:left;
+    display:block;
 
-    padding-left:40px;   /* 新增 */
+    text-align:left !important;
 
     font-size:40px;
 
@@ -830,5 +830,15 @@ body{
     border:none;
 
     border-top:2px solid #eee;
+
+}
+#linePayBtn:disabled,
+#cashBtn:disabled{
+
+    opacity:.5;
+
+    cursor:not-allowed;
+
+    filter:grayscale(100%);
 
 }
