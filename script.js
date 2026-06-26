@@ -302,23 +302,23 @@ printStatus.classList.add("print-finish");
 
     countdownNumber.innerHTML = sec;
 
-    countdownTimer = setInterval(()=>{
+countdownTimer = setInterval(()=>{
 
-        if(sec === 0){
+    if(sec <= 1){
 
-            clearInterval(countdownTimer);
+        clearInterval(countdownTimer);
 
-            showPage("homePage");
+        showPage("homePage");
 
-            return;
+        return;
 
-        }
+    }
 
-        sec--;
+    countdownNumber.innerHTML = sec;
 
-        countdownNumber.innerHTML = sec;
+    sec--;
 
-    },1000);
+},1000);
 
 },2000);
 
