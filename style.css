@@ -659,23 +659,21 @@ body{
 
     margin:30px auto;
 
+    text-align:left;
+
 }
 
 .success-items div{
 
-    display:grid;
-
-    grid-template-columns:50px 1fr;
-
-    align-items:center;
-
     font-size:38px;
 
-    font-weight:bold;
-
-    text-align:left;
+    font-weight:700;
 
     line-height:1.8;
+
+    margin:18px 0;
+
+    white-space:nowrap;
 
 }
 /*==========================
