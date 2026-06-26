@@ -408,11 +408,13 @@ body{
 
 #detailInfo{
 
-    width:460px;
+    width:500px;
 
     margin:0 auto;
 
     text-align:left;
+
+    padding-left:40px;   /* 新增 */
 
     font-size:40px;
 
