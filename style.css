@@ -741,3 +741,13 @@ body{
     color:#4CAF50;
 
 }
+/*==========================
+等待出票
+==========================*/
+
+.success-title,
+.success-items{
+
+    display:none;
+
+}
