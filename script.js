@@ -109,7 +109,10 @@ document
 
             detailPrice.innerHTML = ticket.dataset.price;
 
-            detailInfo.innerHTML = ticket.dataset.info;
+            detailInfo.innerHTML =
+"<div style='width:520px;margin:0 auto;text-align:left;'>" +
+ticket.dataset.info +
+"</div>";
 
             ticket.classList.remove("ticket-selected");
 
