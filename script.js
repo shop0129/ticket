@@ -127,7 +127,7 @@ document
 function paymentSuccess(){
 
     showPage("successPage");
-
+countdownNumber.innerHTML = sec;
 updateSuccessItems();
 
 startPrintAnimation();
