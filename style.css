@@ -394,24 +394,25 @@ body{
 }
 .detail-tip{
 
-    margin:18px 0 25px;
+    margin:22px 0 30px;
 
-    font-size:30px;      
+    font-size:32px;
 
-    font-weight:700;     
+    font-weight:700;
 
     color:#666;
 
     text-align:center;
 
 }
+
 #detailInfo{
 
     font-size:40px;
 
     font-weight:bold;
 
-    line-height:1.9;
+    line-height:2;
 
     color:#333;
 
