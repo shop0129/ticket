@@ -280,6 +280,8 @@ if(percent > 100){
      clearInterval(timer);
 
     progressFill.style.width="100%";
+           
+    progressFill.style.borderRadius = "40px";
 
     progressText.innerHTML="100%";
 
@@ -296,7 +298,7 @@ printStatus.classList.add("print-finish");
 
         let sec = 8;
 
-        countdownNumber.innerHTML = sec;
+        countdownNumber.innerHTML = "";
 
         clearInterval(countdownTimer);
 
