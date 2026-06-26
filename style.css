@@ -663,7 +663,9 @@ body{
 
 .success-items div{
 
-    display:flex;
+    display:grid;
+
+    grid-template-columns:50px 1fr;
 
     align-items:center;
 
