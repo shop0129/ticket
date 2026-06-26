@@ -21,6 +21,8 @@ const detailPrice = document.getElementById("detailPrice");
 const detailInfo = document.getElementById("detailInfo");
 
 const countdownNumber = document.getElementById("countdownNumber");
+const successTip =
+document.getElementById("successTip");
 
 const linePayBtn = document.getElementById("linePayBtn");
 const cashBtn = document.getElementById("cashBtn");
@@ -126,7 +128,19 @@ function paymentSuccess(){
 
     updateSuccessItems();
 
-    showPage("successPage");
+showPage("successPage");
+
+// 一開始顯示
+successTip.innerHTML =
+"👾 小怪獸正在準備您的票券...";
+
+// 1秒後改文字
+setTimeout(()=>{
+
+    successTip.innerHTML =
+    "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
+
+},1000);
 
     let sec = 5;
 
