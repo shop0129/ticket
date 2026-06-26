@@ -746,13 +746,19 @@ body{
 
 .progress-text{
 
-    margin-top:12px;
+    margin-top:15px;
 
-    font-size:28px;
+    font-size:64px;
 
-    font-weight:bold;
+    font-weight:900;
 
-    color:#4CAF50;
+    color:#FF9800;
+
+    text-align:center;
+
+    letter-spacing:3px;
+
+    text-shadow:0 2px 6px rgba(0,0,0,.12);
 
 }
 /*==========================
