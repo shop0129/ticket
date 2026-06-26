@@ -126,9 +126,11 @@ document
 
 function paymentSuccess(){
 
-    updateSuccessItems();
+    showPage("successPage");
 
-showPage("successPage");
+updateSuccessItems();
+
+startPrintAnimation();
 
 // 一開始顯示
 successTip.innerHTML =
@@ -249,3 +251,54 @@ document.addEventListener("touchstart", resetIdleTimer);
 // --------------------------
 
 showPage("homePage");
+function startPrintAnimation(){
+
+    const progressFill =
+    document.getElementById("progressFill");
+
+    const progressText =
+    document.getElementById("progressText");
+
+    const printStatus =
+    document.getElementById("printStatus");
+
+    const successTitle =
+    document.querySelector(".success-title");
+
+    const successItems =
+    document.querySelector(".success-items");
+
+    progressFill.style.width="0%";
+
+    progressText.innerHTML="0%";
+
+    successTitle.style.display="none";
+
+    successItems.style.display="none";
+
+    let percent=0;
+
+    const timer=setInterval(()=>{
+
+        percent+=10;
+
+        progressFill.style.width=percent+"%";
+
+        progressText.innerHTML=percent+"%";
+
+        if(percent>=100){
+
+            clearInterval(timer);
+
+            printStatus.innerHTML=
+            "🎫 票券已準備完成";
+
+            successTitle.style.display="block";
+
+            successItems.style.display="block";
+
+        }
+
+    },180);
+
+}
