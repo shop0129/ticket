@@ -291,7 +291,12 @@ if(percent > 100){
 
     printStatus.innerHTML =
     "票券已準備完成";
-           document.getElementById("successSound").play();
+           const sound = document.getElementById("successSound");
+
+sound.pause();
+sound.currentTime = 0;
+
+sound.play().catch(err => console.log(err));
 printStatus.classList.add("print-finish");
     successTitle.style.display="block";
 
