@@ -215,6 +215,12 @@ body{
     background:#fb8c00;
 
 }
+#backBtn:active,
+#detailBackBtn:active{
+
+    transform:scale(.95);
+
+}
 
 /* ==========================================
    內容
@@ -479,6 +485,12 @@ body{
 #cashBtn:hover{
 
     transform:scale(1.04);
+
+}
+#linePayBtn:active,
+#cashBtn:active{
+
+    transform:scale(.95);
 
 }
 
