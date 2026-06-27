@@ -95,7 +95,11 @@ document
 
     playClick();
 
-    showPage("homePage");
+    setTimeout(()=>{
+
+        showPage("homePage");
+
+    },80);
 
 });
 
@@ -105,7 +109,11 @@ document
 
     playClick();
 
-    showPage("ticketPage");
+    setTimeout(()=>{
+
+        showPage("ticketPage");
+
+    },80);
 
 });
 
