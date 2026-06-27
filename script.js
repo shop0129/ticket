@@ -291,6 +291,7 @@ if(percent > 100){
 
     printStatus.innerHTML =
     "票券已準備完成";
+           document.getElementById("successSound").play();
 printStatus.classList.add("print-finish");
     successTitle.style.display="block";
 
