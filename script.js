@@ -1,3 +1,19 @@
+function playClick(){
+
+    const click = document.getElementById("clickSound");
+
+    click.pause();
+
+    click.currentTime = 0;
+
+    click.play().catch(()=>{});
+
+}
+document.querySelectorAll("button, .ticket-btn, .ticket-btn-wide").forEach(btn => {
+
+    btn.addEventListener("click", playClick);
+
+});
 // ==========================
 // 小怪獸放電所 售票機 V3.6
 // ==========================
