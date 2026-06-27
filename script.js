@@ -93,6 +93,8 @@ document
 .getElementById("backBtn")
 .addEventListener("click",()=>{
 
+    playClick();
+
     showPage("homePage");
 
 });
