@@ -71,6 +71,8 @@ document
 .getElementById("startBtn")
 .addEventListener("click",()=>{
 
+    playClick();   // 播放按鍵音
+
     showPage("ticketPage");
 
 });
