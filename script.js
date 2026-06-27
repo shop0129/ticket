@@ -9,9 +9,17 @@ function playClick(){
     click.play().catch(()=>{});
 
 }
-document.querySelectorAll("button, .ticket-btn, .ticket-btn-wide").forEach(btn => {
+document
+.getElementById("startBtn")
+.addEventListener("click",()=>{
 
-    btn.addEventListener("click", playClick);
+    playClick();
+
+    setTimeout(()=>{
+
+        showPage("ticketPage");
+
+    },100);
 
 });
 // ==========================
