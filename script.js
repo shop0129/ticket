@@ -114,7 +114,7 @@ document
 .forEach(ticket=>{
 
     ticket.addEventListener("click",()=>{
-
+playClick();
         document
         .querySelectorAll(".ticket-btn,.ticket-btn-wide")
         .forEach(card=>{
@@ -178,9 +178,21 @@ setTimeout(()=>{
 
 }
 
-linePayBtn.addEventListener("click", paymentSuccess);
+linePayBtn.addEventListener("click",()=>{
 
-cashBtn.addEventListener("click", paymentSuccess);
+    playClick();
+
+    paymentSuccess();
+
+});
+
+cashBtn.addEventListener("click",()=>{
+
+    playClick();
+
+    paymentSuccess();
+
+});
 
 // --------------------------
 // 成功頁領取項目
