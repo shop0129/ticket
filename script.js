@@ -101,6 +101,8 @@ document
 .getElementById("detailBackBtn")
 .addEventListener("click",()=>{
 
+    playClick();
+
     showPage("ticketPage");
 
 });
