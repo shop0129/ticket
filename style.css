@@ -48,11 +48,15 @@ body{
 
 #homePage{
 
-    position:relative;
+    position:fixed;
 
-    width:100vw;
+    top:0;
 
-    height:100vh;
+    left:0;
+
+    right:0;
+
+    bottom:0;
 
     overflow:hidden;
 
@@ -72,13 +76,19 @@ body{
 
     left:0;
 
-    width:100vw;
+    right:0;
 
-    height:100vh;
+    bottom:0;
+
+    width:100%;
+
+    height:100%;
 
     object-fit:cover;
 
     object-position:center;
+
+    display:block;
 
     z-index:0;
 
@@ -90,15 +100,11 @@ body{
 
     left:50%;
 
-    bottom:120px;
+    bottom:90px;
 
     transform:translateX(-50%);
 
     width:420px;
-
-    cursor:pointer;
-
-    transition:.25s;
 
     z-index:5;
 
