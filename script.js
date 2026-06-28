@@ -80,7 +80,7 @@ document
 .addEventListener("click",()=>{
 
     playClick();   // 播放按鍵音
-
+alert("有執行到");
     showPage("ticketPage");
 
 });
