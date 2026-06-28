@@ -234,7 +234,7 @@ body{
 
     width:100%;
 
-    padding:50px 0 120px;
+    padding:60px 0 120px;
 
 }
 
@@ -258,17 +258,17 @@ body{
 
 .ticket-grid{
 
-    width:980px;
+    width:760px;
 
-    margin:0 auto 45px;
+    margin:25px auto;
 
     display:grid;
 
-    grid-template-columns:repeat(2,420px);
+    grid-template-columns:repeat(2,340px);
 
     justify-content:center;
 
-    column-gap:40px;
+    column-gap:30px;
 
     row-gap:45px;
 
@@ -295,15 +295,21 @@ body{
 
 .ticket-btn{
 
-    width:44px;
+    width:340px;
 
     display:block;
 
     cursor:pointer;
 
+    border-radius:22px;
+
     transition:.25s;
 
-    border-radius:20px;
+}
+
+.ticket-btn:hover{
+
+    transform:scale(1.03);
 
 }
 
@@ -594,19 +600,8 @@ body{
 
     }
 
-    .ticket-single{
 
-        width:100%;
 
-        padding:0 20px;
-
-    }
-
-    .ticket-btn-wide{
-
-        width:100%;
-
-    }
 
     .detail-card{
 
