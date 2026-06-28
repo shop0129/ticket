@@ -91,7 +91,7 @@ body{
     display:block;
 
     z-index:0;
-
+pointer-events:none;
 }
 
 .start-btn{
