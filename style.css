@@ -1,3 +1,4 @@
+
 /* ==========================================
    小怪獸放電所 售票機 V3
    Style Part 1
@@ -150,7 +151,7 @@ body{
 
     width:100%;
 
-    height:105px;
+    height:80px;
 
     display:flex;
 
@@ -162,7 +163,7 @@ body{
 
     backdrop-filter:blur(8px);
 
-    box-shadow:0 2px 10px rgba(0,0,0,.12);
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
 
 }
 
@@ -228,13 +229,9 @@ body{
 
 .ticket-content{
 
-    position:relative;
-
-    z-index:10;
-
     width:100%;
 
-    padding:60px 0 120px;
+    padding:35px 0 100px;
 
 }
 
@@ -280,13 +277,17 @@ body{
 
 .ticket-single{
 
-    width:980px;
+    width:700px;
 
-    margin:0 auto 45px;
+    display:grid;
 
-    display:flex;
+    grid-template-columns:repeat(2,320px);
 
     justify-content:center;
+
+    gap:35px;
+
+    margin:30px auto;
 
 }
 /* ==========================================
@@ -295,11 +296,11 @@ body{
 
 .ticket-btn{
 
-    width:340px;
+    width:320px;
+
+    height:auto;
 
     display:block;
-
-    cursor:pointer;
 
     border-radius:22px;
 
@@ -313,19 +314,6 @@ body{
 
 }
 
-.ticket-btn-wide{
-
-    width:900px;
-
-    display:block;
-
-    cursor:pointer;
-
-    transition:.25s;
-
-    border-radius:20px;
-
-}
 
 .ticket-btn:hover,
 .ticket-btn-wide:hover{
@@ -586,13 +574,19 @@ body{
 
     .ticket-grid{
 
-        width:100%;
+    width:700px;
 
-        grid-template-columns:repeat(2,1fr);
+    margin:30px auto;
 
-        padding:0 20px;
+    display:grid;
 
-    }
+    grid-template-columns:repeat(2,320px);
+
+    justify-content:center;
+
+    gap:35px;
+
+}
 
     .ticket-btn{
 
