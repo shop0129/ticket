@@ -22,19 +22,6 @@ JSON.parse(localStorage.getItem("ticketPrices")) || {
     powerbank:50
 
 };
-const ticketPrices = {
-    ticket2hGreen: 250,
-    ticket2hRed: 300,
-    ticket3hGreen: 300,
-    ticket3hRed: 350,
-    early: 300,
-    summer: 350,
-    baby: 100,
-    parent: 80,
-    token10: 100,
-    token25: 200,
-    powerbank: 50
-};
 function playClick(){
 
     const click = document.getElementById("clickSound");
