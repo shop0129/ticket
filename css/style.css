@@ -912,3 +912,13 @@ cursor:pointer;
     border-radius:12px;
 
 }
+.admin-test-btn{
+    position: fixed;
+    top:20px;
+    right:20px;
+    z-index:99999;
+    background:red;
+    color:white;
+    width:120px;
+    height:60px;
+}
