@@ -162,7 +162,10 @@ playClick();
 
             detailTitle.innerHTML = ticket.dataset.title;
 
-            detailPrice.innerHTML = ticket.dataset.price;
+            const id = ticket.dataset.id;
+
+detailPrice.innerHTML =
+"$" + ticketPrices[id];
 
             detailInfo.innerHTML =
 "<div style='width:520px;margin:0 auto;text-align:left;'>" +
