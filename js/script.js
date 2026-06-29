@@ -158,16 +158,17 @@ playClick();
 
             selectedReward = ticket.dataset.reward;
 
-            detailImage.src = ticket.src;
+detailImage.src = ticket.src;
 
-            detailTitle.innerHTML = ticket.dataset.title;
+detailTitle.innerHTML = ticket.dataset.title;
 
-            const id = ticket.dataset.id;
+// 讀取票種代號
+const id = ticket.dataset.id;
 
-detailPrice.innerHTML =
-"$" + ticketPrices[id];
+// 從後台票價資料取得價格
+detailPrice.innerHTML = "$" + ticketPrices[id];
 
-            detailInfo.innerHTML =
+detailInfo.innerHTML =
 "<div style='width:520px;margin:0 auto;text-align:left;'>" +
 ticket.dataset.info +
 "</div>";
