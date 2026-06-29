@@ -874,15 +874,15 @@ cursor:pointer;
 
 .admin-login{
 
+    width:100%;
+
     display:flex;
 
     flex-direction:column;
 
-    align-items:center;
-
     justify-content:center;
 
-    height:100%;
+    align-items:center;
 
     gap:20px;
 
@@ -1049,5 +1049,14 @@ cursor:pointer;
     color:#444;
 
     margin-bottom:50px;
+
+}
+#adminLoginPage{
+
+    justify-content:center;
+
+    align-items:center;
+
+    background:#f5f5f5;
 
 }
