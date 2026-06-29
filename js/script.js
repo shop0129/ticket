@@ -178,14 +178,6 @@ startPrintAnimation();
 successTip.innerHTML =
 "👾 小怪獸正在準備您的票券...";
 
-// 1秒後改文字
-setTimeout(()=>{
-
-    successTip.innerHTML =
-    "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
-
-},1000);
-
    
 
 }
@@ -328,19 +320,36 @@ if(percent > 100){
         progressFill.style.width=percent+"%";
 
         progressText.innerHTML=percent+"%";
+        if(percent < 30){
 
-       if(percent>=100){
+    successTip.innerHTML = "👾 小怪獸正在準備您的票券...";
 
-     clearInterval(timer);
+}else if(percent < 70){
+
+    successTip.innerHTML = "🖨️ 正在列印票券...";
+
+}else if(percent < 100){
+
+    successTip.innerHTML = "✨ 即將完成...";
+
+}
+
+       if(percent >=100){
+
+    clearInterval(timer);
 
     progressFill.style.width="100%";
-           
+
     progressFill.style.borderRadius = "40px";
 
     progressText.innerHTML="100%";
 
     printStatus.innerHTML =
-    "票券已準備完成";
+    "✅ 票券已準備完成";
+successTip.innerHTML =
+"🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
+    successTip.innerHTML =
+    "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
            const sound = document.getElementById("successSound");
 
 sound.pause();
