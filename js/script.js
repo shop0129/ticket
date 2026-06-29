@@ -319,7 +319,7 @@ progressText.innerHTML = "0%";
 
     const timer=setInterval(()=>{
 
-       percent += Math.floor(Math.random() * 8) + 8;
+       percent += Math.floor(Math.random() * 5) + 5;
 
 if(percent > 100){
     percent = 100;
