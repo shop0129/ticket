@@ -10,7 +10,7 @@ content="width=device-width, initial-scale=1.0">
 
 <title>小怪獸放電所 售票機</title>
 
-<<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css">
 
 </head>
 
@@ -47,48 +47,6 @@ content="width=device-width, initial-scale=1.0">
 
 <section id="ticketPage" class="page">
     <!-- 管理者登入 -->
-<section id="adminLoginPage" class="page">
-
-    <div class="admin-login">
-
-        <h1>管理者登入</h1>
-
-        <input
-            type="password"
-            id="adminPassword"
-            placeholder="請輸入管理密碼">
-
-        <button class="big-btn" onclick="loginAdmin()">
-            登入
-        </button>
-
-        <button class="back-btn" onclick="showPage('homePage')">
-            返回
-        </button>
-
-    </div>
-
-</section>
-
-
-<!-- 管理首頁 -->
-<section id="adminHomePage" class="page">
-
-    <h1 class="title">管理後台</h1>
-
-    <button class="big-btn">🎫 票價設定</button>
-
-    <button class="big-btn">🎉 活動設定</button>
-
-    <button class="big-btn">⚙ 系統設定</button>
-
-    <button class="big-btn">🖨 硬體測試</button>
-
-    <button class="big-btn" onclick="showPage('homePage')">
-        返回首頁
-    </button>
-
-</section>
 
     <!-- Header -->
 
@@ -350,6 +308,48 @@ content="width=device-width, initial-scale=1.0">
         </div>
 
     </div>
+
+</section>
+<section id="adminLoginPage" class="page">
+
+    <div class="admin-login">
+
+        <h1>管理者登入</h1>
+
+        <input
+            type="password"
+            id="adminPassword"
+            placeholder="請輸入管理密碼">
+
+        <button class="big-btn" onclick="loginAdmin()">
+            登入
+        </button>
+
+        <button class="back-btn" onclick="showPage('homePage')">
+            返回
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- 管理首頁 -->
+<section id="adminHomePage" class="page">
+
+    <h1 class="title">管理後台</h1>
+
+    <button class="big-btn">🎫 票價設定</button>
+
+    <button class="big-btn">🎉 活動設定</button>
+
+    <button class="big-btn">⚙ 系統設定</button>
+
+    <button class="big-btn">🖨 硬體測試</button>
+
+    <button class="big-btn" onclick="showPage('homePage')">
+        返回首頁
+    </button>
 
 </section>
 
