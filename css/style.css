@@ -305,6 +305,7 @@ cursor:pointer;
     border-radius:22px;
 
     transition:.25s;
+   box-shadow:0 10px 25px rgba(0,0,0,.18);
 
 }
 
