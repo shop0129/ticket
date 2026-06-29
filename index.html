@@ -339,7 +339,13 @@ content="width=device-width, initial-scale=1.0">
 
     <h1 class="title">管理後台</h1>
 
-    <button class="big-btn">🎫 票價設定</button>
+    <button
+class="big-btn"
+onclick="openPricePage()">
+
+🎫 票價設定
+
+</button>
 
     <button class="big-btn">🎉 活動設定</button>
 
@@ -352,7 +358,94 @@ content="width=device-width, initial-scale=1.0">
     </button>
 
 </section>
+<!-- ==========================
+票價設定
+========================== -->
 
+<section id="pricePage" class="page">
+
+    <header class="ticket-header">
+
+        <button
+            id="priceBackBtn"
+            onclick="showPage('adminHomePage')">
+
+            ← 返回
+
+        </button>
+
+        <h1>票價設定</h1>
+
+    </header>
+
+    <div class="price-content">
+
+        <div class="price-row">
+            <span>2H 小怪獸</span>
+            <input id="price-ticket2hGreen" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>2H 小怪獸Plus</span>
+            <input id="price-ticket2hRed" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>3H 大怪獸</span>
+            <input id="price-ticket3hGreen" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>3H 大怪獸Plus</span>
+            <input id="price-ticket3hRed" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>平日早鳥</span>
+            <input id="price-early" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>寒暑假限定</span>
+            <input id="price-summer" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>幼幼票</span>
+            <input id="price-baby" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>陪同票</span>
+            <input id="price-parent" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>10枚代幣</span>
+            <input id="price-token10" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>25枚代幣</span>
+            <input id="price-token25" type="number">
+        </div>
+
+        <div class="price-row">
+            <span>行動電源</span>
+            <input id="price-powerbank" type="number">
+        </div>
+
+        <button
+            class="big-btn"
+            onclick="savePrices()">
+
+            💾 儲存設定
+
+        </button>
+
+    </div>
+
+</section>
 
 <audio id="successSound" preload="auto">
     <source src="sounds/success.wav" type="audio/wav">
