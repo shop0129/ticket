@@ -386,3 +386,19 @@ countdownTimer = setInterval(()=>{
 }
         },220);  
 }   
+function loginAdmin(){
+
+    const password =
+        document.getElementById("adminPassword").value;
+
+    if(password==="123456"){
+
+        showPage("adminHomePage");
+
+    }else{
+
+        alert("密碼錯誤");
+
+    }
+
+}
