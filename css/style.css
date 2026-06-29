@@ -38,7 +38,7 @@ body{
 
 .page.active{
 
-    display:flex;
+    display:flex !important;
 
 }
 
@@ -51,19 +51,13 @@ body{
     position:fixed;
 
     top:0;
-
     left:0;
-
     right:0;
-
     bottom:0;
 
     overflow:hidden;
 
-    display:flex;
-
     justify-content:center;
-
     align-items:center;
 
 }
@@ -134,7 +128,7 @@ cursor:pointer;
 
     overflow-x:hidden;
 
-    background:url("../images/ticket-bg.png");
+    background:url("../images/ticket-bg.png") center center / cover no-repeat;
 
     background-size:cover;
 
@@ -911,14 +905,4 @@ cursor:pointer;
 
     border-radius:12px;
 
-}
-.admin-test-btn{
-    position: fixed;
-    top:20px;
-    right:20px;
-    z-index:99999;
-    background:red;
-    color:white;
-    width:120px;
-    height:60px;
 }
