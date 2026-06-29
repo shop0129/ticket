@@ -79,12 +79,14 @@ const cashBtn = document.getElementById("cashBtn");
 // 換頁
 // --------------------------
 
- showPage(pageId){
+function showPage(pageId){
 
     clearInterval(countdownTimer);
 
     document.querySelectorAll(".page").forEach(page=>{
+
         page.classList.remove("active");
+
     });
 
     document
@@ -92,6 +94,7 @@ const cashBtn = document.getElementById("cashBtn");
         .classList.add("active");
 
     resetIdleTimer();
+
 }
 
 // --------------------------
