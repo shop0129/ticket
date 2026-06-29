@@ -922,3 +922,6 @@ cursor:pointer;
     width:120px;
     height:60px;
 }
+#ticketPage{
+    background:red !important;
+}
