@@ -356,7 +356,7 @@ printStatus.classList.add("print-finish");
 
    setTimeout(()=>{
 
-    let sec = 8;
+    let sec = 5;
 
     clearInterval(countdownTimer);
 
