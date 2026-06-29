@@ -34,12 +34,61 @@ content="width=device-width, initial-scale=1.0">
         alt="開始購票">
 
 </section>
+<button
+class="admin-test-btn"
+onclick="showPage('adminLoginPage')">
 
+管理
+
+</button>
 <!-- ==========================
 票種頁
 ========================== -->
 
 <section id="ticketPage" class="page">
+    <!-- 管理者登入 -->
+<section id="adminLoginPage" class="page">
+
+    <div class="admin-login">
+
+        <h1>管理者登入</h1>
+
+        <input
+            type="password"
+            id="adminPassword"
+            placeholder="請輸入管理密碼">
+
+        <button class="big-btn" onclick="loginAdmin()">
+            登入
+        </button>
+
+        <button class="back-btn" onclick="showPage('homePage')">
+            返回
+        </button>
+
+    </div>
+
+</section>
+
+
+<!-- 管理首頁 -->
+<section id="adminHomePage" class="page">
+
+    <h1 class="title">管理後台</h1>
+
+    <button class="big-btn">🎫 票價設定</button>
+
+    <button class="big-btn">🎉 活動設定</button>
+
+    <button class="big-btn">⚙ 系統設定</button>
+
+    <button class="big-btn">🖨 硬體測試</button>
+
+    <button class="big-btn" onclick="showPage('homePage')">
+        返回首頁
+    </button>
+
+</section>
 
     <!-- Header -->
 
