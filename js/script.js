@@ -57,33 +57,23 @@ const cashBtn = document.getElementById("cashBtn");
 
 function showPage(pageId){
 
+    clearInterval(countdownTimer);
+
     document.querySelectorAll(".page").forEach(page=>{
-
         page.classList.remove("active");
-
     });
 
     document
-    .getElementById(pageId)
-    .classList.add("active");
+        .getElementById(pageId)
+        .classList.add("active");
 
     resetIdleTimer();
-
 }
 
 // --------------------------
 // 首頁
 // --------------------------
 
-document
-.getElementById("startBtn")
-.addEventListener("click",()=>{
-
-    playClick();   // 播放按鍵音
-
-    showPage("ticketPage");
-
-});
 
 // --------------------------
 // 返回
