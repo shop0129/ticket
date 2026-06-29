@@ -345,11 +345,9 @@ if(percent > 100){
     progressText.innerHTML="100%";
 
     printStatus.innerHTML =
-    "✅ 票券已準備完成";
+   "✅ 票券已列印完成";
 successTip.innerHTML =
 "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
-    successTip.innerHTML =
-    "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
            const sound = document.getElementById("successSound");
 
 sound.pause();
@@ -361,9 +359,8 @@ printStatus.classList.add("print-finish");
 
     successItems.style.display="block";
 
-    // ===== 1秒後開始倒數 =====
-
-   setTimeout(()=>{
+// ===== 0.5秒後開始倒數 =====
+setTimeout(() => {
 
     let sec = 5;
 
@@ -371,26 +368,28 @@ printStatus.classList.add("print-finish");
 
     countdownNumber.innerHTML = sec;
 
-countdownTimer = setInterval(()=>{
+    countdownTimer = setInterval(() => {
 
-    if(sec <= 1){
+        sec--;
 
-        clearInterval(countdownTimer);
-    linePayBtn.disabled = false;
-    cashBtn.disabled = false;
-        showPage("homePage");
+        if (sec > 0) {
 
-        return;
+            countdownNumber.innerHTML = sec;
 
-    }
+        } else {
 
-    countdownNumber.innerHTML = sec;
+            clearInterval(countdownTimer);
 
-    sec--;
+            linePayBtn.disabled = false;
+            cashBtn.disabled = false;
 
-},1000);
+            showPage("homePage");
 
-},2000);
+        }
+
+    }, 1000);
+
+}, 500);
 
 }
         },220);  
