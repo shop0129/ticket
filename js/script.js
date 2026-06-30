@@ -70,44 +70,39 @@ JSON.parse(localStorage.getItem("ticketData")) || {
 },
 
     baby:{
-        title:"幼幼票",
-     price:100,
-        reward:"band",
-info:"限未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣"
-                            
-    },
+    title:"幼幼票",
+    price:100,
+    reward:"band",
+    info:"限未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣"
+},
 
     parent:{
-        title:"陪同票",
-        price:80,
-        reward:"band",
-info:"限陪同家長使用<br>須有兒童同行"
-               
-    },
+    title:"陪同票",
+    price:80,
+    reward:"band",
+    info:"限陪同家長使用<br>須有兒童同行"
+},
 
     token10:{
-        title:"10枚代幣",
-        price:100,
-        reward:"token10",
-info:"兌換10枚遊戲代幣"
-                
-    },
+    title:"10枚代幣",
+    price:100,
+    reward:"token10",
+    info:"兌換10枚遊戲代幣"
+},
 
     token25:{
-        title:"25枚代幣",
-        price:200,
-        reward:"token25",
-info:"兌換25枚遊戲代幣"
-                
-    },
+    title:"25枚代幣",
+    price:200,
+    reward:"token25",
+    info:"兌換25枚遊戲代幣"
+},
 
     powerbank:{
-        title:"行動電源",
-        price:50,
-        reward:"powerbank",
-info:"限館內租借<br>離場前請歸還<br〔需抵押證件〕"
-                
-    }
+    title:"行動電源",
+    price:50,
+    reward:"powerbank",
+    info:"限館內租借<br>離場前請歸還<br>〔需抵押證件〕"
+},
 
 };
 function playClick(){
