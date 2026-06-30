@@ -1,64 +1,52 @@
-// ==========================
-// Render Engine
-// ==========================
+// =====================================
+// Monster Ticket System V3.8
+// render.js
+// =====================================
 
-function getTicket(id){
+function createTicketCard(id){
 
-    return ticketData[id];
+    const ticket = ticketData[id];
 
-}
-
-function renderTicketCard(id){
-
-    const ticket = getTicket(id);
-
-    if(!ticket.enable){
-
-        return "";
-
-    }
+    if(!ticket.enable) return "";
 
     return `
-    <div class="ticket-card">
+        <div class="ticket-card">
 
-        <img
-            src="${ticket.image}"
-            class="ticket-btn"
-            data-id="${id}">
+            <img
+                src="${ticket.image}"
+                class="ticket-btn"
+                data-id="${id}"
+                draggable="false">
 
-        <div class="ticket-price">
-
-            NT$${ticket.price}
+            <div class="ticket-price">
+                NT$${ticket.price}
+            </div>
 
         </div>
-
-    </div>
     `;
 
 }
 
-function renderCategory(category,containerId){
+function renderCategory(category, containerId){
 
     const container =
-    document.getElementById(containerId);
+        document.getElementById(containerId);
 
-    let html="";
+    if(!container) return;
 
-    for(const id in ticketData){
+    let html = "";
 
-        const ticket=ticketData[id];
+    Object.keys(ticketData).forEach(id=>{
 
-        if(ticket.category!==category){
+        const ticket = ticketData[id];
 
-            continue;
+        if(ticket.category !== category) return;
 
-        }
+        html += createTicketCard(id);
 
-        html+=renderTicketCard(id);
+    });
 
-    }
-
-    container.innerHTML=html;
+    container.innerHTML = html;
 
 }
 
