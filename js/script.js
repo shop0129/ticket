@@ -312,45 +312,76 @@ cashBtn.addEventListener("click",()=>{
 
 function updateSuccessItems(){
 
-   const ticket = ticketData[selectedTicket];
+    const ticket = ticketData[selectedTicket];
 
     const successItems =
     document.getElementById("successItems");
 
     let html = "";
 
-    switch(selectedReward){
+    if(!ticket){
 
-        case "token,band,toy":
+        successItems.innerHTML =
+        "<div>請至櫃檯確認領取項目</div>";
 
-            html += "<div>🪙 請領取代幣</div>";
-            html += "<div>🎫 請領取入場手環</div>";
-            html += "<div>🎁 玩具請於離場時憑手環兌換 </div>";
-            break;
+        return;
 
-        case "band":
+    }
 
-            html += "<div>🎫 請領取入場手環</div>";
-            break;
+    // ===== 代幣 =====
 
-        case "token10":
+    if(ticket.token){
 
-            html += "<div>🪙 請領取10枚代幣</div>";
-            break;
+        html += `<div>🪙 請領取 ${ticket.token} 枚代幣</div>`;
 
-        case "token25":
+    }
 
-            html += "<div>🪙 請領取25枚代幣</div>";
-            break;
+    // ===== 手環 =====
 
-        case "powerbank":
+    if(ticket.reward.includes("band")){
 
-            html += "<div>🔋 請向櫃檯領取行動電源</div>";
-            break;
+        html += "<div>🎫 請領取入場手環</div>";
 
-        default:
+    }
 
-            html = "<div>請至櫃檯確認領取項目</div>";
+    // ===== 玩具 =====
+
+    if(ticket.toy=="green"){
+
+        html +=
+        "<div>🎁 離場時可兌換綠標玩具</div>";
+
+    }
+
+    if(ticket.toy=="red"){
+
+        html +=
+        "<div>🎁 離場時可兌換紅標玩具</div>";
+
+    }
+
+    // ===== 代幣票 =====
+
+    if(selectedTicket=="token10"){
+
+        html =
+        "<div>🪙 請領取10枚代幣</div>";
+
+    }
+
+    if(selectedTicket=="token25"){
+
+        html =
+        "<div>🪙 請領取25枚代幣</div>";
+
+    }
+
+    // ===== 行動電源 =====
+
+    if(selectedTicket=="powerbank"){
+
+        html =
+        "<div>🔋 請向櫃檯領取行動電源</div>";
 
     }
 
