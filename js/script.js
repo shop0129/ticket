@@ -50,30 +50,29 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     },
 
     early:{
-        title:"平日早鳥",
-        price:300,
-        reward:"token,band,toy",
-
-    info:"🕙 入場時間：14:00~15:30<br>
+    title:"平日早鳥",
+    price:300,
+    reward:"token,band,toy",
+    info:`🕙 入場時間：14:00~15:30<br>
 🎮 可暢玩至：18:00<br>
 🪙 贈送代幣：15 枚<br>
-🎁 贈送玩具：紅標玩具"
-    },
+🎁 贈送玩具：紅標玩具`
+},
 
     summer:{
-        title:"寒暑假限定",
-        price:350,
-        reward:"token,band,toy",
-info:"🕙 入場時間：10:00~11:30<br>
+    title:"寒暑假限定",
+    price:350,
+    reward:"token,band,toy",
+    info:`🕙 入場時間：10:00~11:30<br>
 🎮 可暢玩至：16:00<br>
 🪙 贈送代幣：20 枚<br>
-🎁 贈送玩具：紅標玩具"
-    },
+🎁 贈送玩具：紅標玩具`
+},
 
     baby:{
         title:"幼幼票",
      price:100,
-        reward:"token,band,toy",
+        reward:"band",
 info:"限未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣"
                             
     },
@@ -81,7 +80,7 @@ info:"限未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣
     parent:{
         title:"陪同票",
         price:80,
-        reward:"token,band,toy",
+        reward:"band",
 info:"限陪同家長使用<br>須有兒童同行"
                
     },
@@ -89,7 +88,7 @@ info:"限陪同家長使用<br>須有兒童同行"
     token10:{
         title:"10枚代幣",
         price:100,
-        reward:"token,band,toy",
+        reward:"token10",
 info:"兌換10枚遊戲代幣"
                 
     },
@@ -97,7 +96,7 @@ info:"兌換10枚遊戲代幣"
     token25:{
         title:"25枚代幣",
         price:200,
-        reward:"token,band,toy",
+        reward:"token25",
 info:"兌換25枚遊戲代幣"
                 
     },
@@ -105,7 +104,7 @@ info:"兌換25枚遊戲代幣"
     powerbank:{
         title:"行動電源",
         price:50,
-        reward:"token,band,toy",
+        reward:"powerbank",
 info:"限館內租借<br>離場前請歸還<br〔需抵押證件〕"
                 
     }
