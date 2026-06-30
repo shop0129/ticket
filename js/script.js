@@ -64,7 +64,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         title:"寒暑假限定",
         price:350,
         reward:"token,band,toy",
-info="🕙 入場時間：10:00~11:30<br>
+info:"🕙 入場時間：10:00~11:30<br>
 🎮 可暢玩至：16:00<br>
 🪙 贈送代幣：20 枚<br>
 🎁 贈送玩具：紅標玩具"
