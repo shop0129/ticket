@@ -407,9 +407,9 @@ function updateSuccessItems(){
     }
 
    successItems.innerHTML =
-"<div style='display:inline-block;text-align:left;'>"
-+ html +
-"</div>";
+`<div class="success-items-content">
+    ${html}
+</div>`;
 
 }
 // --------------------------
