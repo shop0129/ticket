@@ -323,7 +323,8 @@ cashBtn.addEventListener("click",()=>{
 function updateSuccessItems(){
 
     const ticket = ticketData[selectedTicket];
-
+console.log(selectedTicket);
+console.log(ticket);
     const successItems =
     document.getElementById("successItems");
 
