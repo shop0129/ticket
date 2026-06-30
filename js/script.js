@@ -114,6 +114,14 @@ if (!ticketData.summer.token) {
     ticketData.summer.token = 20;
     ticketData.summer.toy = "red";
 }
+
+localStorage.setItem(
+    "ticketData",
+    JSON.stringify(ticketData)
+);
+
+console.log(ticketData.early);
+console.log(ticketData.summer);
 function playClick(){
 
     const click = document.getElementById("clickSound");
