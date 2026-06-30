@@ -11,6 +11,9 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         hour:2,
         token:10,
         toy:"green"
+        reward:"token,band,toy",
+
+    info:"🪙 贈送代幣：10 枚<br>🎁 贈送玩具：綠標玩具"data-reward="token,band,toy">
     },
 
     ticket2hRed:{
@@ -19,6 +22,9 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         hour:2,
         token:15,
         toy:"red"
+        reward:"token,band,toy",
+
+    info:"🪙 贈送代幣：15 枚<br>🎁 贈送玩具：紅標玩具"data-reward="token,band,toy">
     },
 
     ticket3hGreen:{
@@ -27,6 +33,9 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         hour:3,
         token:15,
         toy:"green"
+        reward:"token,band,toy",
+
+    info:"🪙 贈送代幣：15 枚<br>🎁 贈送玩具：綠標玩具"data-reward="token,band,toy">
     },
 
     ticket3hRed:{
@@ -35,41 +44,70 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         hour:3,
         token:20,
         toy:"red"
+        reward:"token,band,toy",
+
+    info:"🪙 贈送代幣：20 枚<br>🎁 贈送玩具：紅標玩具"data-reward="token,band,toy">
     },
 
     early:{
         title:"平日早鳥",
         price:300
+        reward:"token,band,toy",
+
+    info="🕙 入場時間：14:00~15:30<br>
+🎮 可暢玩至：18:00<br>
+🪙 贈送代幣：15 枚<br>
+🎁 贈送玩具：紅標玩具"data-reward="token,band,toy">
     },
 
     summer:{
         title:"寒暑假限定",
         price:350
+        reward:"token,band,toy",
+info="🕙 入場時間：10:00~11:30<br>
+🎮 可暢玩至：16:00<br>
+🪙 贈送代幣：20 枚<br>
+🎁 贈送玩具：紅標玩具"data-reward="token,band,toy">
     },
 
     baby:{
         title:"幼幼票",
-        price:100
+     price:100
+        reward:"token,band,toy",
+info="<div style='text-align:center'>限未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣"
+                            data-reward="band">
     },
 
     parent:{
         title:"陪同票",
         price:80
+        reward:"token,band,toy",
+info="<div style='text-align:center'>限陪同家長使用<br>須有兒童同行"
+                data-reward="band">
     },
 
     token10:{
         title:"10枚代幣",
         price:100
+        reward:"token,band,toy",
+info="<div style='text-align:center'>兌換10枚遊戲代幣"
+                data-reward="token10">
     },
 
     token25:{
         title:"25枚代幣",
         price:200
+        reward:"token,band,toy",
+info="<div style='text-align:center'>兌換25枚遊戲代幣"
+                data-reward="token25">
     },
 
     powerbank:{
         title:"行動電源",
         price:50
+        reward:"token,band,toy",
+info="<div style='text-align:center'>限館內租借<br>離場前請歸還<br〔需抵押證件〕"
+                data-reward="powerbank">
     }
 
 };
@@ -207,22 +245,26 @@ playClick();
 
         setTimeout(()=>{
 
-            selectedReward = ticket.dataset.reward;
+           const id = ticket.dataset.id;
 
+const data = ticketData[id];
+
+// 紀錄票種
+selectedReward = data.reward;
+
+// 圖片
 detailImage.src = ticket.src;
 
-detailTitle.innerHTML = ticket.dataset.title;
+// 標題
+detailTitle.innerHTML = data.title;
 
-// 讀取票種代號
-const id = ticket.dataset.id;
+// 價格
+detailPrice.innerHTML = "$" + data.price;
 
-// 從後台票價資料取得價格
-detailPrice.innerHTML =
-"$"+ticketData[id].price;
-
+// 說明
 detailInfo.innerHTML =
 "<div style='width:520px;margin:0 auto;text-align:left;'>" +
-ticket.dataset.info +
+data.info +
 "</div>";
 
             ticket.classList.remove("ticket-selected");
