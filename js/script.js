@@ -2,24 +2,75 @@
 // 票價設定
 // ==========================
 
-let ticketPrices =
-JSON.parse(localStorage.getItem("ticketPrices")) || {
+let ticketData =
+JSON.parse(localStorage.getItem("ticketData")) || {
 
-    ticket2hGreen:250,
-    ticket2hRed:300,
-    ticket3hGreen:300,
-    ticket3hRed:350,
+    ticket2hGreen:{
+        title:"2H 小怪獸",
+        price:250,
+        hour:2,
+        token:10,
+        toy:"green"
+    },
 
-    early:300,
-    summer:350,
+    ticket2hRed:{
+        title:"2H 小怪獸 Plus",
+        price:300,
+        hour:2,
+        token:15,
+        toy:"red"
+    },
 
-    baby:100,
-    parent:80,
+    ticket3hGreen:{
+        title:"3H 大怪獸",
+        price:300,
+        hour:3,
+        token:15,
+        toy:"green"
+    },
 
-    token10:100,
-    token25:200,
+    ticket3hRed:{
+        title:"3H 大怪獸 Plus",
+        price:350,
+        hour:3,
+        token:20,
+        toy:"red"
+    },
 
-    powerbank:50
+    early:{
+        title:"平日早鳥",
+        price:300
+    },
+
+    summer:{
+        title:"寒暑假限定",
+        price:350
+    },
+
+    baby:{
+        title:"幼幼票",
+        price:100
+    },
+
+    parent:{
+        title:"陪同票",
+        price:80
+    },
+
+    token10:{
+        title:"10枚代幣",
+        price:100
+    },
+
+    token25:{
+        title:"25枚代幣",
+        price:200
+    },
+
+    powerbank:{
+        title:"行動電源",
+        price:50
+    }
 
 };
 function playClick(){
@@ -166,7 +217,8 @@ detailTitle.innerHTML = ticket.dataset.title;
 const id = ticket.dataset.id;
 
 // 從後台票價資料取得價格
-detailPrice.innerHTML = "$" + ticketPrices[id];
+detailPrice.innerHTML =
+"$"+ticketData[id].price;
 
 detailInfo.innerHTML =
 "<div style='width:520px;margin:0 auto;text-align:left;'>" +
@@ -505,8 +557,8 @@ function savePrices(){
     Number(document.getElementById("price-powerbank").value);
 
     localStorage.setItem(
-        "ticketPrices",
-        JSON.stringify(ticketPrices)
+    "ticketData",
+        JSON.stringify(ticketData)
     );
 
     alert("票價已儲存！");
