@@ -528,80 +528,81 @@ function loginAdmin(){
 function openPricePage(){
 
     document.getElementById("price-ticket2hGreen").value =
-    ticketPrices.ticket2hGreen;
+    ticketData.ticket2hGreen.price;
 
     document.getElementById("price-ticket2hRed").value =
-    ticketPrices.ticket2hRed;
+    ticketData.ticket2hRed.price;
 
     document.getElementById("price-ticket3hGreen").value =
-    ticketPrices.ticket3hGreen;
+    ticketData.ticket3hGreen.price;
 
     document.getElementById("price-ticket3hRed").value =
-    ticketPrices.ticket3hRed;
+    ticketData.ticket3hRed.price;
 
     document.getElementById("price-early").value =
-    ticketPrices.early;
+    ticketData.early.price;
 
     document.getElementById("price-summer").value =
-    ticketPrices.summer;
+    ticketData.summer.price;
 
     document.getElementById("price-baby").value =
-    ticketPrices.baby;
+    ticketData.baby.price;
 
     document.getElementById("price-parent").value =
-    ticketPrices.parent;
+    ticketData.parent.price;
 
     document.getElementById("price-token10").value =
-    ticketPrices.token10;
+    ticketData.token10.price;
 
     document.getElementById("price-token25").value =
-    ticketPrices.token25;
+    ticketData.token25.price;
 
     document.getElementById("price-powerbank").value =
-    ticketPrices.powerbank;
+    ticketData.powerbank.price;
 
     showPage("pricePage");
 
 }
 function savePrices(){
 
-    ticketPrices.ticket2hGreen =
+    ticketData.ticket2hGreen.price =
     Number(document.getElementById("price-ticket2hGreen").value);
 
-    ticketPrices.ticket2hRed =
+    ticketData.ticket2hRed.price =
     Number(document.getElementById("price-ticket2hRed").value);
 
-    ticketPrices.ticket3hGreen =
+    ticketData.ticket3hGreen.price =
     Number(document.getElementById("price-ticket3hGreen").value);
 
-    ticketPrices.ticket3hRed =
+    ticketData.ticket3hRed.price =
     Number(document.getElementById("price-ticket3hRed").value);
 
-    ticketPrices.early =
+    ticketData.early.price =
     Number(document.getElementById("price-early").value);
 
-    ticketPrices.summer =
+    ticketData.summer.price =
     Number(document.getElementById("price-summer").value);
 
-    ticketPrices.baby =
+    ticketData.baby.price =
     Number(document.getElementById("price-baby").value);
 
-    ticketPrices.parent =
+    ticketData.parent.price =
     Number(document.getElementById("price-parent").value);
 
-    ticketPrices.token10 =
+    ticketData.token10.price =
     Number(document.getElementById("price-token10").value);
 
-    ticketPrices.token25 =
+    ticketData.token25.price =
     Number(document.getElementById("price-token25").value);
 
-    ticketPrices.powerbank =
+    ticketData.powerbank.price =
     Number(document.getElementById("price-powerbank").value);
 
     localStorage.setItem(
-    "ticketData",
+        "ticketData",
         JSON.stringify(ticketData)
     );
 
     alert("票價已儲存！");
+
 }
