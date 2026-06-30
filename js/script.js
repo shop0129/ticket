@@ -80,7 +80,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"陪同票",
     price:80,
     reward:"band",
-    info:"✓ 限陪同家長使用<br>✓ 須有兒童同行"
+    info:"✓ 限陪同家長使用<br>✓ 必須有兒童同行"
 },
 
     token10:{
