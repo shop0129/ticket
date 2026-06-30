@@ -1129,3 +1129,20 @@ cursor:pointer;
     margin:40px auto;
 
 }
+.success-items{
+
+    width:100%;
+
+    text-align:center;
+
+}
+
+.success-items-content{
+
+    display:inline-block;
+
+    text-align:left;
+
+    line-height:2;
+
+}
