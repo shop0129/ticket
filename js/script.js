@@ -120,8 +120,6 @@ localStorage.setItem(
     JSON.stringify(ticketData)
 );
 
-console.log(ticketData.early);
-console.log(ticketData.summer);
 function playClick(){
 
     const click = document.getElementById("clickSound");
@@ -336,8 +334,7 @@ cashBtn.addEventListener("click",()=>{
 function updateSuccessItems(){
 
     const ticket = ticketData[selectedTicket];
-console.log(selectedTicket);
-console.log(ticket);
+
     const successItems =
     document.getElementById("successItems");
 
