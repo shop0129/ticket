@@ -353,7 +353,7 @@ function updateSuccessItems(){
 
     if(ticket.token){
 
-        html += `<div>🪙 請領取 ${ticket.token} 枚代幣</div>`;
+        html += `<div>🪙 領取： ${ticket.token} 枚代幣</div>`;
 
     }
 
@@ -361,7 +361,7 @@ function updateSuccessItems(){
 
     if(ticket.reward.includes("band")){
 
-        html += "<div>🎫 請領取入場手環</div>";
+        html += "<div>🎫 領取：入場手環</div>";
 
     }
 
@@ -370,14 +370,14 @@ function updateSuccessItems(){
     if(ticket.toy=="green"){
 
         html +=
-        "<div>🎁 離場時可兌換綠標玩具</div>";
+        "<div>🎁 兌換：綠標玩具(離場時)</div>";
 
     }
 
     if(ticket.toy=="red"){
 
         html +=
-        "<div>🎁 離場時可兌換紅標玩具</div>";
+        "<div>🎁 兌換：紅標玩具(離場時)</div>";
 
     }
 
@@ -386,14 +386,14 @@ function updateSuccessItems(){
     if(selectedTicket=="token10"){
 
         html =
-        "<div>🪙 請領取10枚代幣</div>";
+        "<div>🪙 領取：10枚代幣</div>";
 
     }
 
     if(selectedTicket=="token25"){
 
         html =
-        "<div>🪙 請領取25枚代幣</div>";
+        "<div>🪙 領取：25枚代幣</div>";
 
     }
 
@@ -402,11 +402,14 @@ function updateSuccessItems(){
     if(selectedTicket=="powerbank"){
 
         html =
-        "<div>🔋 請向櫃檯領取行動電源</div>";
+        "<div>🔋 領取：行動電源</div>";
 
     }
 
-    successItems.innerHTML = html;
+   successItems.innerHTML =
+"<div style='display:inline-block;text-align:left;'>"
++ html +
+"</div>";
 
 }
 // --------------------------
