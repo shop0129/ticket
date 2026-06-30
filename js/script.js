@@ -105,6 +105,15 @@ JSON.parse(localStorage.getItem("ticketData")) || {
 },
 
 };
+if (!ticketData.early.token) {
+    ticketData.early.token = 15;
+    ticketData.early.toy = "red";
+}
+
+if (!ticketData.summer.token) {
+    ticketData.summer.token = 20;
+    ticketData.summer.toy = "red";
+}
 function playClick(){
 
     const click = document.getElementById("clickSound");
@@ -631,10 +640,7 @@ function savePrices(){
     ticketData.powerbank.price =
     Number(document.getElementById("price-powerbank").value);
 
-    localStorage.setItem(
-        "ticketData",
-        JSON.stringify(ticketData)
-    );
+   localStorage.setItem("ticketData", JSON.stringify(ticketData));
 
     alert("票價已儲存！");
 
