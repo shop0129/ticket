@@ -101,7 +101,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"行動電源",
     price:50,
     reward:"powerbank",
-    info:"✓ 限館內租借<br>✓ 離場前請歸還<br>〔需抵押證件〕"
+    info:"✓ 限本館內借用<br>✓ 離場前請歸還<br>〔需抵押證件〕"
 },
 
 };
