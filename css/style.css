@@ -409,13 +409,7 @@ cursor:pointer;
 
 #detailInfo{
 
-    width:520px;
-
-    margin:0 auto;
-
-    display:block;
-
-    text-align:left !important;
+    text-align:center;
 
     font-size:40px;
 
