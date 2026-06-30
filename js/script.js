@@ -52,10 +52,8 @@ JSON.parse(localStorage.getItem("ticketData")) || {
    early:{
     title:"平日早鳥",
     price:300,
-
     token:15,
     toy:"red",
-
     reward:"token,band,toy",
 
     info:"🕙 入場時間：14:00~15:30<br>🎮 可暢玩至：18:00<br>🪙 贈送代幣：15 枚<br>🎁 贈送玩具：紅標玩具"
@@ -64,10 +62,8 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     summer:{
     title:"寒暑假限定",
     price:350,
-
     token:20,
     toy:"red",
-
     reward:"token,band,toy",
 
     info:"🕙 入場時間：10:00~11:30<br>🎮 可暢玩至：16:00<br>🪙 贈送代幣：20 枚<br>🎁 贈送玩具：紅標玩具"
