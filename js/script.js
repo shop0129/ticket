@@ -135,6 +135,7 @@ let idleTimer;
 let countdownTimer;
 
 let selectedReward = "";
+let selectedTicket = "";
 
 // --------------------------
 // 取得元件
@@ -233,9 +234,13 @@ playClick();
 
         setTimeout(()=>{
 
-           const id = ticket.dataset.id;
+          const id = ticket.dataset.id;
 
 const data = ticketData[id];
+
+selectedTicket = id;
+
+selectedReward = data.reward;
 
 // 紀錄票種
 selectedReward = data.reward;
@@ -306,6 +311,8 @@ cashBtn.addEventListener("click",()=>{
 // --------------------------
 
 function updateSuccessItems(){
+
+   const ticket = ticketData[selectedTicket];
 
     const successItems =
     document.getElementById("successItems");
