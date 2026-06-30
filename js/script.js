@@ -73,14 +73,14 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"幼幼票",
     price:100,
     reward:"band",
-    info:"限未滿12個月<br>免費陪同1位家長<br>不送玩具、不送代幣"
+    info:"✓ 限未滿12個月<br>✓ 免費陪同1位家長<br>不送玩具、不送代幣"
 },
 
     parent:{
     title:"陪同票",
     price:80,
     reward:"band",
-    info:"限陪同家長使用<br>須有兒童同行"
+    info:"✓ 限陪同家長使用<br>✓ 須有兒童同行"
 },
 
     token10:{
@@ -101,7 +101,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"行動電源",
     price:50,
     reward:"powerbank",
-    info:"限館內租借<br>離場前請歸還<br>〔需抵押證件〕"
+    info:"✓ 限館內租借<br>✓ 離場前請歸還<br>〔需抵押證件〕"
 },
 
 };
@@ -277,8 +277,8 @@ detailPrice.innerHTML = "$" + data.price;
 
 // 說明
 detailInfo.innerHTML =
-"<div style='width:520px;margin:0 auto;text-align:left;'>" +
-data.info +
+"<div style='display:inline-block;text-align:left;line-height:1.9;'>"
++ data.info +
 "</div>";
 
             ticket.classList.remove("ticket-selected");
