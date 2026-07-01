@@ -308,13 +308,20 @@ content="width=device-width, initial-scale=1.0">
     <h1 class="title">管理後台</h1>
 
     <button
-class="big-btn"
-onclick="openPricePage()">
+    class="big-btn"
+    onclick="openPricePage()">
 
-🎫 票價設定
+    🎫 票價設定
 
 </button>
 
+<button
+    class="big-btn"
+    onclick="openTicketManager()">
+
+    🎫 票券管理
+
+</button>
     <button class="big-btn">🎉 活動設定</button>
 
     <button class="big-btn">⚙ 系統設定</button>
@@ -341,21 +348,35 @@ onclick="openPricePage()">
             ← 返回
 
         </button>
+<section id="ticketManagerPage" class="page">
 
+    <header class="ticket-header">
+
+        <button onclick="showPage('adminHomePage')">
+            ← 返回
+        </button>
+
+        <h1>票券管理</h1>
+
+    </header>
+
+    <div id="ticketTable"></div>
+
+    <div class="btn-group">
+
+        <button class="big-btn"
+                onclick="saveTicketManager()">
+            儲存全部
+        </button>
+
+    </div>
+
+</section>
         <h1>票價設定</h1>
 
     </header>
 
-    <div class="price-content">
-        <div id="ticketManager"></div>
 
-<div class="admin-btn-group">
-
-    <button onclick="saveTickets()">
-        儲存票券
-    </button>
-
-</div>
         <div class="price-row">
             <span>2H 小怪獸</span>
             <input id="price-ticket2hGreen" type="number">
