@@ -1258,3 +1258,78 @@ V3.8 票券管理
     border-radius:12px;
 
 }
+/*==========================
+V3.8 卡片式票券管理
+==========================*/
+
+.tm-card{
+
+    width:900px;
+
+    margin:30px auto;
+
+    background:#fff;
+
+    border-radius:25px;
+
+    padding:30px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.12);
+
+}
+
+.tm-card-title{
+
+    font-size:36px;
+
+    font-weight:bold;
+
+    color:#333;
+
+    margin-bottom:25px;
+
+}
+
+.tm-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:25px;
+
+}
+
+.tm-field{
+
+    display:flex;
+
+    flex-direction:column;
+
+    margin-bottom:25px;
+
+}
+
+.tm-field label{
+
+    font-size:24px;
+
+    color:#666;
+
+    margin-bottom:8px;
+
+}
+
+.tm-field input{
+
+    height:60px;
+
+    border:2px solid #ddd;
+
+    border-radius:12px;
+
+    font-size:28px;
+
+    padding:0 15px;
+
+}
