@@ -419,26 +419,49 @@ content="width=device-width, initial-scale=1.0">
     </div>
 
 </section>
+<!-- ==========================
+票券管理 V3.8
+========================== -->
+
 <section id="ticketManagerPage" class="page">
 
-    <header class="ticket-header">
+    <div class="tm-page">
 
-        <button onclick="showPage('adminHomePage')">
-            ← 返回
-        </button>
+        <div class="tm-top">
 
-        <h1>票券管理</h1>
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
 
-    </header>
+                ← 返回
 
-    <div id="ticketTable"></div>
+            </button>
 
-   <div class="tm-bottom">
+            <h1 class="tm-title">
 
-        <button class="big-btn"
+                🎫 票券管理
+
+            </h1>
+
+        </div>
+
+        <div id="ticketTable">
+
+            <!-- renderTicketManager() 自動產生 -->
+
+        </div>
+
+        <div class="tm-footer">
+
+            <button
+                class="big-btn"
                 onclick="saveTicketManager()">
-            儲存全部
-        </button>
+
+                💾 儲存全部
+
+            </button>
+
+        </div>
 
     </div>
 
