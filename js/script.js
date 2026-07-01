@@ -655,11 +655,39 @@ function savePrices(){
 }
 function openTicketManager(){
 
+    renderTicketManager();
+
     showPage("ticketManagerPage");
 
 }
 function saveTicketManager(){
 
     alert("票券管理開發中");
+
+}
+function renderTicketManager(){
+
+    const table = document.getElementById("ticketTable");
+
+    table.innerHTML = `
+    
+    <div class="ticket-row">
+
+        <div class="ticket-name">
+            2H 綠
+        </div>
+
+        <input
+            id="tm-title-ticket2hGreen"
+            value="${ticketData.ticket2hGreen.title}">
+
+        <input
+            id="tm-price-ticket2hGreen"
+            type="number"
+            value="${ticketData.ticket2hGreen.price}">
+
+    </div>
+
+    `;
 
 }
