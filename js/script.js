@@ -671,36 +671,56 @@ function renderTicketManager(){
 
     table.innerHTML = `
 
-    <div class="tm-header">
+    <div class="tm-card">
 
-        <div>票種</div>
-        <div>票名</div>
-        <div>價格</div>
-        <div>時數</div>
-        <div>代幣</div>
+        <div class="tm-card-title">
+            🟢 2H 小怪獸
+        </div>
 
-    </div>
+        <div class="tm-field">
 
-    <div class="tm-row">
+            <label>票名</label>
 
-        <div>2H綠</div>
+            <input
+                id="tm-title-ticket2hGreen"
+                value="${ticketData.ticket2hGreen.title}">
 
-        <input
-            id="tm-title-ticket2hGreen"
-            value="${ticketData.ticket2hGreen.title}">
+        </div>
 
-        <input
-            id="tm-price-ticket2hGreen"
-            type="number"
-            value="${ticketData.ticket2hGreen.price}">
+        <div class="tm-grid">
 
-        <input
-            value="${ticketData.ticket2hGreen.hour}"
-            disabled>
+            <div class="tm-field">
 
-        <input
-            value="${ticketData.ticket2hGreen.token}"
-            disabled>
+                <label>價格</label>
+
+                <input
+                    id="tm-price-ticket2hGreen"
+                    type="number"
+                    value="${ticketData.ticket2hGreen.price}">
+
+            </div>
+
+            <div class="tm-field">
+
+                <label>時數</label>
+
+                <input
+                    value="${ticketData.ticket2hGreen.hour}"
+                    disabled>
+
+            </div>
+
+            <div class="tm-field">
+
+                <label>代幣</label>
+
+                <input
+                    value="${ticketData.ticket2hGreen.token}"
+                    disabled>
+
+            </div>
+
+        </div>
 
     </div>
 
