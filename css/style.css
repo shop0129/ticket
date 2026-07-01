@@ -1436,3 +1436,12 @@ V3.8 卡片式票券管理
     width:100%;
 
 }
+.tm-field{
+
+    display:flex;
+
+    flex-direction:column;
+
+    min-width:0;
+
+}
