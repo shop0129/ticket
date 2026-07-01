@@ -1152,7 +1152,9 @@ cursor:pointer;
 
     align-items:center;
 
-    gap:20px;
+    justify-content:center;
+
+    gap:25px;
 
     margin:20px 0;
 
@@ -1179,5 +1181,12 @@ cursor:pointer;
     border-radius:10px;
 
     padding:5px 10px;
+
+}
+#ticketTable{
+
+    width:900px;
+
+    margin:120px auto 40px;
 
 }
