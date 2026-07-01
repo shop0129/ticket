@@ -653,3 +653,13 @@ function savePrices(){
     alert("票價已儲存！");
 
 }
+function openTicketManager(){
+
+    showPage("ticketManagerPage");
+
+}
+function saveTicketManager(){
+
+    alert("票券管理開發中");
+
+}
