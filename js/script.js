@@ -669,61 +669,89 @@ function renderTicketManager(){
 
     const table = document.getElementById("ticketTable");
 
-    table.innerHTML = `
+    table.innerHTML = "";
 
-    <div class="tm-card">
+    const ticketNames = {
 
-        <div class="tm-card-title">
-            🟢 2H 小怪獸
-        </div>
+        ticket2hGreen:"🟢 2H 小怪獸",
+        ticket2hRed:"🔴 2H 小怪獸 Plus",
+        ticket3hGreen:"🟢 3H 大怪獸",
+        ticket3hRed:"🔴 3H 大怪獸 Plus",
+        early:"🌞 平日早鳥",
+        summer:"🏖 寒暑假限定",
+        baby:"👶 幼幼票",
+        parent:"👨 陪同票",
+        token10:"🪙 10枚代幣",
+        token25:"🪙 25枚代幣",
+        powerbank:"🔋 行動電源"
 
-        <div class="tm-field">
+    };
 
-            <label>票名</label>
+    for(const id in ticketData){
 
-            <input
-                id="tm-title-ticket2hGreen"
-                value="${ticketData.ticket2hGreen.title}">
+        const ticket = ticketData[id];
 
-        </div>
+        table.innerHTML += `
 
-        <div class="tm-grid">
+        <div class="tm-card">
 
-            <div class="tm-field">
+            <div class="tm-card-title">
 
-                <label>價格</label>
-
-                <input
-                    id="tm-price-ticket2hGreen"
-                    type="number"
-                    value="${ticketData.ticket2hGreen.price}">
-
-            </div>
-
-            <div class="tm-field">
-
-                <label>時數</label>
-
-                <input
-                    value="${ticketData.ticket2hGreen.hour}"
-                    disabled>
+                ${ticketNames[id]}
 
             </div>
 
             <div class="tm-field">
 
-                <label>代幣</label>
+                <label>票名</label>
 
                 <input
-                    value="${ticketData.ticket2hGreen.token}"
-                    disabled>
+                    id="title-${id}"
+                    value="${ticket.title}">
+
+            </div>
+
+            <div class="tm-grid">
+
+                <div class="tm-field">
+
+                    <label>價格</label>
+
+                    <input
+                        id="price-${id}"
+                        type="number"
+                        value="${ticket.price}">
+
+                </div>
+
+                <div class="tm-field">
+
+                    <label>時數</label>
+
+                    <input
+                        id="hour-${id}"
+                        type="number"
+                        value="${ticket.hour ?? ""}">
+
+                </div>
+
+                <div class="tm-field">
+
+                    <label>代幣</label>
+
+                    <input
+                        id="token-${id}"
+                        type="number"
+                        value="${ticket.token ?? ""}">
+
+                </div>
 
             </div>
 
         </div>
 
-    </div>
+        `;
 
-    `;
+    }
 
 }
