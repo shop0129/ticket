@@ -1183,10 +1183,78 @@ cursor:pointer;
     padding:5px 10px;
 
 }
-#ticketTable{
+/*==========================
+V3.8 票券管理
+==========================*/
 
-    width:900px;
+.tm-header,
+.tm-row{
 
-    margin:120px auto 40px;
+    width:980px;
+
+    margin:15px auto;
+
+    display:grid;
+
+    grid-template-columns:
+        120px
+        320px
+        140px
+        140px
+        140px;
+
+    gap:15px;
+
+    align-items:center;
+
+}
+
+.tm-header{
+
+    font-size:30px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+    color:#555;
+
+}
+
+.tm-row{
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:20px;
+
+    box-shadow:0 3px 12px rgba(0,0,0,.08);
+
+}
+
+.tm-row div{
+
+    font-size:28px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+}
+
+.tm-row input{
+
+    width:100%;
+
+    height:55px;
+
+    font-size:28px;
+
+    text-align:center;
+
+    border:2px solid #ddd;
+
+    border-radius:12px;
 
 }
