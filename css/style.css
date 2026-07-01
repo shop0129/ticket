@@ -1264,7 +1264,9 @@ V3.8 卡片式票券管理
 
 .tm-card{
 
-    width:900px;
+    width:94%;
+
+    max-width:900px;
 
     margin:30px auto;
 
@@ -1294,9 +1296,9 @@ V3.8 卡片式票券管理
 
     display:grid;
 
-    grid-template-columns:repeat(3,1fr);
+    grid-template-columns:1fr 1fr 1fr;
 
-    gap:25px;
+    gap:20px;
 
 }
 
@@ -1331,5 +1333,29 @@ V3.8 卡片式票券管理
     font-size:28px;
 
     padding:0 15px;
+
+}
+.tm-header-bar{
+
+    height:80px;
+
+    justify-content:center;
+
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
+
+}
+.tm-bottom{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    margin:40px 0 80px;
 
 }
