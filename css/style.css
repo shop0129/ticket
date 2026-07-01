@@ -1359,3 +1359,76 @@ V3.8 卡片式票券管理
     margin:40px 0 80px;
 
 }
+/*==========================
+票券管理 V3.8
+==========================*/
+
+#ticketManagerPage{
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:flex-start;
+
+    align-items:center;
+
+    background:#f5f5f5;
+
+    overflow-y:auto;
+
+}
+
+.tm-page{
+
+    width:100%;
+
+    max-width:980px;
+
+    margin:0 auto;
+
+    padding:30px 0 80px;
+
+}
+
+.tm-top{
+
+    position:sticky;
+
+    top:0;
+
+    background:#f5f5f5;
+
+    padding:20px 0;
+
+    z-index:100;
+
+}
+
+.tm-title{
+
+    text-align:center;
+
+    font-size:52px;
+
+    color:#444;
+
+    margin:20px 0 30px;
+
+}
+
+.tm-footer{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin:50px 0 60px;
+
+}
+
+#ticketTable{
+
+    width:100%;
+
+}
