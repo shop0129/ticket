@@ -670,12 +670,20 @@ function renderTicketManager(){
     const table = document.getElementById("ticketTable");
 
     table.innerHTML = `
-    
-    <div class="ticket-row">
 
-        <div class="ticket-name">
-            2H 綠
-        </div>
+    <div class="tm-header">
+
+        <div>票種</div>
+        <div>票名</div>
+        <div>價格</div>
+        <div>時數</div>
+        <div>代幣</div>
+
+    </div>
+
+    <div class="tm-row">
+
+        <div>2H綠</div>
 
         <input
             id="tm-title-ticket2hGreen"
@@ -685,6 +693,14 @@ function renderTicketManager(){
             id="tm-price-ticket2hGreen"
             type="number"
             value="${ticketData.ticket2hGreen.price}">
+
+        <input
+            value="${ticketData.ticket2hGreen.hour}"
+            disabled>
+
+        <input
+            value="${ticketData.ticket2hGreen.token}"
+            disabled>
 
     </div>
 
