@@ -1369,13 +1369,7 @@ V3.8 卡片式票券管理
 
 #ticketManagerPage{
 
-    display:flex;
-
     flex-direction:column;
-
-    justify-content:flex-start;
-
-    align-items:center;
 
     background:#f5f5f5;
 
@@ -1434,6 +1428,10 @@ V3.8 卡片式票券管理
 #ticketTable{
 
     width:100%;
+
+    max-width:900px;
+
+    margin:0 auto;
 
 }
 .tm-field{
