@@ -498,6 +498,7 @@ progressText.innerHTML = "0%";
 if(percent > 100){
     percent = 100;
 }
+        
 
         progressFill.style.width=percent+"%";
 
