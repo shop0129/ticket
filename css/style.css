@@ -310,6 +310,8 @@ cursor:pointer;
 }
 .ticket-item{
 
+    width:300px;
+
     display:flex;
 
     flex-direction:column;
@@ -319,15 +321,11 @@ cursor:pointer;
 }
 .ticket-price{
 
-    margin-top:10px;
+    margin-top:12px;
 
-    font-size:34px;
+    height:48px;
 
-    font-weight:bold;
-
-    color:#ff5722;
-
-    text-align:center;
+    background:red;
 
 }
 .ticket-btn:hover{
