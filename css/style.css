@@ -308,7 +308,28 @@ cursor:pointer;
    box-shadow:0 10px 25px rgba(0,0,0,.18);
 
 }
+.ticket-item{
 
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+}
+.ticket-price{
+
+    margin-top:10px;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    color:#ff5722;
+
+    text-align:center;
+
+}
 .ticket-btn:hover{
 
     transform:scale(1.03);
