@@ -715,11 +715,26 @@ function renderTicketManager(){
 
         <div class="tm-card">
 
-            <div class="tm-card-title">
+            <div class="tm-card-header">
 
-                ${ticketNames[id]}
+    <div class="tm-card-title">
 
-            </div>
+        ${ticketNames[id]}
+
+    </div>
+
+    <label class="tm-enable">
+
+        <input
+            type="checkbox"
+            id="enable-${id}"
+            ${ticket.enable ? "checked" : ""}>
+
+        啟用
+
+    </label>
+
+</div>
 
             <div class="tm-field">
 
