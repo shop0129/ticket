@@ -458,6 +458,7 @@ document.addEventListener("touchstart", resetIdleTimer);
 // --------------------------
 
 showPage("homePage");
+updateTicketButtons();
 function startPrintAnimation(){
 
     const progressFill =
@@ -680,6 +681,30 @@ function openTicketManager(){
     showPage("ticketManagerPage");
 
 }
+function updateTicketButtons(){
+
+    document
+    .querySelectorAll(".ticket-btn,.ticket-btn-wide")
+    .forEach(btn=>{
+
+        const id = btn.dataset.id;
+
+        // 沒有 data-id 就跳過
+        if(!id) return;
+
+        if(ticketData[id] && ticketData[id].enable){
+
+            btn.style.display = "";
+
+        }else{
+
+            btn.style.display = "none";
+
+        }
+
+    });
+
+}
 function saveTicketManager(){
 
     for(const id in ticketData){
@@ -690,14 +715,13 @@ function saveTicketManager(){
     }
 
     localStorage.setItem(
+    "ticketData",
+    JSON.stringify(ticketData)
+);
 
-        "ticketData",
+updateTicketButtons();
 
-        JSON.stringify(ticketData)
-
-    );
-
-    alert("票券管理已儲存！");
+alert("票券管理已儲存！");
 
 }
 function renderTicketManager(){
