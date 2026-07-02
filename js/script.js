@@ -662,8 +662,13 @@ function saveTicketManager(){
         document.getElementById("title-"+id).value;
 
         // 價格
-        ticketData[id].price =
-        Number(document.getElementById("price-"+id).value);
+        const priceInput = document.getElementById("price-"+id);
+
+if(priceInput && priceInput.value !== ""){
+
+    ticketData[id].price = Number(priceInput.value);
+
+}
 
         // 時數
         const hour =
@@ -761,7 +766,7 @@ function renderTicketManager(){
     <input
         id="price-${id}"
         type="number"
-        value="${ticket.price}"
+        value="${ticket.price}">
 
 </div>
 
