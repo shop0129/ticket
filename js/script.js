@@ -732,18 +732,16 @@ function renderTicketManager(){
 
             </div>
 
-            <div class="tm-grid">
+           <div class="tm-field">
 
-                <div class="tm-field">
+    <label>價格</label>
 
-                    <label>價格</label>
+    <input
+        id="price-${id}"
+        type="number"
+        value="${ticket.price ?? ""}">
 
-                    <input
-                        id="price-${id}"
-                        type="number"
-                        value="${ticket.price}">
-
-                </div>
+</div>
 
                 <div class="tm-field">
 
