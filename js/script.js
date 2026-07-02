@@ -12,7 +12,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         token:10,
         toy:"green",
         reward:"token,band,toy",
-
+enable:true,
     info:"🪙 贈送代幣：10 枚<br>🎁 贈送玩具：綠標玩具"
     },
 
@@ -23,7 +23,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         token:15,
         toy:"red",
         reward:"token,band,toy",
-
+enable:true,
     info:"🪙 贈送代幣：15 枚<br>🎁 贈送玩具：紅標玩具"
     },
 
@@ -34,7 +34,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         token:15,
         toy:"green",
         reward:"token,band,toy",
-
+enable:true,
     info:"🪙 贈送代幣：15 枚<br>🎁 贈送玩具：綠標玩具"
     },
 
@@ -45,7 +45,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
         token:20,
         toy:"red",
         reward:"token,band,toy",
-
+enable:true,
     info:"🪙 贈送代幣：20 枚<br>🎁 贈送玩具：紅標玩具"
     },
 
@@ -55,7 +55,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     token:15,
     toy:"red",
     reward:"token,band,toy",
-
+enable:true,
     info:"🕙 入場時間：14:00~15:30<br>🎮 可暢玩至：18:00<br>🪙 贈送代幣：15 枚<br>🎁 贈送玩具：紅標玩具"
 },
 
@@ -65,7 +65,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     token:20,
     toy:"red",
     reward:"token,band,toy",
-
+enable:true,
     info:"🕙 入場時間：10:00~11:30<br>🎮 可暢玩至：16:00<br>🪙 贈送代幣：20 枚<br>🎁 贈送玩具：紅標玩具"
 },
 
@@ -73,6 +73,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"幼幼票",
     price:100,
     reward:"band",
+        enable:true,
     info:"✓ 限未滿12個月<br>✓ 免費陪同1位家長<br>不送玩具、不送代幣"
 },
 
@@ -80,6 +81,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"陪同票",
     price:80,
     reward:"band",
+        enable:true,
     info:"✓ 限陪同家長使用<br>✓ 必須有兒童同行"
 },
 
@@ -87,6 +89,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"10枚代幣",
     price:100,
     reward:"token10",
+        enable:true,
     info:"兌換10枚遊戲代幣"
 },
 
@@ -94,6 +97,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"25枚代幣",
     price:200,
     reward:"token25",
+        enable:true,
     info:"兌換25枚遊戲代幣"
 },
 
@@ -101,6 +105,7 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     title:"行動電源",
     price:50,
     reward:"powerbank",
+        enable:true,
     info:"✓ 限本館內借用<br>✓ 離場前請歸還<br>〔需抵押證件〕"
 },
 
@@ -113,6 +118,17 @@ if (!ticketData.early.token) {
 if (!ticketData.summer.token) {
     ticketData.summer.token = 20;
     ticketData.summer.toy = "red";
+}
+// ===== 補上 enable 預設值 =====
+
+for(const id in ticketData){
+
+    if(ticketData[id].enable === undefined){
+
+        ticketData[id].enable = true;
+
+    }
+
 }
 
 localStorage.setItem(
