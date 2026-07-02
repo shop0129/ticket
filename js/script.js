@@ -128,7 +128,7 @@ function playClick(){
 
     click.currentTime = 0;
 
-    click.play().catch(()=>{});
+    click.play().catch(function(){});
 
 }
 document
@@ -518,7 +518,11 @@ successTip.innerHTML =
 sound.pause();
 sound.currentTime = 0;
 
-sound.play().catch(err => console.log(err));
+sound.play().catch(function(err){
+
+    console.log(err);
+
+});
 printStatus.classList.add("print-finish");
     successTitle.style.display="block";
 
@@ -731,7 +735,7 @@ function renderTicketManager(){
                     <input
                         id="hour-${id}"
                         type="number"
-                        value="${ticket.hour ?? ""}">
+                        value="${ticket.hour || ""}">
 
                 </div>
 
@@ -742,7 +746,7 @@ function renderTicketManager(){
                     <input
                         id="token-${id}"
                         type="number"
-                        value="${ticket.token ?? ""}">
+                        value="${ticket.token || ""}">
 
                 </div>
 
