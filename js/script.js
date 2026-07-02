@@ -682,7 +682,22 @@ function openTicketManager(){
 }
 function saveTicketManager(){
 
-    alert("票券管理開發中");
+    for(const id in ticketData){
+
+        ticketData[id].enable =
+        document.getElementById("enable-"+id).checked;
+
+    }
+
+    localStorage.setItem(
+
+        "ticketData",
+
+        JSON.stringify(ticketData)
+
+    );
+
+    alert("票券管理已儲存！");
 
 }
 function renderTicketManager(){
