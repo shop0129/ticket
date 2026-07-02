@@ -459,6 +459,7 @@ document.addEventListener("touchstart", resetIdleTimer);
 
 showPage("homePage");
 updateTicketButtons();
+updateTicketPrices();
 function startPrintAnimation(){
 
     const progressFill =
@@ -629,6 +630,25 @@ function updateTicketButtons(){
     });
 
 }
+function updateTicketPrices(){
+
+    document
+    .querySelectorAll(".ticket-btn")
+    .forEach(btn=>{
+
+        const id = btn.dataset.id;
+
+        const price =
+        document.getElementById("price-"+id);
+
+        if(!price) return;
+
+        price.innerHTML =
+        "NT$" + ticketData[id].price;
+
+    });
+
+}
 function saveTicketManager(){
 
     for(const id in ticketData){
@@ -667,9 +687,10 @@ function saveTicketManager(){
     );
 
     // 更新前台
-    updateTicketButtons();
+   updateTicketButtons();
+updateTicketPrices();
 
-    alert("票券管理已儲存！");
+alert("票券管理已儲存！");
 
 }
 function renderTicketManager(){
@@ -740,7 +761,7 @@ function renderTicketManager(){
     <input
         id="price-${id}"
         type="number"
-        value="${ticket.price ?? ""}">
+        value="${ticket.price}"
 
 </div>
 
