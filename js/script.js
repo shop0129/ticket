@@ -709,19 +709,43 @@ function saveTicketManager(){
 
     for(const id in ticketData){
 
+        // 上架
         ticketData[id].enable =
         document.getElementById("enable-"+id).checked;
+
+        // 票名
+        ticketData[id].title =
+        document.getElementById("title-"+id).value;
+
+        // 價格
+        ticketData[id].price =
+        Number(document.getElementById("price-"+id).value);
+
+        // 時數
+        const hour =
+        document.getElementById("hour-"+id).value;
+
+        ticketData[id].hour =
+        hour === "" ? null : Number(hour);
+
+        // 代幣
+        const token =
+        document.getElementById("token-"+id).value;
+
+        ticketData[id].token =
+        token === "" ? null : Number(token);
 
     }
 
     localStorage.setItem(
-    "ticketData",
-    JSON.stringify(ticketData)
-);
+        "ticketData",
+        JSON.stringify(ticketData)
+    );
 
-updateTicketButtons();
+    // 更新前台
+    updateTicketButtons();
 
-alert("票券管理已儲存！");
+    alert("票券管理已儲存！");
 
 }
 function renderTicketManager(){
