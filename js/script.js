@@ -662,13 +662,12 @@ function saveTicketManager(){
         document.getElementById("title-"+id).value;
 
         // 價格
-        const priceInput = document.getElementById("price-"+id);
-
+        // 價格
 const priceInput =
 document.getElementById("price-"+id);
 
 ticketData[id].price =
-Number(priceInput.value || 0);
+Number(priceInput.value);
 
         // 時數
         const hour =
