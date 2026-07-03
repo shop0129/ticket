@@ -130,7 +130,7 @@ for(const id in ticketData){
     }
 
 }
-
+console.log(JSON.stringify(ticketData, null, 2));
 localStorage.setItem(
     "ticketData",
     JSON.stringify(ticketData)
@@ -668,12 +668,7 @@ document.getElementById("price-"+id);
 ticketData[id].price =
 Number(priceInput.value || 0);
 
-        // 時數
-        const hour =
-        document.getElementById("hour-"+id).value;
-
-       ticketData[id].hour =
-hour === "" ? "" : Number(hour);
+      
 
         // 代幣
         const token =
