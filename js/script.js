@@ -664,11 +664,11 @@ function saveTicketManager(){
         // 價格
         const priceInput = document.getElementById("price-"+id);
 
-if(priceInput && priceInput.value !== ""){
+const priceInput =
+document.getElementById("price-"+id);
 
-    ticketData[id].price = Number(priceInput.value);
-
-}
+ticketData[id].price =
+Number(priceInput.value || 0);
 
         // 時數
         const hour =
