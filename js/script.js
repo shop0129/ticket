@@ -672,15 +672,15 @@ Number(priceInput.value || 0);
         const hour =
         document.getElementById("hour-"+id).value;
 
-        ticketData[id].hour =
-        hour === "" ? null : Number(hour);
+       ticketData[id].hour =
+hour === "" ? "" : Number(hour);
 
         // 代幣
         const token =
         document.getElementById("token-"+id).value;
 
         ticketData[id].token =
-        token === "" ? null : Number(token);
+token === "" ? "" : Number(token);
 
     }
 
