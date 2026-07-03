@@ -1,6 +1,6 @@
 // =========================
 // 票價設定
-// ==========================
+// =========================
 
 let ticketData =
 JSON.parse(localStorage.getItem("ticketData")) || {
