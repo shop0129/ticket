@@ -786,7 +786,7 @@ function renderTicketManager(){
     <input
         id="price-${id}"
         type="number"
-        value="${ticket.price}">
+        value="${Number.isFinite(ticket.price) ? ticket.price : 0}">
 
 </div>
 
@@ -797,7 +797,7 @@ function renderTicketManager(){
                     <input
                         id="hour-${id}"
                         type="number"
-                        value="${ticket.hour || ""}">
+                        value="${Number.isFinite(ticket.hour) ? ticket.hour : 0}">
 
                 </div>
 
@@ -808,7 +808,7 @@ function renderTicketManager(){
                     <input
                         id="token-${id}"
                         type="number"
-                        value="${ticket.token || ""}">
+                        value="${Number.isFinite(ticket.token) ? ticket.token : 0}">
 
                 </div>
 
