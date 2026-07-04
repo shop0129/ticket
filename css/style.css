@@ -323,25 +323,23 @@ cursor:pointer;
 
     margin-top:8px;
 
-    min-height:50px;
+    min-height:55px;
 
     background:transparent;
 
     color:#fff;
 
-    font-size:40px;
+    font-size:48px;
 
     font-weight:900;
 
     text-align:center;
 
-    line-height:50px;
-
-    letter-spacing:1px;
+    line-height:55px;
 
     text-shadow:
-        0 3px 6px rgba(0,0,0,.8),
-        0 0 10px rgba(0,0,0,.5);
+        3px 3px 0 #000,
+        0 0 8px rgba(0,0,0,.6);
 
 }
 
