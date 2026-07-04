@@ -675,7 +675,7 @@ function saveTicketManager(){
 
         // 價格
         const price =
-        document.getElementById("price-"+id);
+        document.getElementById("priceInput-"+id);
 
         if(price){
 
@@ -784,7 +784,7 @@ function renderTicketManager(){
     <label>價格</label>
 
     <input
-        id="price-${id}"
+        id="priceInput-${id}"
         type="number"
         value="${Number.isFinite(ticket.price) ? ticket.price : 0}">
 
