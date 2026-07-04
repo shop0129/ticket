@@ -653,29 +653,57 @@ function saveTicketManager(){
 
     for(const id in ticketData){
 
-        // 上架
-        ticketData[id].enable =
-        document.getElementById("enable-"+id).checked;
+        // 啟用
+        const enable =
+        document.getElementById("enable-"+id);
+
+        if(enable){
+
+            ticketData[id].enable = enable.checked;
+
+        }
 
         // 票名
-        ticketData[id].title =
-        document.getElementById("title-"+id).value;
+        const title =
+        document.getElementById("title-"+id);
+
+        if(title){
+
+            ticketData[id].title = title.value.trim();
+
+        }
 
         // 價格
-const priceInput =
-document.getElementById("price-"+id);
+        const price =
+        document.getElementById("price-"+id);
 
-ticketData[id].price =
-Number(priceInput.value || 0);
+        if(price){
 
-      
+            ticketData[id].price =
+            parseInt(price.value,10) || 0;
+
+        }
 
         // 代幣
         const token =
-        document.getElementById("token-"+id).value;
+        document.getElementById("token-"+id);
 
-        ticketData[id].token =
-token === "" ? "" : Number(token);
+        if(token){
+
+            ticketData[id].token =
+            parseInt(token.value,10) || 0;
+
+        }
+
+        // 玩具（先預留）
+        const toy =
+        document.getElementById("toy-"+id);
+
+        if(toy){
+
+            ticketData[id].toy = toy.value;
+
+        }
 
     }
 
@@ -684,11 +712,10 @@ token === "" ? "" : Number(token);
         JSON.stringify(ticketData)
     );
 
-    // 更新前台
-   updateTicketButtons();
-updateTicketPrices();
+    updateTicketButtons();
+    updateTicketPrices();
 
-alert("票券管理已儲存！");
+    alert("票券管理已儲存！");
 
 }
 function renderTicketManager(){
