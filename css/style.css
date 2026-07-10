@@ -304,6 +304,13 @@ cursor:pointer;
    box-shadow:0 10px 25px rgba(0,0,0,.18);
 
 }
+.ticket-item .ticket-btn{
+
+    width:300px;
+
+    display:block;
+
+}
 .ticket-item{
 
     width:300px;
@@ -313,6 +320,10 @@ cursor:pointer;
     flex-direction:column;
 
     align-items:center;
+
+    justify-content:flex-start;
+
+    flex-shrink:0;
 
 }
 .ticket-price{
@@ -596,19 +607,23 @@ cursor:pointer;
 
    .ticket-grid{
 
-    width:700px;
+    width:660px;
 
-    margin:25px auto;
+    margin:30px auto;
 
     display:grid;
 
-    grid-template-columns:repeat(2,320px);
+    grid-template-columns:300px 300px;
 
     justify-content:center;
 
+    justify-items:center;
+
+    align-items:start;
+
     column-gap:40px;
 
-    row-gap:40px;
+    row-gap:45px;
 
 }
 
