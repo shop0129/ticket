@@ -16,15 +16,17 @@ JSON.parse(localStorage.getItem("ticketData")) || {
 },
 
 
-        title:"2H 小怪獸 Plus",
-        price:300,
-        hour:2,
-        token:15,
-        toy:"red",
-        reward:"token,band,toy",
-enable:true
-    
-    },
+       },
+
+ticket2hRed:{
+    title:"2H 小怪獸 Plus",
+    price:300,
+    hour:2,
+    token:15,
+    toy:"red",
+    reward:"token,band,toy",
+    enable:true
+},
 
     ticket3hGreen:{
         title:"3H 大怪獸",
