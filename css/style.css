@@ -255,19 +255,15 @@ cursor:pointer;
 
 .ticket-grid{
 
-    width:720px;
+    column-gap:35px;
 
-    margin:30px auto;
+    row-gap:60px;
 
-    display:grid;
+}
 
-    grid-template-columns:repeat(2,300px);
+.category-title{
 
-    justify-content:center;
-
-    column-gap:60px;
-
-    row-gap:30px;
+    margin:25px auto 15px;
 
 }
 
@@ -618,7 +614,7 @@ cursor:pointer;
 
     column-gap:40px;
 
-    row-gap:110px;
+    row-gap:60px;
 
 }
 
