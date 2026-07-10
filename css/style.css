@@ -267,7 +267,7 @@ cursor:pointer;
 
     column-gap:60px;
 
-    row-gap:35px;
+    row-gap:30px;
 
 }
 
@@ -326,7 +326,7 @@ cursor:pointer;
 
     transform:translateX(-50%);
 
-    bottom:0px;
+    bottom:-5px;
 
     width:100%;
 
