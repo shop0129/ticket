@@ -313,28 +313,24 @@ cursor:pointer;
 }
 .ticket-item{
 
+    position:relative;
+
     width:300px;
-
-    display:flex;
-
-    flex-direction:column;
-
-    align-items:center;
-
-    justify-content:flex-start;
-
-    flex-shrink:0;
 
 }
 .ticket-price{
 
-    width:300px;
+    position:absolute;
 
-    margin-top:6px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    bottom:-48px;
+
+    width:100%;
 
     text-align:center;
-
-    background:transparent;
 
     color:#fff;
 
@@ -342,7 +338,7 @@ cursor:pointer;
 
     font-weight:900;
 
-    font-family:"Arial Black","Microsoft JhengHei";
+    font-family:"Arial Black","Microsoft JhengHei",sans-serif;
 
     text-shadow:
         -2px -2px 0 #000,
@@ -350,7 +346,6 @@ cursor:pointer;
         -2px  2px 0 #000,
          2px  2px 0 #000,
          0 4px 8px rgba(0,0,0,.5);
-
 }
 
 
@@ -623,7 +618,7 @@ cursor:pointer;
 
     column-gap:40px;
 
-    row-gap:45px;
+    row-gap:90px;
 
 }
 
