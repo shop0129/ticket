@@ -292,9 +292,35 @@ detailTitle.innerHTML = data.title;
 detailPrice.innerHTML = "$" + data.price;
 
 // 說明
+let info = "";
+
+if(data.hour){
+
+    info += "⏰ 遊玩時間：" + data.hour + " 小時<br>";
+
+}
+
+if(data.token){
+
+    info += "🪙 贈送代幣：" + data.token + " 枚<br>";
+
+}
+
+if(data.toy){
+
+    let toyName = "";
+
+    if(data.toy=="green") toyName="綠標玩具";
+    else if(data.toy=="red") toyName="紅標玩具";
+    else toyName=data.toy;
+
+    info += "🎁 贈送玩具：" + toyName + "<br>";
+
+}
+
 detailInfo.innerHTML =
 "<div style='display:inline-block;text-align:left;line-height:1.9;'>"
-+ data.info +
++ info +
 "</div>";
 
             ticket.classList.remove("ticket-selected");
