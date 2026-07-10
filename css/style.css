@@ -329,17 +329,24 @@ cursor:pointer;
 
     color:#fff;
 
-    font-size:40px;
+    font-size:48px;
 
     font-weight:900;
+
+    font-family:"Arial Black","Microsoft JhengHei",sans-serif;
 
     text-align:center;
 
     line-height:55px;
 
+    letter-spacing:1px;
+
     text-shadow:
-        3px 3px 0 #000,
-        0 0 8px rgba(0,0,0,.6);
+        -2px -2px 0 #000,
+         2px -2px 0 #000,
+        -2px  2px 0 #000,
+         2px  2px 0 #000,
+         0px  4px 8px rgba(0,0,0,.6);
 
 }
 
