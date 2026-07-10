@@ -291,20 +291,9 @@ detailTitle.innerHTML = data.title;
 // 價格
 detailPrice.innerHTML = "$" + data.price;
 
+
 // 說明
 let info = "";
-
-if(data.hour){
-
-    info += "⏰ 遊玩時間：" + data.hour + " 小時<br>";
-
-}
-
-if(data.token){
-
-    info += "🪙 贈送代幣：" + data.token + " 枚<br>";
-
-}let info = "";
 
 // 一般票
 if(
@@ -350,7 +339,7 @@ else if(id=="summer"){
 
 }
 
-// 其它票種維持原本固定說明
+// 其他票種
 else{
 
     info = ticketData[id].info;
@@ -361,7 +350,6 @@ detailInfo.innerHTML =
 "<div style='display:inline-block;text-align:left;line-height:1.9;'>"
 + info +
 "</div>";
-
 if(data.toy){
 
     let toyName = "";
