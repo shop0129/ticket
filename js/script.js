@@ -614,16 +614,33 @@ function updateTicketButtons(){
 
         const id = btn.dataset.id;
 
-        // 沒有 data-id 就跳過
         if(!id) return;
+
+        const item = btn.closest(".ticket-item");
 
         if(ticketData[id] && ticketData[id].enable){
 
-            btn.style.display = "";
+            if(item){
+
+                item.style.display = "";
+
+            }else{
+
+                btn.style.display = "";
+
+            }
 
         }else{
 
-            btn.style.display = "none";
+            if(item){
+
+                item.style.display = "none";
+
+            }else{
+
+                btn.style.display = "none";
+
+            }
 
         }
 
