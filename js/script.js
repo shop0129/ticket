@@ -6,25 +6,24 @@ let ticketData =
 JSON.parse(localStorage.getItem("ticketData")) || {
 
     ticket2hGreen:{
-        title:"2H 小怪獸",
-        price:250,
-        hour:2,
-        token:10,
-        toy:"green",
-        reward:"token,band,toy",
-enable:true,
-    info:"🪙 贈送代幣：10 枚<br>🎁 贈送玩具：綠標玩具"
-    },
+    title:"2H 小怪獸",
+    price:250,
+    hour:2,
+    token:10,
+    toy:"green",
+    reward:"token,band,toy",
+    enable:true
+},
 
-    ticket2hRed:{
+
         title:"2H 小怪獸 Plus",
         price:300,
         hour:2,
         token:15,
         toy:"red",
         reward:"token,band,toy",
-enable:true,
-    info:"🪙 贈送代幣：15 枚<br>🎁 贈送玩具：紅標玩具"
+enable:true
+    
     },
 
     ticket3hGreen:{
@@ -34,8 +33,8 @@ enable:true,
         token:15,
         toy:"green",
         reward:"token,band,toy",
-enable:true,
-    info:"🪙 贈送代幣：15 枚<br>🎁 贈送玩具：綠標玩具"
+enable:true
+   
     },
 
     ticket3hRed:{
@@ -45,8 +44,8 @@ enable:true,
         token:20,
         toy:"red",
         reward:"token,band,toy",
-enable:true,
-    info:"🪙 贈送代幣：20 枚<br>🎁 贈送玩具：紅標玩具"
+enable:true
+   
     },
 
    early:{
@@ -55,8 +54,8 @@ enable:true,
     token:15,
     toy:"red",
     reward:"token,band,toy",
-enable:true,
-    info:"🕙 入場時間：14:00~15:30<br>🎮 可暢玩至：18:00<br>🪙 贈送代幣：15 枚<br>🎁 贈送玩具：紅標玩具"
+enable:true
+   
 },
 
     summer:{
@@ -65,48 +64,42 @@ enable:true,
     token:20,
     toy:"red",
     reward:"token,band,toy",
-enable:true,
-    info:"🕙 入場時間：10:00~11:30<br>🎮 可暢玩至：16:00<br>🪙 贈送代幣：20 枚<br>🎁 贈送玩具：紅標玩具"
+enable:true
 },
 
     baby:{
     title:"幼幼票",
     price:100,
     reward:"band",
-        enable:true,
-    info:"✓ 限未滿12個月<br>✓ 免費陪同1位家長<br>不送玩具、不送代幣"
+        enable:true
 },
 
     parent:{
     title:"陪同票",
     price:80,
     reward:"band",
-        enable:true,
-    info:"✓ 限陪同家長使用<br>✓ 必須有兒童同行"
+        enable:true
 },
 
     token10:{
     title:"10枚代幣",
     price:100,
     reward:"token10",
-        enable:true,
-    info:"兌換10枚遊戲代幣"
+        enable:true
 },
 
     token25:{
     title:"25枚代幣",
     price:200,
     reward:"token25",
-        enable:true,
-    info:"兌換25枚遊戲代幣"
+        enable:true
 },
 
     powerbank:{
     title:"行動電源",
     price:50,
     reward:"powerbank",
-        enable:true,
-    info:"✓ 限本館內借用<br>✓ 離場前請歸還<br>〔需抵押證件〕"
+        enable:true
 },
 
 };
