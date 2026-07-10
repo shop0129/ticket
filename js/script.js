@@ -13,8 +13,6 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     toy:"green",
     reward:"token,band,toy",
     enable:true
-},
-
 
        },
 
