@@ -277,17 +277,13 @@ cursor:pointer;
 
 .ticket-single{
 
-    width:700px;
-
-    display:grid;
-
-    grid-template-columns:repeat(2,320px);
-
-    justify-content:center;
-
-    gap:35px;
+    width:320px;
 
     margin:30px auto;
+
+    display:flex;
+
+    justify-content:center;
 
 }
 /* ==========================================
@@ -321,32 +317,28 @@ cursor:pointer;
 }
 .ticket-price{
 
-    margin-top:8px;
+    width:300px;
 
-    min-height:55px;
+    margin-top:6px;
+
+    text-align:center;
 
     background:transparent;
 
     color:#fff;
 
-    font-size:48px;
+    font-size:46px;
 
     font-weight:900;
 
-    font-family:"Arial Black","Microsoft JhengHei",sans-serif;
-
-    text-align:center;
-
-    line-height:55px;
-
-    letter-spacing:1px;
+    font-family:"Arial Black","Microsoft JhengHei";
 
     text-shadow:
         -2px -2px 0 #000,
          2px -2px 0 #000,
         -2px  2px 0 #000,
          2px  2px 0 #000,
-         0px  4px 8px rgba(0,0,0,.6);
+         0 4px 8px rgba(0,0,0,.5);
 
 }
 
