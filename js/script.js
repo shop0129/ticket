@@ -288,77 +288,99 @@ detailPrice.innerHTML = "$" + data.price;
 // 說明
 let info = "";
 
-// 一般票
-if(
-id=="ticket2hGreen" ||
-id=="ticket2hRed" ||
-id=="ticket3hGreen" ||
-id=="ticket3hRed"
-){
+switch(id){
 
-    info += "🪙 贈送代幣：" + ticketData[id].token + " 枚<br>";
+    // ===== 一般票 =====
+    case "ticket2hGreen":
+    case "ticket2hRed":
+    case "ticket3hGreen":
+    case "ticket3hRed":
 
-    if(ticketData[id].toy=="green"){
+        info += `🪙 贈送代幣：${data.token} 枚<br>`;
 
-        info += "🎁 贈送玩具：綠標玩具";
+        if(data.toy=="green"){
 
-    }else{
+            info += "🎁 贈送玩具：綠標玩具";
 
-        info += "🎁 贈送玩具：紅標玩具";
+        }else if(data.toy=="red"){
 
-    }
+            info += "🎁 贈送玩具：紅標玩具";
 
-}
+        }
 
-// 平日早鳥
-else if(id=="early"){
+        break;
 
-    info +=
-    "🕙 入場時間：14:00~15:30<br>" +
-    "🎮 可暢玩至：18:00<br>" +
-    "🪙 贈送代幣：" + ticketData[id].token + " 枚<br>" +
-    "🎁 贈送玩具：紅標玩具";
+    // ===== 平日早鳥 =====
+    case "early":
 
-}
+        info += `
+🕙 入場時間：14:00~15:30<br>
+🎮 可暢玩至：18:00<br>
+🪙 贈送代幣：${data.token} 枚<br>
+🎁 贈送玩具：紅標玩具`;
 
-// 寒暑假
-else if(id=="summer"){
+        break;
 
-    info +=
-    "🕙 入場時間：10:00~11:30<br>" +
-    "🎮 可暢玩至：16:00<br>" +
-    "🪙 贈送代幣：" + ticketData[id].token + " 枚<br>" +
-    "🎁 贈送玩具：紅標玩具";
+    // ===== 寒暑假 =====
+    case "summer":
 
-}
+        info += `
+🕙 入場時間：10:00~11:30<br>
+🎮 可暢玩至：16:00<br>
+🪙 贈送代幣：${data.token} 枚<br>
+🎁 贈送玩具：紅標玩具`;
 
-// 其他票種
-else{
+        break;
 
-    info = ticketData[id].info;
+    // ===== 幼幼票 =====
+    case "baby":
+
+        info =
+        "✓ 限未滿12個月<br>" +
+        "✓ 免費陪同1位家長<br>" +
+        "不送玩具、不送代幣";
+
+        break;
+
+    // ===== 陪同票 =====
+    case "parent":
+
+        info =
+        "✓ 限陪同家長使用<br>" +
+        "✓ 必須有兒童同行";
+
+        break;
+
+    // ===== 10枚代幣 =====
+    case "token10":
+
+        info = "兌換10枚遊戲代幣";
+
+        break;
+
+    // ===== 25枚代幣 =====
+    case "token25":
+
+        info = "兌換25枚遊戲代幣";
+
+        break;
+
+    // ===== 行動電源 =====
+    case "powerbank":
+
+        info =
+        "✓ 限本館內借用<br>" +
+        "✓ 離場前請歸還<br>" +
+        "〔需抵押證件〕";
+
+        break;
 
 }
 
 detailInfo.innerHTML =
-"<div style='display:inline-block;text-align:left;line-height:1.9;'>"
-+ info +
-"</div>";
-if(data.toy){
-
-    let toyName = "";
-
-    if(data.toy=="green") toyName="綠標玩具";
-    else if(data.toy=="red") toyName="紅標玩具";
-    else toyName=data.toy;
-
-    info += "🎁 贈送玩具：" + toyName + "<br>";
-
-}
-
-detailInfo.innerHTML =
-"<div style='display:inline-block;text-align:left;line-height:1.9;'>"
-+ info +
-"</div>";
+`<div style="display:inline-block;text-align:left;line-height:1.9;">
+${info}
+</div>`;
 
             ticket.classList.remove("ticket-selected");
 
