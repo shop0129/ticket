@@ -274,7 +274,7 @@ playClick();
           const id = ticket.dataset.id;
 
 const data = ticketData[id];
-
+console.log("確認頁 data =", data);
 selectedTicket = id;
 
 selectedReward = data.reward;
@@ -304,7 +304,63 @@ if(data.token){
 
     info += "🪙 贈送代幣：" + data.token + " 枚<br>";
 
+}let info = "";
+
+// 一般票
+if(
+id=="ticket2hGreen" ||
+id=="ticket2hRed" ||
+id=="ticket3hGreen" ||
+id=="ticket3hRed"
+){
+
+    info += "🪙 贈送代幣：" + ticketData[id].token + " 枚<br>";
+
+    if(ticketData[id].toy=="green"){
+
+        info += "🎁 贈送玩具：綠標玩具";
+
+    }else{
+
+        info += "🎁 贈送玩具：紅標玩具";
+
+    }
+
 }
+
+// 平日早鳥
+else if(id=="early"){
+
+    info +=
+    "🕙 入場時間：14:00~15:30<br>" +
+    "🎮 可暢玩至：18:00<br>" +
+    "🪙 贈送代幣：" + ticketData[id].token + " 枚<br>" +
+    "🎁 贈送玩具：紅標玩具";
+
+}
+
+// 寒暑假
+else if(id=="summer"){
+
+    info +=
+    "🕙 入場時間：10:00~11:30<br>" +
+    "🎮 可暢玩至：16:00<br>" +
+    "🪙 贈送代幣：" + ticketData[id].token + " 枚<br>" +
+    "🎁 贈送玩具：紅標玩具";
+
+}
+
+// 其它票種維持原本固定說明
+else{
+
+    info = ticketData[id].info;
+
+}
+
+detailInfo.innerHTML =
+"<div style='display:inline-block;text-align:left;line-height:1.9;'>"
++ info +
+"</div>";
 
 if(data.toy){
 
@@ -726,6 +782,16 @@ function saveTicketManager(){
             parseInt(price.value,10) || 0;
 
         }
+        // 時數
+const hour =
+document.getElementById("hour-"+id);
+
+if(hour){
+
+    ticketData[id].hour =
+    parseInt(hour.value,10) || 0;
+
+}
 
         // 代幣
         const token =
@@ -747,6 +813,7 @@ function saveTicketManager(){
             ticketData[id].toy = toy.value;
 
         }
+        
 
     }
 
