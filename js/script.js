@@ -938,9 +938,9 @@ function renderTicketManager(){
     }
 
 }
-// ==========================
-// 加入購物車
-// ==========================
+/* =========================================
+   V3.9 購物車
+========================================= */
 
 function addCurrentTicketToCart(){
 
@@ -950,70 +950,68 @@ function addCurrentTicketToCart(){
 
     cart.push({
 
-        id: selectedTicket,
+        id:selectedTicket,
 
-        title: ticket.title,
+        title:ticket.title,
 
-        price: ticket.price,
+        price:ticket.price,
 
-        token: ticket.token || 0,
+        token:ticket.token || 0,
 
-        toy: ticket.toy || "none",
+        toy:ticket.toy || "none",
 
-        reward: ticket.reward || ""
+        reward:ticket.reward || ""
 
     });
 
-    console.log(cart);
-
     updateCartPanel();
 
-alert("✅ 已加入購物車");
-
-showPage("ticketPage");
+    showPage("ticketPage");
 
 }
+
+
 function updateCartPanel(){
 
-    const count = document.getElementById("cartCount");
-    const amount = document.getElementById("cartAmount");
-    const items = document.getElementById("cartItems");
+    const count=document.getElementById("cartCount");
+    const items=document.getElementById("cartItems");
+    const amount=document.getElementById("cartAmount");
 
-    let total = 0;
+    let total=0;
 
-let html = "";
+    const summary={};
 
-const summary = {};
+    cart.forEach(ticket=>{
 
-cart.forEach(item=>{
+        total+=ticket.price;
 
-    total += item.price;
+        if(!summary[ticket.id]){
 
-    if(!summary[item.id]){
+            summary[ticket.id]={
 
-        summary[item.id] = {
+                title:ticket.title,
 
-            title:item.title,
+                qty:0,
 
-            qty:0,
+                amount:0
 
-            amount:0
+            };
 
-        };
+        }
 
-    }
+        summary[ticket.id].qty++;
 
-    summary[item.id].qty++;
+        summary[ticket.id].amount+=ticket.price;
 
-    summary[item.id].amount += item.price;
+    });
 
-});
+    let html="";
 
-for(const id in summary){
+    for(const id in summary){
 
-    const item = summary[id];
+        const item=summary[id];
 
-   html += `
+        html+=`
 
 <div class="cartRow">
 
@@ -1040,9 +1038,7 @@ for(const id in summary){
             <button
                 class="qtyBtn"
                 onclick="changeQty('${id}',-1)">
-
                 −
-
             </button>
 
             <div class="qtyNumber">
@@ -1054,20 +1050,19 @@ for(const id in summary){
             <button
                 class="qtyBtn"
                 onclick="changeQty('${id}',1)">
-
                 +
 
             </button>
 
         </div>
 
-       <button
-class="deleteBtn"
-onclick="removeCartItem('${id}')">
+        <button
+            class="deleteBtn"
+            onclick="removeCartItem('${id}')">
 
-✕
+            ✕
 
-</button>
+        </button>
 
     </div>
 
@@ -1075,12 +1070,14 @@ onclick="removeCartItem('${id}')">
 
 `;
 
-}
+    }
 
-   count.innerHTML =
-`🛒 購物車（共 ${cart.length} 張）`;
+    count.innerHTML=
+    `🛒 購物車（共 ${cart.length} 張）`;
 
-amount.innerHTML = `
+    items.innerHTML=html;
+
+    amount.innerHTML=`
 
 <div class="cartSummary">
 
@@ -1100,10 +1097,10 @@ amount.innerHTML = `
 
 `;
 
-items.innerHTML = html;
-
 }
-function changeQty(id, step){
+
+
+function changeQty(id,step){
 
     if(step>0){
 
@@ -1140,9 +1137,11 @@ function changeQty(id, step){
     updateCartPanel();
 
 }
+
+
 function removeCartItem(id){
 
-    cart = cart.filter(item=>item.id!==id);
+    cart=cart.filter(x=>x.id!==id);
 
     updateCartPanel();
 
