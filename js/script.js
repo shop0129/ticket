@@ -1146,3 +1146,36 @@ function removeCartItem(id){
     updateCartPanel();
 
 }
+// =========================================
+// V3.9.9 購物車付款
+// =========================================
+
+const checkoutBtn = document.getElementById("checkoutBtn");
+const paymentArea = document.getElementById("paymentArea");
+const cartLineBtn = document.getElementById("cartLineBtn");
+const cartCashBtn = document.getElementById("cartCashBtn");
+const cartBackBtn = document.getElementById("cartBackBtn");
+
+checkoutBtn.addEventListener("click",()=>{
+
+    if(cart.length===0){
+
+        alert("請先加入票券！");
+
+        return;
+
+    }
+
+    checkoutBtn.style.display="none";
+
+    paymentArea.style.display="flex";
+
+});
+
+cartBackBtn.addEventListener("click",()=>{
+
+    paymentArea.style.display="none";
+
+    checkoutBtn.style.display="block";
+
+});
