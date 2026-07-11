@@ -1198,3 +1198,22 @@ cartBackBtn.addEventListener("click",()=>{
     checkoutBtn.style.display="block";
 
 });
+// =========================
+// 購物車付款
+// =========================
+
+cartLineBtn.addEventListener("click",()=>{
+
+    playClick();
+
+    paymentSuccess();
+
+});
+
+cartCashBtn.addEventListener("click",()=>{
+
+    playClick();
+
+    paymentSuccess();
+
+});
