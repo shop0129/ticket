@@ -359,6 +359,21 @@ function playClick(){
     click.play().catch(function(){});
 
 }
+// =========================================
+// 共用付款按鈕
+// =========================================
+
+function bindPaymentButton(button, paymentType){
+
+    button.addEventListener("click",()=>{
+
+        playClick();
+
+        paymentSuccess(paymentType);
+
+    });
+
+}
 document
 .getElementById("startBtn")
 .addEventListener("click",()=>{
