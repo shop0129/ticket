@@ -2524,3 +2524,24 @@ V4 今日統計
     font-weight:bold;
 
 }
+.detailItem{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    font-size:28px;
+
+    margin:15px 0;
+
+}
+
+.detailItemPrice{
+
+    font-weight:bold;
+
+    color:#ff9800;
+
+}
