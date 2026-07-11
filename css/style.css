@@ -2451,3 +2451,34 @@ V4 今日統計
     margin-top:120px;
 
 }
+.deleteHistoryBtn{
+
+    margin-top:20px;
+
+    width:220px;
+
+    height:60px;
+
+    border:none;
+
+    border-radius:15px;
+
+    background:#f44336;
+
+    color:#fff;
+
+    font-size:26px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.deleteHistoryBtn:hover{
+
+    background:#d32f2f;
+
+}
