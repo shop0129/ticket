@@ -1088,20 +1088,26 @@ function openOrderDetail(index){
 let greenToy = 0;
 let redToy = 0;
 let htmlItems = "";
-
+const groupedItems = {};
 order.items.forEach(item=>{
 
-    htmlItems += `
-        <div class="detailItem">
+    if(!groupedItems[item.id]){
 
-            🎫 ${item.title}
+        groupedItems[item.id]={
 
-            <span class="detailItemPrice">
-                NT$${item.price}
-            </span>
+            title:item.title,
 
-        </div>
-    `;
+            qty:0,
+
+            totalPrice:0
+
+        };
+
+    }
+
+    groupedItems[item.id].qty++;
+
+    groupedItems[item.id].totalPrice+=item.price;
 
     totalToken += item.token || 0;
 
@@ -1118,7 +1124,31 @@ order.items.forEach(item=>{
     }
 
 });
+for(const id in groupedItems){
 
+    const item = groupedItems[id];
+
+    htmlItems += `
+
+        <div class="detailItem">
+
+            <span>
+
+                🎫 ${item.title} × ${item.qty}
+
+            </span>
+
+            <span class="detailItemPrice">
+
+                NT$${item.totalPrice}
+
+            </span>
+
+        </div>
+
+    `;
+
+}
 let html = `
 
 <div class="detailCard">
