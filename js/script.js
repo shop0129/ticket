@@ -128,7 +128,11 @@ localStorage.setItem(
     "ticketData",
     JSON.stringify(ticketData)
 );
+// ==========================
+// V3.9 購物車
+// ==========================
 
+let cart = [];
 function playClick(){
 
     const click = document.getElementById("clickSound");
