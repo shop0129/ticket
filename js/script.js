@@ -216,6 +216,37 @@ function saveTodayStats(){
 
 }
 // =========================================
+// 更新統計
+// =========================================
+
+function updateStats(stats, ticket, item){
+
+    stats.tickets++;
+
+    stats.income += ticket.price;
+
+    stats.tokens += ticket.token || 0;
+
+    if(ticket.toy==="green"){
+
+        stats.greenToy++;
+
+    }
+
+    if(ticket.toy==="red"){
+
+        stats.redToy++;
+
+    }
+
+    if(item.id==="parent"){
+
+        stats.parent++;
+
+    }
+
+}
+// =========================================
 // V4.2 售票紀錄
 // =========================================
 
