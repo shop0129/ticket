@@ -222,7 +222,7 @@ function saveSalesHistory(){
 // 建立售票紀錄
 // =========================================
 
-function saveSalesRecord(paymentType){
+function saveSalesRecord(paymentType,totalAmount){
 
     const now = new Date();
 
@@ -242,12 +242,7 @@ function saveSalesRecord(paymentType){
 
         payment:paymentType,
 
-        amount:cart.reduce((sum,item)=>{
-
-            return sum+
-            ticketData[item.id].price*item.qty;
-
-        },0),
+       amount: Number(totalAmount) || 0,
 
         items:JSON.parse(JSON.stringify(cart))
 
@@ -525,7 +520,12 @@ ${info}
 // --------------------------
 
 function paymentSuccess(paymentType){
-    saveSalesRecord(paymentType);
+    const totalAmount = cart.reduce((sum,item)=>{
+
+    return sum + Number(item.price || 0);
+
+},0);
+    saveSalesRecord(paymentType,totalAmount);
     // ==========================
 // 更新今日統計
 // ==========================
