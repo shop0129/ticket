@@ -1014,19 +1014,28 @@ for(const id in summary){
     const item = summary[id];
 
     html += `
-        <div class="cartRow">
+<div class="cartRow">
 
-            <span>
-                ${item.title}
-                ×${item.qty}
-            </span>
+    <div>
 
-            <span>
-                $${item.amount}
-            </span>
+        ${item.title}<br>
 
-        </div>
-    `;
+        <button onclick="changeQty('${id}',-1)">－</button>
+
+        <b>${item.qty}</b>
+
+        <button onclick="changeQty('${id}',1)">＋</button>
+
+    </div>
+
+    <div>
+
+        $${item.amount}
+
+    </div>
+
+</div>
+`;
 
 }
 
@@ -1037,5 +1046,42 @@ for(const id in summary){
     `總金額：$${total}`;
 
     items.innerHTML = html;
+
+}
+function changeQty(id, step){
+
+    if(step>0){
+
+        const ticket=ticketData[id];
+
+        cart.push({
+
+            id:id,
+
+            title:ticket.title,
+
+            price:ticket.price,
+
+            token:ticket.token||0,
+
+            toy:ticket.toy||"none",
+
+            reward:ticket.reward||""
+
+        });
+
+    }else{
+
+        const index=cart.findIndex(x=>x.id===id);
+
+        if(index!=-1){
+
+            cart.splice(index,1);
+
+        }
+
+    }
+
+    updateCartPanel();
 
 }
