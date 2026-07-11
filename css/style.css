@@ -464,6 +464,7 @@ cursor:pointer;
 
 }
 
+#addCartBtn,
 #linePayBtn,
 #cashBtn{
 
@@ -486,7 +487,11 @@ cursor:pointer;
     transition:.2s;
 
 }
+#addCartBtn{
 
+    background:#2196F3;
+
+}
 #linePayBtn{
 
     background:#06C755;
@@ -499,12 +504,14 @@ cursor:pointer;
 
 }
 
+#addCartBtn:hover,
 #linePayBtn:hover,
 #cashBtn:hover{
 
     transform:scale(1.04);
 
 }
+#addCartBtn:active,
 #linePayBtn:active,
 #cashBtn:active{
 
