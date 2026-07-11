@@ -1559,17 +1559,15 @@ V3.8 卡片式票券管理
 }
 #cartPanel{
 
+    margin-top:20px;
+
     background:#ffffff;
 
-    border-top:3px solid #4CAF50;
+    border-radius:24px;
 
     padding:20px;
 
-    margin-top:25px;
-
-    text-align:center;
-
-    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
 
 }
 
@@ -1595,23 +1593,21 @@ V3.8 卡片式票券管理
 
 #checkoutBtn{
 
-    margin-top:18px;
+    width:500px;
 
-    width:420px;
-
-    height:80px;
+    height:90px;
 
     border:none;
 
-    border-radius:18px;
+    border-radius:22px;
 
-    background:#4CAF50;
+    background:#43A047;
 
-    color:#fff;
+    color:white;
 
-    font-size:34px;
+    font-size:38px;
 
-    font-weight:bold;
+    font-weight:800;
 
 }
 #cartItems{
@@ -1630,11 +1626,13 @@ V3.8 卡片式票券管理
 
 .cartRow{
 
-    display:flex;
+    background:#f7f8fa;
 
-    justify-content:space-between;
+    border-radius:18px;
 
-    padding:4px 10px;
+    padding:18px;
+
+    margin-bottom:14px;
 
 }
 /* ==========================
@@ -1673,7 +1671,9 @@ V3.8 卡片式票券管理
 
     font-size:30px;
 
-    font-weight:bold;
+    font-weight:800;
+
+    color:#222;
 
 }
 
@@ -1689,19 +1689,19 @@ V3.8 卡片式票券管理
 
 .qtyBtn{
 
-    width:52px;
+    width:60px;
 
-    height:52px;
+    height:60px;
 
     border:none;
 
     border-radius:50%;
 
-    background:#2196F3;
+    background:#1E88E5;
 
     color:white;
 
-    font-size:34px;
+    font-size:36px;
 
     font-weight:bold;
 
@@ -1723,13 +1723,13 @@ V3.8 卡片式票券管理
 
 .qtyNumber{
 
-    font-size:34px;
-
-    font-weight:bold;
-
-    min-width:30px;
+    width:45px;
 
     text-align:center;
+
+    font-size:34px;
+
+    font-weight:800;
 
 }
 
@@ -1737,32 +1737,30 @@ V3.8 卡片式票券管理
 
     font-size:34px;
 
-    font-weight:bold;
+    font-weight:800;
 
-    color:#ff5722;
+    color:#333;
 
 }
 .deleteBtn{
 
-    margin-top:8px;
+    width:50px;
 
-    width:42px;
-
-    height:42px;
+    height:50px;
 
     border:none;
 
     border-radius:50%;
 
-    background:#ff5252;
+    background:#ef5350;
 
-    color:#fff;
+    color:white;
 
-    font-size:20px;
+    font-size:28px;
+
+    font-weight:bold;
 
     cursor:pointer;
-
-    transition:.2s;
 
 }
 
@@ -1798,9 +1796,8 @@ V3.8 卡片式票券管理
 
     align-items:center;
 
-    margin-bottom:12px;
-
 }
+
 .cartBottom{
 
     display:flex;
@@ -1808,6 +1805,8 @@ V3.8 卡片式票券管理
     justify-content:space-between;
 
     align-items:center;
+
+    margin-top:15px;
 
 }
 .deleteBtn{
