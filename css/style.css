@@ -2567,3 +2567,22 @@ V4 今日統計
     margin:18px 0;
 
 }
+.cancelBadge{
+
+    margin-top:10px;
+
+    display:inline-block;
+
+    background:#e53935;
+
+    color:#fff;
+
+    padding:6px 16px;
+
+    border-radius:20px;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+}
