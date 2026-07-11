@@ -1084,26 +1084,188 @@ function openOrderDetail(index){
 
     const order = salesHistory[index];
 
+    if(!order){
+        return;
+    }
+
     let totalToken = 0;
-let greenToy = 0;
-let redToy = 0;
-let htmlItems = "";
-const groupedItems = {};
-order.items.forEach(item=>{
+    let greenToy = 0;
+    let redToy = 0;
 
-    if(!groupedItems[item.id]){
+    const groupedItems = {};
 
-        groupedItems[item.id]={
+    //==========================
+    // 整理購買內容
+    //==========================
+    order.items.forEach(item=>{
 
-            title:item.title,
+        if(!groupedItems[item.id]){
 
-            qty:0,
+            groupedItems[item.id]={
 
-            totalPrice:0
+                title:item.title,
 
-        };
+                qty:0,
+
+                totalPrice:0
+
+            };
+
+        }
+
+        groupedItems[item.id].qty++;
+
+        groupedItems[item.id].totalPrice += Number(item.price||0);
+
+        totalToken += Number(item.token||0);
+
+        if(item.toy==="green"){
+
+            greenToy++;
+
+        }
+
+        if(item.toy==="red"){
+
+            redToy++;
+
+        }
+
+    });
+
+    //==========================
+    // 購買內容HTML
+    //==========================
+
+    let htmlItems="";
+
+    for(const id in groupedItems){
+
+        const item = groupedItems[id];
+
+        htmlItems += `
+
+        <div class="detailItem">
+
+            <span>
+                🎫 ${item.title} × ${item.qty}
+            </span>
+
+            <span class="detailItemPrice">
+                NT$${item.totalPrice}
+            </span>
+
+        </div>
+
+        `;
 
     }
+
+    //==========================
+    // 明細HTML
+    //==========================
+
+    const html=`
+
+    <div class="detailCard">
+
+        <div class="detailTitle">
+
+            🆔 ${order.orderNo}
+
+        </div>
+
+        <div class="detailRow">
+
+            🕒 ${order.date} ${order.time}
+
+        </div>
+
+        <div class="detailRow">
+
+            💳 ${order.payment}
+
+        </div>
+
+        <hr>
+
+        <h3>🎫 購買內容</h3>
+
+        ${htmlItems}
+
+        <hr>
+
+        <h3>🎁 贈送內容</h3>
+
+        <div class="detailRow">
+
+            🪙 遊戲代幣：${totalToken} 枚
+
+        </div>
+
+        ${greenToy>0?`
+        <div class="detailRow">
+            🎁 綠標玩具 × ${greenToy}
+        </div>
+        `:""}
+
+        ${redToy>0?`
+        <div class="detailRow">
+            🎁 紅標玩具 × ${redToy}
+        </div>
+        `:""}
+
+        <hr>
+
+        <div class="detailPrice">
+
+            NT$${order.amount}
+
+        </div>
+
+        <div class="detailButtons">
+
+            <button
+                class="big-btn"
+                onclick="reprintOrder('${order.orderNo}')">
+
+                🖨️ 補印票券
+
+            </button>
+
+        </div>
+
+    </div>
+
+    `;
+
+    document.getElementById("orderDetailContent").innerHTML=html;
+
+    showPage("orderDetailPage");
+
+}
+function reprintOrder(orderNo){
+
+    const order = salesHistory.find(
+        x => x.orderNo===orderNo
+    );
+
+    if(!order){
+
+        return;
+
+    }
+
+    alert(
+`🖨️ 補印測試
+
+訂單：
+${order.orderNo}
+
+目前下一版會直接重新開啟成功頁。`
+    );
+
+}
 function reprintOrder(orderNo){
 
     const order = salesHistory.find(
@@ -1120,127 +1282,6 @@ function reprintOrder(orderNo){
         "補印功能\n\n訂單：" +
         order.orderNo
     );
-
-}
-    groupedItems[item.id].qty++;
-
-    groupedItems[item.id].totalPrice+=item.price;
-
-    totalToken += item.token || 0;
-
-    if(item.toy==="green"){
-
-        greenToy++;
-
-    }
-
-    if(item.toy==="red"){
-
-        redToy++;
-
-    }
-
-});
-for(const id in groupedItems){
-
-    const item = groupedItems[id];
-
-    htmlItems += `
-
-        <div class="detailItem">
-
-            <span>
-
-                🎫 ${item.title} × ${item.qty}
-
-            </span>
-
-            <span class="detailItemPrice">
-
-                NT$${item.totalPrice}
-
-            </span>
-
-        </div>
-
-    `;
-
-}
-let html = `
-
-<div class="detailCard">
-
-    <div class="detailTitle">
-
-        🆔 ${order.orderNo}
-
-    </div>
-
-    <div class="detailRow">
-
-        🕒 ${order.date} ${order.time}
-
-    </div>
-
-    <div class="detailRow">
-
-        💳 ${order.payment}
-
-    </div>
-
-    <hr>
-
-    <h3>🎫 購買內容</h3>
-
-    ${htmlItems}
-
-    <hr>
-
-    <h3>🎁 贈送內容</h3>
-
-    <div class="detailRow">
-
-        🪙 代幣：${totalToken} 枚
-
-    </div>
-
-    ${
-        greenToy
-        ? `<div class="detailRow">🎁 綠標玩具 × ${greenToy}</div>`
-        : ""
-    }
-
-    ${
-        redToy
-        ? `<div class="detailRow">🎁 紅標玩具 × ${redToy}</div>`
-        : ""
-    }
-
-    <hr>
-
-    <div class="detailPrice">
-
-        NT$${order.amount}
-
-    </div>
-<div class="detailButtons">
-
-    <button
-        class="big-btn"
-        onclick="reprintOrder('${order.orderNo}')">
-
-        🖨️ 補印票券
-
-    </button>
-
-</div>
-</div>
-
-`;
-
-    document.getElementById("orderDetailContent").innerHTML = html;
-
-    showPage("orderDetailPage");
 
 }
 function renderTodayStats(){
