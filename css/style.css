@@ -1848,3 +1848,273 @@ margin:20px auto 0;
     transform:scale(.9);
 
 }
+/*====================================================
+ V3.9.8 FINAL 購物車（請放在 style.css 最後面）
+====================================================*/
+
+#cartPanel{
+
+    width:92%;
+    max-width:900px;
+
+    margin:30px auto 40px;
+
+    padding:25px;
+
+    background:#fff;
+
+    border-radius:24px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.12);
+
+}
+
+#cartCount{
+
+    font-size:38px;
+
+    font-weight:800;
+
+    color:#333;
+
+    margin-bottom:18px;
+
+}
+
+#cartItems{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+}
+
+.cartRow{
+
+    background:#f8f9fb;
+
+    border-radius:20px;
+
+    padding:18px 22px;
+
+    border:2px solid #ececec;
+
+}
+
+.cartTop{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:15px;
+
+}
+
+.cartTitle{
+
+    font-size:34px;
+
+    font-weight:800;
+
+    color:#222;
+
+}
+
+.cartPrice{
+
+    font-size:34px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+.cartBottom{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.qtyBox{
+
+    flex:1;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+.qtyBtn{
+
+    width:62px;
+
+    height:62px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#2196F3;
+
+    color:white;
+
+    font-size:38px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+}
+
+.qtyBtn:hover{
+
+    transform:scale(1.06);
+
+}
+
+.qtyBtn:active{
+
+    transform:scale(.93);
+
+}
+
+.qtyNumber{
+
+    width:45px;
+
+    text-align:center;
+
+    font-size:36px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+.deleteBtn{
+
+    width:50px;
+
+    height:50px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#ef5350;
+
+    color:white;
+
+    font-size:26px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+}
+
+.deleteBtn:hover{
+
+    background:#e53935;
+
+    transform:scale(1.06);
+
+}
+
+.deleteBtn:active{
+
+    transform:scale(.92);
+
+}
+
+.cartSummary{
+
+    margin-top:25px;
+
+    text-align:center;
+
+}
+
+.cartTotalCount{
+
+    font-size:30px;
+
+    font-weight:700;
+
+    color:#666;
+
+}
+
+.cartTotalPrice{
+
+    margin-top:8px;
+
+    font-size:54px;
+
+    font-weight:900;
+
+    color:#ff5722;
+
+}
+
+#checkoutBtn{
+
+    display:block;
+
+    width:520px;
+
+    height:95px;
+
+    margin:25px auto 0;
+
+    border:none;
+
+    border-radius:22px;
+
+    background:#43A047;
+
+    color:#fff;
+
+    font-size:40px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+#checkoutBtn:hover{
+
+    transform:translateY(-2px);
+
+    background:#388E3C;
+
+}
+
+#checkoutBtn:active{
+
+    transform:scale(.97);
+
+}
