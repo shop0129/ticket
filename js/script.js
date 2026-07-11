@@ -1502,13 +1502,6 @@ function updateCartPanel(){
 
     amount.innerHTML=`
 
-<div class="cartSummary">
-
-    <div class="cartTotalCount">
-
-        共 ${cart.length} 張
-
-    </div>
 
     <div class="cartTotalPrice">
 
