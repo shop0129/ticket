@@ -1006,7 +1006,9 @@ function renderSalesHistory(){
 
         html+=`
 
-        <div class="historyCard">
+        <div
+    class="historyCard"
+    onclick="openOrderDetail(${index})">
 
             <div class="historyTop">
 
@@ -1056,6 +1058,47 @@ function deleteSalesHistory(index){
     saveSalesHistory();
 
     renderSalesHistory();
+
+}
+function openOrderDetail(index){
+
+    const order = salesHistory[index];
+
+    let html = "";
+
+    html += `
+        <div class="detailCard">
+
+            <div class="detailTitle">
+
+                🆔 ${order.orderNo}
+
+            </div>
+
+            <div class="detailRow">
+
+                🕒 ${order.date} ${order.time}
+
+            </div>
+
+            <div class="detailRow">
+
+                💳 ${order.payment}
+
+            </div>
+
+            <div class="detailPrice">
+
+                NT$${order.amount}
+
+            </div>
+
+        </div>
+    `;
+
+    document.getElementById("orderDetailContent").innerHTML = html;
+
+    showPage("orderDetailPage");
 
 }
 function renderTodayStats(){
