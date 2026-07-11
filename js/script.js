@@ -654,8 +654,13 @@ function updateSuccessItems(){
     let redToy = 0;
     let band = 0;
     let powerbank = 0;
-
-    cart.forEach(item=>{
+// 如果不是購物車付款，就用目前選擇的票券建立暫時購物車
+const items = cart.length > 0
+    ? cart
+    : [{
+        id: selectedTicket
+    }];
+    items.forEach(item=>{
 
         const ticket = ticketData[item.id];
 
