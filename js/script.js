@@ -575,21 +575,32 @@ ${info}
 
 function paymentSuccess(paymentType){
     isReprint = false;
-    let totalAmount = 0;
+    //==========================
+// 本次付款內容
+//==========================
 
-if(cart.length > 0){
+const payItems =
+cart.length > 0
+? cart
+: [{
+    id:selectedTicket
+}];
 
-    totalAmount = cart.reduce((sum,item)=>{
+//==========================
+// 本次付款金額
+//==========================
 
-        return sum + Number(item.price || 0);
+const totalAmount = payItems.reduce((sum,item)=>{
 
-    },0);
+    if(item.price!==undefined){
 
-}else if(selectedTicket){
+        return sum + Number(item.price);
 
-    totalAmount = Number(ticketData[selectedTicket].price || 0);
+    }
 
-}
+    return sum + Number(ticketData[item.id].price || 0);
+
+},0);
     saveSalesRecord(paymentType,totalAmount);
     // ==========================
 // 更新今日統計
