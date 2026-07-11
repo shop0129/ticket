@@ -1017,13 +1017,23 @@ for(const id in summary){
 
 <div class="cartRow">
 
-    <div class="cartLeft">
+    <div class="cartTop">
 
         <div class="cartTitle">
 
-            🛒 ${item.title}
+            ${item.title}
 
         </div>
+
+        <div class="cartPrice">
+
+            NT$${item.amount}
+
+        </div>
+
+    </div>
+
+    <div class="cartBottom">
 
         <div class="qtyBox">
 
@@ -1051,11 +1061,13 @@ for(const id in summary){
 
         </div>
 
-    </div>
+        <button
+            class="deleteBtn"
+            onclick="removeCartItem('${id}')">
 
-    <div class="cartPrice">
+            🗑️
 
-        NT$${item.amount}
+        </button>
 
     </div>
 
@@ -1107,6 +1119,13 @@ function changeQty(id, step){
         }
 
     }
+
+    updateCartPanel();
+
+}
+function removeCartItem(id){
+
+    cart = cart.filter(item=>item.id!==id);
 
     updateCartPanel();
 
