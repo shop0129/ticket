@@ -2315,3 +2315,70 @@ V4 今日統計
     color:#fff;
 
 }
+/*==========================
+營運中心 歸零按鈕
+==========================*/
+
+.statsResetButtons{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:20px;
+
+    margin:40px 0;
+
+}
+
+.resetBtn{
+
+    width:240px;
+
+    height:80px;
+
+    border:none;
+
+    border-radius:18px;
+
+    font-size:30px;
+
+    font-weight:800;
+
+    color:#fff;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.todayBtn{
+
+    background:#2196F3;
+
+}
+
+.monthBtn{
+
+    background:#FF9800;
+
+}
+
+.totalBtn{
+
+    background:#F44336;
+
+}
+
+.resetBtn:hover{
+
+    transform:scale(1.05);
+
+}
+
+.resetBtn:active{
+
+    transform:scale(.95);
+
+}
