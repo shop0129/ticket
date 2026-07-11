@@ -682,21 +682,9 @@ successTip.innerHTML =
 
 }
 
-linePayBtn.addEventListener("click",()=>{
+bindPaymentButton(linePayBtn,"LINE Pay");
 
-    playClick();
-
-    paymentSuccess("LINE Pay");
-
-});
-
-cashBtn.addEventListener("click",()=>{
-
-    playClick();
-
-    paymentSuccess("現金");
-
-});
+bindPaymentButton(cashBtn,"現金");
 
 // --------------------------
 // 成功頁領取項目
