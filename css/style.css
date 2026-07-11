@@ -1557,3 +1557,60 @@ V3.8 卡片式票券管理
     transform:scale(.96);
 
 }
+#cartPanel{
+
+    background:#ffffff;
+
+    border-top:3px solid #4CAF50;
+
+    padding:20px;
+
+    margin-top:25px;
+
+    text-align:center;
+
+    border-radius:20px;
+
+}
+
+#cartCount{
+
+    font-size:32px;
+
+    font-weight:bold;
+
+}
+
+#cartAmount{
+
+    margin-top:10px;
+
+    font-size:34px;
+
+    color:#ff5722;
+
+    font-weight:bold;
+
+}
+
+#checkoutBtn{
+
+    margin-top:18px;
+
+    width:420px;
+
+    height:80px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:#4CAF50;
+
+    color:#fff;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+}
