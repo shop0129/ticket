@@ -1614,3 +1614,26 @@ V3.8 卡片式票券管理
     font-weight:bold;
 
 }
+#cartItems{
+
+    margin-top:15px;
+
+    margin-bottom:15px;
+
+    text-align:left;
+
+    font-size:24px;
+
+    line-height:1.8;
+
+}
+
+.cartRow{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    padding:4px 10px;
+
+}
