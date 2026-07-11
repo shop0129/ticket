@@ -313,7 +313,9 @@ cart.length>0
 
     reward:ticketData[selectedTicket].reward || ""
 
-}]
+}],
+
+    status:"normal"
 
     };
 
