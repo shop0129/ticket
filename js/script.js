@@ -715,7 +715,6 @@ function updateSuccessItems(){
     const successItems =
     document.getElementById("successItems");
 
-}
     let totalToken = 0;
     let greenToy = 0;
     let redToy = 0;
