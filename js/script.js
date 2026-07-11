@@ -197,6 +197,67 @@ function saveTodayStats(){
     );
 
 }
+// =========================================
+// V4.2 售票紀錄
+// =========================================
+
+let salesHistory = JSON.parse(
+
+    localStorage.getItem("salesHistory")
+
+) || [];
+
+function saveSalesHistory(){
+
+    localStorage.setItem(
+
+        "salesHistory",
+
+        JSON.stringify(salesHistory)
+
+    );
+
+}
+// =========================================
+// 建立售票紀錄
+// =========================================
+
+function saveSalesRecord(paymentType){
+
+    const now = new Date();
+
+    const order={
+
+        orderNo:"M"+Date.now(),
+
+        date:now.toLocaleDateString("zh-TW"),
+
+        time:now.toLocaleTimeString("zh-TW",{
+
+            hour:"2-digit",
+
+            minute:"2-digit"
+
+        }),
+
+        payment:paymentType,
+
+        amount:cart.reduce((sum,item)=>{
+
+            return sum+
+            ticketData[item.id].price*item.qty;
+
+        },0),
+
+        items:JSON.parse(JSON.stringify(cart))
+
+    };
+
+    salesHistory.unshift(order);
+
+    saveSalesHistory();
+
+}
 function playClick(){
 
     const click = document.getElementById("clickSound");
@@ -463,7 +524,8 @@ ${info}
 // 付款成功
 // --------------------------
 
-function paymentSuccess(){
+function paymentSuccess(paymentType){
+    saveSalesRecord(paymentType);
     // ==========================
 // 更新今日統計
 // ==========================
@@ -859,6 +921,10 @@ function openTicketManager(){
 // 今日統計
 // ==========================
 
+//==========================
+// 營運中心
+//==========================
+
 function openTodayStats(){
 
     showPage("todayStatsPage");
@@ -866,146 +932,73 @@ function openTodayStats(){
     renderStats(todayStats);
 
 }
-function updateTicketButtons(){
 
-    document
-    .querySelectorAll(".ticket-btn,.ticket-btn-wide")
-    .forEach(btn=>{
+//==========================
+// 售票紀錄
+//==========================
 
-        const id = btn.dataset.id;
+function openSalesHistory(){
 
-        if(!id) return;
+    renderSalesHistory();
 
-        const item = btn.closest(".ticket-item");
-
-        if(ticketData[id] && ticketData[id].enable){
-
-            if(item){
-
-                item.style.display = "";
-
-            }else{
-
-                btn.style.display = "";
-
-            }
-
-        }else{
-
-            if(item){
-
-                item.style.display = "none";
-
-            }else{
-
-                btn.style.display = "none";
-
-            }
-
-        }
-
-    });
-
-}
-function updateTicketPrices(){
-
-    document
-    .querySelectorAll(".ticket-btn")
-    .forEach(btn=>{
-
-        const id = btn.dataset.id;
-
-        const price =
-        document.getElementById("price-"+id);
-
-        if(!price) return;
-
-        price.innerHTML =
-        "NT$" + ticketData[id].price;
-
-    });
-
-}
-function saveTicketManager(){
-
-    for(const id in ticketData){
-
-        // 啟用
-        const enable =
-        document.getElementById("enable-"+id);
-
-        if(enable){
-
-            ticketData[id].enable = enable.checked;
-
-        }
-
-        // 票名
-        const title =
-        document.getElementById("title-"+id);
-
-        if(title){
-
-            ticketData[id].title = title.value.trim();
-
-        }
-
-        // 價格
-        const price =
-        document.getElementById("priceInput-"+id);
-
-        if(price){
-
-            ticketData[id].price =
-            parseInt(price.value,10) || 0;
-
-        }
-        // 時數
-const hour =
-document.getElementById("hour-"+id);
-
-if(hour){
-
-    ticketData[id].hour =
-    parseInt(hour.value,10) || 0;
+    showPage("salesHistoryPage");
 
 }
 
-        // 代幣
-        const token =
-        document.getElementById("token-"+id);
+function renderSalesHistory(){
 
-        if(token){
+    const list = document.getElementById("salesHistoryList");
 
-            ticketData[id].token =
-            parseInt(token.value,10) || 0;
+    if(salesHistory.length===0){
 
-        }
+        list.innerHTML=`
+            <div class="emptyHistory">
+                目前沒有售票紀錄
+            </div>
+        `;
 
-        // 玩具（先預留）
-        const toy =
-        document.getElementById("toy-"+id);
-
-        if(toy){
-
-            ticketData[id].toy = toy.value;
-
-        }
-        
+        return;
 
     }
 
-    localStorage.setItem(
-        "ticketData",
-        JSON.stringify(ticketData)
-    );
+    let html="";
 
-    updateTicketButtons();
-    updateTicketPrices();
+    salesHistory.forEach(order=>{
 
-    alert("票券管理已儲存！");
+        html+=`
+
+        <div class="historyCard">
+
+            <div class="historyTop">
+
+                <span>${order.time}</span>
+
+                <span>${order.payment}</span>
+
+            </div>
+
+            <div class="historyAmount">
+
+                NT$${order.amount}
+
+            </div>
+
+            <div class="historyOrderNo">
+
+                ${order.orderNo}
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+    list.innerHTML=html;
 
 }
+
 function renderTodayStats(){
 
     document.getElementById("statsTickets").innerHTML =
@@ -1519,7 +1512,7 @@ cartLineBtn.addEventListener("click",()=>{
 
     playClick();
 
-    paymentSuccess();
+    paymentSuccess("LINE Pay");
 
 });
 
@@ -1527,7 +1520,7 @@ cartCashBtn.addEventListener("click",()=>{
 
     playClick();
 
-    paymentSuccess();
+    paymentSuccess("現金");
 
 });
 const todayTab = document.getElementById("todayTab");
