@@ -975,21 +975,6 @@ function renderSalesHistory(){
         return;
 
     }
-    function deleteSalesHistory(index){
-
-    if(!confirm("確定要刪除這筆售票紀錄？")){
-
-        return;
-
-    }
-
-    salesHistory.splice(index,1);
-
-    saveSalesHistory();
-
-    renderSalesHistory();
-
-}
 
     let html="";
 
@@ -1034,7 +1019,21 @@ function renderSalesHistory(){
     list.innerHTML=html;
 
 }
+function deleteSalesHistory(index){
 
+    if(!confirm("確定要刪除這筆售票紀錄？")){
+
+        return;
+
+    }
+
+    salesHistory.splice(index,1);
+
+    saveSalesHistory();
+
+    renderSalesHistory();
+
+}
 function renderTodayStats(){
 
     document.getElementById("statsTickets").innerHTML =
