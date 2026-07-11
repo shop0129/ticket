@@ -1835,21 +1835,9 @@ cartBackBtn.addEventListener("click",()=>{
 // 購物車付款
 // =========================
 
-cartLineBtn.addEventListener("click",()=>{
+bindPaymentButton(cartLineBtn,"LINE Pay");
 
-    playClick();
-
-    paymentSuccess("LINE Pay");
-
-});
-
-cartCashBtn.addEventListener("click",()=>{
-
-    playClick();
-
-    paymentSuccess("現金");
-
-});
+bindPaymentButton(cartCashBtn,"現金");
 const todayTab = document.getElementById("todayTab");
 const monthTab = document.getElementById("monthTab");
 const totalTab = document.getElementById("totalTab");
