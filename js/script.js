@@ -520,11 +520,21 @@ ${info}
 // --------------------------
 
 function paymentSuccess(paymentType){
-    const totalAmount = cart.reduce((sum,item)=>{
+    let totalAmount = 0;
 
-    return sum + Number(item.price || 0);
+if(cart.length > 0){
 
-},0);
+    totalAmount = cart.reduce((sum,item)=>{
+
+        return sum + Number(item.price || 0);
+
+    },0);
+
+}else if(selectedTicket){
+
+    totalAmount = Number(ticketData[selectedTicket].price || 0);
+
+}
     saveSalesRecord(paymentType,totalAmount);
     // ==========================
 // 更新今日統計
