@@ -586,21 +586,21 @@ cart.length > 0
     id:selectedTicket
 }];
 
-//==========================
-// 本次付款金額
-//==========================
+let totalAmount = 0;
 
-const totalAmount = payItems.reduce((sum,item)=>{
+if(cart.length > 0){
 
-    if(item.price!==undefined){
+    totalAmount = cart.reduce((sum,item)=>{
 
-        return sum + Number(item.price);
+        return sum + Number(item.price || 0);
 
-    }
+    },0);
 
-    return sum + Number(ticketData[item.id].price || 0);
+}else if(selectedTicket){
 
-},0);
+    totalAmount = Number(ticketData[selectedTicket].price || 0);
+
+}
     saveSalesRecord(paymentType,totalAmount);
     // ==========================
 // 更新今日統計
