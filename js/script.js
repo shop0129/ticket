@@ -1062,7 +1062,9 @@ function renderSalesHistory(){
                 <span>${order.payment}</span>
 
             </div>
-
+${order.status==="cancel"
+? `<div class="cancelBadge">❌ 已作廢</div>`
+: ""}
             <div class="historyAmount">
 
                 NT$${order.amount}
