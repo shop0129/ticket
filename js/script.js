@@ -1031,7 +1031,7 @@ function renderSalesHistory(){
             </div>
 <button
     class="deleteHistoryBtn"
-    onclick="deleteSalesHistory(${index})">
+    onclick="event.stopPropagation(); deleteSalesHistory(${index})">
 
     🗑️ 刪除紀錄
 
