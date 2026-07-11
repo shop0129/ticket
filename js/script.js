@@ -861,9 +861,9 @@ function openTicketManager(){
 
 function openTodayStats(){
 
-    renderTodayStats();
-
     showPage("todayStatsPage");
+
+    renderStats(todayStats);
 
 }
 function updateTicketButtons(){
@@ -1025,6 +1025,27 @@ function renderTodayStats(){
 
     document.getElementById("statsParent").innerHTML =
     todayStats.parent + " 張";
+
+}
+function renderStats(data){
+
+    document.getElementById("statsTickets").innerHTML =
+    data.tickets + " 張";
+
+    document.getElementById("statsIncome").innerHTML =
+    "NT$" + data.income;
+
+    document.getElementById("statsTokens").innerHTML =
+    data.tokens + " 枚";
+
+    document.getElementById("statsGreenToy").innerHTML =
+    data.greenToy + " 個";
+
+    document.getElementById("statsRedToy").innerHTML =
+    data.redToy + " 個";
+
+    document.getElementById("statsParent").innerHTML =
+    data.parent + " 張";
 
 }
 function resetTodayStats(){
@@ -1427,3 +1448,48 @@ cartCashBtn.addEventListener("click",()=>{
     paymentSuccess();
 
 });
+const todayTab = document.getElementById("todayTab");
+const monthTab = document.getElementById("monthTab");
+const totalTab = document.getElementById("totalTab");
+
+if(todayTab){
+
+    todayTab.onclick = ()=>{
+
+        renderStats(todayStats);
+
+        todayTab.classList.add("active");
+        monthTab.classList.remove("active");
+        totalTab.classList.remove("active");
+
+    };
+
+}
+
+if(monthTab){
+
+    monthTab.onclick = ()=>{
+
+        renderStats(monthStats);
+
+        todayTab.classList.remove("active");
+        monthTab.classList.add("active");
+        totalTab.classList.remove("active");
+
+    };
+
+}
+
+if(totalTab){
+
+    totalTab.onclick = ()=>{
+
+        renderStats(totalStats);
+
+        todayTab.classList.remove("active");
+        monthTab.classList.remove("active");
+        totalTab.classList.add("active");
+
+    };
+
+}
