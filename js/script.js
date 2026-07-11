@@ -1261,17 +1261,6 @@ function openOrderDetail(index){
     showPage("orderDetailPage");
 
 }
-
-    alert(
-`🖨️ 補印測試
-
-訂單：
-${order.orderNo}
-
-目前下一版會直接重新開啟成功頁。`
-    );
-
-}
 function reprintOrder(orderNo){
 
     const order = salesHistory.find(
