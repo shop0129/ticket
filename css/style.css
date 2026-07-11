@@ -2507,9 +2507,9 @@ V4 今日統計
 
 .detailRow{
 
-    font-size:28px;
+    font-size:32px;
 
-    margin:18px 0;
+    line-height:1.8;
 
 }
 
@@ -2532,13 +2532,15 @@ V4 今日統計
 
     align-items:center;
 
-    font-size:28px;
+    font-size:32px;
 
-    margin:15px 0;
+    margin:18px 0;
 
 }
 
 .detailItemPrice{
+
+    font-size:32px;
 
     font-weight:bold;
 
@@ -2552,5 +2554,16 @@ V4 今日統計
     justify-content:center;
 
     margin-top:25px;
+
+}
+.detailCard h3{
+
+    font-size:30px;
+
+    font-weight:bold;
+
+    color:#333;
+
+    margin:18px 0;
 
 }
