@@ -703,11 +703,6 @@ function updateSuccessItems(){
 
     const successItems =
     document.getElementById("successItems");
-if(!currentPrintOrder){
-
-    successItems.innerHTML="<div>沒有可補印的訂單</div>";
-
-    return;
 
 }
     let totalToken = 0;
@@ -724,12 +719,16 @@ if(!currentPrintOrder){
 
 }
 
-const items = currentPrintOrder.items;
+const items = currentPrintOrder.items || [];
     items.forEach(item=>{
 
-        const ticket = item;
+        if(!item){
 
-        if(!ticket) return;
+    return;
+
+}
+
+const ticket = item;
 
         // 代幣
         totalToken += ticket.token || 0;
