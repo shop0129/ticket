@@ -438,83 +438,96 @@ cashBtn.addEventListener("click",()=>{
 
 function updateSuccessItems(){
 
-    const ticket = ticketData[selectedTicket];
-
     const successItems =
     document.getElementById("successItems");
 
-    let html = "";
+    let totalToken = 0;
+    let greenToy = 0;
+    let redToy = 0;
+    let band = 0;
+    let powerbank = 0;
 
-    if(!ticket){
+    cart.forEach(item=>{
 
-        successItems.innerHTML =
-        "<div>請至櫃檯確認領取項目</div>";
+        const ticket = ticketData[item.id];
 
-        return;
+        if(!ticket) return;
 
-    }
+        // 代幣
+        totalToken += ticket.token || 0;
 
-    // ===== 代幣 =====
+        // 手環
+        if(ticket.reward &&
+           ticket.reward.includes("band")){
 
-    if(ticket.token){
+            band++;
 
-        html += `<div>🪙 領取： ${ticket.token} 枚代幣</div>`;
+        }
 
-    }
+        // 玩具
+        if(ticket.toy==="green"){
 
-    // ===== 手環 =====
+            greenToy++;
 
-    if(ticket.reward.includes("band")){
+        }
 
-        html += "<div>🎫 領取：入場手環</div>";
+        if(ticket.toy==="red"){
 
-    }
+            redToy++;
 
-    // ===== 玩具 =====
+        }
 
-    if(ticket.toy=="green"){
+        // 行動電源
+        if(item.id==="powerbank"){
 
-        html +=
-        "<div>🎁 兌換：綠標玩具(離場時)</div>";
+            powerbank++;
 
-    }
+        }
 
-    if(ticket.toy=="red"){
+    });
 
-        html +=
-        "<div>🎁 兌換：紅標玩具(離場時)</div>";
+    let html="";
 
-    }
+    if(band){
 
-    // ===== 代幣票 =====
-
-    if(selectedTicket=="token10"){
-
-        html =
-        "<div>🪙 領取：10枚代幣</div>";
-
-    }
-
-    if(selectedTicket=="token25"){
-
-        html =
-        "<div>🪙 領取：25枚代幣</div>";
+        html += `<div>🎫 入場手環 × ${band}</div>`;
 
     }
 
-    // ===== 行動電源 =====
+    if(totalToken){
 
-    if(selectedTicket=="powerbank"){
-
-        html =
-        "<div>🔋 領取：行動電源</div>";
+        html += `<div>🪙 遊戲代幣 × ${totalToken} 枚</div>`;
 
     }
 
-   successItems.innerHTML =
-`<div class="success-items-content">
-    ${html}
-</div>`;
+    if(greenToy){
+
+        html += `<div>🎁 綠標玩具 × ${greenToy}</div>`;
+
+    }
+
+    if(redToy){
+
+        html += `<div>🎁 紅標玩具 × ${redToy}</div>`;
+
+    }
+
+    if(powerbank){
+
+        html += `<div>🔋 行動電源 × ${powerbank}</div>`;
+
+    }
+
+    if(html===""){
+
+        html="<div>無需領取物品</div>";
+
+    }
+
+    successItems.innerHTML=
+    `<div class="success-items-content">
+        ${html}
+    </div>`;
 
 }
 // --------------------------
