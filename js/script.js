@@ -792,6 +792,17 @@ function openTicketManager(){
     showPage("ticketManagerPage");
 
 }
+// ==========================
+// 今日統計
+// ==========================
+
+function openTodayStats(){
+
+    renderTodayStats();
+
+    showPage("todayStatsPage");
+
+}
 function updateTicketButtons(){
 
     document
@@ -930,6 +941,58 @@ if(hour){
     updateTicketPrices();
 
     alert("票券管理已儲存！");
+
+}
+function renderTodayStats(){
+
+    document.getElementById("statsTickets").innerHTML =
+    todayStats.tickets + " 張";
+
+    document.getElementById("statsIncome").innerHTML =
+    "NT$" + todayStats.income;
+
+    document.getElementById("statsTokens").innerHTML =
+    todayStats.tokens + " 枚";
+
+    document.getElementById("statsGreenToy").innerHTML =
+    todayStats.greenToy + " 個";
+
+    document.getElementById("statsRedToy").innerHTML =
+    todayStats.redToy + " 個";
+
+    document.getElementById("statsParent").innerHTML =
+    todayStats.parent + " 張";
+
+}
+function resetTodayStats(){
+
+    if(!confirm("確定要將今日統計歸零？")){
+
+        return;
+
+    }
+
+    todayStats={
+
+        tickets:0,
+
+        income:0,
+
+        tokens:0,
+
+        greenToy:0,
+
+        redToy:0,
+
+        parent:0
+
+    };
+
+    saveTodayStats();
+
+    renderTodayStats();
+
+    alert("今日統計已歸零！");
 
 }
 function renderTicketManager(){
