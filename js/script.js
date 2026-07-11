@@ -244,7 +244,27 @@ function saveSalesRecord(paymentType,totalAmount){
 
        amount: Number(totalAmount) || 0,
 
-        items:JSON.parse(JSON.stringify(cart))
+       items:
+
+cart.length>0
+
+? JSON.parse(JSON.stringify(cart))
+
+: [{
+
+    id:selectedTicket,
+
+    title:ticketData[selectedTicket].title,
+
+    price:ticketData[selectedTicket].price,
+
+    token:ticketData[selectedTicket].token || 0,
+
+    toy:ticketData[selectedTicket].toy || "none",
+
+    reward:ticketData[selectedTicket].reward || ""
+
+}]
 
     };
 
