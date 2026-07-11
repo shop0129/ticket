@@ -228,7 +228,7 @@ function saveSalesRecord(paymentType,totalAmount){
 
     const order={
 
-        orderNo:"M"+Date.now(),
+        orderNo: generateOrderNo(),
 
         date:now.toLocaleDateString("zh-TW"),
 
@@ -251,6 +251,30 @@ function saveSalesRecord(paymentType,totalAmount){
     salesHistory.unshift(order);
 
     saveSalesHistory();
+
+}
+function generateOrderNo(){
+
+    let orderIndex = Number(localStorage.getItem("orderIndex")) || 1;
+
+    const now = new Date();
+
+    const y = now.getFullYear();
+
+    const m = String(now.getMonth()+1).padStart(2,"0");
+
+    const d = String(now.getDate()).padStart(2,"0");
+
+    const orderNo =
+        "M" +
+        y +
+        m +
+        d +
+        String(orderIndex).padStart(4,"0");
+
+    localStorage.setItem("orderIndex", orderIndex + 1);
+
+    return orderNo;
 
 }
 function playClick(){
