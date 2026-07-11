@@ -938,3 +938,36 @@ function renderTicketManager(){
     }
 
 }
+// ==========================
+// 加入購物車
+// ==========================
+
+function addCurrentTicketToCart(){
+
+    if(!selectedTicket) return;
+
+    const ticket = ticketData[selectedTicket];
+
+    cart.push({
+
+        id: selectedTicket,
+
+        title: ticket.title,
+
+        price: ticket.price,
+
+        token: ticket.token || 0,
+
+        toy: ticket.toy || "none",
+
+        reward: ticket.reward || ""
+
+    });
+
+    console.log(cart);
+
+    alert("✅ 已加入購物車");
+
+    showPage("ticketPage");
+
+}
