@@ -643,65 +643,11 @@ cart.forEach(item=>{
 
     if(!ticket) return;
 
-    //==================
-    // 今日
-    //==================
+    updateStats(todayStats, ticket, item);
 
-    todayStats.tickets++;
-    todayStats.income += ticket.price;
-    todayStats.tokens += ticket.token || 0;
+    updateStats(monthStats, ticket, item);
 
-    if(ticket.toy==="green"){
-        todayStats.greenToy++;
-    }
-
-    if(ticket.toy==="red"){
-        todayStats.redToy++;
-    }
-
-    if(item.id==="parent"){
-        todayStats.parent++;
-    }
-
-    //==================
-    // 本月
-    //==================
-
-    monthStats.tickets++;
-    monthStats.income += ticket.price;
-    monthStats.tokens += ticket.token || 0;
-
-    if(ticket.toy==="green"){
-        monthStats.greenToy++;
-    }
-
-    if(ticket.toy==="red"){
-        monthStats.redToy++;
-    }
-
-    if(item.id==="parent"){
-        monthStats.parent++;
-    }
-
-    //==================
-    // 累積
-    //==================
-
-    totalStats.tickets++;
-    totalStats.income += ticket.price;
-    totalStats.tokens += ticket.token || 0;
-
-    if(ticket.toy==="green"){
-        totalStats.greenToy++;
-    }
-
-    if(ticket.toy==="red"){
-        totalStats.redToy++;
-    }
-
-    if(item.id==="parent"){
-        totalStats.parent++;
-    }
+    updateStats(totalStats, ticket, item);
 
 });
     saveTodayStats();
