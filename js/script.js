@@ -154,14 +154,46 @@ let todayStats = JSON.parse(
     parent:0
 
 };
+let monthStats = JSON.parse(
+    localStorage.getItem("monthStats")
+) || {
+
+    tickets:0,
+    income:0,
+    tokens:0,
+    greenToy:0,
+    redToy:0,
+    parent:0
+
+};
+
+let totalStats = JSON.parse(
+    localStorage.getItem("totalStats")
+) || {
+
+    tickets:0,
+    income:0,
+    tokens:0,
+    greenToy:0,
+    redToy:0,
+    parent:0
+
+};
 function saveTodayStats(){
 
     localStorage.setItem(
-
         "todayStats",
-
         JSON.stringify(todayStats)
+    );
 
+    localStorage.setItem(
+        "monthStats",
+        JSON.stringify(monthStats)
+    );
+
+    localStorage.setItem(
+        "totalStats",
+        JSON.stringify(totalStats)
     );
 
 }
@@ -442,33 +474,64 @@ cart.forEach(item=>{
 
     if(!ticket) return;
 
-    // 售票張數
+    //==================
+    // 今日
+    //==================
+
     todayStats.tickets++;
-
-    // 收入
     todayStats.income += ticket.price;
-
-    // 代幣
     todayStats.tokens += ticket.token || 0;
 
-    // 玩具
     if(ticket.toy==="green"){
-
         todayStats.greenToy++;
-
     }
 
     if(ticket.toy==="red"){
-
         todayStats.redToy++;
-
     }
 
-    // 陪同票
     if(item.id==="parent"){
-
         todayStats.parent++;
+    }
 
+    //==================
+    // 本月
+    //==================
+
+    monthStats.tickets++;
+    monthStats.income += ticket.price;
+    monthStats.tokens += ticket.token || 0;
+
+    if(ticket.toy==="green"){
+        monthStats.greenToy++;
+    }
+
+    if(ticket.toy==="red"){
+        monthStats.redToy++;
+    }
+
+    if(item.id==="parent"){
+        monthStats.parent++;
+    }
+
+    //==================
+    // 累積
+    //==================
+
+    totalStats.tickets++;
+    totalStats.income += ticket.price;
+    totalStats.tokens += ticket.token || 0;
+
+    if(ticket.toy==="green"){
+        totalStats.greenToy++;
+    }
+
+    if(ticket.toy==="red"){
+        totalStats.redToy++;
+    }
+
+    if(item.id==="parent"){
+        totalStats.parent++;
     }
 
 });
