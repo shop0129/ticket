@@ -1104,9 +1104,11 @@ order.items.forEach(item=>{
         };
 
     }
-function reprintOrder(index){
+function reprintOrder(orderNo){
 
-    const order = salesHistory[index];
+    const order = salesHistory.find(
+        x => x.orderNo === orderNo
+    );
 
     if(!order){
 
@@ -1225,7 +1227,7 @@ let html = `
 
     <button
         class="big-btn"
-        onclick="reprintOrder(${index})">
+        onclick="reprintOrder('${order.orderNo}')">
 
         🖨️ 補印票券
 
