@@ -1304,27 +1304,7 @@ showPage("successPage");
 updateSuccessItems();
 startPrintAnimation();
     }
-function renderTodayStats(){
 
-    document.getElementById("statsTickets").innerHTML =
-    todayStats.tickets + " 張";
-
-    document.getElementById("statsIncome").innerHTML =
-    "NT$" + todayStats.income;
-
-    document.getElementById("statsTokens").innerHTML =
-    todayStats.tokens + " 枚";
-
-    document.getElementById("statsGreenToy").innerHTML =
-    todayStats.greenToy + " 個";
-
-    document.getElementById("statsRedToy").innerHTML =
-    todayStats.redToy + " 個";
-
-    document.getElementById("statsParent").innerHTML =
-    todayStats.parent + " 張";
-
-}
 function renderStats(data){
 
     document.getElementById("statsTickets").innerHTML =
@@ -1372,7 +1352,7 @@ function resetTodayStats(){
 
     saveTodayStats();
 
-    renderTodayStats();
+    renderStats(todayStats);
 
     alert("今日統計已歸零！");
 
