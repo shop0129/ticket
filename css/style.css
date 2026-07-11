@@ -2266,3 +2266,13 @@ V4 今日統計
     color:#ff6b00;
 
 }
+/* 今日統計按鈕 */
+#todayStatsPage .big-btn{
+
+    display:block;
+
+    width:420px;
+
+    margin:40px auto 0;
+
+}
