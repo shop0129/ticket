@@ -1196,11 +1196,19 @@ function openOrderDetail(index){
 
     <div class="detailCard">
 
-        <div class="detailTitle">
+<div class="detailTitle">
 
-            🆔 ${order.orderNo}
+    🆔 ${order.orderNo}
 
-        </div>
+</div>
+
+${order.status==="cancel"
+? `
+<div class="cancelBadge">
+    ❌ 已作廢
+</div>
+`
+: ""}
 
         <div class="detailRow">
 
@@ -1252,20 +1260,28 @@ function openOrderDetail(index){
 
         <div class="detailButtons">
 
-            <button
-                class="big-btn"
-                onclick="reprintOrder('${order.orderNo}')">
+           <button
+    class="big-btn"
+    ${order.status==="cancel"
+        ? "disabled"
+        : `onclick="reprintOrder('${order.orderNo}')"`}>
 
-                🖨️ 補印票券
+    ${order.status==="cancel"
+        ? "🚫 已作廢不可補印"
+        : "🖨️ 補印票券"}
 
-            </button>
- <button
-        class="big-btn cancelBtn"
-        onclick="cancelOrder('${order.orderNo}')">
+</button>
+<button
+    class="big-btn cancelBtn"
+    ${order.status==="cancel"
+        ? "disabled"
+        : `onclick="cancelOrder('${order.orderNo}')"`}>
 
-        ❌ 作廢訂單
+    ${order.status==="cancel"
+        ? "✅ 已作廢"
+        : "❌ 作廢訂單"}
 
-    </button>
+</button>
         </div>
 
     </div>
