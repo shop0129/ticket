@@ -1261,17 +1261,6 @@ function openOrderDetail(index){
     showPage("orderDetailPage");
 
 }
-function reprintOrder(orderNo){
-
-    const order = salesHistory.find(
-        x => x.orderNo===orderNo
-    );
-
-    if(!order){
-
-        return;
-
-    }
 
     alert(
 `🖨️ 補印測試
@@ -1296,10 +1285,9 @@ function reprintOrder(orderNo){
     }
 
 currentPrintOrder = order;
-
-updateSuccessItems();
-
 showPage("successPage");
+updateSuccessItems();
+startPrintAnimation();
     }
 function renderTodayStats(){
 
