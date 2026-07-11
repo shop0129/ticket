@@ -1079,6 +1079,88 @@ function resetTodayStats(){
     alert("今日統計已歸零！");
 
 }
+function resetMonthStats(){
+
+    if(!confirm("確定清除本月統計？")) return;
+
+    monthStats={
+
+        tickets:0,
+
+        income:0,
+
+        tokens:0,
+
+        greenToy:0,
+
+        redToy:0,
+
+        parent:0
+
+    };
+
+    saveTodayStats();
+
+    renderStats(monthStats);
+
+}
+function resetAllStats(){
+
+    if(!confirm("確定清除所有統計？")) return;
+
+    todayStats={
+
+        tickets:0,
+
+        income:0,
+
+        tokens:0,
+
+        greenToy:0,
+
+        redToy:0,
+
+        parent:0
+
+    };
+
+    monthStats={
+
+        tickets:0,
+
+        income:0,
+
+        tokens:0,
+
+        greenToy:0,
+
+        redToy:0,
+
+        parent:0
+
+    };
+
+    totalStats={
+
+        tickets:0,
+
+        income:0,
+
+        tokens:0,
+
+        greenToy:0,
+
+        redToy:0,
+
+        parent:0
+
+    };
+
+    saveTodayStats();
+
+    renderStats(todayStats);
+
+}
 function renderTicketManager(){
 
     const table = document.getElementById("ticketTable");
