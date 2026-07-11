@@ -654,7 +654,7 @@ if(cart.length > 0){
 // 更新今日統計
 // ==========================
 
-cart.forEach(item=>{
+payItems.forEach(item=>{
 
     const ticket = ticketData[item.id];
 
