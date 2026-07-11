@@ -2481,3 +2481,46 @@ V4 今日統計
     background:#d32f2f;
 
 }
+.detailCard{
+
+    background:#fff;
+
+    border-radius:20px;
+
+    padding:30px;
+
+    margin:30px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.12);
+
+}
+
+.detailTitle{
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    margin-bottom:25px;
+
+}
+
+.detailRow{
+
+    font-size:28px;
+
+    margin:18px 0;
+
+}
+
+.detailPrice{
+
+    margin-top:30px;
+
+    font-size:48px;
+
+    color:#ff6a00;
+
+    font-weight:bold;
+
+}
