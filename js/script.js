@@ -1084,8 +1084,6 @@ function openOrderDetail(index){
 
     const order = salesHistory[index];
 
-    let html = "";
-
     let totalToken = 0;
 let greenToy = 0;
 let redToy = 0;
