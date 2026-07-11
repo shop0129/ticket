@@ -977,12 +977,22 @@ function updateCartPanel(){
 
     const count = document.getElementById("cartCount");
     const amount = document.getElementById("cartAmount");
+    const items = document.getElementById("cartItems");
 
     let total = 0;
+
+    let html = "";
 
     cart.forEach(item=>{
 
         total += item.price;
+
+        html += `
+            <div class="cartRow">
+                <span>${item.title}</span>
+                <span>$${item.price}</span>
+            </div>
+        `;
 
     });
 
@@ -991,5 +1001,7 @@ function updateCartPanel(){
 
     amount.innerHTML =
     `總金額：$${total}`;
+
+    items.innerHTML = html;
 
 }
