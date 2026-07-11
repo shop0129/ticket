@@ -966,8 +966,30 @@ function addCurrentTicketToCart(){
 
     console.log(cart);
 
-    alert("✅ 已加入購物車");
+    updateCartPanel();
 
-    showPage("ticketPage");
+alert("✅ 已加入購物車");
+
+showPage("ticketPage");
+
+}
+function updateCartPanel(){
+
+    const count = document.getElementById("cartCount");
+    const amount = document.getElementById("cartAmount");
+
+    let total = 0;
+
+    cart.forEach(item=>{
+
+        total += item.price;
+
+    });
+
+    count.innerHTML =
+    `🛒 共 ${cart.length} 張`;
+
+    amount.innerHTML =
+    `總金額：$${total}`;
 
 }
