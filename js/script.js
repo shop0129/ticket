@@ -618,7 +618,7 @@ linePayBtn.addEventListener("click",()=>{
 
     playClick();
 
-    paymentSuccess();
+    paymentSuccess("LINE Pay");
 
 });
 
@@ -626,7 +626,7 @@ cashBtn.addEventListener("click",()=>{
 
     playClick();
 
-    paymentSuccess();
+    paymentSuccess("現金");
 
 });
 
