@@ -1154,6 +1154,75 @@ function resetAllStats(){
     renderStats(todayStats);
 
 }
+//==========================
+// 更新票券顯示
+//==========================
+
+function updateTicketButtons(){
+
+    document
+    .querySelectorAll(".ticket-btn,.ticket-btn-wide")
+    .forEach(btn=>{
+
+        const id = btn.dataset.id;
+
+        if(!id) return;
+
+        const item = btn.closest(".ticket-item");
+
+        if(ticketData[id] && ticketData[id].enable){
+
+            if(item){
+
+                item.style.display = "";
+
+            }else{
+
+                btn.style.display = "";
+
+            }
+
+        }else{
+
+            if(item){
+
+                item.style.display = "none";
+
+            }else{
+
+                btn.style.display = "none";
+
+            }
+
+        }
+
+    });
+
+}
+
+//==========================
+// 更新票價
+//==========================
+
+function updateTicketPrices(){
+
+    document
+    .querySelectorAll(".ticket-btn")
+    .forEach(btn=>{
+
+        const id = btn.dataset.id;
+
+        const price =
+        document.getElementById("price-"+id);
+
+        if(!price) return;
+
+        price.innerHTML =
+        "NT$" + ticketData[id].price;
+
+    });
+
+}
 function renderTicketManager(){
 
     const table = document.getElementById("ticketTable");
