@@ -1061,13 +1061,13 @@ for(const id in summary){
 
         </div>
 
-        <button
-            class="deleteBtn"
-            onclick="removeCartItem('${id}')">
+       <button
+class="deleteBtn"
+onclick="removeCartItem('${id}')">
 
-            🗑️
+✕
 
-        </button>
+</button>
 
     </div>
 
@@ -1077,13 +1077,30 @@ for(const id in summary){
 
 }
 
-    count.innerHTML =
-    `🛒 共 ${cart.length} 張`;
+   count.innerHTML =
+`🛒 購物車（共 ${cart.length} 張）`;
 
-    amount.innerHTML =
-    `總金額：$${total}`;
+amount.innerHTML = `
 
-    items.innerHTML = html;
+<div class="cartSummary">
+
+    <div class="cartTotalCount">
+
+        共 ${cart.length} 張
+
+    </div>
+
+    <div class="cartTotalPrice">
+
+        NT$${total}
+
+    </div>
+
+</div>
+
+`;
+
+items.innerHTML = html;
 
 }
 function changeQty(id, step){
