@@ -2382,3 +2382,72 @@ V4 今日統計
     transform:scale(.95);
 
 }
+/*==========================
+售票紀錄
+==========================*/
+
+#salesHistoryList{
+
+    padding:30px;
+
+}
+
+.historyCard{
+
+    background:#fff;
+
+    border-radius:18px;
+
+    padding:25px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 5px 15px rgba(0,0,0,.12);
+
+}
+
+.historyTop{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    font-size:28px;
+
+    font-weight:bold;
+
+}
+
+.historyAmount{
+
+    margin-top:18px;
+
+    font-size:42px;
+
+    font-weight:900;
+
+    color:#ff9800;
+
+}
+
+.historyOrderNo{
+
+    margin-top:15px;
+
+    font-size:24px;
+
+    color:#777;
+
+}
+
+.emptyHistory{
+
+    text-align:center;
+
+    font-size:36px;
+
+    color:#999;
+
+    margin-top:120px;
+
+}
