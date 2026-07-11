@@ -1156,6 +1156,12 @@ const cartLineBtn = document.getElementById("cartLineBtn");
 const cartCashBtn = document.getElementById("cartCashBtn");
 const cartBackBtn = document.getElementById("cartBackBtn");
 
+console.log("checkoutBtn =", checkoutBtn);
+console.log("paymentArea =", paymentArea);
+console.log("cartLineBtn =", cartLineBtn);
+console.log("cartCashBtn =", cartCashBtn);
+console.log("cartBackBtn =", cartBackBtn);
+
 checkoutBtn.addEventListener("click",()=>{
 
     if(cart.length===0){
