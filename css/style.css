@@ -1742,3 +1742,104 @@ V3.8 卡片式票券管理
     color:#ff5722;
 
 }
+.deleteBtn{
+
+    margin-top:8px;
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#ff5252;
+
+    color:#fff;
+
+    font-size:20px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.deleteBtn:hover{
+
+    transform:scale(1.08);
+
+}
+
+.deleteBtn:active{
+
+    transform:scale(.9);
+
+}
+.cartRight{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:flex-end;
+
+    justify-content:center;
+
+    gap:10px;
+
+}
+.cartTop{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    margin-bottom:12px;
+
+}
+.cartBottom{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+.deleteBtn{
+
+    width:48px;
+
+    height:48px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#ff5252;
+
+    color:white;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.deleteBtn:hover{
+
+    transform:scale(1.08);
+
+}
+
+.deleteBtn:active{
+
+    transform:scale(.9);
+
+}
