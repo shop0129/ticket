@@ -593,13 +593,33 @@ content="width=device-width, initial-scale=1.0">
 
 </div>
 
-        <button
-            class="big-btn"
-            onclick="resetTodayStats()">
+        <div class="statsResetButtons">
 
-            🔄 今日歸零
+    <button
+        class="resetBtn todayBtn"
+        onclick="resetTodayStats()">
 
-        </button>
+        🔄 今日歸零
+
+    </button>
+
+    <button
+        class="resetBtn monthBtn"
+        onclick="resetMonthStats()">
+
+        📅 本月歸零
+
+    </button>
+
+    <button
+        class="resetBtn totalBtn"
+        onclick="resetAllStats()">
+
+        🗑 全部歸零
+
+    </button>
+
+</div>
 
     </div>
 
