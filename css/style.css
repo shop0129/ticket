@@ -458,9 +458,11 @@ cursor:pointer;
 
     display:flex;
 
+    justify-content:center;
+
     gap:30px;
 
-    margin-top:35px;
+    margin-top:25px;
 
 }
 
@@ -1516,5 +1518,42 @@ V3.8 卡片式票券管理
     width:24px;
 
     height:24px;
+
+}
+#addCartBtn{
+
+    width:710px;
+
+    height:95px;
+
+    margin-top:35px;
+
+    border:none;
+
+    border-radius:22px;
+
+    font-size:38px;
+
+    font-weight:bold;
+
+    color:#fff;
+
+    background:#2196F3;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+#addCartBtn:hover{
+
+    transform:scale(1.02);
+
+}
+
+#addCartBtn:active{
+
+    transform:scale(.96);
 
 }
