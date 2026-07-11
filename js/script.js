@@ -1257,7 +1257,13 @@ function openOrderDetail(index){
                 🖨️ 補印票券
 
             </button>
+ <button
+        class="big-btn cancelBtn"
+        onclick="cancelOrder('${order.orderNo}')">
 
+        ❌ 作廢訂單
+
+    </button>
         </div>
 
     </div>
@@ -1286,7 +1292,45 @@ showPage("successPage");
 updateSuccessItems();
 startPrintAnimation();
     }
+function cancelOrder(orderNo){
 
+    const order = salesHistory.find(
+        x => x.orderNo === orderNo
+    );
+
+    if(!order){
+
+        return;
+
+    }
+
+    if(order.status==="cancel"){
+
+        alert("此訂單已經作廢！");
+
+        return;
+
+    }
+
+    if(!confirm("確定要作廢這筆訂單？")){
+
+        return;
+
+    }
+
+    order.status = "cancel";
+
+    saveSalesHistory();
+
+    alert("✅ 訂單已作廢");
+
+    openOrderDetail(
+        salesHistory.findIndex(
+            x => x.orderNo === orderNo
+        )
+    );
+
+}
 function renderStats(data){
 
     document.getElementById("statsTickets").innerHTML =
