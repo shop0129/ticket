@@ -1086,35 +1086,102 @@ function openOrderDetail(index){
 
     let html = "";
 
-    html += `
-        <div class="detailCard">
+    let totalToken = 0;
+let greenToy = 0;
+let redToy = 0;
+let htmlItems = "";
 
-            <div class="detailTitle">
+order.items.forEach(item=>{
 
-                🆔 ${order.orderNo}
+    htmlItems += `
+        <div class="detailItem">
 
-            </div>
+            🎫 ${item.title}
 
-            <div class="detailRow">
-
-                🕒 ${order.date} ${order.time}
-
-            </div>
-
-            <div class="detailRow">
-
-                💳 ${order.payment}
-
-            </div>
-
-            <div class="detailPrice">
-
-                NT$${order.amount}
-
-            </div>
+            <span class="detailItemPrice">
+                NT$${item.price}
+            </span>
 
         </div>
     `;
+
+    totalToken += item.token || 0;
+
+    if(item.toy==="green"){
+
+        greenToy++;
+
+    }
+
+    if(item.toy==="red"){
+
+        redToy++;
+
+    }
+
+});
+
+let html = `
+
+<div class="detailCard">
+
+    <div class="detailTitle">
+
+        🆔 ${order.orderNo}
+
+    </div>
+
+    <div class="detailRow">
+
+        🕒 ${order.date} ${order.time}
+
+    </div>
+
+    <div class="detailRow">
+
+        💳 ${order.payment}
+
+    </div>
+
+    <hr>
+
+    <h3>🎫 購買內容</h3>
+
+    ${htmlItems}
+
+    <hr>
+
+    <h3>🎁 贈送內容</h3>
+
+    <div class="detailRow">
+
+        🪙 代幣：${totalToken} 枚
+
+    </div>
+
+    ${
+        greenToy
+        ? `<div class="detailRow">🎁 綠標玩具 × ${greenToy}</div>`
+        : ""
+    }
+
+    ${
+        redToy
+        ? `<div class="detailRow">🎁 紅標玩具 × ${redToy}</div>`
+        : ""
+    }
+
+    <hr>
+
+    <div class="detailPrice">
+
+        NT$${order.amount}
+
+    </div>
+
+</div>
+
+`;
 
     document.getElementById("orderDetailContent").innerHTML = html;
 
