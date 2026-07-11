@@ -1750,9 +1750,9 @@ margin:20px auto 0;
 }
 .deleteBtn{
 
-    width:50px;
+    width:60px;
 
-    height:50px;
+    height:60px;
 
     border:none;
 
@@ -1760,17 +1760,27 @@ margin:20px auto 0;
 
     background:#ef5350;
 
-    color:white;
+    color:#fff;
 
-    font-size:28px;
+    font-size:34px;
 
-    font-weight:bold;
+    font-weight:900;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
 
     cursor:pointer;
+
+    transition:.2s;
 
 }
 
 .deleteBtn:hover{
+
+    background:#d32f2f;
 
     transform:scale(1.08);
 
@@ -1778,7 +1788,7 @@ margin:20px auto 0;
 
 .deleteBtn:active{
 
-    transform:scale(.9);
+    transform:scale(.92);
 
 }
 .cartRight{
