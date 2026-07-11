@@ -1013,28 +1013,54 @@ for(const id in summary){
 
     const item = summary[id];
 
-    html += `
+   html += `
+
 <div class="cartRow">
 
-    <div>
+    <div class="cartLeft">
 
-        ${item.title}<br>
+        <div class="cartTitle">
 
-        <button onclick="changeQty('${id}',-1)">－</button>
+            🛒 ${item.title}
 
-        <b>${item.qty}</b>
+        </div>
 
-        <button onclick="changeQty('${id}',1)">＋</button>
+        <div class="qtyBox">
+
+            <button
+                class="qtyBtn"
+                onclick="changeQty('${id}',-1)">
+
+                −
+
+            </button>
+
+            <div class="qtyNumber">
+
+                ${item.qty}
+
+            </div>
+
+            <button
+                class="qtyBtn"
+                onclick="changeQty('${id}',1)">
+
+                +
+
+            </button>
+
+        </div>
 
     </div>
 
-    <div>
+    <div class="cartPrice">
 
-        $${item.amount}
+        NT$${item.amount}
 
     </div>
 
 </div>
+
 `;
 
 }
