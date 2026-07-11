@@ -670,10 +670,21 @@ setTimeout(() => {
 
             clearInterval(countdownTimer);
 
-            linePayBtn.disabled = false;
-            cashBtn.disabled = false;
+           linePayBtn.disabled = false;
+cashBtn.disabled = false;
 
-            showPage("homePage");
+// ===== 清空購物車 =====
+cart = [];
+
+updateCartPanel();
+
+// ===== 收起付款區 =====
+paymentArea.style.display = "none";
+
+checkoutBtn.style.display = "block";
+
+// ===== 回首頁 =====
+showPage("homePage");
 
         }
 
