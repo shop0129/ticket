@@ -2545,3 +2545,12 @@ V4 今日統計
     color:#ff9800;
 
 }
+.detailButtons{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin-top:25px;
+
+}
