@@ -428,7 +428,13 @@ content="width=device-width, initial-scale=1.0">
     onclick="openTicketManager()">
 
     🎫 票券管理
+<button
+    class="big-btn"
+    onclick="openTodayStats()">
 
+    📊 今日統計
+
+</button>
 </button>
     <button class="big-btn">🎉 活動設定</button>
 
@@ -485,6 +491,95 @@ content="width=device-width, initial-scale=1.0">
             </button>
 
         </div>
+
+    </div>
+
+</section>
+    <!-- ==========================
+今日統計
+========================== -->
+
+<section id="todayStatsPage" class="page">
+
+    <div class="tm-page">
+
+        <div class="tm-top">
+
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
+
+                ← 返回
+
+            </button>
+
+            <h1 class="tm-title">
+
+                📊 今日統計
+
+            </h1>
+
+        </div>
+
+        <div id="todayStatsBox">
+
+            <div class="statsRow">
+
+                <span>🎫 今日售票</span>
+
+                <span id="statsTickets">0 張</span>
+
+            </div>
+
+            <div class="statsRow">
+
+                <span>💰 今日收入</span>
+
+                <span id="statsIncome">NT$0</span>
+
+            </div>
+
+            <div class="statsRow">
+
+                <span>🪙 今日代幣</span>
+
+                <span id="statsTokens">0 枚</span>
+
+            </div>
+
+            <div class="statsRow">
+
+                <span>🟢 綠標玩具</span>
+
+                <span id="statsGreenToy">0 個</span>
+
+            </div>
+
+            <div class="statsRow">
+
+                <span>🔴 紅標玩具</span>
+
+                <span id="statsRedToy">0 個</span>
+
+            </div>
+
+            <div class="statsRow">
+
+                <span>👨 陪同票</span>
+
+                <span id="statsParent">0 張</span>
+
+            </div>
+
+        </div>
+
+        <button
+            class="big-btn"
+            onclick="resetTodayStats()">
+
+            🔄 今日歸零
+
+        </button>
 
     </div>
 
