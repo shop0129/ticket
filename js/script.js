@@ -133,6 +133,38 @@ localStorage.setItem(
 // ==========================
 
 let cart = [];
+// =========================================
+// V4.0 今日統計
+// =========================================
+
+let todayStats = JSON.parse(
+    localStorage.getItem("todayStats")
+) || {
+
+    tickets:0,
+
+    income:0,
+
+    tokens:0,
+
+    greenToy:0,
+
+    redToy:0,
+
+    parent:0
+
+};
+function saveTodayStats(){
+
+    localStorage.setItem(
+
+        "todayStats",
+
+        JSON.stringify(todayStats)
+
+    );
+
+}
 function playClick(){
 
     const click = document.getElementById("clickSound");
@@ -400,6 +432,47 @@ ${info}
 // --------------------------
 
 function paymentSuccess(){
+    // ==========================
+// 更新今日統計
+// ==========================
+
+cart.forEach(item=>{
+
+    const ticket = ticketData[item.id];
+
+    if(!ticket) return;
+
+    // 售票張數
+    todayStats.tickets++;
+
+    // 收入
+    todayStats.income += ticket.price;
+
+    // 代幣
+    todayStats.tokens += ticket.token || 0;
+
+    // 玩具
+    if(ticket.toy==="green"){
+
+        todayStats.greenToy++;
+
+    }
+
+    if(ticket.toy==="red"){
+
+        todayStats.redToy++;
+
+    }
+
+    // 陪同票
+    if(item.id==="parent"){
+
+        todayStats.parent++;
+
+    }
+
+});
+    saveTodayStats();
      linePayBtn.disabled = true;
     cashBtn.disabled = true;
     showPage("successPage");
