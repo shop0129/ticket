@@ -1104,7 +1104,22 @@ order.items.forEach(item=>{
         };
 
     }
+function reprintOrder(index){
 
+    const order = salesHistory[index];
+
+    if(!order){
+
+        return;
+
+    }
+
+    alert(
+        "補印功能\n\n訂單：" +
+        order.orderNo
+    );
+
+}
     groupedItems[item.id].qty++;
 
     groupedItems[item.id].totalPrice+=item.price;
@@ -1206,7 +1221,17 @@ let html = `
         NT$${order.amount}
 
     </div>
+<div class="detailButtons">
 
+    <button
+        class="big-btn"
+        onclick="reprintOrder(${index})">
+
+        🖨️ 補印票券
+
+    </button>
+
+</div>
 </div>
 
 `;
