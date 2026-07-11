@@ -981,20 +981,54 @@ function updateCartPanel(){
 
     let total = 0;
 
-    let html = "";
+let html = "";
 
-    cart.forEach(item=>{
+const summary = {};
 
-        total += item.price;
+cart.forEach(item=>{
 
-        html += `
-            <div class="cartRow">
-                <span>${item.title}</span>
-                <span>$${item.price}</span>
-            </div>
-        `;
+    total += item.price;
 
-    });
+    if(!summary[item.id]){
+
+        summary[item.id] = {
+
+            title:item.title,
+
+            qty:0,
+
+            amount:0
+
+        };
+
+    }
+
+    summary[item.id].qty++;
+
+    summary[item.id].amount += item.price;
+
+});
+
+for(const id in summary){
+
+    const item = summary[id];
+
+    html += `
+        <div class="cartRow">
+
+            <span>
+                ${item.title}
+                ×${item.qty}
+            </span>
+
+            <span>
+                $${item.amount}
+            </span>
+
+        </div>
+    `;
+
+}
 
     count.innerHTML =
     `🛒 共 ${cart.length} 張`;
