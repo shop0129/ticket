@@ -1060,7 +1060,7 @@ function updateCartPanel(){
             class="deleteBtn"
             onclick="removeCartItem('${id}')">
 
-            ✕
+            ×
 
         </button>
 
