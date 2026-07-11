@@ -1637,3 +1637,108 @@ V3.8 卡片式票券管理
     padding:4px 10px;
 
 }
+/* ==========================
+   V3.9 購物車
+========================== */
+
+.cartRow{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    background:#f7f7f7;
+
+    border-radius:18px;
+
+    padding:15px 18px;
+
+    margin-bottom:12px;
+
+}
+
+.cartLeft{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:10px;
+
+}
+
+.cartTitle{
+
+    font-size:30px;
+
+    font-weight:bold;
+
+}
+
+.qtyBox{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+.qtyBtn{
+
+    width:52px;
+
+    height:52px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#2196F3;
+
+    color:white;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+.qtyBtn:hover{
+
+    transform:scale(1.08);
+
+}
+
+.qtyBtn:active{
+
+    transform:scale(.92);
+
+}
+
+.qtyNumber{
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    min-width:30px;
+
+    text-align:center;
+
+}
+
+.cartPrice{
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    color:#ff5722;
+
+}
