@@ -975,10 +975,25 @@ function renderSalesHistory(){
         return;
 
     }
+    function deleteSalesHistory(index){
+
+    if(!confirm("確定要刪除這筆售票紀錄？")){
+
+        return;
+
+    }
+
+    salesHistory.splice(index,1);
+
+    saveSalesHistory();
+
+    renderSalesHistory();
+
+}
 
     let html="";
 
-    salesHistory.forEach(order=>{
+    salesHistory.forEach((order,index)=>{
 
         html+=`
 
@@ -1003,7 +1018,13 @@ function renderSalesHistory(){
                 ${order.orderNo}
 
             </div>
+<button
+    class="deleteHistoryBtn"
+    onclick="deleteSalesHistory(${index})">
 
+    🗑️ 刪除紀錄
+
+</button>
         </div>
 
         `;
