@@ -138,6 +138,8 @@ let cart = [];
 // ======================
 
 let currentPrintOrder = null;
+// 是否為補印
+let isReprint = false;
 // =========================================
 // V4.0 今日統計
 // =========================================
@@ -571,6 +573,7 @@ ${info}
 // --------------------------
 
 function paymentSuccess(paymentType){
+    isReprint = false;
     let totalAmount = 0;
 
 if(cart.length > 0){
@@ -957,8 +960,21 @@ paymentArea.style.display = "none";
 
 checkoutBtn.style.display = "block";
 
-// ===== 回首頁 =====
-showPage("homePage");
+if(isReprint){
+
+    isReprint = false;
+
+    const index = salesHistory.findIndex(
+        x => x.orderNo === currentPrintOrder.orderNo
+    );
+
+    openOrderDetail(index);
+
+}else{
+
+    showPage("homePage");
+
+}
 
         }
 
@@ -1262,7 +1278,7 @@ function openOrderDetail(index){
 
 }
 function reprintOrder(orderNo){
-
+isReprint = true;
     const order = salesHistory.find(
         x => x.orderNo === orderNo
     );
