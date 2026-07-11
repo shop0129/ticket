@@ -1592,6 +1592,8 @@ V3.8 卡片式票券管理
 }
 
 #checkoutBtn{
+   display:block;
+margin:20px auto 0;
 
     width:500px;
 
@@ -1679,11 +1681,15 @@ V3.8 卡片式票券管理
 
 .qtyBox{
 
+    flex:1;
+
     display:flex;
+
+    justify-content:center;
 
     align-items:center;
 
-    gap:18px;
+    gap:20px;
 
 }
 
