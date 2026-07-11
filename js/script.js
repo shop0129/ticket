@@ -133,6 +133,11 @@ localStorage.setItem(
 // ==========================
 
 let cart = [];
+// ======================
+// 目前列印訂單
+// ======================
+
+let currentPrintOrder = null;
 // =========================================
 // V4.0 今日統計
 // =========================================
@@ -268,7 +273,9 @@ cart.length>0
 
     };
 
-    salesHistory.unshift(order);
+    currentPrintOrder = order;
+
+salesHistory.unshift(order);
 
     saveSalesHistory();
 
@@ -692,21 +699,31 @@ function updateSuccessItems(){
 
     const successItems =
     document.getElementById("successItems");
+if(!currentPrintOrder){
 
+    successItems.innerHTML="<div>沒有可補印的訂單</div>";
+
+    return;
+
+}
     let totalToken = 0;
     let greenToy = 0;
     let redToy = 0;
     let band = 0;
     let powerbank = 0;
-// 如果不是購物車付款，就用目前選擇的票券建立暫時購物車
-const items = cart.length > 0
-    ? cart
-    : [{
-        id: selectedTicket
-    }];
+if(!currentPrintOrder){
+
+    successItems.innerHTML =
+    "<div class='success-items-content'>沒有可列印資料</div>";
+
+    return;
+
+}
+
+const items = currentPrintOrder.items;
     items.forEach(item=>{
 
-        const ticket = ticketData[item.id];
+        const ticket = item;
 
         if(!ticket) return;
 
@@ -1278,12 +1295,12 @@ function reprintOrder(orderNo){
 
     }
 
-    alert(
-        "補印功能\n\n訂單：" +
-        order.orderNo
-    );
+currentPrintOrder = order;
 
-}
+updateSuccessItems();
+
+showPage("successPage");
+    }
 function renderTodayStats(){
 
     document.getElementById("statsTickets").innerHTML =
