@@ -1305,31 +1305,25 @@ V3.8 卡片式票券管理
 
 .tm-card{
 
-    width:94%;
-
-    max-width:900px;
-
-    margin:30px auto;
-
     background:#fff;
 
-    border-radius:25px;
+    border-radius:24px;
 
-    padding:30px;
+    padding:25px;
 
-    box-shadow:0 8px 20px rgba(0,0,0,.12);
+    margin-bottom:25px;
+
+    box-shadow:0 8px 25px rgba(0,0,0,.08);
 
 }
 
 .tm-card-title{
 
-    flex:1;
+    font-size:32px;
 
-    font-size:30px;
+    font-weight:700;
 
-    font-weight:bold;
-
-    line-height:1.3;
+    color:#222;
 
     white-space:nowrap;
 
@@ -1357,11 +1351,13 @@ V3.8 卡片式票券管理
 
 .tm-field label{
 
-    font-size:24px;
-
-    color:#666;
+    display:block;
 
     margin-bottom:8px;
+
+    font-size:22px;
+
+    font-weight:bold;
 
 }
 
@@ -1369,17 +1365,15 @@ V3.8 卡片式票券管理
 
     width:100%;
 
-    min-width:0;
+    height:52px;
 
-    height:60px;
-
-    border:2px solid #ddd;
+    font-size:24px;
 
     border-radius:12px;
 
-    font-size:28px;
+    padding:0 15px;
 
-    padding:0 12px;
+    box-sizing:border-box;
 
 }
 .tm-header-bar{
@@ -1491,11 +1485,11 @@ V3.8 卡片式票券管理
 
     display:flex;
 
-    align-items:center;
-
     justify-content:space-between;
 
-    gap:20px;
+    align-items:center;
+
+    margin-bottom:18px;
 
 }
 
@@ -1505,21 +1499,19 @@ V3.8 卡片式票券管理
 
     align-items:center;
 
-    gap:8px;
+    gap:10px;
 
     font-size:22px;
 
     font-weight:bold;
 
-    white-space:nowrap;
-
 }
 
 .tm-enable input{
 
-    width:22px;
+    width:24px;
 
-    height:22px;
+    height:24px;
 
 }
 #addCartBtn{
@@ -2603,21 +2595,19 @@ V4 今日統計
 
     flex:1;
 
-    height:46px;
+    height:50px;
+
+    font-size:22px;
+
+    font-weight:bold;
 
     border:none;
 
     border-radius:12px;
 
-    background:#eeeeee;
-
-    font-size:20px;
-
-    font-weight:bold;
+    background:#ececec;
 
     cursor:pointer;
-
-    transition:.2s;
 
 }
 
@@ -2625,23 +2615,27 @@ V4 今日統計
 
     background:#4CAF50;
 
-    color:white;
+    color:#fff;
 
 }
 .tm-preview{
 
-    width:120px;
+    display:flex;
 
-    flex-shrink:0;
+    justify-content:center;
 
-    text-align:center;
+    align-items:center;
+
+    margin:20px 0 25px;
 
 }
 
 .tm-preview-img{
 
-    width:100px;
+    width:180px;
 
-    border-radius:16px;
+    border-radius:18px;
+
+    box-shadow:0 6px 18px rgba(0,0,0,.18);
 
 }
