@@ -25,13 +25,13 @@ function renderBusinessMode(){
 
     <div class="tm-card-title">
 
-        🗓️ 請選擇目前營業模式
+        🗓️ 目前營業模式
 
     </div>
 
-    <div class="tm-field">
+    <div class="modeGrid">
 
-        <label>
+        <label class="modeCard">
 
             <input
                 type="radio"
@@ -39,15 +39,23 @@ function renderBusinessMode(){
                 value="weekday"
                 ${businessMode.mode==="weekday"?"checked":""}>
 
-            平日
+            <div class="modeIcon">🌤️</div>
+
+            <div class="modeTitle">
+
+                平日
+
+            </div>
+
+            <div class="modeDesc">
+
+                一般營運模式
+
+            </div>
 
         </label>
 
-    </div>
-
-    <div class="tm-field">
-
-        <label>
+        <label class="modeCard">
 
             <input
                 type="radio"
@@ -55,15 +63,23 @@ function renderBusinessMode(){
                 value="holiday"
                 ${businessMode.mode==="holiday"?"checked":""}>
 
-            假日
+            <div class="modeIcon">🎈</div>
+
+            <div class="modeTitle">
+
+                假日
+
+            </div>
+
+            <div class="modeDesc">
+
+                六日、連假
+
+            </div>
 
         </label>
 
-    </div>
-
-    <div class="tm-field">
-
-        <label>
+        <label class="modeCard">
 
             <input
                 type="radio"
@@ -71,26 +87,34 @@ function renderBusinessMode(){
                 value="summer"
                 ${businessMode.mode==="summer"?"checked":""}>
 
-            寒暑假
+            <div class="modeIcon">🏖️</div>
+
+            <div class="modeTitle">
+
+                寒暑假
+
+            </div>
+
+            <div class="modeDesc">
+
+                寒假、暑假
+
+            </div>
 
         </label>
 
     </div>
 
-    <div class="tm-field">
+    <label class="autoMode">
 
-        <label>
+        <input
+            type="checkbox"
+            id="autoMode"
+            ${businessMode.auto?"checked":""}>
 
-            <input
-                type="checkbox"
-                id="autoMode"
-                ${businessMode.auto?"checked":""}>
+        自動依日期切換（之後開放）
 
-            自動依日期切換（之後開放）
-
-        </label>
-
-    </div>
+    </label>
 
 </div>
 
