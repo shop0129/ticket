@@ -247,6 +247,37 @@ function updateStats(stats, ticket, item){
 
 }
 // =========================================
+// 扣回統計（作廢訂單）
+// =========================================
+
+function rollbackStats(stats, ticket, item){
+
+    stats.tickets = Math.max(0, stats.tickets - 1);
+
+    stats.income = Math.max(0, stats.income - ticket.price);
+
+    stats.tokens = Math.max(0, stats.tokens - (ticket.token || 0));
+
+    if(ticket.toy === "green"){
+
+        stats.greenToy = Math.max(0, stats.greenToy - 1);
+
+    }
+
+    if(ticket.toy === "red"){
+
+        stats.redToy = Math.max(0, stats.redToy - 1);
+
+    }
+
+    if(item.id === "parent"){
+
+        stats.parent = Math.max(0, stats.parent - 1);
+
+    }
+
+}
+// =========================================
 // V4.2 售票紀錄
 // =========================================
 
@@ -1338,9 +1369,27 @@ function cancelOrder(orderNo){
 
     order.status = "cancel";
 
-    saveSalesHistory();
+//==========================
+// 扣回統計
+//==========================
 
-    alert("✅ 訂單已作廢");
+order.items.forEach(item=>{
+
+    rollbackStats(todayStats, item, item);
+
+    rollbackStats(monthStats, item, item);
+
+    rollbackStats(totalStats, item, item);
+
+});
+
+// 儲存統計
+saveTodayStats();
+
+// 儲存售票紀錄
+saveSalesHistory();
+
+alert("✅ 訂單已作廢");
 
     openOrderDetail(
         salesHistory.findIndex(
