@@ -2,132 +2,7 @@
 // 票價設定
 // =========================
 
-let ticketData =
-JSON.parse(localStorage.getItem("ticketData")) || {
 
-    ticket2hGreen:{
-    title:"2H 小怪獸",
-    price:250,
-    hour:2,
-    token:10,
-    toy:"green",
-    reward:"token,band,toy",
-    enable:true
-
-       },
-
-ticket2hRed:{
-    title:"2H 小怪獸 Plus",
-    price:300,
-    hour:2,
-    token:15,
-    toy:"red",
-    reward:"token,band,toy",
-    enable:true
-},
-
-    ticket3hGreen:{
-        title:"3H 大怪獸",
-        price:300,
-        hour:3,
-        token:15,
-        toy:"green",
-        reward:"token,band,toy",
-enable:true
-   
-    },
-
-    ticket3hRed:{
-        title:"3H 大怪獸 Plus",
-        price:350,
-        hour:3,
-        token:20,
-        toy:"red",
-        reward:"token,band,toy",
-enable:true
-   
-    },
-
-   early:{
-    title:"平日早鳥",
-    price:300,
-    token:15,
-    toy:"red",
-    reward:"token,band,toy",
-enable:true
-   
-},
-
-    summer:{
-    title:"寒暑假限定",
-    price:350,
-    token:20,
-    toy:"red",
-    reward:"token,band,toy",
-enable:true
-},
-
-    baby:{
-    title:"幼幼票",
-    price:100,
-    reward:"band",
-        enable:true
-},
-
-    parent:{
-    title:"陪同票",
-    price:80,
-    reward:"band",
-        enable:true
-},
-
-    token10:{
-    title:"10枚代幣",
-    price:100,
-    reward:"token10",
-        enable:true
-},
-
-    token25:{
-    title:"25枚代幣",
-    price:200,
-    reward:"token25",
-        enable:true
-},
-
-    powerbank:{
-    title:"行動電源",
-    price:50,
-    reward:"powerbank",
-        enable:true
-},
-
-};
-if (!ticketData.early.token) {
-    ticketData.early.token = 15;
-    ticketData.early.toy = "red";
-}
-
-if (!ticketData.summer.token) {
-    ticketData.summer.token = 20;
-    ticketData.summer.toy = "red";
-}
-// ===== 補上 enable 預設值 =====
-
-for(const id in ticketData){
-
-    if(ticketData[id].enable === undefined){
-
-        ticketData[id].enable = true;
-
-    }
-
-}
-console.log(JSON.stringify(ticketData, null, 2));
-localStorage.setItem(
-    "ticketData",
-    JSON.stringify(ticketData)
-);
 // ==========================
 // V3.9 購物車
 // ==========================
@@ -136,67 +11,12 @@ localStorage.setItem(
 // 全域狀態
 // =========================================
 
-let cart = [];
 
-// 目前列印中的訂單
-let currentPrintOrder = null;
-
-// 是否為補印模式
-let isReprint = false;
-
-// 閒置計時
-let idleTimer;
-let countdownTimer;
-
-// 目前選擇票券
-let selectedReward = "";
-let selectedTicket = "";
 // =========================================
 // V4.0 今日統計
 // =========================================
 
-let todayStats = JSON.parse(
-    localStorage.getItem("todayStats")
-) || {
 
-    tickets:0,
-
-    income:0,
-
-    tokens:0,
-
-    greenToy:0,
-
-    redToy:0,
-
-    parent:0
-
-};
-let monthStats = JSON.parse(
-    localStorage.getItem("monthStats")
-) || {
-
-    tickets:0,
-    income:0,
-    tokens:0,
-    greenToy:0,
-    redToy:0,
-    parent:0
-
-};
-
-let totalStats = JSON.parse(
-    localStorage.getItem("totalStats")
-) || {
-
-    tickets:0,
-    income:0,
-    tokens:0,
-    greenToy:0,
-    redToy:0,
-    parent:0
-
-};
 function saveTodayStats(){
 
     localStorage.setItem(
@@ -281,23 +101,7 @@ function rollbackStats(stats, ticket, item){
 // V4.2 售票紀錄
 // =========================================
 
-let salesHistory = JSON.parse(
 
-    localStorage.getItem("salesHistory")
-
-) || [];
-
-function saveSalesHistory(){
-
-    localStorage.setItem(
-
-        "salesHistory",
-
-        JSON.stringify(salesHistory)
-
-    );
-
-}
 // =========================================
 // 建立售票紀錄
 // =========================================
