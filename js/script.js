@@ -1,6 +1,21 @@
+// =========================================
+// DOM 元件
+// =========================================
+const detailImage = document.getElementById("detailImage");
+const detailTitle = document.getElementById("detailTitle");
+const detailPrice = document.getElementById("detailPrice");
+const detailInfo = document.getElementById("detailInfo");
 
+const countdownNumber = document.getElementById("countdownNumber");
+const successTip =
+document.getElementById("successTip");
 
+const linePayBtn = document.getElementById("linePayBtn");
+const cashBtn = document.getElementById("cashBtn");
 
+const todayTab = document.getElementById("todayTab");
+const monthTab = document.getElementById("monthTab");
+const totalTab = document.getElementById("totalTab");
 // =========================================
 // 扣回統計（作廢訂單）
 // =========================================
@@ -38,7 +53,7 @@ function rollbackStats(stats, ticket, item){
 
 function saveSalesRecord(paymentType,totalAmount){
 
-    const now = new Date();
+     now = new Date();
 
     const order={
 
@@ -108,31 +123,9 @@ function bindPaymentButton(button, paymentType){
     });
 
 }
-
-// ==========================
-// 小怪獸放電所 售票機 V3.6
-// ==========================
-
-// --------------------------
-// 取得元件
-// --------------------------
-
-const detailImage = document.getElementById("detailImage");
-const detailTitle = document.getElementById("detailTitle");
-const detailPrice = document.getElementById("detailPrice");
-const detailInfo = document.getElementById("detailInfo");
-
-const countdownNumber = document.getElementById("countdownNumber");
-const successTip =
-document.getElementById("successTip");
-
-const linePayBtn = document.getElementById("linePayBtn");
-const cashBtn = document.getElementById("cashBtn");
-
-// --------------------------
+// =========================================
 // 換頁
-// --------------------------
-
+// =========================================
 document
 .getElementById("detailBackBtn")
 .addEventListener("click",()=>{
@@ -147,9 +140,9 @@ document
 
 });
 
-// --------------------------
+// =========================================
 // 點票
-// --------------------------
+// =========================================
 
 document
 .querySelectorAll(".ticket-btn,.ticket-btn-wide")
@@ -296,15 +289,16 @@ ${info}
     });
 
 });
-// --------------------------
+// =========================================
 // 付款成功
-// --------------------------
+// =========================================
 
 function paymentSuccess(paymentType){
     isReprint = false;
-    //==========================
+    
+//=========================================
 // 本次付款內容
-//==========================
+//=========================================
 
 const payItems =
 cart.length > 0
@@ -329,9 +323,9 @@ if(cart.length > 0){
 
 }
     saveSalesRecord(paymentType,totalAmount);
-    // ==========================
+// ================================================
 // 更新今日統計
-// ==========================
+// ================================================
 
 payItems.forEach(item=>{
 
@@ -367,9 +361,9 @@ bindPaymentButton(linePayBtn,"LINE Pay");
 
 bindPaymentButton(cashBtn,"現金");
 
-// --------------------------
+// =========================================
 // 啟動
-// --------------------------
+// =========================================
 
 showPage("homePage");
 updateTicketButtons();
@@ -390,15 +384,6 @@ function loginAdmin(){
     }
 
 }
-
-
-
-//==========================
-// 更新票券顯示
-//==========================
-
-
-
 /* =========================================
    V3.9 購物車
 ========================================= */
@@ -625,11 +610,10 @@ cartBackBtn.addEventListener("click",()=>{
 
 bindPaymentButton(cartLineBtn,"LINE Pay");
 bindPaymentButton(cartCashBtn,"現金");
+
 // =========================================
 // V3.9.9 購物車付款
 // =========================================
-
-
 
 console.log("checkoutBtn =", checkoutBtn);
 console.log("paymentArea =", paymentArea);
@@ -638,14 +622,9 @@ console.log("cartCashBtn =", cartCashBtn);
 console.log("cartBackBtn =", cartBackBtn);
 
 
-// =========================
+// =======================================
 // 購物車付款
-// =========================
-
-
-const todayTab = document.getElementById("todayTab");
-const monthTab = document.getElementById("monthTab");
-const totalTab = document.getElementById("totalTab");
+// =======================================
 
 if(todayTab){
 
