@@ -558,6 +558,13 @@ function renderTicketManager(){
         ${ticketNames[id]}
 
     </div>
+    <div class="tm-preview">
+
+    <img
+        src="images/${ticket.image || "ticket-default.png"}"
+        class="tm-preview-img">
+
+</div>
 
     <label class="tm-enable">
 
