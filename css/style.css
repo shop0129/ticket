@@ -2621,63 +2621,42 @@ V4 今日統計
 .tm-preview{
 
     display:flex;
-
-    justify-content:center;
+    flex-direction:column;
 
     align-items:center;
 
-    margin:20px 0 25px;
+    margin:15px 0 20px;
 
 }
 
 .tm-preview-img{
 
-    width:180px;
+    width:140px;
 
     border-radius:18px;
 
-    box-shadow:0 6px 18px rgba(0,0,0,.18);
+    box-shadow:0 5px 15px rgba(0,0,0,.15);
 
 }
+
 .tm-image-name{
+
+    display:inline-block;
 
     margin-top:10px;
 
+    padding:6px 16px;
+
+    border-radius:20px;
+
+    background:#f3f7fb;
+
+    border:1px solid #d8e3ef;
+
     font-size:18px;
-
-    color:#666;
-
-    font-weight:bold;
-
-    text-align:center;
-
-    word-break:break-all;
-
-}
-.tm-image-label{
-
-    margin-top:12px;
-
-    font-size:16px;
-
-    color:#888;
-
-    font-weight:bold;
-
-    text-align:center;
-
-}
-
-.tm-image-name{
-
-    margin-top:5px;
-
-    font-size:20px;
 
     font-weight:bold;
 
     color:#333;
-
-    text-align:center;
 
 }
