@@ -578,11 +578,19 @@ function renderTicketManager(){
         src="images/${ticket.image}"
         class="tm-preview-img">
 
-    <div class="tm-image-name">
+    <div class="tm-image-label">
 
-        ${ticket.image}
+        目前圖片
 
     </div>
+
+    <div class="tm-image-name">
+
+        ${imageNames[ticket.image] || ticket.image}
+
+    </div>
+
+</div>
 
 </div>
 
