@@ -991,21 +991,6 @@ function setToy(id,toy){
     event.target.classList.add("active");
 
 }
-const imageList=[
-
-"ticket-2h-green.png",
-"ticket-2h-red.png",
-"ticket-3h-green.png",
-"ticket-3h-red.png",
-"ticket-early.png",
-"ticket-summer.png",
-"ticket-baby.png",
-"ticket-parent.png",
-"ticket-token10.png",
-"ticket-token25.png",
-"ticket-powerbank.png"
-
-];
 function changeTicketImage(id,step){
 
     const ticket=ticketData[id];
