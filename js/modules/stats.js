@@ -64,7 +64,40 @@ function renderStats(data){
 
     document.getElementById("statsParent").innerHTML =
     data.parent + " 張";
+const dateBox = document.getElementById("statsDate");
 
+if(dateBox){
+
+    const today = new Date();
+
+    const week = [
+        "星期日",
+        "星期一",
+        "星期二",
+        "星期三",
+        "星期四",
+        "星期五",
+        "星期六"
+    ];
+
+    if(data === todayStats){
+
+        dateBox.innerHTML =
+            `${today.toLocaleDateString("zh-TW")}（${week[today.getDay()]}）`;
+
+    }else if(data === monthStats){
+
+        dateBox.innerHTML =
+            `${today.getFullYear()} 年 ${today.getMonth()+1} 月`;
+
+    }else{
+
+        dateBox.innerHTML =
+            `截至 ${today.toLocaleDateString("zh-TW")}（${week[today.getDay()]}）`;
+
+    }
+
+}
 }
 function resetTodayStats(){
 
