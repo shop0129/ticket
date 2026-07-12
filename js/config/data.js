@@ -103,8 +103,8 @@ enable:true
 },
 
 };
-if (!.early.token) {
-    .early.token = 15;
+if (!ticketData.early.token) {
+    ticketData.early.token = 15;
     ticketData.early.toy = "red";
 }
 
