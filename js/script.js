@@ -1,5 +1,58 @@
+// =========================================
+// 儲存票券設定
+// =========================================
 
+function saveTicketManager(){
 
+    for(const id in ticketData){
+
+        ticketData[id].enable =
+            document.getElementById(`enable-${id}`).checked;
+
+        ticketData[id].title =
+            document.getElementById(`title-${id}`).value;
+
+        ticketData[id].price =
+            Number(
+                document.getElementById(`priceInput-${id}`).value
+            );
+
+        ticketData[id].token =
+            Number(
+                document.getElementById(`token-${id}`).value
+            );
+
+    }
+
+    localStorage.setItem(
+        "ticketData",
+        JSON.stringify(ticketData)
+    );
+
+    updateTicketButtons();
+
+    updateTicketPrices();
+
+    alert("✅ 票券設定已儲存");
+
+}
+// =========================================
+// 恢復預設票券
+// =========================================
+
+function resetTicketManager(){
+
+    if(!confirm("確定恢復預設票券？")){
+
+        return;
+
+    }
+
+    localStorage.removeItem("ticketData");
+
+    location.reload();
+
+}
 
 // =========================================
 // 扣回統計（作廢訂單）
