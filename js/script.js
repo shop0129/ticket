@@ -540,9 +540,22 @@ function renderTicketManager(){
         token10:"🪙 10枚代幣",
         token25:"🪙 25枚代幣",
         powerbank:"🔋 行動電源"
+    };
+const imageNames = {
+
+        "ticket-2h-green.png":"🟢 2H 綠色票卡",
+        "ticket-2h-red.png":"🔴 2H 紅色票卡",
+        "ticket-3h-green.png":"🟢 3H 綠色票卡",
+        "ticket-3h-red.png":"🔴 3H 紅色票卡",
+        "ticket-early.png":"🌞 平日早鳥",
+        "ticket-summer.png":"🏖 寒暑假限定",
+        "ticket-baby.png":"👶 幼幼票",
+        "ticket-parent.png":"👨 陪同票",
+        "ticket-token10.png":"🪙 10枚代幣",
+        "ticket-token25.png":"🪙 25枚代幣",
+        "ticket-powerbank.png":"🔋 行動電源"
 
     };
-
     for(const id in ticketData){
 
         const ticket = ticketData[id];
