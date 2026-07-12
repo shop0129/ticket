@@ -687,16 +687,7 @@ if(percent > 100){
    "✅ 票券已列印完成";
 successTip.innerHTML =
 "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
-           const sound = document.getElementById("successSound");
-
-sound.pause();
-sound.currentTime = 0;
-
-sound.play().catch(function(err){
-
-    console.log(err);
-
-});
+          playSuccess();
 printStatus.classList.add("print-finish");
     successTitle.style.display="block";
 
