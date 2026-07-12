@@ -2699,3 +2699,31 @@ V4 今日統計
     background:#43a047;
 
 }
+.stats-date{
+
+    margin-top:8px;
+
+    margin-bottom:18px;
+
+    font-size:22px;
+
+    font-weight:700;
+
+    color:#666;
+
+    text-align:center;
+
+}
+.statsDate{
+
+    text-align:center;
+
+    font-size:22px;
+
+    font-weight:bold;
+
+    color:#666;
+
+    margin:18px 0 24px;
+
+}
