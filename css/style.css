@@ -2639,3 +2639,18 @@ V4 今日統計
     box-shadow:0 6px 18px rgba(0,0,0,.18);
 
 }
+.tm-image-name{
+
+    margin-top:10px;
+
+    font-size:18px;
+
+    color:#666;
+
+    font-weight:bold;
+
+    text-align:center;
+
+    word-break:break-all;
+
+}
