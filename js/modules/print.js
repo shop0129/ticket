@@ -210,7 +210,7 @@ printStatus.classList.add("print-finish");
 // ===== 0.5秒後開始倒數 =====
 setTimeout(() => {
 
-    let sec = 5;
+    let sec = systemData.printDelay;
 
     clearInterval(countdownTimer);
 
