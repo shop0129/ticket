@@ -103,12 +103,12 @@ function saveBusinessMode(){
     document.getElementById("autoMode").checked;
 
     localStorage.setItem(
-
         "businessMode",
-
         JSON.stringify(businessMode)
-
     );
+
+    // ⭐ 立即更新首頁票券
+    updateTicketButtons();
 
     alert("✅ 營業模式已儲存");
 
