@@ -18,10 +18,10 @@ function saveTicketManager(){
             );
 
         ticketData[id].token =
-            Number(
-                document.getElementById(`token-${id}`).value
-            );
+Number(document.getElementById(`token-${id}`).value);
 
+    ticketData[id].toy =
+document.getElementById(`toy-${id}`).value;
     }
 
     localStorage.setItem(
@@ -600,14 +600,28 @@ function renderTicketManager(){
 
                 <div class="tm-field">
 
-                    <label>時數</label>
+    <label>玩具</label>
 
-                    <input
-                        id="hour-${id}"
-                        type="number"
-                        value="${Number.isFinite(ticket.hour) ? ticket.hour : 0}">
+    <select id="toy-${id}">
 
-                </div>
+        <option value="none"
+            ${ticket.toy=="none"?"selected":""}>
+            無
+        </option>
+
+        <option value="green"
+            ${ticket.toy=="green"?"selected":""}>
+            🟢 綠標
+        </option>
+
+        <option value="red"
+            ${ticket.toy=="red"?"selected":""}>
+            🔴 紅標
+        </option>
+
+    </select>
+
+</div>
 
                 <div class="tm-field">
 
