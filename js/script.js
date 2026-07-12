@@ -613,6 +613,9 @@ showPage("homePage");
 updateTicketButtons();
 updateTicketPrices();
 function startPrintAnimation(){
+    clearInterval(countdownTimer);
+
+countdownNumber.innerHTML = "";
 
     const progressFill =
     document.getElementById("progressFill");
@@ -1075,6 +1078,7 @@ ${order.status==="cancel"
 
 }
 function reprintOrder(orderNo){
+    
 isReprint = true;
     const order = salesHistory.find(
         x => x.orderNo === orderNo
