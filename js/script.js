@@ -558,10 +558,24 @@ function renderTicketManager(){
         ${ticketNames[id]}
 
     </div>
-    <div class="tm-preview">
+
+    <label class="tm-enable">
+
+        <input
+            type="checkbox"
+            id="enable-${id}"
+            ${ticket.enable ? "checked" : ""}>
+
+        啟用
+
+    </label>
+
+</div>
+
+<div class="tm-preview">
 
     <img
-        src="images/${ticket.image || "ticket-default.png"}"
+        src="images/${ticket.image}"
         class="tm-preview-img">
 
 </div>
