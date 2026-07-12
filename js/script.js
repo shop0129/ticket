@@ -578,6 +578,12 @@ function renderTicketManager(){
         src="images/${ticket.image}"
         class="tm-preview-img">
 
+    <div class="tm-image-name">
+
+        ${ticket.image}
+
+    </div>
+
 </div>
 
 
