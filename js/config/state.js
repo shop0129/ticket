@@ -1,27 +1,38 @@
-// =========================================
-// Monster Ticket V5
-// state.js
-// 全域狀態
-// =========================================
-
-// 購物車
 let cart = [];
 
-// 目前選擇票券
-let selectedTicket = "";
-let selectedReward = "";
-
-// 列印
+// 目前列印中的訂單
 let currentPrintOrder = null;
+
+// 是否為補印模式
 let isReprint = false;
 
-// Timer
-let idleTimer = null;
-let countdownTimer = null;
+// 閒置計時
+let idleTimer;
+let countdownTimer;
 
-// 今日統計
-let todayStats =
-JSON.parse(localStorage.getItem("todayStats")) || {
+// 目前選擇票券
+let selectedReward = "";
+let selectedTicket = "";
+let todayStats = JSON.parse(
+    localStorage.getItem("todayStats")
+) || {
+
+    tickets:0,
+
+    income:0,
+
+    tokens:0,
+
+    greenToy:0,
+
+    redToy:0,
+
+    parent:0
+
+};
+let monthStats = JSON.parse(
+    localStorage.getItem("monthStats")
+) || {
 
     tickets:0,
     income:0,
@@ -32,9 +43,9 @@ JSON.parse(localStorage.getItem("todayStats")) || {
 
 };
 
-// 本月統計
-let monthStats =
-JSON.parse(localStorage.getItem("monthStats")) || {
+let totalStats = JSON.parse(
+    localStorage.getItem("totalStats")
+) || {
 
     tickets:0,
     income:0,
@@ -44,20 +55,20 @@ JSON.parse(localStorage.getItem("monthStats")) || {
     parent:0
 
 };
+let salesHistory = JSON.parse(
 
-// 累積統計
-let totalStats =
-JSON.parse(localStorage.getItem("totalStats")) || {
+    localStorage.getItem("salesHistory")
 
-    tickets:0,
-    income:0,
-    tokens:0,
-    greenToy:0,
-    redToy:0,
-    parent:0
+) || [];
 
-};
+function saveSalesHistory(){
 
-// 售票紀錄
-let salesHistory =
-JSON.parse(localStorage.getItem("salesHistory")) || [];
+    localStorage.setItem(
+
+        "salesHistory",
+
+        JSON.stringify(salesHistory)
+
+    );
+
+}
