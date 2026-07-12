@@ -591,12 +591,6 @@ const imageNames = {
         src="images/${ticket.image}"
         class="tm-preview-img">
 
-    <div class="tm-image-label">
-
-        目前圖片
-
-    </div>
-
     <div class="tm-image-name">
 
         ${imageNames[ticket.image] || ticket.image}
