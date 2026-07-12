@@ -428,6 +428,9 @@ content="width=device-width, initial-scale=1.0">
     onclick="openTicketManager()">
 
     🎫 票券管理
+
+</button>
+
 <button
     class="big-btn"
     onclick="openTodayStats()">
@@ -435,23 +438,44 @@ content="width=device-width, initial-scale=1.0">
     📊 營運中心
 
 </button>
-    <button
+
+<button
     class="big-btn"
     onclick="openSalesHistory()">
 
     🧾 售票紀錄
 
 </button>
+
+<button
+    class="big-btn"
+    onclick="openBusinessMode()">
+
+    🗓️ 營業模式
+
 </button>
-    <button class="big-btn">🎉 活動設定</button>
 
-    <button class="big-btn">⚙ 系統設定</button>
+<button
+    class="big-btn">
 
-    <button class="big-btn">🖨 硬體測試</button>
+    ⚙️ 系統設定
 
-    <button class="big-btn" onclick="showPage('homePage')">
-        返回首頁
-    </button>
+</button>
+
+<button
+    class="big-btn">
+
+    🖨️ 硬體測試
+
+</button>
+
+<button
+    class="big-btn"
+    onclick="showPage('homePage')">
+
+    返回首頁
+
+</button>
 
 </section>
     
@@ -467,7 +491,7 @@ content="width=device-width, initial-scale=1.0">
 
             <button
                 class="back-btn"
-                onclick="showPage('adminHomePage')">
+                ="showPage('adminHomePage')">
 
                 ← 返回
 
@@ -490,20 +514,67 @@ content="width=device-width, initial-scale=1.0">
         <div class="tm-footer">
 
             <button
-                class="big-btn"
-                onclick="saveTicketManager()">
+    class="big-btn"
+    onclick="saveTicketManager()">
 
                 💾 儲存全部
 
             </button>
 <button
     class="big-btn danger-btn"
-    onclick="resetTicketManager()">
+    ="resetTicketManager()">
 
     ♻️ 恢復預設
 
 </button>
         </div>
+
+    </div>
+
+</section>
+    <section
+    id="businessModePage"
+    class="page">
+
+    <header class="tm-header-bar">
+
+        <button
+            class="back-btn"
+            onclick="showPage('adminHomePage')">
+
+            ← 返回
+
+        </button>
+
+        <h1 class="tm-title">
+
+            🗓️ 營業模式
+
+        </h1>
+
+    </header>
+
+    <div id="businessModeTable">
+
+    </div>
+
+    <div class="tm-buttons">
+
+        <button
+            class="save-btn"
+            onclick="saveBusinessMode()">
+
+            💾 儲存全部
+
+        </button>
+
+        <button
+            class="reset-btn"
+            onclick="resetBusinessMode()">
+
+            ♻ 恢復預設
+
+        </button>
 
     </div>
 
@@ -520,7 +591,7 @@ content="width=device-width, initial-scale=1.0">
 
             <button
                 class="back-btn"
-                onclick="showPage('adminHomePage')">
+                ="showPage('adminHomePage')">
 
                 ← 返回
 
@@ -611,7 +682,7 @@ content="width=device-width, initial-scale=1.0">
 
     <button
         class="resetBtn todayBtn"
-        onclick="resetTodayStats()">
+        ="resetTodayStats()">
 
         🔄 今日歸零
 
@@ -619,7 +690,7 @@ content="width=device-width, initial-scale=1.0">
 
     <button
         class="resetBtn monthBtn"
-        onclick="resetMonthStats()">
+        ="resetMonthStats()">
 
         📅 本月歸零
 
@@ -627,7 +698,7 @@ content="width=device-width, initial-scale=1.0">
 
     <button
         class="resetBtn totalBtn"
-        onclick="resetAllStats()">
+        ="resetAllStats()">
 
         🗑 全部歸零
 
@@ -646,7 +717,7 @@ content="width=device-width, initial-scale=1.0">
 
             <button
                 class="back-btn"
-                onclick="showPage('adminHomePage')">
+                ="showPage('adminHomePage')">
 
                 ← 返回
 
@@ -673,7 +744,7 @@ content="width=device-width, initial-scale=1.0">
 
         <button
             class="back-btn"
-            onclick="openSalesHistory()">
+            ="openSalesHistory()">
 
             ← 返回
 
@@ -711,6 +782,7 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/print.js"></script>
 <script src="js/modules/stats.js"></script>
 <script src="js/modules/ticketManager.js"></script>  
+<script src="js/modules/businessMode.js"></script>    
     
 <script src="js/script.js"></script>
 </body>
