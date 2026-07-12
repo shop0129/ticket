@@ -2660,3 +2660,42 @@ V4 今日統計
     color:#333;
 
 }
+.image-switch{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:18px;
+
+    margin-top:12px;
+
+}
+
+.imageArrow{
+
+    width:42px;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#4CAF50;
+
+    color:white;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+}
+
+.imageArrow:hover{
+
+    background:#43a047;
+
+}
