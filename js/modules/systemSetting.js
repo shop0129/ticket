@@ -19,19 +19,9 @@ function renderSystemSetting(){
     const table =
     document.getElementById("systemSettingTable");
 
-    table.innerHTML = `
+   table.innerHTML = `
 
 <div class="tm-card">
-
-    <div class="tm-field">
-
-        <label>🏪 店名</label>
-
-        <input
-            id="shopName"
-            value="${systemData.shopName}">
-
-    </div>
 
     <div class="tm-field">
 
@@ -41,6 +31,41 @@ function renderSystemSetting(){
             id="homeTimeout"
             type="number"
             value="${systemData.homeTimeout}">
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>💳 付款完成停留（秒）</label>
+
+        <input
+            id="paymentDelay"
+            type="number"
+            value="${systemData.paymentDelay}">
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>🖨️ 列印完成停留（秒）</label>
+
+        <input
+            id="printDelay"
+            type="number"
+            value="${systemData.printDelay}">
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>🧾 收據列印份數</label>
+
+        <input
+            id="receiptCopies"
+            type="number"
+            min="1"
+            max="5"
+            value="${systemData.receiptCopies}">
 
     </div>
 
@@ -67,11 +92,17 @@ function renderSystemSetting(){
 
 function saveSystemSetting(){
 
-    systemData.shopName =
-    document.getElementById("shopName").value;
-
     systemData.homeTimeout =
     Number(document.getElementById("homeTimeout").value);
+
+    systemData.paymentDelay =
+    Number(document.getElementById("paymentDelay").value);
+
+    systemData.printDelay =
+    Number(document.getElementById("printDelay").value);
+
+    systemData.receiptCopies =
+    Number(document.getElementById("receiptCopies").value);
 
     systemData.adminPassword =
     document.getElementById("adminPassword").value;
@@ -95,9 +126,13 @@ function resetSystemSetting(){
 
     systemData = {
 
-        shopName:"小怪獸放電所",
-
         homeTimeout:60,
+
+        paymentDelay:8,
+
+        printDelay:5,
+
+        receiptCopies:1,
 
         adminPassword:"1234"
 
