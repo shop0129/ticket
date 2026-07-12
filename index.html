@@ -456,7 +456,8 @@ content="width=device-width, initial-scale=1.0">
 </button>
 
 <button
-    class="big-btn">
+    class="big-btn"
+    onclick="openSystemSetting()">
 
     ⚙️ 系統設定
 
@@ -573,6 +574,55 @@ content="width=device-width, initial-scale=1.0">
             <button
                 class="big-btn danger-btn"
                 onclick="resetBusinessMode()">
+
+                ♻ 恢復預設
+
+            </button>
+
+        </div>
+
+    </div>
+
+</section>
+    <section id="systemSettingPage" class="page">
+
+    <div class="tm-page">
+
+        <div class="tm-top">
+
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
+
+                ← 返回
+
+            </button>
+
+            <h1 class="tm-title">
+
+                ⚙️ 系統設定
+
+            </h1>
+
+        </div>
+
+        <div id="systemSettingTable">
+
+        </div>
+
+        <div class="tm-footer">
+
+            <button
+                class="big-btn"
+                onclick="saveSystemSetting()">
+
+                💾 儲存全部
+
+            </button>
+
+            <button
+                class="big-btn danger-btn"
+                onclick="resetSystemSetting()">
 
                 ♻ 恢復預設
 
