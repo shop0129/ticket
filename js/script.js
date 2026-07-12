@@ -914,7 +914,95 @@ progressText.innerHTML = "0%";
 if(percent > 100){
     percent = 100;
 }
-        
+// =========================================
+// 快速補印
+// =========================================
+
+function startReprintAnimation(){
+
+    const progressFill =
+    document.getElementById("progressFill");
+
+    const progressText =
+    document.getElementById("progressText");
+
+    const printStatus =
+    document.getElementById("printStatus");
+
+    const successTitle =
+    document.querySelector(".success-title");
+
+    const successItems =
+    document.querySelector(".success-items");
+
+    // 顯示內容
+    successTitle.style.display = "none";
+    successItems.style.display = "none";
+
+    progressFill.style.width = "0%";
+    progressText.innerHTML = "0%";
+
+    printStatus.classList.remove("print-finish");
+
+    successTip.innerHTML = "🖨️ 正在補印票券...";
+
+    let percent = 0;
+
+    const timer = setInterval(()=>{
+
+        percent += 20;
+
+        if(percent > 100){
+
+            percent = 100;
+
+        }
+
+        progressFill.style.width = percent + "%";
+
+        progressText.innerHTML = percent + "%";
+
+       if(percent >= 100){
+
+    clearInterval(timer);
+
+    progressFill.style.width = "100%";
+
+    progressText.innerHTML = "100%";
+
+    printStatus.innerHTML =
+    "✅ 補印完成";
+const sound = document.getElementById("successSound");
+
+sound.pause();
+
+sound.currentTime = 0;
+
+sound.play().catch(function(){});
+    successTip.innerHTML =
+    "🧾 請取回補印票券";
+
+            printStatus.classList.add("print-finish");
+
+            successTitle.style.display = "block";
+
+            successItems.style.display = "block";
+
+            setTimeout(()=>{
+
+                const index = salesHistory.findIndex(
+                    x => x.orderNo === currentPrintOrder.orderNo
+                );
+
+                openOrderDetail(index);
+
+            },500);
+
+        }
+
+    },80);
+
+}        
 
         progressFill.style.width=percent+"%";
 
@@ -1352,7 +1440,7 @@ isReprint = true;
 currentPrintOrder = order;
 showPage("successPage");
 updateSuccessItems();
-startPrintAnimation();
+startReprintAnimation();
     }
 function cancelOrder(orderNo){
 
