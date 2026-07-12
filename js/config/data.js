@@ -125,20 +125,26 @@ JSON.parse(localStorage.getItem("businessMode")) || {
 let systemData =
 JSON.parse(localStorage.getItem("systemData")) || {
 
-    shopName:"小怪獸放電所",
-
+    // 自動回首頁秒數
     homeTimeout:60,
 
+    // 付款完成停留
+    paymentDelay:8,
+
+    // 列印完成停留
+    printDelay:5,
+
+    // 收據列印份數
+    receiptCopies:1,
+
+    // 管理密碼
     adminPassword:"1234"
 
 };
 
 localStorage.setItem(
-
     "systemData",
-
     JSON.stringify(systemData)
-
 );
 //==========================
 // 票券名稱
