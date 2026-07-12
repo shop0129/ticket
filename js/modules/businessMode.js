@@ -19,93 +19,59 @@ function renderBusinessMode(){
     const table =
     document.getElementById("businessModeTable");
 
-    table.innerHTML = `
+    table.innerHTML = "";
+
+    const modeNames = {
+
+        weekday:"🌤️ 平日",
+
+        holiday:"🎈 假日",
+
+        summer:"🏖️ 寒暑假",
+
+        event:"🎉 特殊活動"
+
+    };
+
+    for(const id in modeNames){
+
+        table.innerHTML += `
 
 <div class="tm-card">
 
-    <div class="tm-card-title">
+    <div class="tm-card-header">
 
-        🗓️ 目前營業模式
+        <div class="tm-card-title">
 
-    </div>
+            ${modeNames[id]}
 
-    <div class="modeGrid">
+        </div>
 
-        <label class="modeCard">
-
-            <input
-                type="radio"
-                name="businessMode"
-                value="weekday"
-                ${businessMode.mode==="weekday"?"checked":""}>
-
-            <div class="modeIcon">🌤️</div>
-
-            <div class="modeTitle">
-
-                平日
-
-            </div>
-
-            <div class="modeDesc">
-
-                一般營運模式
-
-            </div>
-
-        </label>
-
-        <label class="modeCard">
+        <label class="tm-enable">
 
             <input
                 type="radio"
                 name="businessMode"
-                value="holiday"
-                ${businessMode.mode==="holiday"?"checked":""}>
+                value="${id}"
+                ${businessMode.mode===id?"checked":""}>
 
-            <div class="modeIcon">🎈</div>
-
-            <div class="modeTitle">
-
-                假日
-
-            </div>
-
-            <div class="modeDesc">
-
-                六日、連假
-
-            </div>
-
-        </label>
-
-        <label class="modeCard">
-
-            <input
-                type="radio"
-                name="businessMode"
-                value="summer"
-                ${businessMode.mode==="summer"?"checked":""}>
-
-            <div class="modeIcon">🏖️</div>
-
-            <div class="modeTitle">
-
-                寒暑假
-
-            </div>
-
-            <div class="modeDesc">
-
-                寒假、暑假
-
-            </div>
+            啟用
 
         </label>
 
     </div>
 
-    <label class="autoMode">
+</div>
+
+`;
+
+    }
+
+    table.innerHTML += `
+
+<div class="tm-card">
+
+    <label class="tm-enable">
 
         <input
             type="checkbox"
