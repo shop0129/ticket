@@ -1,4 +1,4 @@
-alert("storage loaded");
+console.log("storage.js loaded");
 function saveTodayStats(){
 
     localStorage.setItem(
