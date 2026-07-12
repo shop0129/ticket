@@ -119,6 +119,28 @@ JSON.parse(localStorage.getItem("businessMode")) || {
 
 };
 //==========================
+// 系統設定
+//==========================
+
+let systemData =
+JSON.parse(localStorage.getItem("systemData")) || {
+
+    shopName:"小怪獸放電所",
+
+    homeTimeout:60,
+
+    adminPassword:"1234"
+
+};
+
+localStorage.setItem(
+
+    "systemData",
+
+    JSON.stringify(systemData)
+
+);
+//==========================
 // 票券名稱
 //==========================
 
