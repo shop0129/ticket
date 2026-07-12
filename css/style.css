@@ -2654,3 +2654,30 @@ V4 今日統計
     word-break:break-all;
 
 }
+.tm-image-label{
+
+    margin-top:12px;
+
+    font-size:16px;
+
+    color:#888;
+
+    font-weight:bold;
+
+    text-align:center;
+
+}
+
+.tm-image-name{
+
+    margin-top:5px;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    color:#333;
+
+    text-align:center;
+
+}
