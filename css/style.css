@@ -2723,6 +2723,53 @@ V4 今日統計
     max-width:700px;
 
     margin:30px auto;
+/*==========================
+System Setting
+==========================*/
+
+.settingStepper{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:25px;
+
+}
+
+.stepBtn{
+
+    width:55px;
+
+    height:55px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#ff9800;
+
+    color:#fff;
+
+    font-size:30px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+.settingStepper span{
+
+    min-width:120px;
+
+    text-align:center;
+
+    font-size:28px;
+
+    font-weight:bold;
 
 }
 
