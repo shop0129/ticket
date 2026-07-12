@@ -8,8 +8,8 @@ JSON.parse(localStorage.getItem("ticketData")) || {
     token:10,
     toy:"green",
     reward:"token,band,toy",
-    enable:true
-
+    enable:true,
+image:"ticket-2h-green.png"
        },
 
 ticket2hRed:{
@@ -19,7 +19,8 @@ ticket2hRed:{
     token:15,
     toy:"red",
     reward:"token,band,toy",
-    enable:true
+    enable:true,
+    image:"ticket-2h-red.png"
 },
 
     ticket3hGreen:{
@@ -29,8 +30,8 @@ ticket2hRed:{
         token:15,
         toy:"green",
         reward:"token,band,toy",
-enable:true
-   
+enable:true,
+   image:"ticket-3h-green.png"
     },
 
     ticket3hRed:{
@@ -40,8 +41,8 @@ enable:true
         token:20,
         toy:"red",
         reward:"token,band,toy",
-enable:true
-   
+enable:true,
+   image:"ticket-3h-red.png"
     },
 
    early:{
@@ -50,8 +51,8 @@ enable:true
     token:15,
     toy:"red",
     reward:"token,band,toy",
-enable:true
-   
+enable:true,
+   image:"ticket-early.png"
 },
 
     summer:{
@@ -60,42 +61,48 @@ enable:true
     token:20,
     toy:"red",
     reward:"token,band,toy",
-enable:true
+enable:true,
+        image:"ticket-summer.png"
 },
 
     baby:{
     title:"幼幼票",
     price:100,
     reward:"band",
-        enable:true
+        enable:true,
+        image:"ticket-baby.png"
 },
 
     parent:{
     title:"陪同票",
     price:80,
     reward:"band",
-        enable:true
+        enable:true,
+        image:"ticket-parent.png"
 },
 
     token10:{
     title:"10枚代幣",
     price:100,
     reward:"token10",
-        enable:true
+        enable:true,
+        image:"ticket-token10.png"
 },
 
     token25:{
     title:"25枚代幣",
     price:200,
     reward:"token25",
-        enable:true
+        enable:true,
+        image:"ticket-token25.png"
 },
 
     powerbank:{
     title:"行動電源",
     price:50,
     reward:"powerbank",
-        enable:true
+        enable:true,
+        image:"ticket-powerbank.png"
 },
 
 };
