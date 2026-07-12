@@ -602,24 +602,41 @@ function renderTicketManager(){
 
     <label>玩具</label>
 
-    <select id="toy-${id}">
+    <div class="toy-group">
 
-        <option value="none"
-            ${ticket.toy=="none"?"selected":""}>
-            無
-        </option>
+        <button
+            type="button"
+            class="toy-btn ${ticket.toy=="none"?"active":""}"
+            onclick="setToy('${id}','none')">
 
-        <option value="green"
-            ${ticket.toy=="green"?"selected":""}>
+            🚫 無
+
+        </button>
+
+        <button
+            type="button"
+            class="toy-btn ${ticket.toy=="green"?"active":""}"
+            onclick="setToy('${id}','green')">
+
             🟢 綠標
-        </option>
 
-        <option value="red"
-            ${ticket.toy=="red"?"selected":""}>
+        </button>
+
+        <button
+            type="button"
+            class="toy-btn ${ticket.toy=="red"?"active":""}"
+            onclick="setToy('${id}','red')">
+
             🔴 紅標
-        </option>
 
-    </select>
+        </button>
+
+    </div>
+
+    <input
+        type="hidden"
+        id="toy-${id}"
+        value="${ticket.toy}">
 
 </div>
 
@@ -930,5 +947,27 @@ if(totalTab){
         totalTab.classList.add("active");
 
     };
+
+}
+function setToy(id,toy){
+
+    document
+    .getElementById(`toy-${id}`)
+    .value = toy;
+
+    const group =
+    document
+    .getElementById(`toy-${id}`)
+    .parentElement;
+
+    group
+    .querySelectorAll(".toy-btn")
+    .forEach(btn=>{
+
+        btn.classList.remove("active");
+
+    });
+
+    event.target.classList.add("active");
 
 }
