@@ -527,35 +527,7 @@ function renderTicketManager(){
 
     table.innerHTML = "";
 
-    const ticketNames = {
-
-        ticket2hGreen:"🟢 2H 小怪獸",
-        ticket2hRed:"🔴 2H 小怪獸 Plus",
-        ticket3hGreen:"🟢 3H 大怪獸",
-        ticket3hRed:"🔴 3H 大怪獸 Plus",
-        early:"🌞 平日早鳥",
-        summer:"🏖 寒暑假限定",
-        baby:"👶 幼幼票",
-        parent:"👨 陪同票",
-        token10:"🪙 10枚代幣",
-        token25:"🪙 25枚代幣",
-        powerbank:"🔋 行動電源"
-    };
-const imageNames = {
-
-        "ticket-2h-green.png":"🟢 2H 綠色票卡",
-        "ticket-2h-red.png":"🔴 2H 紅色票卡",
-        "ticket-3h-green.png":"🟢 3H 綠色票卡",
-        "ticket-3h-red.png":"🔴 3H 紅色票卡",
-        "ticket-early.png":"🌞 平日早鳥",
-        "ticket-summer.png":"🏖 寒暑假限定",
-        "ticket-baby.png":"👶 幼幼票",
-        "ticket-parent.png":"👨 陪同票",
-        "ticket-token10.png":"🪙 10枚代幣",
-        "ticket-token25.png":"🪙 25枚代幣",
-        "ticket-powerbank.png":"🔋 行動電源"
-
-    };
+    
     for(const id in ticketData){
 
         const ticket = ticketData[id];
@@ -589,11 +561,34 @@ const imageNames = {
 
     <img
         src="images/${ticket.image}"
-        class="tm-preview-img">
+        class="tm-preview-img"
+        id="preview-${id}">
 
-    <div class="tm-image-name">
+    <div class="image-switch">
 
-        ${imageNames[ticket.image] || ticket.image}
+        <button
+            class="imageArrow"
+            onclick="changeTicketImage('${id}',-1)">
+
+            ◀
+
+        </button>
+
+        <div
+            class="tm-image-name"
+            id="imageName-${id}">
+
+            ${imageNames[ticket.image] || ticket.image}
+
+        </div>
+
+        <button
+            class="imageArrow"
+            onclick="changeTicketImage('${id}',1)">
+
+            ▶
+
+        </button>
 
     </div>
 
@@ -994,5 +989,58 @@ function setToy(id,toy){
     });
 
     event.target.classList.add("active");
+
+}
+const imageList=[
+
+"ticket-2h-green.png",
+"ticket-2h-red.png",
+"ticket-3h-green.png",
+"ticket-3h-red.png",
+"ticket-early.png",
+"ticket-summer.png",
+"ticket-baby.png",
+"ticket-parent.png",
+"ticket-token10.png",
+"ticket-token25.png",
+"ticket-powerbank.png"
+
+];
+function changeTicketImage(id,step){
+
+    const ticket=ticketData[id];
+
+    let index=imageList.indexOf(ticket.image);
+
+    if(index==-1){
+
+        index=0;
+
+    }
+
+    index+=step;
+
+    if(index<0){
+
+        index=imageList.length-1;
+
+    }
+
+    if(index>=imageList.length){
+
+        index=0;
+
+    }
+
+    ticket.image=imageList[index];
+
+    document
+    .getElementById(`preview-${id}`)
+    .src="images/"+ticket.image;
+
+    document
+    .getElementById(`imageName-${id}`)
+    .innerHTML=
+    imageNames[ticket.image];
 
 }
