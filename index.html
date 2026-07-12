@@ -536,45 +536,49 @@ content="width=device-width, initial-scale=1.0">
     id="businessModePage"
     class="page">
 
-    <header class="tm-header-bar">
+    <div class="tm-page">
 
-        <button
-            class="back-btn"
-            onclick="showPage('adminHomePage')">
+        <div class="tm-top">
 
-            ← 返回
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
 
-        </button>
+                ← 返回
 
-        <h1 class="tm-title">
+            </button>
 
-            🗓️ 營業模式
+            <h1 class="tm-title">
 
-        </h1>
+                🗓️ 營業模式
 
-    </header>
+            </h1>
 
-    <div id="businessModeTable">
+        </div>
 
-    </div>
+        <div id="businessModeTable">
 
-    <div class="tm-footer">
+        </div>
 
-        <button
-            class="save-btn"
-            onclick="saveBusinessMode()">
+        <div class="tm-footer">
 
-            💾 儲存全部
+            <button
+                class="big-btn"
+                onclick="saveBusinessMode()">
 
-        </button>
+                💾 儲存全部
 
-        <button
-            class="reset-btn"
-            onclick="resetBusinessMode()">
+            </button>
 
-            ♻ 恢復預設
+            <button
+                class="big-btn danger-btn"
+                onclick="resetBusinessMode()">
 
-        </button>
+                ♻ 恢復預設
+
+            </button>
+
+        </div>
 
     </div>
 
