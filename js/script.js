@@ -144,19 +144,7 @@ function bindPaymentButton(button, paymentType){
     });
 
 }
-document
-.getElementById("startBtn")
-.addEventListener("click",()=>{
 
-    playClick();
-
-    setTimeout(()=>{
-
-        showPage("ticketPage");
-
-    },100);
-
-});
 // ==========================
 // 小怪獸放電所 售票機 V3.6
 // ==========================
@@ -180,47 +168,6 @@ const cashBtn = document.getElementById("cashBtn");
 // --------------------------
 // 換頁
 // --------------------------
-
-function showPage(pageId){
-
-    clearInterval(countdownTimer);
-
-    document.querySelectorAll(".page").forEach(page=>{
-
-        page.classList.remove("active");
-
-    });
-
-    document
-        .getElementById(pageId)
-        .classList.add("active");
-
-    resetIdleTimer();
-
-}
-
-// --------------------------
-// 首頁
-// --------------------------
-
-
-// --------------------------
-// 返回
-// --------------------------
-
-document
-.getElementById("backBtn")
-.addEventListener("click",()=>{
-
-    playClick();
-
-    setTimeout(()=>{
-
-        showPage("homePage");
-
-    },80);
-
-});
 
 document
 .getElementById("detailBackBtn")
@@ -584,26 +531,9 @@ if(item.id === "token25"){
 // 閒置60秒自動回首頁
 // --------------------------
 
-function resetIdleTimer(){
 
-    clearTimeout(idleTimer);
 
-    idleTimer = setTimeout(()=>{
 
-        // 如果不是首頁就回首頁
-        if(!document.getElementById("homePage").classList.contains("active")){
-
-            showPage("homePage");
-
-        }
-
-    },60000);
-
-}
-
-document.addEventListener("click", resetIdleTimer);
-
-document.addEventListener("touchstart", resetIdleTimer);
 
 // --------------------------
 // 啟動
