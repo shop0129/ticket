@@ -580,18 +580,6 @@ function renderTicketManager(){
 
 </div>
 
-    <label class="tm-enable">
-
-        <input
-            type="checkbox"
-            id="enable-${id}"
-            ${ticket.enable ? "checked" : ""}>
-
-        啟用
-
-    </label>
-
-</div>
 
             <div class="tm-field">
 
