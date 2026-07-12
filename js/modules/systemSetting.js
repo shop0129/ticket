@@ -19,59 +19,147 @@ function renderSystemSetting(){
     const table =
     document.getElementById("systemSettingTable");
 
-   table.innerHTML = `
+  table.innerHTML = `
+
+<!-- ==========================
+系統
+========================== -->
 
 <div class="tm-card">
 
-    <div class="tm-field">
+    <div class="tm-card-title">
 
-        <label>⏱ 自動回首頁（秒）</label>
-
-        <input
-            id="homeTimeout"
-            type="number"
-            value="${systemData.homeTimeout}">
+        ⏱️ 系統
 
     </div>
 
     <div class="tm-field">
 
-        <label>💳 付款完成停留（秒）</label>
+        <label>自動回首頁</label>
 
-        <input
-            id="paymentDelay"
-            type="number"
-            value="${systemData.paymentDelay}">
+        <div class="settingStepper">
 
-    </div>
+            <button
+                class="stepBtn"
+                onclick="changeSetting('homeTimeout',-10)">
 
-    <div class="tm-field">
+                －
 
-        <label>🖨️ 列印完成停留（秒）</label>
+            </button>
 
-        <input
-            id="printDelay"
-            type="number"
-            value="${systemData.printDelay}">
+            <span id="homeTimeoutText">
 
-    </div>
+                ${systemData.homeTimeout} 秒
 
-    <div class="tm-field">
+            </span>
 
-        <label>🧾 收據列印份數</label>
+            <button
+                class="stepBtn"
+                onclick="changeSetting('homeTimeout',10)">
 
-        <input
-            id="receiptCopies"
-            type="number"
-            min="1"
-            max="5"
-            value="${systemData.receiptCopies}">
+                ＋
+
+            </button>
+
+        </div>
 
     </div>
 
     <div class="tm-field">
 
-        <label>🔐 管理密碼</label>
+        <label>列印完成倒數</label>
+
+        <div class="settingStepper">
+
+            <button
+                class="stepBtn"
+                onclick="changeSetting('printDelay',-1)">
+
+                －
+
+            </button>
+
+            <span id="printDelayText">
+
+                ${systemData.printDelay} 秒
+
+            </span>
+
+            <button
+                class="stepBtn"
+                onclick="changeSetting('printDelay',1)">
+
+                ＋
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================
+列印
+========================== -->
+
+<div class="tm-card">
+
+    <div class="tm-card-title">
+
+        🖨️ 列印
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>收據列印份數</label>
+
+        <div class="settingStepper">
+
+            <button
+                class="stepBtn"
+                onclick="changeSetting('receiptCopies',-1)">
+
+                －
+
+            </button>
+
+            <span id="receiptCopiesText">
+
+                ${systemData.receiptCopies} 份
+
+            </span>
+
+            <button
+                class="stepBtn"
+                onclick="changeSetting('receiptCopies',1)">
+
+                ＋
+
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ==========================
+管理
+========================== -->
+
+<div class="tm-card">
+
+    <div class="tm-card-title">
+
+        🔐 管理
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>管理密碼</label>
 
         <input
             id="adminPassword"
@@ -142,6 +230,49 @@ function resetSystemSetting(){
         "systemData",
         JSON.stringify(systemData)
     );
+
+    renderSystemSetting();
+
+}
+function changeSetting(key, step){
+
+    systemData[key] += step;
+
+    if(key=="homeTimeout"){
+
+        if(systemData[key] < 10){
+
+            systemData[key] = 10;
+
+        }
+
+    }
+
+    if(key=="printDelay"){
+
+        if(systemData[key] < 1){
+
+            systemData[key] = 1;
+
+        }
+
+    }
+
+    if(key=="receiptCopies"){
+
+        if(systemData[key] < 1){
+
+            systemData[key] = 1;
+
+        }
+
+        if(systemData[key] > 5){
+
+            systemData[key] = 5;
+
+        }
+
+    }
 
     renderSystemSetting();
 
