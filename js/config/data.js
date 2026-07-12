@@ -107,6 +107,18 @@ enable:true,
 
 };
 //==========================
+// 營業模式
+//==========================
+
+let businessMode =
+JSON.parse(localStorage.getItem("businessMode")) || {
+
+    mode:"weekday",
+
+    auto:false
+
+};
+//==========================
 // 票券名稱
 //==========================
 
