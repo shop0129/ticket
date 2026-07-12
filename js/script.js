@@ -728,31 +728,7 @@ function openTodayStats(){
 // 扣回統計
 //==========================
 
-order.items.forEach(item=>{
 
-    rollbackStats(todayStats, item, item);
-
-    rollbackStats(monthStats, item, item);
-
-    rollbackStats(totalStats, item, item);
-
-});
-
-// 儲存統計
-saveTodayStats();
-
-// 儲存售票紀錄
-saveSalesHistory();
-
-alert("✅ 訂單已作廢");
-
-    openOrderDetail(
-        salesHistory.findIndex(
-            x => x.orderNo === orderNo
-        )
-    );
-
-}
 function renderStats(data){
 
     document.getElementById("statsTickets").innerHTML =
