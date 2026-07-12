@@ -25,7 +25,7 @@ function renderBusinessMode(){
 
     <div class="tm-card-title">
 
-        目前營業模式
+        🗓️ 請選擇目前營業模式
 
     </div>
 
@@ -35,7 +35,7 @@ function renderBusinessMode(){
 
             <input
                 type="radio"
-                name="mode"
+                name="businessMode"
                 value="weekday"
                 ${businessMode.mode==="weekday"?"checked":""}>
 
@@ -51,7 +51,7 @@ function renderBusinessMode(){
 
             <input
                 type="radio"
-                name="mode"
+                name="businessMode"
                 value="holiday"
                 ${businessMode.mode==="holiday"?"checked":""}>
 
@@ -67,7 +67,7 @@ function renderBusinessMode(){
 
             <input
                 type="radio"
-                name="mode"
+                name="businessMode"
                 value="summer"
                 ${businessMode.mode==="summer"?"checked":""}>
 
@@ -86,7 +86,7 @@ function renderBusinessMode(){
                 id="autoMode"
                 ${businessMode.auto?"checked":""}>
 
-            自動依日期切換
+            自動依日期切換（之後開放）
 
         </label>
 
@@ -106,7 +106,7 @@ function saveBusinessMode(){
 
     businessMode.mode =
     document.querySelector(
-        "input[name=mode]:checked"
+        "input[name='businessMode']:checked"
     ).value;
 
     businessMode.auto =
@@ -120,7 +120,7 @@ function saveBusinessMode(){
 
     );
 
-    alert("✅ 已儲存");
+    alert("✅ 營業模式已儲存");
 
 }
 
