@@ -753,8 +753,21 @@ const items = currentPrintOrder.items || [];
 
 const ticket = item;
 
-        // 代幣
-        totalToken += ticket.token || 0;
+       // 一般票送的代幣
+totalToken += ticket.token || 0;
+
+// 代幣商品
+if(item.id === "token10"){
+
+    totalToken += 10;
+
+}
+
+if(item.id === "token25"){
+
+    totalToken += 25;
+
+}
 
         // 手環
         if(ticket.reward &&
