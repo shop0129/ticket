@@ -456,6 +456,10 @@ function openTicketManager(){
 // 更新票券顯示
 //==========================
 
+//==========================
+// 更新票券顯示 / 圖片
+//==========================
+
 function updateTicketButtons(){
 
     document
@@ -466,6 +470,14 @@ function updateTicketButtons(){
 
         if(!id) return;
 
+        // ===== 更新圖片 =====
+        if(ticketData[id] && ticketData[id].image){
+
+            btn.src = "images/" + ticketData[id].image;
+
+        }
+
+        // ===== 控制顯示 =====
         const item = btn.closest(".ticket-item");
 
         if(ticketData[id] && ticketData[id].enable){
