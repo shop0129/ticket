@@ -19,17 +19,63 @@ function updateTicketButtons(){
 
         if(!id) return;
 
-        // ===== 更新圖片 =====
-        if(ticketData[id] && ticketData[id].image){
+        const item = btn.closest(".ticket-item");
 
-            btn.src = "images/" + ticketData[id].image;
+        let enable =
+            ticketData[id] &&
+            ticketData[id].enable;
+
+        //==========================
+        // 營業模式
+        //==========================
+
+        if(enable){
+
+            switch(businessMode.mode){
+
+                case "weekday":
+
+                    // 平日：隱藏寒暑假票
+                    if(id==="summer"){
+
+                        enable = false;
+
+                    }
+
+                    break;
+
+                case "holiday":
+
+                    // 假日：隱藏早鳥、寒暑假
+                    if(id==="early" || id==="summer"){
+
+                        enable = false;
+
+                    }
+
+                    break;
+
+                case "summer":
+
+                    // 寒暑假：隱藏早鳥
+                    if(id==="early"){
+
+                        enable = false;
+
+                    }
+
+                    break;
+
+                case "event":
+
+                    // 之後特殊活動
+                    break;
+
+            }
 
         }
 
-        // ===== 控制顯示 =====
-        const item = btn.closest(".ticket-item");
-
-        if(ticketData[id] && ticketData[id].enable){
+        if(enable){
 
             if(item){
 
