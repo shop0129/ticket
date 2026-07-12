@@ -2703,12 +2703,14 @@ V4 今日統計
 
     text-align:center;
 
-    font-size:22px;
+    font-size:32px;
 
-    font-weight:bold;
+    font-weight:900;
 
-    color:#666;
+    color:#333;
 
-    margin:18px 0 24px;
+    letter-spacing:1px;
+
+    margin:18px 0 28px;
 
 }
