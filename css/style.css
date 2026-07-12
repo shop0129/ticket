@@ -1404,6 +1404,7 @@ V3.8 卡片式票券管理
     margin:40px 0 80px;
 
 }
+
 /*==========================
 票券管理 V3.8
 ==========================*/
@@ -2584,5 +2585,44 @@ V4 今日統計
     font-size:22px;
 
     font-weight:bold;
+
+}
+.toy-group{
+
+    display:flex;
+
+    gap:10px;
+
+    margin-top:8px;
+
+}
+
+.toy-btn{
+
+    flex:1;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:12px;
+
+    background:#eeeeee;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.toy-btn.active{
+
+    background:#4CAF50;
+
+    color:white;
 
 }
