@@ -180,21 +180,11 @@ function renderSystemSetting(){
 
 function saveSystemSetting(){
 
-    systemData.homeTimeout =
-    Number(document.getElementById("homeTimeout").value);
-
-    systemData.paymentDelay =
-    Number(document.getElementById("paymentDelay").value);
-
-    systemData.printDelay =
-    Number(document.getElementById("printDelay").value);
-
-    systemData.receiptCopies =
-    Number(document.getElementById("receiptCopies").value);
-
+    // 只有管理密碼還需要從 input 讀取
     systemData.adminPassword =
     document.getElementById("adminPassword").value;
 
+    // 儲存全部設定
     localStorage.setItem(
         "systemData",
         JSON.stringify(systemData)
