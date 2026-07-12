@@ -28,7 +28,7 @@ function resetIdleTimer(){
 
         }
 
-    },60000);
+    }, systemData.homeTimeout * 1000);
 
 }
 document.addEventListener("click", resetIdleTimer);
