@@ -126,6 +126,33 @@ for(const id in ticketData){
     }
 
 }
+// ===== 補上 image 預設值 =====
+
+const defaultImages = {
+
+    ticket2hGreen:"ticket-2h-green.png",
+    ticket2hRed:"ticket-2h-red.png",
+    ticket3hGreen:"ticket-3h-green.png",
+    ticket3hRed:"ticket-3h-red.png",
+    early:"ticket-early.png",
+    summer:"ticket-summer.png",
+    baby:"ticket-baby.png",
+    parent:"ticket-parent.png",
+    token10:"ticket-token10.png",
+    token25:"ticket-token25.png",
+    powerbank:"ticket-powerbank.png"
+
+};
+
+for(const id in ticketData){
+
+    if(!ticketData[id].image){
+
+        ticketData[id].image = defaultImages[id];
+
+    }
+
+}
 console.log(JSON.stringify(ticketData, null, 2));
 localStorage.setItem(
     "ticketData",
