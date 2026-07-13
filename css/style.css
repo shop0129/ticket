@@ -2725,6 +2725,7 @@ V4 今日統計
     max-width:700px;
 
     margin:30px auto;
+   }
 /*==========================
 System Setting
 ==========================*/
@@ -2774,4 +2775,426 @@ System Setting
     font-weight:bold;
 
 }
+/*====================================================
+  V5.5 系統設定正式版
+====================================================*/
 
+#systemSettingPage{
+
+    flex-direction:column;
+
+    background:#f3f6fa;
+
+    overflow-y:auto;
+
+}
+
+#systemSettingPage .tm-page{
+
+    width:100%;
+
+    max-width:1000px;
+
+    margin:0 auto;
+
+    padding:25px 35px 90px;
+
+}
+
+#systemSettingPage .tm-top{
+
+    padding:20px 0 25px;
+
+    background:#f3f6fa;
+
+}
+
+#systemSettingPage .tm-title{
+
+    margin:10px 0 25px;
+
+    font-size:52px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+#systemSettingTable{
+
+    width:100%;
+
+    max-width:900px;
+
+    margin:0 auto;
+
+}
+
+/* 卡片 */
+
+.system-card{
+
+    width:100%;
+
+    margin-bottom:28px;
+
+    padding:32px 36px;
+
+    background:#fff;
+
+    border-radius:24px;
+
+    box-shadow:0 8px 22px rgba(0,0,0,.09);
+
+}
+
+.system-card-title{
+
+    margin-bottom:25px;
+
+    padding-bottom:18px;
+
+    border-bottom:2px solid #eeeeee;
+
+    font-size:34px;
+
+    line-height:1.3;
+
+    font-weight:900;
+
+    color:#222;
+
+}
+
+/* 一般設定列 */
+
+.system-setting-row{
+
+    min-height:92px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:30px;
+
+    padding:14px 0;
+
+    border-bottom:1px solid #eeeeee;
+
+}
+
+.system-setting-row:last-child{
+
+    border-bottom:none;
+
+}
+
+.system-setting-label{
+
+    flex:1;
+
+    font-size:30px;
+
+    font-weight:800;
+
+    color:#333;
+
+}
+
+/* 加減控制 */
+
+.settingStepper{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+.stepBtn{
+
+    width:68px;
+
+    height:68px;
+
+    border:none;
+
+    border-radius:16px;
+
+    background:#ff9800;
+
+    color:#fff;
+
+    font-size:40px;
+
+    line-height:1;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    box-shadow:0 5px 12px rgba(255,152,0,.28);
+
+    transition:.15s;
+
+}
+
+.stepBtn:hover{
+
+    background:#fb8c00;
+
+    transform:translateY(-2px);
+
+}
+
+.stepBtn:active{
+
+    transform:scale(.92);
+
+}
+
+.settingStepper span{
+
+    min-width:145px;
+
+    text-align:center;
+
+    font-size:34px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+/* 付款方式 */
+
+.payment-setting-row{
+
+    min-height:86px;
+
+    display:grid;
+
+    grid-template-columns:48px 1fr 180px;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:12px 4px;
+
+    border-bottom:1px solid #eeeeee;
+
+    cursor:pointer;
+
+}
+
+.payment-setting-row:last-child{
+
+    border-bottom:none;
+
+}
+
+.payment-setting-row input[type="checkbox"]{
+
+    width:34px;
+
+    height:34px;
+
+    margin:0;
+
+    cursor:pointer;
+
+    accent-color:#2196F3;
+
+}
+
+.payment-setting-name{
+
+    font-size:30px;
+
+    font-weight:800;
+
+    color:#333;
+
+}
+
+.payment-setting-status{
+
+    justify-self:end;
+
+    min-width:150px;
+
+    padding:10px 16px;
+
+    border-radius:22px;
+
+    text-align:center;
+
+    font-size:23px;
+
+    font-weight:800;
+
+}
+
+.status-ready{
+
+    color:#218838;
+
+    background:#e9f8ed;
+
+}
+
+.status-pending{
+
+    color:#777;
+
+    background:#f0f1f3;
+
+}
+
+/* 密碼 */
+
+.password-setting-box{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:14px;
+
+}
+
+.password-setting-box label{
+
+    font-size:29px;
+
+    font-weight:800;
+
+    color:#333;
+
+}
+
+.password-setting-box input{
+
+    width:100%;
+
+    height:70px;
+
+    padding:0 20px;
+
+    border:2px solid #d7dce2;
+
+    border-radius:15px;
+
+    background:#fff;
+
+    font-size:32px;
+
+    letter-spacing:5px;
+
+    color:#333;
+
+    outline:none;
+
+}
+
+.password-setting-box input:focus{
+
+    border-color:#2196F3;
+
+    box-shadow:0 0 0 4px rgba(33,150,243,.12);
+
+}
+
+/* 底部按鈕 */
+
+#systemSettingPage .tm-footer{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:22px;
+
+    margin:35px auto 50px;
+
+}
+
+#systemSettingPage .tm-footer .big-btn{
+
+    width:360px;
+
+    height:90px;
+
+    margin:0;
+
+    font-size:31px;
+
+}
+
+/* 小尺寸螢幕 */
+
+@media (max-width:700px){
+
+    #systemSettingPage .tm-page{
+
+        padding:20px 18px 70px;
+
+    }
+
+    .system-card{
+
+        padding:25px 22px;
+
+    }
+
+    .system-setting-row{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:18px;
+
+    }
+
+    .settingStepper{
+
+        width:100%;
+
+        justify-content:center;
+
+    }
+
+    .payment-setting-row{
+
+        grid-template-columns:44px 1fr;
+
+    }
+
+    .payment-setting-status{
+
+        grid-column:2;
+
+        justify-self:start;
+
+    }
+
+    #systemSettingPage .tm-footer{
+
+        flex-direction:column;
+
+        align-items:center;
+
+    }
+
+}
