@@ -874,9 +874,11 @@ cursor:pointer;
 
 }
 #linePayBtn:disabled,
-#cashBtn:disabled{
+#cashBtn:disabled,
+#cartLineBtn:disabled,
+#cartCashBtn:disabled{
 
-    opacity:.5;
+    opacity:.45;
 
     cursor:not-allowed;
 
