@@ -463,6 +463,15 @@ content="width=device-width, initial-scale=1.0">
 
 </button>
 
+
+<button
+    class="big-btn"
+    onclick="openDataManager()">
+
+    ☁️ 資料管理
+
+</button>
+
 <button
     class="big-btn">
 
@@ -817,6 +826,167 @@ content="width=device-width, initial-scale=1.0">
     </div>
 
 </section>
+
+<!-- ==========================
+資料管理 V5.8
+========================== -->
+
+<section id="dataManagerPage" class="page">
+
+    <div class="tm-page">
+
+        <div class="tm-top">
+
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
+
+                ← 返回
+
+            </button>
+
+            <h1 class="tm-title">
+
+                ☁️ 資料管理
+
+            </h1>
+
+        </div>
+
+        <div class="backup-info-card">
+
+            <div class="backup-info-icon">
+                🛡️
+            </div>
+
+            <div>
+
+                <div class="backup-info-title">
+                    售票機資料保護
+                </div>
+
+                <div class="backup-info-text">
+                    定期備份可避免瀏覽器資料被清除或設備更換時遺失資料。
+                </div>
+
+                <div
+                    id="lastBackupTime"
+                    class="backup-last-time">
+                    尚未建立備份
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="backup-grid">
+
+            <div class="backup-card">
+
+                <div class="backup-card-icon">
+                    📦
+                </div>
+
+                <div class="backup-card-title">
+                    完整備份
+                </div>
+
+                <div class="backup-card-text">
+                    匯出票券設定、營業模式、系統設定、統計與售票紀錄。
+                </div>
+
+                <button
+                    class="backup-action-btn backup-primary-btn"
+                    onclick="exportFullBackup()">
+                    匯出完整備份
+                </button>
+
+            </div>
+
+            <div class="backup-card">
+
+                <div class="backup-card-icon">
+                    📥
+                </div>
+
+                <div class="backup-card-title">
+                    匯入還原
+                </div>
+
+                <div class="backup-card-text">
+                    選擇之前匯出的 JSON 備份檔，還原全部售票機資料。
+                </div>
+
+                <button
+                    class="backup-action-btn backup-restore-btn"
+                    onclick="chooseBackupFile()">
+                    選擇備份檔
+                </button>
+
+                <input
+                    type="file"
+                    id="backupFileInput"
+                    accept=".json,application/json"
+                    hidden>
+
+            </div>
+
+            <div class="backup-card">
+
+                <div class="backup-card-icon">
+                    🧾
+                </div>
+
+                <div class="backup-card-title">
+                    售票紀錄
+                </div>
+
+                <div class="backup-card-text">
+                    單獨匯出所有售票紀錄，方便保存或後續整理。
+                </div>
+
+                <button
+                    class="backup-action-btn backup-history-btn"
+                    onclick="exportSalesHistory()">
+                    匯出售票紀錄
+                </button>
+
+            </div>
+
+            <div class="backup-card backup-danger-card">
+
+                <div class="backup-card-icon">
+                    ⚠️
+                </div>
+
+                <div class="backup-card-title">
+                    清除全部資料
+                </div>
+
+                <div class="backup-card-text">
+                    清除瀏覽器內全部售票機資料，重新載入預設設定。
+                </div>
+
+                <button
+                    class="backup-action-btn backup-danger-btn"
+                    onclick="clearAllAppData()">
+                    清除全部資料
+                </button>
+
+            </div>
+
+        </div>
+
+        <div
+            id="backupStatus"
+            class="backup-status">
+            請選擇要執行的資料操作
+        </div>
+
+    </div>
+
+</section>
+
 <audio id="successSound" preload="auto">
     <source src="sounds/success.wav" type="audio/wav">
 </audio>
@@ -839,6 +1009,7 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/businessMode.js"></script>    
 <script src="js/modules/systemSetting.js"></script>
     
+<script src="js/modules/dataManager.js"></script>
 <script src="js/modules/payment.js"></script>
 <script src="js/modules/detail.js"></script>
 <script src="js/modules/cart.js"></script>
