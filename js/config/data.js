@@ -321,3 +321,40 @@ localStorage.setItem(
     "ticketData",
     JSON.stringify(ticketData)
 );
+
+
+// ==========================
+// V6.3 票券分類與自訂票券相容
+// ==========================
+const ticketCategoryDefaults = {
+    ticket2hGreen:"general",
+    ticket2hRed:"general",
+    ticket3hGreen:"general",
+    ticket3hRed:"general",
+    early:"special",
+    summer:"special",
+    baby:"other",
+    parent:"other",
+    token10:"other",
+    token25:"other",
+    powerbank:"other"
+};
+
+for(const id in ticketData){
+
+    ticketData[id].category ??=
+    ticketCategoryDefaults[id] || "other";
+
+    ticketData[id].description ??= "";
+
+    ticketData[id].custom ??=
+    id.startsWith("custom_");
+
+    ticketData[id].toy ??= "none";
+
+    ticketData[id].token ??= 0;
+
+    ticketData[id].reward ??= "";
+
+}
+
