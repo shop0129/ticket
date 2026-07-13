@@ -6008,3 +6008,115 @@ System Setting
         text-align:left;
     }
 }
+
+
+/*====================================================
+  V6.3 動態票券與新增票券
+====================================================*/
+
+.ticket-category-section{
+    width:100%;
+}
+
+.ticket-grid:empty{
+    display:none;
+}
+
+.ticket-manager-actions{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.ticket-add-card{
+    width:100%;
+    margin-bottom:30px;
+    padding:32px 36px;
+    border:3px dashed #90caf9;
+    border-radius:24px;
+    background:#f5fbff;
+    text-align:center;
+}
+
+.ticket-add-title{
+    font-size:36px;
+    font-weight:900;
+    color:#245b80;
+}
+
+.ticket-add-text{
+    margin-top:12px;
+    font-size:25px;
+    line-height:1.5;
+    font-weight:700;
+    color:#66859b;
+}
+
+.ticket-add-btn{
+    width:420px;
+    max-width:100%;
+    margin:24px auto 0;
+    background:#2196F3;
+}
+
+.ticket-delete-btn{
+    height:56px;
+    padding:0 18px;
+    border:none;
+    border-radius:15px;
+    background:#F44336;
+    color:#fff;
+    font-size:23px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+#ticketManagerPage .tm-field select{
+    width:100%;
+    height:68px;
+    padding:0 18px;
+    border:2px solid #d7dce2;
+    border-radius:15px;
+    background:#fff;
+    font-size:29px;
+    font-weight:800;
+    color:#333;
+    outline:none;
+}
+
+#ticketManagerPage .tm-field textarea{
+    width:100%;
+    min-height:130px;
+    padding:16px 18px;
+    border:2px solid #d7dce2;
+    border-radius:15px;
+    background:#fff;
+    font-family:"Microsoft JhengHei",sans-serif;
+    font-size:27px;
+    line-height:1.5;
+    font-weight:700;
+    color:#333;
+    resize:vertical;
+    outline:none;
+}
+
+#ticketManagerPage .tm-field select:focus,
+#ticketManagerPage .tm-field textarea:focus{
+    border-color:#2196F3;
+    box-shadow:0 0 0 4px rgba(33,150,243,.12);
+}
+
+#ticketManagerPage .ticket-description-field{
+    grid-column:1 / -1;
+}
+
+@media (max-width:700px){
+    .ticket-manager-actions{
+        flex-direction:column;
+        align-items:flex-end;
+    }
+
+    .ticket-delete-btn{
+        width:100%;
+    }
+}
