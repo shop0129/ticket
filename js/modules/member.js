@@ -5,6 +5,17 @@
 
 const MEMBER_KEY = "memberData";
 
+const CONSUME_POINT_RATE = 100;
+const TOY_POINT_GREEN = 1;
+const TOY_POINT_RED = 2;
+
+const MEMBER_LEVELS = [
+    {name:"VIP會員", minSpend:30000},
+    {name:"金卡會員", minSpend:15000},
+    {name:"銀卡會員", minSpend:5000},
+    {name:"一般會員", minSpend:0}
+];
+
 let memberData = loadMembers();
 let currentMember = null;
 let currentMemberHistoryId = "";
@@ -29,6 +40,46 @@ function loadMembers(){
         return [];
 
     }
+
+}
+
+
+function normalizeMemberPointFields(){
+
+    memberData.forEach(member=>{
+
+        member.points =
+        Number(member.points || 0);
+
+        member.toyPoints =
+        Number(member.toyPoints || 0);
+
+        member.pointHistory =
+        Array.isArray(member.pointHistory)
+        ? member.pointHistory
+        : [];
+
+        member.toyPointHistory =
+        Array.isArray(member.toyPointHistory)
+        ? member.toyPointHistory
+        : [];
+
+    });
+
+}
+
+normalizeMemberPointFields();
+
+function getMemberLevel(member){
+
+    const spend =
+    Number(member?.totalSpend || 0);
+
+    return MEMBER_LEVELS.find(level=>
+        spend >= level.minSpend
+    ) || MEMBER_LEVELS[
+        MEMBER_LEVELS.length - 1
+    ];
 
 }
 
@@ -253,8 +304,18 @@ function renderMemberList(){
         </div>
 
         <div>
-            <span>累積點數</span>
+            <span>消費點數</span>
             <strong>${Number(member.points || 0)} 點</strong>
+        </div>
+
+        <div class="member-toy-point-box">
+            <span>玩具點數</span>
+            <strong>${Number(member.toyPoints || 0)} 點</strong>
+        </div>
+
+        <div>
+            <span>會員等級</span>
+            <strong>${getMemberLevel(member).name}</strong>
         </div>
 
         <div>
@@ -282,19 +343,25 @@ function renderMemberList(){
     <div class="member-card-actions">
 
         <button
+            class="member-toy-adjust-btn"
+            onclick="adjustToyPoints('${member.id}')">
+            玩具點數操作
+        </button>
+
+        <button
             class="member-history-btn"
             onclick="openMemberHistory('${member.id}')">
             消費紀錄
         </button>
 
         <button
-            class="member-edit-btn"
+            class="member-edit-btn member-admin-only"
             onclick="openMemberEditor('${member.id}')">
             編輯
         </button>
 
         <button
-            class="member-delete-btn"
+            class="member-delete-btn member-admin-only"
             onclick="deleteMember('${member.id}')">
             刪除
         </button>
@@ -464,16 +531,118 @@ function renderMemberHistory(){
         </div>
 
         <div>
-            <span>累積點數</span>
+            <span>消費點數</span>
             <strong>${Number(member.points || 0)} 點</strong>
+        </div>
+
+        <div>
+            <span>玩具點數</span>
+            <strong>${Number(member.toyPoints || 0)} 點</strong>
+        </div>
+
+        <div>
+            <span>會員等級</span>
+            <strong>${getMemberLevel(member).name}</strong>
         </div>
 
     </div>
 
 </div>
 
+${renderToyPointHistory(member)}
+
 <div class="member-history-list">
     ${orderHtml}
+</div>
+
+`;
+
+}
+
+
+function renderToyPointHistory(member){
+
+    const rows =
+    Array.isArray(member.toyPointHistory)
+    ? member.toyPointHistory.slice(0,20)
+    : [];
+
+    if(rows.length === 0){
+
+        return `
+
+<div class="toy-point-history-card">
+
+    <div class="toy-point-history-title">
+        🎁 玩具點數紀錄
+    </div>
+
+    <div class="toy-point-history-empty">
+        尚無玩具點數紀錄
+    </div>
+
+</div>
+
+`;
+
+    }
+
+    const html =
+    rows.map(row=>{
+
+        const amount =
+        Number(row.amount || 0);
+
+        return `
+
+<div class="toy-point-history-row">
+
+    <div>
+
+        <strong>
+            ${memberEsc(row.reason || "玩具點數調整")}
+        </strong>
+
+        <span>
+            ${memberEsc(row.date || "")}
+            ${row.orderNo ? `・${memberEsc(row.orderNo)}` : ""}
+            ${row.operator ? `・${memberEsc(row.operator)}` : ""}
+        </span>
+
+        ${
+            row.note
+            ? `<small>${memberEsc(row.note)}</small>`
+            : ""
+        }
+
+    </div>
+
+    <div class="${amount >= 0 ? "toy-point-plus" : "toy-point-minus"}">
+
+        ${amount >= 0 ? "+" : ""}${amount} 點
+
+        <small>
+            餘額 ${Number(row.balance || 0)}
+        </small>
+
+    </div>
+
+</div>
+
+`;
+
+    }).join("");
+
+    return `
+
+<div class="toy-point-history-card">
+
+    <div class="toy-point-history-title">
+        🎁 玩具點數紀錄
+    </div>
+
+    ${html}
+
 </div>
 
 `;
@@ -751,7 +920,13 @@ function saveMemberEditor(){
 
             ...values,
 
-            lastPurchaseDate:""
+            lastPurchaseDate:"",
+
+            toyPoints:0,
+
+            pointHistory:[],
+
+            toyPointHistory:[]
 
         });
 
@@ -972,7 +1147,13 @@ function createQuickMember(phone){
             "quickJoinNote"
         ).value.trim(),
 
-        lastPurchaseDate:""
+        lastPurchaseDate:"",
+
+        toyPoints:0,
+
+        pointHistory:[],
+
+        toyPointHistory:[]
 
     };
 
@@ -1141,7 +1322,16 @@ function getCurrentMemberOrderInfo(){
 
 }
 
-function applyMemberPurchase(amount){
+function calculateConsumePoints(amount){
+
+    return Math.floor(
+        Number(amount || 0) /
+        CONSUME_POINT_RATE
+    );
+
+}
+
+function applyMemberPurchase(amount,order){
 
     if(!currentMember) return;
 
@@ -1152,14 +1342,115 @@ function applyMemberPurchase(amount){
 
     if(!member) return;
 
+    const spend =
+    Number(amount || 0);
+
+    const earnedPoints =
+    calculateConsumePoints(spend);
+
     member.totalSpend =
     Number(member.totalSpend || 0) +
-    Number(amount || 0);
+    spend;
+
+    member.points =
+    Number(member.points || 0) +
+    earnedPoints;
 
     member.lastPurchaseDate =
     new Date().toLocaleString("zh-TW");
 
+    member.pointHistory.unshift({
+
+        id:"point_" + Date.now(),
+
+        date:
+        new Date().toLocaleString("zh-TW"),
+
+        amount:
+        earnedPoints,
+
+        reason:"消費累積",
+
+        orderNo:
+        order?.orderNo || "",
+
+        balance:
+        member.points
+
+    });
+
+    if(order){
+
+        order.earnedPoints =
+        earnedPoints;
+
+        order.memberLevel =
+        getMemberLevel(member).name;
+
+        saveSalesHistory();
+
+    }
+
     saveMembers();
+
+}
+
+function canRollbackMemberOrder(order){
+
+    if(
+        !order ||
+        !order.memberId
+    ){
+
+        return true;
+
+    }
+
+    const member =
+    memberData.find(item=>
+        item.id === order.memberId
+    );
+
+    if(!member){
+
+        return true;
+
+    }
+
+    const earnedPoints =
+    Number(order.earnedPoints || 0);
+
+    const toyPoints =
+    Number(
+        order.toyPointConversion?.points ||
+        0
+    );
+
+    if(
+        member.points < earnedPoints
+    ){
+
+        alert(
+            "❌ 會員消費點數已被使用，無法直接作廢此訂單。請先由店長調整點數。"
+        );
+
+        return false;
+
+    }
+
+    if(
+        member.toyPoints < toyPoints
+    ){
+
+        alert(
+            "❌ 此訂單轉入的玩具點數已被使用，無法直接作廢。請先補足玩具點數。"
+        );
+
+        return false;
+
+    }
+
+    return true;
 
 }
 
@@ -1181,6 +1472,15 @@ function rollbackMemberPurchase(order){
 
     if(!member) return;
 
+    const earnedPoints =
+    Number(order.earnedPoints || 0);
+
+    const toyPoints =
+    Number(
+        order.toyPointConversion?.points ||
+        0
+    );
+
     member.totalSpend =
     Math.max(
         0,
@@ -1188,7 +1488,775 @@ function rollbackMemberPurchase(order){
         Number(order.amount || 0)
     );
 
+    member.points =
+    Math.max(
+        0,
+        Number(member.points || 0) -
+        earnedPoints
+    );
+
+    member.toyPoints =
+    Math.max(
+        0,
+        Number(member.toyPoints || 0) -
+        toyPoints
+    );
+
+    if(earnedPoints > 0){
+
+        member.pointHistory.unshift({
+
+            id:"point_" + Date.now(),
+
+            date:
+            new Date().toLocaleString("zh-TW"),
+
+            amount:
+            -earnedPoints,
+
+            reason:"訂單作廢扣回",
+
+            orderNo:
+            order.orderNo || "",
+
+            balance:
+            member.points
+
+        });
+
+    }
+
+    if(toyPoints > 0){
+
+        member.toyPointHistory.unshift({
+
+            id:"toy_" + Date.now(),
+
+            date:
+            new Date().toLocaleString("zh-TW"),
+
+            amount:
+            -toyPoints,
+
+            reason:"訂單作廢扣回",
+
+            orderNo:
+            order.orderNo || "",
+
+            operator:
+            currentUserRole === "staff"
+            ? "員工"
+            : "店長",
+
+            balance:
+            member.toyPoints
+
+        });
+
+    }
+
     saveMembers();
+
+}
+
+// =========================================
+// 玩具點數手動調整
+// =========================================
+function adjustToyPoints(memberId){
+
+    playClick();
+
+    const member =
+    memberData.find(item=>
+        item.id === memberId
+    );
+
+    if(!member) return;
+
+    const rawAmount =
+    prompt(
+        `目前玩具點數：${member.toyPoints} 點\n\n增加請輸入正數，兌換扣除請輸入負數：`
+    );
+
+    if(rawAmount === null) return;
+
+    const amount =
+    Number(rawAmount);
+
+    if(
+        !Number.isInteger(amount) ||
+        amount === 0
+    ){
+
+        alert(
+            "❌ 請輸入非 0 的整數點數"
+        );
+
+        return;
+
+    }
+
+    if(
+        amount < 0 &&
+        member.toyPoints < Math.abs(amount)
+    ){
+
+        alert(
+            "❌ 玩具點數不足"
+        );
+
+        return;
+
+    }
+
+    const reason =
+    prompt(
+        amount > 0
+        ? "請輸入增加點數原因："
+        : "請輸入兌換獎品名稱或扣點原因："
+    );
+
+    if(
+        reason === null ||
+        !reason.trim()
+    ){
+
+        alert(
+            "❌ 必須填寫原因"
+        );
+
+        return;
+
+    }
+
+    const note =
+    prompt(
+        "備註（可留空）："
+    );
+
+    const newBalance =
+    Number(member.toyPoints || 0) +
+    amount;
+
+    if(
+        !confirm(
+            `會員：${member.name}\n目前：${member.toyPoints} 點\n本次：${amount > 0 ? "+" : ""}${amount} 點\n操作後：${newBalance} 點\n\n確定執行？`
+        )
+    ){
+
+        return;
+
+    }
+
+    member.toyPoints =
+    newBalance;
+
+    member.toyPointHistory.unshift({
+
+        id:"toy_" + Date.now(),
+
+        date:
+        new Date().toLocaleString("zh-TW"),
+
+        amount,
+
+        reason:
+        reason.trim(),
+
+        note:
+        (note || "").trim(),
+
+        orderNo:"",
+
+        operator:
+        currentUserRole === "staff"
+        ? "員工"
+        : "店長",
+
+        balance:
+        member.toyPoints
+
+    });
+
+    saveMembers();
+
+    renderMemberList();
+
+    if(
+        currentMemberHistoryId ===
+        member.id
+    ){
+
+        renderMemberHistory();
+
+    }
+
+    alert(
+        "✅ 玩具點數已更新"
+    );
+
+}
+
+// =========================================
+// 訂單玩具轉點與離場補綁會員
+// =========================================
+function getOrderToyCounts(order){
+
+    const result = {
+        green:0,
+        red:0
+    };
+
+    (
+        Array.isArray(order?.items)
+        ? order.items
+        : []
+    ).forEach(item=>{
+
+        if(item.toy === "green"){
+            result.green++;
+        }
+
+        if(item.toy === "red"){
+            result.red++;
+        }
+
+    });
+
+    return result;
+
+}
+
+function renderToyPointOrderPanel(orderNo){
+
+    const panel =
+    document.getElementById(
+        "toyPointOrderPanel"
+    );
+
+    if(!panel) return;
+
+    const order =
+    salesHistory.find(item=>
+        item.orderNo === orderNo
+    );
+
+    if(!order){
+
+        panel.innerHTML = "";
+        return;
+
+    }
+
+    const counts =
+    getOrderToyCounts(order);
+
+    const converted =
+    order.toyPointConversion || {
+
+        greenQty:0,
+        redQty:0,
+        points:0
+
+    };
+
+    const greenRemaining =
+    Math.max(
+        0,
+        counts.green -
+        Number(converted.greenQty || 0)
+    );
+
+    const redRemaining =
+    Math.max(
+        0,
+        counts.red -
+        Number(converted.redQty || 0)
+    );
+
+    if(
+        counts.green === 0 &&
+        counts.red === 0
+    ){
+
+        panel.innerHTML = `
+
+<div class="toy-order-card disabled">
+    此訂單沒有贈送玩具
+</div>
+
+`;
+
+        return;
+
+    }
+
+    if(order.status === "cancel"){
+
+        panel.innerHTML = `
+
+<div class="toy-order-card disabled">
+    已作廢訂單不可轉換玩具點數
+</div>
+
+`;
+
+        return;
+
+    }
+
+    if(!order.memberId){
+
+        panel.innerHTML = `
+
+<div class="toy-order-card">
+
+    <div class="toy-order-title">
+        🎁 離場補綁會員＋玩具轉點
+    </div>
+
+    <div class="toy-order-description">
+        此訂單購票時未綁會員。輸入手機後，可綁定現有會員；找不到時可快速建立。
+    </div>
+
+    <div class="toy-order-bind-row">
+
+        <input
+            id="lateBindPhone"
+            inputmode="tel"
+            placeholder="輸入會員手機">
+
+        <button
+            onclick="lateBindOrderMember('${orderNo}')">
+            搜尋／建立會員
+        </button>
+
+    </div>
+
+</div>
+
+`;
+
+        return;
+
+    }
+
+    const member =
+    memberData.find(item=>
+        item.id === order.memberId
+    );
+
+    panel.innerHTML = `
+
+<div class="toy-order-card">
+
+    <div class="toy-order-title">
+        🎁 玩具轉點
+    </div>
+
+    <div class="toy-order-member">
+        會員：${memberEsc(order.memberName || member?.name || "")}
+        ・玩具點數 ${Number(member?.toyPoints || 0)} 點
+    </div>
+
+    <div class="toy-order-rate">
+        綠標 1 個 = ${TOY_POINT_GREEN} 點　
+        紅標 1 個 = ${TOY_POINT_RED} 點
+    </div>
+
+    <div class="toy-order-grid">
+
+        <label>
+
+            <span>
+                🟢 綠標可轉 ${greenRemaining} 個
+            </span>
+
+            <input
+                id="convertGreenQty"
+                type="number"
+                min="0"
+                max="${greenRemaining}"
+                value="0"
+                ${greenRemaining === 0 ? "disabled" : ""}>
+
+        </label>
+
+        <label>
+
+            <span>
+                🔴 紅標可轉 ${redRemaining} 個
+            </span>
+
+            <input
+                id="convertRedQty"
+                type="number"
+                min="0"
+                max="${redRemaining}"
+                value="0"
+                ${redRemaining === 0 ? "disabled" : ""}>
+
+        </label>
+
+    </div>
+
+    ${
+        converted.points > 0
+        ? `
+        <div class="toy-order-converted">
+            此訂單已累積 ${converted.points} 玩具點
+        </div>
+        `
+        : ""
+    }
+
+    ${
+        greenRemaining > 0 ||
+        redRemaining > 0
+        ? `
+        <button
+            class="toy-order-convert-btn"
+            onclick="convertOrderToysToPoints('${orderNo}')">
+            確認放棄玩具並累積點數
+        </button>
+        `
+        : `
+        <div class="toy-order-complete">
+            此訂單玩具已全部處理完成
+        </div>
+        `
+    }
+
+</div>
+
+`;
+
+}
+
+function lateBindOrderMember(orderNo){
+
+    playClick();
+
+    const phoneInput =
+    document.getElementById(
+        "lateBindPhone"
+    );
+
+    const phone =
+    memberPhone(
+        phoneInput?.value
+    );
+
+    if(!phone){
+
+        alert(
+            "請輸入手機"
+        );
+
+        return;
+
+    }
+
+    let member =
+    findMemberByPhone(phone);
+
+    if(!member){
+
+        if(
+            !confirm(
+                "此手機尚未加入會員，是否快速建立？"
+            )
+        ){
+
+            return;
+
+        }
+
+        const name =
+        prompt(
+            "請輸入會員姓名："
+        );
+
+        if(
+            name === null ||
+            !name.trim()
+        ){
+
+            alert(
+                "❌ 姓名不可空白"
+            );
+
+            return;
+
+        }
+
+        const birthday =
+        prompt(
+            "生日（可留空，例如 2020-05-10）："
+        );
+
+        member = {
+
+            id:"member_" + Date.now(),
+
+            memberNo:
+            newMemberNo(),
+
+            name:
+            name.trim(),
+
+            phone,
+
+            birthday:
+            (birthday || "").trim(),
+
+            joinDate:
+            new Date().toLocaleDateString("zh-TW"),
+
+            totalSpend:0,
+
+            points:0,
+
+            toyPoints:0,
+
+            note:"離場玩具轉點快速入會",
+
+            lastPurchaseDate:"",
+
+            pointHistory:[],
+
+            toyPointHistory:[]
+
+        };
+
+        memberData.unshift(member);
+
+        saveMembers();
+
+    }
+
+    const order =
+    salesHistory.find(item=>
+        item.orderNo === orderNo
+    );
+
+    if(!order) return;
+
+    order.memberId =
+    member.id;
+
+    order.memberNo =
+    member.memberNo;
+
+    order.memberName =
+    member.name;
+
+    order.memberPhone =
+    member.phone;
+
+    order.memberBoundAt =
+    new Date().toLocaleString("zh-TW");
+
+    order.memberBoundType =
+    "late-toy-only";
+
+    saveSalesHistory();
+
+    renderToyPointOrderPanel(orderNo);
+
+    alert(
+        "✅ 訂單已補綁會員\n此筆只可累積玩具點數，不補發消費點數與累積消費。"
+    );
+
+}
+
+function convertOrderToysToPoints(orderNo){
+
+    playClick();
+
+    const order =
+    salesHistory.find(item=>
+        item.orderNo === orderNo
+    );
+
+    if(
+        !order ||
+        !order.memberId ||
+        order.status === "cancel"
+    ){
+
+        return;
+
+    }
+
+    const member =
+    memberData.find(item=>
+        item.id === order.memberId
+    );
+
+    if(!member){
+
+        alert(
+            "❌ 找不到會員資料"
+        );
+
+        return;
+
+    }
+
+    const counts =
+    getOrderToyCounts(order);
+
+    const converted =
+    order.toyPointConversion || {
+
+        greenQty:0,
+        redQty:0,
+        points:0
+
+    };
+
+    const greenRemaining =
+    Math.max(
+        0,
+        counts.green -
+        Number(converted.greenQty || 0)
+    );
+
+    const redRemaining =
+    Math.max(
+        0,
+        counts.red -
+        Number(converted.redQty || 0)
+    );
+
+    const greenQty =
+    Math.max(
+        0,
+        Number(
+            document.getElementById(
+                "convertGreenQty"
+            )?.value || 0
+        )
+    );
+
+    const redQty =
+    Math.max(
+        0,
+        Number(
+            document.getElementById(
+                "convertRedQty"
+            )?.value || 0
+        )
+    );
+
+    if(
+        !Number.isInteger(greenQty) ||
+        !Number.isInteger(redQty) ||
+        greenQty > greenRemaining ||
+        redQty > redRemaining
+    ){
+
+        alert(
+            "❌ 玩具數量不正確"
+        );
+
+        return;
+
+    }
+
+    const points =
+    greenQty * TOY_POINT_GREEN +
+    redQty * TOY_POINT_RED;
+
+    if(points <= 0){
+
+        alert(
+            "請選擇要放棄的玩具數量"
+        );
+
+        return;
+
+    }
+
+    if(
+        !confirm(
+            `放棄綠標 ${greenQty} 個、紅標 ${redQty} 個\n本次增加 ${points} 玩具點\n\n確認後不可再次領取這些玩具，確定繼續？`
+        )
+    ){
+
+        return;
+
+    }
+
+    member.toyPoints =
+    Number(member.toyPoints || 0) +
+    points;
+
+    member.toyPointHistory.unshift({
+
+        id:"toy_" + Date.now(),
+
+        date:
+        new Date().toLocaleString("zh-TW"),
+
+        amount:
+        points,
+
+        reason:"放棄票券贈送玩具",
+
+        note:
+        `綠標 ${greenQty} 個、紅標 ${redQty} 個`,
+
+        orderNo:
+        order.orderNo || "",
+
+        operator:
+        currentUserRole === "staff"
+        ? "員工"
+        : "店長",
+
+        balance:
+        member.toyPoints
+
+    });
+
+    order.toyPointConversion = {
+
+        greenQty:
+        Number(converted.greenQty || 0) +
+        greenQty,
+
+        redQty:
+        Number(converted.redQty || 0) +
+        redQty,
+
+        points:
+        Number(converted.points || 0) +
+        points,
+
+        memberId:
+        member.id,
+
+        convertedAt:
+        new Date().toLocaleString("zh-TW"),
+
+        operator:
+        currentUserRole === "staff"
+        ? "員工"
+        : "店長"
+
+    };
+
+    saveMembers();
+
+    saveSalesHistory();
+
+    renderToyPointOrderPanel(orderNo);
+
+    alert(
+        `✅ 已增加 ${points} 玩具點\n目前餘額：${member.toyPoints} 點`
+    );
 
 }
 
