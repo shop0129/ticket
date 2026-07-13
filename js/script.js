@@ -70,7 +70,7 @@ function rollbackStats(stats,ticket,item){
 }
 
 // =========================================
-// 管理員登入
+// 管理員／員工登入
 // =========================================
 function loginAdmin(){
 
@@ -82,24 +82,19 @@ function loginAdmin(){
     if(!input) return;
 
     const password =
-    input.value;
+    input.value.trim();
 
     input.value = "";
 
-    if(
-        password ===
-        systemData.adminPassword
-    ){
-
-        showPage(
-            "adminHomePage"
-        );
-
-    }else{
+    if(!loginByRole(password)){
 
         alert("❌ 密碼錯誤");
 
+        return;
+
     }
+
+    showPage("adminHomePage");
 
 }
 
@@ -204,7 +199,8 @@ document.addEventListener("click",(event)=>{
         #todayStatsPage,
         #salesHistoryPage,
         #orderDetailPage,
-        #dataManagerPage
+        #dataManagerPage,
+        #hardwareTestPage
     `);
 
     if(!adminPage) return;
