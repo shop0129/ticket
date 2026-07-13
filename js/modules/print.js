@@ -275,6 +275,8 @@ function startReturnCountdown(){
 
         }
 
+        if(typeof resetCurrentMemberSelection === "function") resetCurrentMemberSelection();
+
         // 清空購物車
         cart = [];
 
