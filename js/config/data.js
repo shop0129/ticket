@@ -125,31 +125,75 @@ JSON.parse(localStorage.getItem("businessMode")) || {
 let systemData =
 JSON.parse(localStorage.getItem("systemData")) || {
 
-    // 自動回首頁秒數
+    // ==========================
+    // 系統
+    // ==========================
     homeTimeout:60,
-
-    // 付款完成停留
     paymentDelay:8,
-
-    // 列印完成停留
     printDelay:5,
 
-    // 收據列印份數
+    // ==========================
+    // 列印
+    // ==========================
     receiptCopies:1,
+    autoPrint:true,
+    showPrintAnimation:true,
 
-    // 管理密碼
+    // ==========================
+    // 售票
+    // ==========================
+    autoHome:true,
+    saveHistory:true,
+    successAnimation:true,
+    playSound:true,
+
+    // ==========================
+    // 付款方式
+    // ==========================
+    payment:{
+        cash:true,
+        linepay:true,
+        easycard:false,
+        credit:false
+    },
+
+    // ==========================
+    // 管理
+    // ==========================
     adminPassword:"1234"
 
 };
 
-if(!localStorage.getItem("systemData")){
+// ==========================
+// 補齊 systemData 預設值（相容舊版本）
+// ==========================
 
-    localStorage.setItem(
-        "systemData",
-        JSON.stringify(systemData)
-    );
+systemData.homeTimeout ??= 60;
+systemData.paymentDelay ??= 8;
+systemData.printDelay ??= 5;
 
-}
+systemData.receiptCopies ??= 1;
+systemData.autoPrint ??= true;
+systemData.showPrintAnimation ??= true;
+
+systemData.autoHome ??= true;
+systemData.saveHistory ??= true;
+systemData.successAnimation ??= true;
+systemData.playSound ??= true;
+
+systemData.payment ??= {};
+
+systemData.payment.cash ??= true;
+systemData.payment.linepay ??= true;
+systemData.payment.easycard ??= false;
+systemData.payment.credit ??= false;
+
+systemData.adminPassword ??= "1234";
+
+localStorage.setItem(
+    "systemData",
+    JSON.stringify(systemData)
+);
 //==========================
 // 票券名稱
 //==========================
