@@ -1,7 +1,7 @@
 // =========================================
 // 小怪獸售票機 V5.6.5
 // 主程式
-// ========================================
+// =========================================
 
 const todayTab =
 document.getElementById("todayTab");
@@ -159,6 +159,58 @@ if(totalTab){
     });
 
 }
+
+
+// =========================================
+// 後台按鍵音效
+// =========================================
+
+// 防止同一次點擊被多個事件重複播放
+const originalPlayClick = playClick;
+
+let lastClickSoundTime = 0;
+
+window.playClick = function(){
+
+    const now = Date.now();
+
+    if(now - lastClickSoundTime < 100){
+
+        return;
+
+    }
+
+    lastClickSoundTime = now;
+
+    originalPlayClick();
+
+};
+
+// 後台頁面所有按鈕統一播放點擊音效
+document.addEventListener("click",(event)=>{
+
+    const button =
+    event.target.closest("button");
+
+    if(!button) return;
+
+    const adminPage =
+    button.closest(`
+        #adminLoginPage,
+        #adminHomePage,
+        #ticketManagerPage,
+        #businessModePage,
+        #systemSettingPage,
+        #todayStatsPage,
+        #salesHistoryPage,
+        #orderDetailPage
+    `);
+
+    if(!adminPage) return;
+
+    playClick();
+
+},true);
 
 // =========================================
 // 啟動
