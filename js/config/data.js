@@ -160,7 +160,8 @@ JSON.parse(localStorage.getItem("systemData")) || {
     // ==========================
     // 管理
     // ==========================
-    adminPassword:"1234"
+    adminPassword:"1234",
+    staffPassword:"0000"
 
 };
 
@@ -189,6 +190,7 @@ systemData.payment.easycard ??= false;
 systemData.payment.credit ??= false;
 
 systemData.adminPassword ??= "1234";
+systemData.staffPassword ??= "0000";
 
 localStorage.setItem(
     "systemData",
