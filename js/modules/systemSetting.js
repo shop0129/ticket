@@ -260,6 +260,21 @@ function renderSystemSetting(){
 
 function saveSystemSetting(){
 
+    //==========================
+// 付款方式
+//==========================
+
+systemData.payment.cash =
+document.getElementById("cashEnable").checked;
+
+systemData.payment.linepay =
+document.getElementById("lineEnable").checked;
+
+systemData.payment.easycard =
+document.getElementById("easyEnable").checked;
+
+systemData.payment.credit =
+document.getElementById("creditEnable").checked;
     // 只有管理密碼還需要從 input 讀取
     systemData.adminPassword =
 document.getElementById("adminSettingPassword").value;
@@ -270,7 +285,9 @@ document.getElementById("adminSettingPassword").value;
         JSON.stringify(systemData)
     );
 
-    alert("✅ 系統設定已儲存");
+    applyPaymentSetting();
+
+alert("✅ 系統設定已儲存");
 
 }
 
@@ -284,17 +301,30 @@ function resetSystemSetting(){
 
     systemData = {
 
-        homeTimeout:60,
+    homeTimeout:60,
+    paymentDelay:8,
+    printDelay:5,
 
-        paymentDelay:8,
+    receiptCopies:1,
 
-        printDelay:5,
+    autoPrint:true,
+    showPrintAnimation:true,
 
-        receiptCopies:1,
+    autoHome:true,
+    saveHistory:true,
+    successAnimation:true,
+    playSound:true,
 
-        adminPassword:"1234"
+    payment:{
+        cash:true,
+        linepay:true,
+        easycard:false,
+        credit:false
+    },
 
-    };
+    adminPassword:"1234"
+
+};
 
     localStorage.setItem(
         "systemData",
@@ -345,5 +375,54 @@ function changeSetting(key, step){
     }
 
     renderSystemSetting();
+
+}
+//==========================
+// 套用付款方式
+//==========================
+
+function applyPaymentSetting(){
+
+    // Detail Page
+    const cashBtn =
+    document.getElementById("cashBtn");
+
+    const lineBtn =
+    document.getElementById("linePayBtn");
+
+    // Cart
+    const cartCash =
+    document.getElementById("cartCashBtn");
+
+    const cartLine =
+    document.getElementById("cartLineBtn");
+
+    if(cashBtn){
+
+        cashBtn.disabled =
+            !systemData.payment.cash;
+
+    }
+
+    if(lineBtn){
+
+        lineBtn.disabled =
+            !systemData.payment.linepay;
+
+    }
+
+    if(cartCash){
+
+        cartCash.disabled =
+            !systemData.payment.cash;
+
+    }
+
+    if(cartLine){
+
+        cartLine.disabled =
+            !systemData.payment.linepay;
+
+    }
 
 }
