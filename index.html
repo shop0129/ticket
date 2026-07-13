@@ -458,6 +458,22 @@ content="width=device-width, initial-scale=1.0">
 
 <button
     class="big-btn"
+    onclick="openShiftReport()">
+
+    📋 今日交班報表
+
+</button>
+
+<button
+    class="big-btn"
+    onclick="reprintLatestOrder()">
+
+    🖨️ 補印最近一筆
+
+</button>
+
+<button
+    class="big-btn"
     onclick="openBusinessMode()">
 
     🗓️ 營業模式
@@ -782,7 +798,42 @@ content="width=device-width, initial-scale=1.0">
     </div>
 
 </section>
-    <section id="salesHistoryPage" class="page">
+    
+<!-- ==========================
+今日交班報表 V6.1A
+========================== -->
+
+<section id="shiftReportPage" class="page">
+
+    <div class="tm-page">
+
+        <div class="tm-top">
+
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
+
+                ← 返回
+
+            </button>
+
+            <h1 class="tm-title">
+
+                📋 今日交班報表
+
+            </h1>
+
+        </div>
+
+        <div id="shiftReportContent">
+
+        </div>
+
+    </div>
+
+</section>
+
+<section id="salesHistoryPage" class="page">
 
     <div class="tm-page">
 
@@ -801,6 +852,53 @@ content="width=device-width, initial-scale=1.0">
                 🧾 售票紀錄
 
             </h1>
+
+        </div>
+
+        <div class="history-search-panel">
+
+            <input
+                type="search"
+                id="historySearchInput"
+                placeholder="搜尋訂單編號、日期、票券名稱">
+
+            <select id="historyPaymentFilter">
+
+                <option value="all">
+                    全部付款方式
+                </option>
+
+                <option value="現金">
+                    現金
+                </option>
+
+                <option value="LINE Pay">
+                    LINE Pay
+                </option>
+
+            </select>
+
+            <select id="historyStatusFilter">
+
+                <option value="all">
+                    全部狀態
+                </option>
+
+                <option value="normal">
+                    正常
+                </option>
+
+                <option value="cancel">
+                    已作廢
+                </option>
+
+            </select>
+
+            <button
+                type="button"
+                onclick="clearHistorySearch()">
+                清除條件
+            </button>
 
         </div>
 
@@ -1201,6 +1299,7 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/detail.js"></script>
 <script src="js/modules/cart.js"></script>
     
+<script src="js/modules/operation.js"></script>
 <script src="js/modules/roleManager.js"></script>
 <script src="js/script.js"></script>
 
