@@ -1,12 +1,17 @@
-// 售票紀錄
-//==========================
+// =========================================
+// 小怪獸售票機 V5.6.4
+// 售票紀錄模組
+// =========================================
 
-function openSalesHistory(){
+const salesHistoryList =
+document.getElementById("salesHistoryList");
 
-    renderSalesHistory();//==========================
-// 售票紀錄
-//==========================
+const orderDetailContent =
+document.getElementById("orderDetailContent");
 
+// =========================================
+// 開啟售票紀錄
+// =========================================
 function openSalesHistory(){
 
     renderSalesHistory();
@@ -15,20 +20,29 @@ function openSalesHistory(){
 
 }
 
-//==========================
-// 顯示售票紀錄
-//==========================
+// =========================================
+// 金額格式
+// =========================================
+function formatHistoryAmount(value){
 
+    return Number(value || 0)
+        .toLocaleString("zh-TW");
+
+}
+
+// =========================================
+// 顯示售票紀錄
+// =========================================
 function renderSalesHistory(){
 
-    const list =
-        document.getElementById("salesHistoryList");
+    if(!salesHistoryList) return;
 
-    if(!list) return;
+    if(
+        !Array.isArray(salesHistory) ||
+        salesHistory.length === 0
+    ){
 
-    if(!Array.isArray(salesHistory) || salesHistory.length === 0){
-
-        list.innerHTML = `
+        salesHistoryList.innerHTML = `
 
 <div class="history-empty-card">
 
@@ -117,7 +131,7 @@ function renderSalesHistory(){
         <button
             type="button"
             class="history-detail-btn"
-            onclick="event.stopPropagation(); openOrderDetail(${index})">
+            onclick="event.stopPropagation(); playClick(); openOrderDetail(${index})">
             查看明細
         </button>
 
@@ -136,25 +150,13 @@ function renderSalesHistory(){
 
     });
 
-    list.innerHTML = html;
+    salesHistoryList.innerHTML = html;
 
 }
 
-//==========================
-// 金額格式
-//==========================
-
-function formatHistoryAmount(value){
-
-    return Number(value || 0)
-        .toLocaleString("zh-TW");
-
-}
-
-//==========================
+// =========================================
 // 刪除售票紀錄
-//==========================
-
+// =========================================
 function deleteSalesHistory(clickEvent,index){
 
     if(clickEvent){
@@ -163,7 +165,19 @@ function deleteSalesHistory(clickEvent,index){
 
     }
 
+    playClick();
+
     if(!confirm("確定要刪除這筆售票紀錄？")){
+
+        return;
+
+    }
+
+    if(
+        !Array.isArray(salesHistory) ||
+        index < 0 ||
+        index >= salesHistory.length
+    ){
 
         return;
 
@@ -177,38 +191,38 @@ function deleteSalesHistory(clickEvent,index){
 
 }
 
-//==========================
-// 開啟訂單明細
-//==========================
-
-function openOrderDetail(index){
-
-    const order =
-        salesHistory[index];
-
-    if(!order) return;
+// =========================================
+// 整理訂單內容
+// =========================================
+function summarizeOrderItems(order){
 
     const items =
         Array.isArray(order.items)
         ? order.items
         : [];
 
+    const groupedItems = {};
+
     let totalToken = 0;
     let greenToy = 0;
     let redToy = 0;
 
-    const groupedItems = {};
-
     items.forEach(item=>{
 
+        if(!item) return;
+
         const itemId =
-            item.id || item.title || "unknown";
+            item.id ||
+            item.title ||
+            "unknown";
 
         if(!groupedItems[itemId]){
 
             groupedItems[itemId] = {
 
-                title:item.title || "未命名票券",
+                title:
+                    item.title ||
+                    "未命名票券",
 
                 qty:0,
 
@@ -240,14 +254,33 @@ function openOrderDetail(index){
 
     });
 
-    let htmlItems = "";
+    return {
+
+        groupedItems,
+
+        totalToken,
+
+        greenToy,
+
+        redToy
+
+    };
+
+}
+
+// =========================================
+// 產生購買內容
+// =========================================
+function renderOrderItemRows(groupedItems){
+
+    let html = "";
 
     for(const id in groupedItems){
 
         const item =
             groupedItems[id];
 
-        htmlItems += `
+        html += `
 
 <div class="detailItem">
 
@@ -265,9 +298,9 @@ function openOrderDetail(index){
 
     }
 
-    if(!htmlItems){
+    if(html === ""){
 
-        htmlItems = `
+        html = `
 
 <div class="history-detail-empty">
     無購買內容
@@ -276,6 +309,96 @@ function openOrderDetail(index){
 `;
 
     }
+
+    return html;
+
+}
+
+// =========================================
+// 產生贈送內容
+// =========================================
+function renderOrderRewardRows(
+    totalToken,
+    greenToy,
+    redToy
+){
+
+    let html = `
+
+<div class="detailRow">
+    🪙 遊戲代幣：${formatHistoryAmount(totalToken)} 枚
+</div>
+
+`;
+
+    if(greenToy > 0){
+
+        html += `
+
+<div class="detailRow">
+    🟢 綠標玩具：${greenToy} 個
+</div>
+
+`;
+
+    }
+
+    if(redToy > 0){
+
+        html += `
+
+<div class="detailRow">
+    🔴 紅標玩具：${redToy} 個
+</div>
+
+`;
+
+    }
+
+    if(
+        totalToken === 0 &&
+        greenToy === 0 &&
+        redToy === 0
+    ){
+
+        html = `
+
+<div class="detailRow">
+    無贈送內容
+</div>
+
+`;
+
+    }
+
+    return html;
+
+}
+
+// =========================================
+// 開啟訂單明細
+// =========================================
+function openOrderDetail(index){
+
+    const order =
+        salesHistory[index];
+
+    if(!order) return;
+
+    const summary =
+        summarizeOrderItems(order);
+
+    const htmlItems =
+        renderOrderItemRows(
+            summary.groupedItems
+        );
+
+    const htmlRewards =
+        renderOrderRewardRows(
+            summary.totalToken,
+            summary.greenToy,
+            summary.redToy
+        );
 
     const isCancelled =
         order.status === "cancel";
@@ -326,41 +449,7 @@ function openOrderDetail(index){
             🎁 贈送內容
         </h3>
 
-        <div class="detailRow">
-            🪙 遊戲代幣：${formatHistoryAmount(totalToken)} 枚
-        </div>
-
-        ${
-            greenToy > 0
-            ? `
-<div class="detailRow">
-    🟢 綠標玩具：${greenToy} 個
-</div>
-`
-            : ""
-        }
-
-        ${
-            redToy > 0
-            ? `
-<div class="detailRow">
-    🔴 紅標玩具：${redToy} 個
-</div>
-`
-            : ""
-        }
-
-        ${
-            totalToken === 0 &&
-            greenToy === 0 &&
-            redToy === 0
-            ? `
-<div class="detailRow">
-    無贈送內容
-</div>
-`
-            : ""
-        }
+        ${htmlRewards}
 
     </div>
 
@@ -414,12 +503,9 @@ function openOrderDetail(index){
 
 `;
 
-    const content =
-        document.getElementById("orderDetailContent");
+    if(orderDetailContent){
 
-    if(content){
-
-        content.innerHTML = html;
+        orderDetailContent.innerHTML = html;
 
     }
 
@@ -427,20 +513,22 @@ function openOrderDetail(index){
 
 }
 
-//==========================
+// =========================================
 // 補印票券
-//==========================
-
+// =========================================
 function reprintOrder(orderNo){
 
-    isReprint = true;
+    playClick();
 
     const order =
         salesHistory.find(
-            item => item.orderNo === orderNo
+            item =>
+            item.orderNo === orderNo
         );
 
     if(!order) return;
+
+    isReprint = true;
 
     currentPrintOrder = order;
 
@@ -452,15 +540,17 @@ function reprintOrder(orderNo){
 
 }
 
-//==========================
+// =========================================
 // 作廢訂單
-//==========================
-
+// =========================================
 function cancelOrder(orderNo){
+
+    playClick();
 
     const order =
         salesHistory.find(
-            item => item.orderNo === orderNo
+            item =>
+            item.orderNo === orderNo
         );
 
     if(!order) return;
@@ -516,349 +606,10 @@ function cancelOrder(orderNo){
 
     const index =
         salesHistory.findIndex(
-            item => item.orderNo === orderNo
+            item =>
+            item.orderNo === orderNo
         );
 
     openOrderDetail(index);
-
-}
-
-    showPage("salesHistoryPage");
-
-}
-
-function renderSalesHistory(){
-
-    const list = document.getElementById("salesHistoryList");
-
-    if(salesHistory.length===0){
-
-        list.innerHTML=`
-            <div class="emptyHistory">
-                目前沒有售票紀錄
-            </div>
-        `;
-
-        return;
-
-    }
-
-    let html="";
-
-    salesHistory.forEach((order,index)=>{
-
-        html+=`
-
-        <div
-    class="historyCard"
-    onclick="openOrderDetail(${index})">
-
-            <div class="historyTop">
-
-                <span>${order.time}</span>
-
-                <span>${order.payment}</span>
-
-            </div>
-${order.status==="cancel"
-? `<div class="cancelBadge">❌ 已作廢</div>`
-: ""}
-            <div class="historyAmount">
-
-                NT$${order.amount}
-
-            </div>
-
-            <div class="historyOrderNo">
-
-                ${order.orderNo}
-
-            </div>
-<button
-    class="deleteHistoryBtn"
-    onclick="event.stopPropagation(); deleteSalesHistory(${index})">
-
-    🗑️ 刪除紀錄
-
-</button>
-        </div>
-
-        `;
-
-    });
-
-    list.innerHTML=html;
-
-}
-function deleteSalesHistory(index){
-
-    if(!confirm("確定要刪除這筆售票紀錄？")){
-
-        return;
-
-    }
-
-    salesHistory.splice(index,1);
-
-    saveSalesHistory();
-
-    renderSalesHistory();
-
-}
-function openOrderDetail(index){
-
-    const order = salesHistory[index];
-
-    if(!order){
-        return;
-    }
-
-    let totalToken = 0;
-    let greenToy = 0;
-    let redToy = 0;
-
-    const groupedItems = {};
-
-    //==========================
-    // 整理購買內容
-    //==========================
-    order.items.forEach(item=>{
-
-        if(!groupedItems[item.id]){
-
-            groupedItems[item.id]={
-
-                title:item.title,
-
-                qty:0,
-
-                totalPrice:0
-
-            };
-
-        }
-
-        groupedItems[item.id].qty++;
-
-        groupedItems[item.id].totalPrice += Number(item.price||0);
-
-        totalToken += Number(item.token||0);
-
-        if(item.toy==="green"){
-
-            greenToy++;
-
-        }
-
-        if(item.toy==="red"){
-
-            redToy++;
-
-        }
-
-    });
-
-    //==========================
-    // 購買內容HTML
-    //==========================
-
-    let htmlItems="";
-
-    for(const id in groupedItems){
-
-        const item = groupedItems[id];
-
-        htmlItems += `
-
-        <div class="detailItem">
-
-            <span>
-                🎫 ${item.title} × ${item.qty}
-            </span>
-
-            <span class="detailItemPrice">
-                NT$${item.totalPrice}
-            </span>
-
-        </div>
-
-        `;
-
-    }
-
-    //==========================
-    // 明細HTML
-    //==========================
-
-    const html=`
-
-    <div class="detailCard">
-
-<div class="detailTitle">
-
-    🆔 ${order.orderNo}
-
-</div>
-
-${order.status==="cancel"
-? `
-<div class="cancelBadge">
-    ❌ 已作廢
-</div>
-`
-: ""}
-
-        <div class="detailRow">
-
-            🕒 ${order.date} ${order.time}
-
-        </div>
-
-        <div class="detailRow">
-
-            💳 ${order.payment}
-
-        </div>
-
-        <hr>
-
-        <h3>🎫 購買內容</h3>
-
-        ${htmlItems}
-
-        <hr>
-
-        <h3>🎁 贈送內容</h3>
-
-        <div class="detailRow">
-
-            🪙 遊戲代幣：${totalToken} 枚
-
-        </div>
-
-        ${greenToy>0?`
-        <div class="detailRow">
-            🎁 綠標玩具 × ${greenToy}
-        </div>
-        `:""}
-
-        ${redToy>0?`
-        <div class="detailRow">
-            🎁 紅標玩具 × ${redToy}
-        </div>
-        `:""}
-
-        <hr>
-
-        <div class="detailPrice">
-
-            NT$${order.amount}
-
-        </div>
-
-        <div class="detailButtons">
-
-           <button
-    class="big-btn"
-    ${order.status==="cancel"
-        ? "disabled"
-        : `onclick="reprintOrder('${order.orderNo}')"`}>
-
-    ${order.status==="cancel"
-        ? "🚫 已作廢不可補印"
-        : "🖨️ 補印票券"}
-
-</button>
-<button
-    class="big-btn cancelBtn"
-    ${order.status==="cancel"
-        ? "disabled"
-        : `onclick="cancelOrder('${order.orderNo}')"`}>
-
-    ${order.status==="cancel"
-        ? "✅ 已作廢"
-        : "❌ 作廢訂單"}
-
-</button>
-        </div>
-
-    </div>
-
-    `;
-
-    document.getElementById("orderDetailContent").innerHTML=html;
-
-    showPage("orderDetailPage");
-
-}
-function reprintOrder(orderNo){
-    
-isReprint = true;
-    const order = salesHistory.find(
-        x => x.orderNo === orderNo
-    );
-
-    if(!order){
-
-        return;
-
-    }
-
-currentPrintOrder = order;
-showPage("successPage");
-updateSuccessItems();
-startPrintAnimation();
-    }
-function cancelOrder(orderNo){
-
-    const order = salesHistory.find(
-        x => x.orderNo === orderNo
-    );
-
-    if(!order){
-
-        return;
-
-    }
-
-    if(order.status==="cancel"){
-
-        alert("此訂單已經作廢！");
-
-        return;
-
-    }
-
-    if(!confirm("確定要作廢這筆訂單？")){
-
-        return;
-
-    }
-
-    order.status = "cancel";
-
-order.items.forEach(item=>{
-
-    rollbackStats(todayStats, item, item);
-
-    rollbackStats(monthStats, item, item);
-
-    rollbackStats(totalStats, item, item);
-
-});
-
-// 儲存統計
-saveTodayStats();
-
-// 儲存售票紀錄
-saveSalesHistory();
-
-alert("✅ 訂單已作廢");
-
-    openOrderDetail(
-        salesHistory.findIndex(
-            x => x.orderNo === orderNo
-        )
-    );
 
 }
