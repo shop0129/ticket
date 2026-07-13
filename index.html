@@ -126,6 +126,8 @@ content="width=device-width, initial-scale=1.0">
     <button id="checkoutBtn">
         前往付款
     </button>
+<div class="selected-member-display">目前為非會員交易</div>
+
 <div id="paymentArea" style="display:none;">
 
     <button id="cartLineBtn">
@@ -188,6 +190,15 @@ content="width=device-width, initial-scale=1.0">
     🛒 加入購物車
 </button>
 
+
+<div class="member-quick-section">
+<button class="member-quick-toggle" onclick="toggleMemberQuickPanel()">👤 會員／快速入會</button>
+<div class="selected-member-display">目前為非會員交易</div>
+<div id="memberQuickPanel" class="member-quick-panel" style="display:none;">
+<div class="member-quick-search"><input id="memberQuickPhone" inputmode="tel" placeholder="輸入手機搜尋會員"><button onclick="searchQuickMember()">搜尋</button></div>
+<div id="memberQuickResult"></div>
+</div>
+</div>
 <div class="payment-buttons">
 
     <button id="linePayBtn">
@@ -473,6 +484,12 @@ content="width=device-width, initial-scale=1.0">
 
                     <button
                         class="dashboard-action-btn admin-only-action"
+                        onclick="openMemberManager()">
+                        👥 會員管理
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
                         onclick="openTicketManager()">
                         🎫 票券管理
                     </button>
@@ -517,6 +534,9 @@ content="width=device-width, initial-scale=1.0">
 
 </section>
 
+
+<!-- 會員管理 V6.4A -->
+<section id="memberManagerPage" class="page"><div class="tm-page"><div class="tm-top"><button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button><h1 class="tm-title">👥 會員管理</h1></div><div class="member-toolbar"><input id="memberSearchInput" type="search" placeholder="搜尋姓名、手機、會員編號"><button class="member-add-btn" onclick="openMemberEditor()">➕ 新增會員</button><button class="member-export-btn" onclick="exportMemberData()">📦 匯出會員</button><button class="member-import-btn" onclick="chooseMemberImportFile()">📥 匯入會員</button><input type="file" id="memberImportInput" accept=".json,application/json" hidden></div><div id="memberEditorPanel" style="display:none;"></div><div id="memberManagerList"></div></div></section>
 <!-- ==========================
 票券管理 V3.8
 ========================== -->
@@ -1299,6 +1319,7 @@ content="width=device-width, initial-scale=1.0">
     
 <script src="js/modules/hardwareTest.js"></script>
 <script src="js/modules/dataManager.js"></script>
+<script src="js/modules/member.js"></script>
 <script src="js/modules/payment.js"></script>
 <script src="js/modules/detail.js"></script>
 <script src="js/modules/cart.js"></script>
