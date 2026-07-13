@@ -6516,3 +6516,212 @@ System Setting
     }
 
 }
+
+
+/*====================================================
+  V6.5 消費點數＋玩具點數
+====================================================*/
+
+.member-toy-point-box{
+    border:2px solid #eadcf7;
+    background:#fcf8ff !important;
+}
+
+.member-toy-adjust-btn{
+    min-width:190px;
+    height:68px;
+    border:none;
+    border-radius:18px;
+    background:#8E44AD;
+    color:#fff;
+    font-size:27px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.toy-point-history-card{
+    margin-top:24px;
+    padding:28px 30px;
+    border-radius:24px;
+    background:#fff;
+    box-shadow:0 8px 22px rgba(0,0,0,.08);
+}
+
+.toy-point-history-title{
+    margin-bottom:18px;
+    font-size:32px;
+    font-weight:900;
+    color:#5E35B1;
+}
+
+.toy-point-history-empty{
+    padding:25px;
+    border-radius:16px;
+    background:#f5f6f8;
+    text-align:center;
+    font-size:24px;
+    color:#888;
+}
+
+.toy-point-history-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+    padding:17px 0;
+    border-bottom:1px solid #eee;
+}
+
+.toy-point-history-row:last-child{
+    border-bottom:none;
+}
+
+.toy-point-history-row strong{
+    display:block;
+    font-size:25px;
+    color:#333;
+}
+
+.toy-point-history-row span,
+.toy-point-history-row small{
+    display:block;
+    margin-top:5px;
+    font-size:20px;
+    color:#888;
+}
+
+.toy-point-plus,
+.toy-point-minus{
+    flex-shrink:0;
+    text-align:right;
+    font-size:28px;
+    font-weight:900;
+}
+
+.toy-point-plus{color:#43A047;}
+.toy-point-minus{color:#F44336;}
+
+.toy-order-card{
+    margin:25px 0;
+    padding:28px 30px;
+    border:2px solid #e3d6f1;
+    border-radius:22px;
+    background:#fbf8ff;
+}
+
+.toy-order-card.disabled{
+    border-color:#ddd;
+    background:#f3f4f5;
+    text-align:center;
+    font-size:25px;
+    font-weight:800;
+    color:#888;
+}
+
+.toy-order-title{
+    font-size:34px;
+    font-weight:900;
+    color:#5E35B1;
+}
+
+.toy-order-description,
+.toy-order-member,
+.toy-order-rate{
+    margin-top:10px;
+    font-size:24px;
+    line-height:1.5;
+    font-weight:800;
+    color:#666;
+}
+
+.toy-order-bind-row{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 230px;
+    gap:14px;
+    margin-top:20px;
+}
+
+.toy-order-bind-row input,
+.toy-order-grid input{
+    width:100%;
+    height:66px;
+    padding:0 16px;
+    border:2px solid #d8dce2;
+    border-radius:15px;
+    font-size:27px;
+}
+
+.toy-order-bind-row button,
+.toy-order-convert-btn{
+    min-height:66px;
+    border:none;
+    border-radius:16px;
+    background:#7E57C2;
+    color:#fff;
+    font-size:25px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.toy-order-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:18px;
+    margin-top:20px;
+}
+
+.toy-order-grid label{
+    padding:18px;
+    border-radius:17px;
+    background:#fff;
+}
+
+.toy-order-grid span{
+    display:block;
+    margin-bottom:10px;
+    font-size:25px;
+    font-weight:900;
+    color:#444;
+}
+
+.toy-order-converted,
+.toy-order-complete{
+    margin-top:18px;
+    padding:15px;
+    border-radius:15px;
+    background:#e9f8ed;
+    text-align:center;
+    font-size:24px;
+    font-weight:900;
+    color:#237a35;
+}
+
+.toy-order-convert-btn{
+    width:100%;
+    margin-top:20px;
+    background:#43A047;
+}
+
+/* 員工可查看會員與操作玩具點數，但不能新增、編輯、刪除或匯入匯出 */
+.role-staff-active .member-admin-only{
+    display:none !important;
+}
+
+@media (max-width:700px){
+
+    .toy-point-history-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .toy-point-plus,
+    .toy-point-minus{
+        text-align:left;
+    }
+
+    .toy-order-bind-row,
+    .toy-order-grid{
+        grid-template-columns:1fr;
+    }
+
+}
