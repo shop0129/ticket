@@ -142,10 +142,14 @@ JSON.parse(localStorage.getItem("systemData")) || {
 
 };
 
-localStorage.setItem(
-    "systemData",
-    JSON.stringify(systemData)
-);
+if(!localStorage.getItem("systemData")){
+
+    localStorage.setItem(
+        "systemData",
+        JSON.stringify(systemData)
+    );
+
+}
 //==========================
 // 票券名稱
 //==========================
