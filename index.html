@@ -422,99 +422,237 @@ content="width=device-width, initial-scale=1.0">
 </section>
 
 
-<!-- 管理首頁 -->
+<!-- 管理首頁 Dashboard V6.2 -->
 <section id="adminHomePage" class="page">
 
-    <h1 class="title">管理後台</h1>
+    <div class="dashboard-page">
 
-<div
-    id="currentRoleBadge"
-    class="role-badge">
-</div>
+        <div class="dashboard-header">
 
-<button
-    class="big-btn"
-    onclick="openTicketManager()">
+            <div>
 
-    🎫 票券管理
+                <h1 class="dashboard-title">
+                    小怪獸營運 Dashboard
+                </h1>
 
-</button>
+                <div
+                    id="dashboardDate"
+                    class="dashboard-date">
+                    今日營運概況
+                </div>
 
-<button
-    class="big-btn"
-    onclick="openTodayStats()">
+            </div>
 
-    📊 營運中心
+            <div
+                id="currentRoleBadge"
+                class="role-badge">
+            </div>
 
-</button>
+        </div>
 
-<button
-    class="big-btn"
-    onclick="openSalesHistory()">
+        <div class="dashboard-summary-grid">
 
-    🧾 售票紀錄
+            <div class="dashboard-summary-card dashboard-income-card">
 
-</button>
+                <div class="dashboard-summary-icon">💰</div>
 
-<button
-    class="big-btn"
-    onclick="openShiftReport()">
+                <div class="dashboard-summary-label">
+                    今日總收入
+                </div>
 
-    📋 今日交班報表
+                <div
+                    id="dashboardIncome"
+                    class="dashboard-summary-value">
+                    NT$0
+                </div>
 
-</button>
+            </div>
 
-<button
-    class="big-btn"
-    onclick="reprintLatestOrder()">
+            <div class="dashboard-summary-card">
 
-    🖨️ 補印最近一筆
+                <div class="dashboard-summary-icon">🎫</div>
 
-</button>
+                <div class="dashboard-summary-label">
+                    今日售票
+                </div>
 
-<button
-    class="big-btn"
-    onclick="openBusinessMode()">
+                <div
+                    id="dashboardTickets"
+                    class="dashboard-summary-value">
+                    0 張
+                </div>
 
-    🗓️ 營業模式
+            </div>
 
-</button>
+            <div class="dashboard-summary-card">
 
-<button
-    class="big-btn"
-    onclick="openSystemSetting()">
+                <div class="dashboard-summary-icon">💵</div>
 
-    ⚙️ 系統設定
+                <div class="dashboard-summary-label">
+                    現金收入
+                </div>
 
-</button>
+                <div
+                    id="dashboardCash"
+                    class="dashboard-summary-value">
+                    NT$0
+                </div>
 
+            </div>
 
-<button
-    class="big-btn"
-    onclick="openDataManager()">
+            <div class="dashboard-summary-card">
 
-    ☁️ 資料管理
+                <div class="dashboard-summary-icon">📱</div>
 
-</button>
+                <div class="dashboard-summary-label">
+                    LINE Pay
+                </div>
 
-<button
-    class="big-btn"
-    onclick="openHardwareTest()">
+                <div
+                    id="dashboardLinePay"
+                    class="dashboard-summary-value">
+                    NT$0
+                </div>
 
-    🖨️ 硬體測試
+            </div>
 
-</button>
+            <div class="dashboard-summary-card">
 
-<button
-    class="big-btn"
-    onclick="logoutAdmin()">
+                <div class="dashboard-summary-icon">🧾</div>
 
-    登出並返回首頁
+                <div class="dashboard-summary-label">
+                    正常訂單
+                </div>
 
-</button>
+                <div
+                    id="dashboardOrders"
+                    class="dashboard-summary-value">
+                    0 筆
+                </div>
+
+            </div>
+
+            <div class="dashboard-summary-card dashboard-cancel-card">
+
+                <div class="dashboard-summary-icon">❌</div>
+
+                <div class="dashboard-summary-label">
+                    作廢訂單
+                </div>
+
+                <div
+                    id="dashboardCancelled"
+                    class="dashboard-summary-value">
+                    0 筆
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="dashboard-content-grid">
+
+            <div class="dashboard-panel">
+
+                <div class="dashboard-panel-header">
+
+                    <div class="dashboard-panel-title">
+                        🧾 最近 5 筆訂單
+                    </div>
+
+                    <button
+                        type="button"
+                        class="dashboard-small-btn"
+                        onclick="playClick(); openSalesHistory()">
+                        查看全部
+                    </button>
+
+                </div>
+
+                <div id="dashboardRecentOrders">
+
+                </div>
+
+            </div>
+
+            <div class="dashboard-panel">
+
+                <div class="dashboard-panel-title">
+                    ⚡ 快速操作
+                </div>
+
+                <div class="dashboard-action-grid">
+
+                    <button
+                        class="dashboard-action-btn"
+                        onclick="openTodayStats()">
+                        📊 營運中心
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn"
+                        onclick="openSalesHistory()">
+                        🧾 售票紀錄
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn"
+                        onclick="openShiftReport()">
+                        📋 交班報表
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn"
+                        onclick="reprintLatestOrder()">
+                        🖨️ 補印最近一筆
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openTicketManager()">
+                        🎫 票券管理
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openBusinessMode()">
+                        🗓️ 營業模式
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openSystemSetting()">
+                        ⚙️ 系統設定
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openDataManager()">
+                        ☁️ 資料管理
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openHardwareTest()">
+                        🖨️ 硬體測試
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <button
+            class="dashboard-logout-btn"
+            onclick="logoutAdmin()">
+            登出並返回首頁
+        </button>
+
+    </div>
 
 </section>
-    
+
 <!-- ==========================
 票券管理 V3.8
 ========================== -->
@@ -1300,6 +1438,7 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/cart.js"></script>
     
 <script src="js/modules/operation.js"></script>
+<script src="js/modules/dashboard.js"></script>
 <script src="js/modules/roleManager.js"></script>
 <script src="js/script.js"></script>
 
