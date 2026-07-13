@@ -549,9 +549,9 @@ content="width=device-width, initial-scale=1.0">
                     </button>
 
                     <button
-                        class="dashboard-action-btn admin-only-action"
+                        class="dashboard-action-btn"
                         onclick="openMemberManager()">
-                        👥 會員管理
+                        👥 會員與點數管理
                     </button>
 
                     <button
@@ -602,7 +602,7 @@ content="width=device-width, initial-scale=1.0">
 
 
 <!-- 會員管理 V6.4A -->
-<section id="memberManagerPage" class="page"><div class="tm-page"><div class="tm-top"><button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button><h1 class="tm-title">👥 會員管理</h1></div><div class="member-toolbar"><input id="memberSearchInput" type="search" placeholder="搜尋姓名、手機、會員編號"><button class="member-add-btn" onclick="openMemberEditor()">➕ 新增會員</button><button class="member-export-btn" onclick="exportMemberData()">📦 匯出會員</button><button class="member-import-btn" onclick="chooseMemberImportFile()">📥 匯入會員</button><input type="file" id="memberImportInput" accept=".json,application/json" hidden></div><div id="memberEditorPanel" style="display:none;"></div><div id="memberManagerList"></div></div></section>
+<section id="memberManagerPage" class="page"><div class="tm-page"><div class="tm-top"><button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button><h1 class="tm-title">👥 會員管理</h1></div><div class="member-toolbar"><input id="memberSearchInput" type="search" placeholder="搜尋姓名、手機、會員編號"><button class="member-add-btn member-admin-only" onclick="openMemberEditor()">➕ 新增會員</button><button class="member-export-btn member-admin-only" onclick="exportMemberData()">📦 匯出會員</button><button class="member-import-btn member-admin-only" onclick="chooseMemberImportFile()">📥 匯入會員</button><input type="file" id="memberImportInput" accept=".json,application/json" hidden></div><div id="memberEditorPanel" style="display:none;"></div><div id="memberManagerList"></div></div></section>
 
 <!-- ==========================
 會員消費紀錄 V6.4C
