@@ -93,6 +93,24 @@ function renderTicketManager(){
     let html =
     renderAddTicketPanel();
 
+    html += `
+
+<div class="image-library-card">
+
+    <div class="image-library-title">
+        🖼️ 已上傳圖片庫
+    </div>
+
+    <div class="image-library-note">
+        圖片會儲存在目前這台售票機的瀏覽器中，備份資料時也會一起匯出。
+    </div>
+
+    ${renderImageLibraryPanel()}
+
+</div>
+
+`;
+
     for(const id in ticketData){
 
         const ticket =
@@ -143,7 +161,7 @@ function renderTicketManager(){
     <div class="tm-preview">
 
         <img
-            src="images/${ticket.image || imageList[0]}"
+            src="${resolveTicketImageSrc(ticket.image || imageList[0])}"
             class="tm-preview-img"
             id="preview-${id}">
 
@@ -159,7 +177,7 @@ function renderTicketManager(){
             <div
                 class="tm-image-name"
                 id="imageName-${id}">
-                ${imageNames[ticket.image] || ticket.image || "未選擇"}
+                ${getTicketImageLabel(ticket.image)}
             </div>
 
             <button
@@ -168,6 +186,29 @@ function renderTicketManager(){
                 onclick="changeTicketImage('${id}',1)">
                 ▶
             </button>
+
+        </div>
+
+        <div class="ticket-image-upload-area">
+
+            <select
+                onchange="selectUploadedTicketImage('${id}',this.value)">
+
+                ${renderUploadedImageOptions(ticket.image)}
+
+            </select>
+
+            <label class="ticket-upload-btn">
+
+                📤 上傳新圖片
+
+                <input
+                    type="file"
+                    accept="image/*"
+                    onchange="uploadTicketImage('${id}',this)"
+                    hidden>
+
+            </label>
 
         </div>
 
@@ -579,13 +620,16 @@ function changeTicketImage(id,step){
 
     if(preview){
         preview.src =
-        "images/" + ticket.image;
+        resolveTicketImageSrc(
+            ticket.image
+        );
     }
 
     if(name){
         name.textContent =
-        imageNames[ticket.image] ||
-        ticket.image;
+        getTicketImageLabel(
+            ticket.image
+        );
     }
 
 }
