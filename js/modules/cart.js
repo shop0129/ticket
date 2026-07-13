@@ -3,6 +3,8 @@
 ========================================= */
 function addCurrentTicketToCart(){
 
+    playClick();
+
     if(!selectedTicket) return;
 
     const ticket = ticketData[selectedTicket];
@@ -198,6 +200,8 @@ function removeCartItem(id){
 }
 checkoutBtn.addEventListener("click",()=>{
 
+    playClick();
+
     if(cart.length===0){
 
         alert("請先加入票券！");
@@ -213,6 +217,8 @@ checkoutBtn.addEventListener("click",()=>{
 });
 
 cartBackBtn.addEventListener("click",()=>{
+
+    playClick();
 
     paymentArea.style.display="none";
 
