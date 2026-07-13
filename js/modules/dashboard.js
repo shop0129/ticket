@@ -1,4 +1,4 @@
-// ========================================
+// =========================================
 // 小怪獸售票機 V6.2
 // 後台 Dashboard
 // =========================================
@@ -23,6 +23,18 @@ document.getElementById("dashboardOrders");
 
 const dashboardCancelled =
 document.getElementById("dashboardCancelled");
+
+const dashboardMemberOrders =
+document.getElementById("dashboardMemberOrders");
+
+const dashboardMemberIncome =
+document.getElementById("dashboardMemberIncome");
+
+const dashboardNonMemberIncome =
+document.getElementById("dashboardNonMemberIncome");
+
+const dashboardNewMembers =
+document.getElementById("dashboardNewMembers");
 
 const dashboardRecentOrders =
 document.getElementById("dashboardRecentOrders");
@@ -95,6 +107,7 @@ function renderDashboardRecentOrders(){
 
         <div class="dashboard-order-meta">
             ${order.time || ""}・${order.payment || "未記錄"}・${itemCount} 張
+            ${order.memberId ? `・👤 ${order.memberName || "會員"}` : ""}
         </div>
 
     </div>
@@ -170,6 +183,81 @@ function renderAdminDashboard(){
 
     dashboardCancelled.textContent =
     `${report.cancelledOrderCount} 筆`;
+
+    const today =
+    new Date().toLocaleDateString("zh-TW");
+
+    const todayOrders =
+    (
+        Array.isArray(salesHistory)
+        ? salesHistory
+        : []
+    ).filter(order=>
+        order.date === today &&
+        order.status !== "cancel"
+    );
+
+    const memberOrders =
+    todayOrders.filter(order=>
+        Boolean(order.memberId)
+    );
+
+    const nonMemberOrders =
+    todayOrders.filter(order=>
+        !order.memberId
+    );
+
+    const memberIncome =
+    memberOrders.reduce(
+        (sum,order)=>
+        sum + Number(order.amount || 0),
+        0
+    );
+
+    const nonMemberIncome =
+    nonMemberOrders.reduce(
+        (sum,order)=>
+        sum + Number(order.amount || 0),
+        0
+    );
+
+    const newMembers =
+    (
+        typeof memberData !== "undefined" &&
+        Array.isArray(memberData)
+        ? memberData
+        : []
+    ).filter(member=>
+        member.joinDate === today
+    ).length;
+
+    if(dashboardMemberOrders){
+
+        dashboardMemberOrders.textContent =
+        `${memberOrders.length} 筆`;
+
+    }
+
+    if(dashboardMemberIncome){
+
+        dashboardMemberIncome.textContent =
+        `NT$${formatDashboardAmount(memberIncome)}`;
+
+    }
+
+    if(dashboardNonMemberIncome){
+
+        dashboardNonMemberIncome.textContent =
+        `NT$${formatDashboardAmount(nonMemberIncome)}`;
+
+    }
+
+    if(dashboardNewMembers){
+
+        dashboardNewMembers.textContent =
+        `${newMembers} 人`;
+
+    }
 
     renderDashboardRecentOrders();
 
