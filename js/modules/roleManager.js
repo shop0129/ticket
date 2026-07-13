@@ -145,19 +145,41 @@ function updateRoleBadge(){
 
     if(!currentUserRole){
 
-        badge.style.display = "none";
+        if(badge.style.display !== "none"){
+
+            badge.style.display = "none";
+
+        }
+
         return;
 
     }
 
-    badge.style.display = "inline-flex";
-    badge.className =
+    const nextClass =
     `role-badge role-${currentUserRole}`;
 
-    badge.innerHTML =
+    const nextText =
     currentUserRole === ROLE_ADMIN
     ? "👑 店長模式"
     : "👤 員工模式";
+
+    if(badge.style.display !== "inline-flex"){
+
+        badge.style.display = "inline-flex";
+
+    }
+
+    if(badge.className !== nextClass){
+
+        badge.className = nextClass;
+
+    }
+
+    if(badge.textContent !== nextText){
+
+        badge.textContent = nextText;
+
+    }
 
 }
 
@@ -269,19 +291,31 @@ function protectAdminFunction(functionName,message){
 });
 
 // 動態產生售票紀錄或訂單明細後重新套用權限
-const roleObserver =
-new MutationObserver(()=>{
+function observeRoleContainer(elementId){
 
-    applyRolePermissions();
+    const element =
+    document.getElementById(elementId);
 
-});
+    if(!element) return;
 
-roleObserver.observe(
-    document.body,
-    {
-        childList:true,
-        subtree:true
-    }
-);
+    const observer =
+    new MutationObserver(()=>{
+
+        applyRolePermissions();
+
+    });
+
+    observer.observe(
+        element,
+        {
+            childList:true,
+            subtree:true
+        }
+    );
+
+}
+
+observeRoleContainer("salesHistoryList");
+observeRoleContainer("orderDetailContent");
 
 applyRolePermissions();
