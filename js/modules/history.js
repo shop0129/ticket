@@ -658,6 +658,8 @@ function openOrderDetail(index){
 
     </div>
 
+    <div id="toyPointOrderPanel"></div>
+
     <div class="detailButtons">
 
         <button
@@ -699,6 +701,17 @@ function openOrderDetail(index){
     if(orderDetailContent){
 
         orderDetailContent.innerHTML = html;
+
+    }
+
+    if(
+        typeof renderToyPointOrderPanel ===
+        "function"
+    ){
+
+        renderToyPointOrderPanel(
+            order.orderNo
+        );
 
     }
 
@@ -757,6 +770,16 @@ function cancelOrder(orderNo){
     }
 
     if(!confirm("確定要作廢這筆訂單？")){
+
+        return;
+
+    }
+
+    if(
+        typeof canRollbackMemberOrder ===
+        "function" &&
+        !canRollbackMemberOrder(order)
+    ){
 
         return;
 
