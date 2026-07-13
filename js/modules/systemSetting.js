@@ -243,6 +243,21 @@ function renderSystemSetting(){
             autocomplete="new-password"
             value="${systemData.adminPassword}">
 
+        <label for="staffSettingPassword">
+            員工密碼
+        </label>
+
+        <input
+            id="staffSettingPassword"
+            type="password"
+            inputmode="numeric"
+            autocomplete="new-password"
+            value="${systemData.staffPassword}">
+
+        <div class="password-setting-note">
+            員工帳號只能查看今日統計、售票紀錄及補印票券。
+        </div>
+
     </div>
 
 </div>
@@ -274,7 +289,32 @@ systemData.payment.credit =
 document.getElementById("creditEnable").checked;
     // 只有管理密碼還需要從 input 讀取
     systemData.adminPassword =
-document.getElementById("adminSettingPassword").value;
+document.getElementById("adminSettingPassword").value.trim();
+
+    systemData.staffPassword =
+document.getElementById("staffSettingPassword").value.trim();
+
+    if(
+        !systemData.adminPassword ||
+        !systemData.staffPassword
+    ){
+
+        alert("❌ 店長密碼與員工密碼不可空白");
+
+        return;
+
+    }
+
+    if(
+        systemData.adminPassword ===
+        systemData.staffPassword
+    ){
+
+        alert("❌ 店長密碼與員工密碼不可相同");
+
+        return;
+
+    }
 
     // 儲存全部設定
     localStorage.setItem(
@@ -319,7 +359,8 @@ function resetSystemSetting(){
         credit:false
     },
 
-    adminPassword:"1234"
+    adminPassword:"1234",
+    staffPassword:"0000"
 
 };
 
