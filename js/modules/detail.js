@@ -1,157 +1,179 @@
 // =========================================
+// 小怪獸售票機 V6.3
 // 確認票券模組
 // =========================================
 
-const detailImage = document.getElementById("detailImage");
-const detailTitle = document.getElementById("detailTitle");
-const detailPrice = document.getElementById("detailPrice");
-const detailInfo = document.getElementById("detailInfo");
-const detailBackBtn = document.getElementById("detailBackBtn");
+const detailImage =
+document.getElementById("detailImage");
 
-// =========================================
-// 返回票種頁
-// =========================================
+const detailTitle =
+document.getElementById("detailTitle");
+
+const detailPrice =
+document.getElementById("detailPrice");
+
+const detailInfo =
+document.getElementById("detailInfo");
+
+const detailBackBtn =
+document.getElementById("detailBackBtn");
+
 if(detailBackBtn){
 
-    detailBackBtn.addEventListener("click",()=>{
+    detailBackBtn.addEventListener(
+        "click",
+        ()=>{
 
-        playClick();
+            playClick();
 
-        setTimeout(()=>{
+            setTimeout(()=>{
 
-            showPage("ticketPage");
+                showPage("ticketPage");
 
-        },80);
+            },80);
 
-    });
+        }
+    );
 
 }
 
-// =========================================
-// 產生票券說明
-// =========================================
 function getTicketDetailInfo(id,data){
 
-    let info = "";
+    if(data.description){
 
-    switch(id){
-
-        // ===== 一般票 =====
-        case "ticket2hGreen":
-        case "ticket2hRed":
-        case "ticket3hGreen":
-        case "ticket3hRed":
-
-            info += `🪙 贈送代幣：${data.token} 枚<br>`;
-
-            if(data.toy === "green"){
-
-                info += "🎁 贈送玩具：綠標玩具";
-
-            }else if(data.toy === "red"){
-
-                info += "🎁 贈送玩具：紅標玩具";
-
-            }
-
-            break;
-
-        // ===== 平日早鳥 =====
-        case "early":
-
-            info += `
-🕙 入場時間：14:00~15:30<br>
-🎮 可暢玩至：18:00<br>
-🪙 贈送代幣：${data.token} 枚<br>
-🎁 贈送玩具：紅標玩具`;
-
-            break;
-
-        // ===== 寒暑假 =====
-        case "summer":
-
-            info += `
-🕙 入場時間：10:00~11:30<br>
-🎮 可暢玩至：16:00<br>
-🪙 贈送代幣：${data.token} 枚<br>
-🎁 贈送玩具：紅標玩具`;
-
-            break;
-
-        // ===== 幼幼票 =====
-        case "baby":
-
-            info =
-            "✓ 限未滿12個月<br>" +
-            "✓ 免費陪同1位家長<br>" +
-            "不送玩具、不送代幣";
-
-            break;
-
-        // ===== 陪同票 =====
-        case "parent":
-
-            info =
-            "✓ 限陪同家長使用<br>" +
-            "✓ 必須有兒童同行";
-
-            break;
-
-        // ===== 10枚代幣 =====
-        case "token10":
-
-            info = "兌換10枚遊戲代幣";
-
-            break;
-
-        // ===== 25枚代幣 =====
-        case "token25":
-
-            info = "兌換25枚遊戲代幣";
-
-            break;
-
-        // ===== 行動電源 =====
-        case "powerbank":
-
-            info =
-            "✓ 限本館內借用<br>" +
-            "✓ 離場前請歸還<br>" +
-            "〔需抵押證件〕";
-
-            break;
+        return escapeDetailText(
+            data.description
+        )
+        .replaceAll("\n","<br>");
 
     }
 
-    return info;
+    let info = "";
+
+    if(Number(data.token || 0) > 0){
+
+        info +=
+        `🪙 贈送代幣：${data.token} 枚<br>`;
+
+    }
+
+    if(data.toy === "green"){
+
+        info +=
+        "🎁 贈送玩具：綠標玩具<br>";
+
+    }else if(data.toy === "red"){
+
+        info +=
+        "🎁 贈送玩具：紅標玩具<br>";
+
+    }
+
+    switch(id){
+
+        case "early":
+
+            return `
+🕙 入場時間：14:00~15:30<br>
+🎮 可暢玩至：18:00<br>
+${info}`;
+
+        case "summer":
+
+            return `
+🕙 入場時間：10:00~11:30<br>
+🎮 可暢玩至：16:00<br>
+${info}`;
+
+        case "baby":
+
+            return (
+                "✓ 限未滿12個月<br>" +
+                "✓ 免費陪同1位家長<br>" +
+                "不送玩具、不送代幣"
+            );
+
+        case "parent":
+
+            return (
+                "✓ 限陪同家長使用<br>" +
+                "✓ 必須有兒童同行"
+            );
+
+        case "token10":
+
+            return "兌換10枚遊戲代幣";
+
+        case "token25":
+
+            return "兌換25枚遊戲代幣";
+
+        case "powerbank":
+
+            return (
+                "✓ 限本館內借用<br>" +
+                "✓ 離場前請歸還<br>" +
+                "〔需抵押證件〕"
+            );
+
+        default:
+
+            return (
+                info ||
+                "請確認票券內容後選擇付款方式"
+            );
+
+    }
 
 }
 
-// =========================================
-// 顯示確認票券頁
-// =========================================
+function escapeDetailText(value){
+
+    return String(value || "")
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+
+}
+
 function openTicketDetail(ticketElement){
 
-    const id = ticketElement.dataset.id;
-    const data = ticketData[id];
+    const id =
+    ticketElement.dataset.id;
+
+    const data =
+    ticketData[id];
 
     if(!data) return;
 
     selectedTicket = id;
-    selectedReward = data.reward;
 
-    detailImage.src = ticketElement.src;
-    detailTitle.innerHTML = data.title;
-    detailPrice.innerHTML = "$" + data.price;
+    selectedReward =
+    data.reward || "";
 
-    const info = getTicketDetailInfo(id,data);
+    detailImage.src =
+    ticketElement.src;
 
-    detailInfo.innerHTML =
-    `<div style="display:inline-block;text-align:left;line-height:1.9;">
+    detailTitle.textContent =
+    data.title;
+
+    detailPrice.textContent =
+    "$" + Number(data.price || 0);
+
+    const info =
+    getTicketDetailInfo(id,data);
+
+    detailInfo.innerHTML = `
+
+<div style="display:inline-block;text-align:left;line-height:1.9;">
     ${info}
-    </div>`;
+</div>
 
-    ticketElement.classList.remove("ticket-selected");
+`;
+
+    ticketElement
+    .classList
+    .remove("ticket-selected");
 
     showPage("detailPage");
 
@@ -159,26 +181,35 @@ function openTicketDetail(ticketElement){
 
 }
 
-// =========================================
-// 點選票券
-// =========================================
-document
-.querySelectorAll(".ticket-btn,.ticket-btn-wide")
-.forEach(ticket=>{
+// 動態票卡使用事件代理，不需重新綁定
+document.addEventListener(
+    "click",
+    event=>{
 
-    ticket.addEventListener("click",()=>{
+        const ticket =
+        event.target.closest(
+            ".ticket-btn,.ticket-btn-wide"
+        );
+
+        if(!ticket) return;
 
         playClick();
 
         document
-        .querySelectorAll(".ticket-btn,.ticket-btn-wide")
+        .querySelectorAll(
+            ".ticket-btn,.ticket-btn-wide"
+        )
         .forEach(card=>{
 
-            card.classList.remove("ticket-selected");
+            card.classList.remove(
+                "ticket-selected"
+            );
 
         });
 
-        ticket.classList.add("ticket-selected");
+        ticket.classList.add(
+            "ticket-selected"
+        );
 
         setTimeout(()=>{
 
@@ -186,6 +217,5 @@ document
 
         },150);
 
-    });
-
-});
+    }
+);
