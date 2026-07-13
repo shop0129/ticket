@@ -144,7 +144,87 @@ function renderSystemSetting(){
     </div>
 
 </div>
+<!-- ==========================
+付款方式
+========================== -->
 
+<div class="tm-card">
+
+    <div class="tm-card-title">
+
+        💳 付款方式
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="cashEnable"
+                ${systemData.payment.cash ? "checked" : ""}>
+
+            現金付款
+
+            🟢 正常
+
+        </label>
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="lineEnable"
+                ${systemData.payment.linepay ? "checked" : ""}>
+
+            LINE Pay
+
+            ⚪ 未串接
+
+        </label>
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="easyEnable"
+                ${systemData.payment.easycard ? "checked" : ""}>
+
+            悠遊卡
+
+            ⚪ 未安裝
+
+        </label>
+
+    </div>
+
+    <div class="tm-field">
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="creditEnable"
+                ${systemData.payment.credit ? "checked" : ""}>
+
+            信用卡
+
+            ⚪ 未安裝
+
+        </label>
+
+    </div>
+
+</div>
 <!-- ==========================
 管理
 ========================== -->
