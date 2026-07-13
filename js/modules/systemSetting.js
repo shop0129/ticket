@@ -162,7 +162,7 @@ function renderSystemSetting(){
         <label>管理密碼</label>
 
         <input
-            id="adminPassword"
+            id="adminSettingPassword"
             type="password"
             value="${systemData.adminPassword}">
 
@@ -182,7 +182,7 @@ function saveSystemSetting(){
 
     // 只有管理密碼還需要從 input 讀取
     systemData.adminPassword =
-    document.getElementById("adminPassword").value;
+document.getElementById("adminSettingPassword").value;
 
     // 儲存全部設定
     localStorage.setItem(
