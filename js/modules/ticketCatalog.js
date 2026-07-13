@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V6.3
+// 小怪獸售票機 V6.3.1
 // 動態票券目錄
 // =========================================
 
@@ -36,15 +36,17 @@ function isTicketVisibleByBusinessMode(id,ticket){
 
 function createTicketCard(id,ticket){
 
-    const image =
-    ticket.image || "ticket-2h-green.png";
+    const imageSrc =
+    resolveTicketImageSrc(
+        ticket.image
+    );
 
     return `
 
 <div class="ticket-item" data-ticket-id="${id}">
 
     <img
-        src="images/${image}"
+        src="${imageSrc}"
         class="ticket-btn"
         data-id="${id}"
         alt="${ticket.title || "票券"}">
