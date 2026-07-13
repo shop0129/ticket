@@ -1,4 +1,4 @@
-// ========================================
+// =========================================
 // 小怪獸售票機 V5.6.5
 // 主程式
 // =========================================
@@ -203,7 +203,8 @@ document.addEventListener("click",(event)=>{
         #systemSettingPage,
         #todayStatsPage,
         #salesHistoryPage,
-        #orderDetailPage
+        #orderDetailPage,
+        #dataManagerPage
     `);
 
     if(!adminPage) return;
