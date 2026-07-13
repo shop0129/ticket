@@ -30,6 +30,120 @@ function formatHistoryAmount(value){
 
 }
 
+
+// =========================================
+// 售票紀錄搜尋條件
+// =========================================
+function getHistorySearchValues(){
+
+    const keywordInput =
+    document.getElementById(
+        "historySearchInput"
+    );
+
+    const paymentSelect =
+    document.getElementById(
+        "historyPaymentFilter"
+    );
+
+    const statusSelect =
+    document.getElementById(
+        "historyStatusFilter"
+    );
+
+    return {
+
+        keyword:
+        keywordInput
+        ? keywordInput.value.trim().toLowerCase()
+        : "",
+
+        payment:
+        paymentSelect
+        ? paymentSelect.value
+        : "all",
+
+        status:
+        statusSelect
+        ? statusSelect.value
+        : "all"
+
+    };
+
+}
+
+function getFilteredSalesHistory(){
+
+    const filters =
+    getHistorySearchValues();
+
+    return (
+        Array.isArray(salesHistory)
+        ? salesHistory
+        : []
+    )
+    .map((order,index)=>({
+
+        order,
+        index
+
+    }))
+    .filter(entry=>{
+
+        const order =
+        entry.order;
+
+        const searchableText = [
+
+            order.orderNo,
+            order.date,
+            order.time,
+            order.payment,
+            order.amount,
+
+            ...(
+                Array.isArray(order.items)
+                ? order.items.map(item=>
+                    item.title || item.id || ""
+                )
+                : []
+            )
+
+        ]
+        .join(" ")
+        .toLowerCase();
+
+        const keywordMatched =
+        !filters.keyword ||
+        searchableText.includes(
+            filters.keyword
+        );
+
+        const paymentMatched =
+        filters.payment === "all" ||
+        order.payment === filters.payment;
+
+        const statusMatched =
+        filters.status === "all" ||
+        (
+            filters.status === "normal" &&
+            order.status !== "cancel"
+        ) ||
+        (
+            filters.status === "cancel" &&
+            order.status === "cancel"
+        );
+
+        return (
+            keywordMatched &&
+            paymentMatched &&
+            statusMatched
+        );
+
+    });
+
+}
+
 // =========================================
 // 顯示售票紀錄
 // =========================================
@@ -66,9 +180,38 @@ function renderSalesHistory(){
 
     }
 
+    const filteredHistory =
+    getFilteredSalesHistory();
+
+    if(filteredHistory.length === 0){
+
+        salesHistoryList.innerHTML = `
+
+<div class="history-empty-card">
+
+    <div class="history-empty-icon">
+        🔍
+    </div>
+
+    <div class="history-empty-title">
+        找不到符合條件的訂單
+    </div>
+
+    <div class="history-empty-text">
+        請調整搜尋關鍵字或篩選條件
+    </div>
+
+</div>
+
+`;
+
+        return;
+
+    }
+
     let html = "";
 
-    salesHistory.forEach((order,index)=>{
+    filteredHistory.forEach(({order,index})=>{
 
         const isCancelled =
             order.status === "cancel";
