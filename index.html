@@ -405,6 +405,10 @@ content="width=device-width, initial-scale=1.0">
             id="adminLoginPassword"
             placeholder="請輸入管理密碼">
 
+        <div class="login-role-hint">
+            店長與員工共用此登入畫面，系統會依密碼自動判斷權限。
+        </div>
+
         <button class="big-btn" onclick="loginAdmin()">
             登入
         </button>
@@ -422,6 +426,11 @@ content="width=device-width, initial-scale=1.0">
 <section id="adminHomePage" class="page">
 
     <h1 class="title">管理後台</h1>
+
+<div
+    id="currentRoleBadge"
+    class="role-badge">
+</div>
 
 <button
     class="big-btn"
@@ -482,9 +491,9 @@ content="width=device-width, initial-scale=1.0">
 
 <button
     class="big-btn"
-    onclick="showPage('homePage')">
+    onclick="logoutAdmin()">
 
-    返回首頁
+    登出並返回首頁
 
 </button>
 
@@ -1193,5 +1202,6 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/cart.js"></script>
     
 <script src="js/script.js"></script>
+<script src="js/modules/roleManager.js"></script>
 </body>
 </html>
