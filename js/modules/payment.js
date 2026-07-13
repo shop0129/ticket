@@ -15,6 +15,43 @@ document.getElementById("linePayBtn");
 const cashBtn =
 document.getElementById("cashBtn");
 
+
+let paymentInProgress = false;
+
+function setPaymentButtonsDisabled(disabled){
+
+    [
+        linePayBtn,
+        cashBtn,
+        document.getElementById("cartLineBtn"),
+        document.getElementById("cartCashBtn")
+    ]
+    .filter(Boolean)
+    .forEach(button=>{
+
+        button.disabled = disabled;
+
+    });
+
+}
+
+function resetPaymentLock(){
+
+    paymentInProgress = false;
+
+    setPaymentButtonsDisabled(false);
+
+    if(
+        typeof applyPaymentSetting ===
+        "function"
+    ){
+
+        applyPaymentSetting();
+
+    }
+
+}
+
 // =========================================
 // 建立售票紀錄
 // =========================================
@@ -92,6 +129,16 @@ function bindPaymentButton(button,paymentType){
 // 付款成功
 // =========================================
 function paymentSuccess(paymentType){
+
+    if(paymentInProgress){
+
+        return;
+
+    }
+
+    paymentInProgress = true;
+
+    setPaymentButtonsDisabled(true);
 
     isReprint = false;
 
