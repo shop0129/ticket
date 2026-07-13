@@ -366,6 +366,8 @@ bindPaymentButton(cashBtn,"現金");
 // =========================================
 
 showPage("homePage");
+
+applyPaymentSetting();
 updateTicketButtons();
 updateTicketPrices();
 function loginAdmin(){
