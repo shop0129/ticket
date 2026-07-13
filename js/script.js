@@ -370,16 +370,22 @@ updateTicketButtons();
 updateTicketPrices();
 function loginAdmin(){
 
-    const password =
-        document.getElementById("adminPassword").value;
+    const input =
+        document.getElementById("adminLoginPassword");
 
-    if(password==="123456"){
+    const password = input.value;
+
+    if(password===systemData.adminPassword){
+
+        input.value = "";
 
         showPage("adminHomePage");
 
     }else{
 
-        alert("密碼錯誤");
+        input.value = "";
+
+        alert("❌ 密碼錯誤");
 
     }
 
