@@ -1,6 +1,6 @@
 // =========================================
 // 付款模組
-// =========================================
+// ========================================
 
 const countdownNumber = document.getElementById("countdownNumber");
 const successTip = document.getElementById("successTip");
