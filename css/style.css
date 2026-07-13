@@ -243,8 +243,6 @@ cursor:pointer;
 
     width:420px;
 
-    margin:45px auto 25px;
-
 }
 
 /* ==========================================
@@ -341,7 +339,6 @@ cursor:pointer;
          2px  2px 0 #000,
          0 4px 8px rgba(0,0,0,.5);
 }
-
 
 .ticket-btn:hover,
 .ticket-btn-wide:hover{
@@ -488,9 +485,6 @@ cursor:pointer;
 
 }
 #addCartBtn{
-
-    background:#2196F3;
-
 }
 #linePayBtn{
 
@@ -631,9 +625,6 @@ cursor:pointer;
 
     }
 
-
-
-
     .detail-card{
 
         width:92%;
@@ -699,8 +690,6 @@ cursor:pointer;
 }
 .success-items{
 
-    text-align:center;
-
     font-size:40px;
 
     font-weight:700;
@@ -744,7 +733,6 @@ cursor:pointer;
 /*==========================
 出票動畫
 ==========================*/
-
 
 .print-area{
 
@@ -912,45 +900,21 @@ cursor:pointer;
 
 .admin-login{
 
-    width:100%;
+    
 
-    display:flex;
-
-    flex-direction:column;
-
-    justify-content:center;
-
-    align-items:center;
+    
 
     gap:20px;
 
 }
 
 .admin-login input{
-
-    width:320px;
-
-    height:55px;
-
-    font-size:24px;
-
-    text-align:center;
-
-    border-radius:12px;
-
 }
 /*==========================
 管理登入
 ==========================*/
 
 #adminLoginPage{
-
-    justify-content:center;
-
-    align-items:center;
-
-    background:#f5f5f5;
-
 }
 
 .admin-login{
@@ -1342,9 +1306,7 @@ V3.8 卡片式票券管理
 
 .tm-field{
 
-    display:flex;
-
-    flex-direction:column;
+    
 
     margin-bottom:25px;
 
@@ -1407,13 +1369,6 @@ V3.8 卡片式票券管理
 ==========================*/
 
 #ticketManagerPage{
-
-    flex-direction:column;
-
-    background:#f5f5f5;
-
-    overflow-y:auto;
-
 }
 
 .tm-page{
@@ -1556,22 +1511,13 @@ V3.8 卡片式票券管理
 
     margin-top:20px;
 
-    background:#ffffff;
+    
 
-    border-radius:24px;
-
-    padding:20px;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.15);
+    
 
 }
 
 #cartCount{
-
-    font-size:32px;
-
-    font-weight:bold;
-
 }
 
 #cartAmount{
@@ -1587,25 +1533,6 @@ V3.8 卡片式票券管理
 }
 
 #checkoutBtn{
-   display:block;
-margin:20px auto 0;
-
-    width:500px;
-
-    height:90px;
-
-    border:none;
-
-    border-radius:22px;
-
-    background:#43A047;
-
-    color:white;
-
-    font-size:38px;
-
-    font-weight:800;
-
 }
 #cartItems{
 
@@ -1622,15 +1549,6 @@ margin:20px auto 0;
 }
 
 .cartRow{
-
-    background:#f7f8fa;
-
-    border-radius:18px;
-
-    padding:18px;
-
-    margin-bottom:14px;
-
 }
 /* ==========================
    V3.9 購物車
@@ -1644,11 +1562,7 @@ margin:20px auto 0;
 
     align-items:center;
 
-    background:#f7f7f7;
-
-    border-radius:18px;
-
-    padding:15px 18px;
+    
 
     margin-bottom:12px;
 
@@ -1666,125 +1580,36 @@ margin:20px auto 0;
 
 .cartTitle{
 
-    font-size:30px;
-
-    font-weight:800;
+    
 
     color:#222;
 
 }
 
 .qtyBox{
-
-    flex:1;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    gap:20px;
-
 }
 
 .qtyBtn{
-
-    width:60px;
-
-    height:60px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#1E88E5;
-
-    color:white;
-
-    font-size:36px;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
 }
 
 .qtyBtn:hover{
-
-    transform:scale(1.08);
-
 }
 
 .qtyBtn:active{
-
-    transform:scale(.92);
-
 }
 
 .qtyNumber{
-
-    width:45px;
-
-    text-align:center;
-
-    font-size:34px;
-
-    font-weight:800;
-
 }
 
 .cartPrice{
-
-    font-size:34px;
-
-    font-weight:800;
-
-    color:#333;
-
 }
 .deleteBtn{
-
-    width:60px;
-
-    height:60px;
-
-    border:none;
-
-    border-radius:50%;
-
-    background:#ef5350;
-
-    color:#fff;
-
-    font-size:34px;
-
-    font-weight:900;
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    cursor:pointer;
-
-    transition:.2s;
-
 }
 
 .deleteBtn:hover{
-
-    background:#d32f2f;
-
-    transform:scale(1.08);
-
 }
 
 .deleteBtn:active{
-
-    transform:scale(.92);
-
 }
 .cartRight{
 
@@ -1800,45 +1625,19 @@ margin:20px auto 0;
 
 }
 .cartTop{
-
-    width:100%;
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
 }
 
 .cartBottom{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    margin-top:15px;
-
 }
 .deleteBtn{
 
-    width:60px;
+    
 
-    height:60px;
+    
 
-    border:none;
+    
 
-    border-radius:50%;
-
-    background:#ef5350;
-
-    color:#fff;
-
-    font-size:34px;
-
-    font-weight:900;
+    
 
     display:flex;
 
@@ -1846,22 +1645,14 @@ margin:20px auto 0;
 
     align-items:center;
 
-    cursor:pointer;
-
-    transition:.2s;
+    
 
 }
 
 .deleteBtn:hover{
-
-    transform:scale(1.08);
-
 }
 
 .deleteBtn:active{
-
-    transform:scale(.9);
-
 }
 /*====================================================
  V3.9.8 FINAL 購物車（請放在 style.css 最後面）
@@ -2205,15 +1996,6 @@ V4 今日統計
 ==========================*/
 
 #todayStatsBox{
-
-    display:grid;
-
-    grid-template-columns:repeat(2,1fr);
-
-    gap:25px;
-
-    margin:30px;
-
 }
 
 .statsCard{
@@ -2382,23 +2164,9 @@ V4 今日統計
 ==========================*/
 
 #salesHistoryList{
-
-    padding:30px;
-
 }
 
 .historyCard{
-
-    background:#fff;
-
-    border-radius:18px;
-
-    padding:25px;
-
-    margin-bottom:20px;
-
-    box-shadow:0 5px 15px rgba(0,0,0,.12);
-
 }
 
 .historyTop{
@@ -2417,11 +2185,7 @@ V4 今日統計
 
     margin-top:18px;
 
-    font-size:42px;
-
-    font-weight:900;
-
-    color:#ff9800;
+    
 
 }
 
@@ -2429,9 +2193,7 @@ V4 今日統計
 
     margin-top:15px;
 
-    font-size:24px;
-
-    color:#777;
+    
 
 }
 
@@ -2457,8 +2219,6 @@ V4 今日統計
     border:none;
 
     border-radius:15px;
-
-    background:#f44336;
 
     color:#fff;
 
@@ -2492,64 +2252,26 @@ V4 今日統計
 }
 
 .detailTitle{
-
-    font-size:34px;
-
-    font-weight:bold;
-
-    margin-bottom:25px;
-
 }
 
 .detailRow{
-
-    font-size:32px;
-
-    line-height:1.8;
-
 }
 
 .detailPrice{
 
     margin-top:30px;
 
-    font-size:48px;
-
-    color:#ff6a00;
-
-    font-weight:bold;
+    
 
 }
 .detailItem{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    font-size:32px;
-
-    margin:18px 0;
-
 }
 
 .detailItemPrice{
-
-    font-size:32px;
-
-    font-weight:bold;
-
-    color:#ff9800;
-
 }
 .detailButtons{
 
-    display:flex;
-
     justify-content:center;
-
-    margin-top:25px;
 
 }
 .detailCard h3{
@@ -2569,9 +2291,7 @@ V4 今日統計
 
     display:inline-block;
 
-    background:#e53935;
-
-    color:#fff;
+    
 
     padding:6px 16px;
 
@@ -2720,59 +2440,18 @@ V4 今日統計
 ==========================*/
 
 #businessModeTable{
-
-    max-width:700px;
-
-    margin:30px auto;
-   }
+}
 /*==========================
 System Setting
 ==========================*/
 
 .settingStepper{
-
-    display:flex;
-
-    justify-content:center;
-
-    align-items:center;
-
-    gap:25px;
-
 }
 
 .stepBtn{
-
-    width:55px;
-
-    height:55px;
-
-    border:none;
-
-    border-radius:12px;
-
-    background:#ff9800;
-
-    color:#fff;
-
-    font-size:30px;
-
-    font-weight:bold;
-
-    cursor:pointer;
-
 }
 
 .settingStepper span{
-
-    min-width:120px;
-
-    text-align:center;
-
-    font-size:28px;
-
-    font-weight:bold;
-
 }
 /*====================================================
   V5.5 系統設定正式版
