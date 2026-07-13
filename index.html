@@ -473,7 +473,8 @@ content="width=device-width, initial-scale=1.0">
 </button>
 
 <button
-    class="big-btn">
+    class="big-btn"
+    onclick="openHardwareTest()">
 
     🖨️ 硬體測試
 
@@ -827,6 +828,182 @@ content="width=device-width, initial-scale=1.0">
 
 </section>
 
+
+<!-- ==========================
+硬體測試中心 V5.9
+========================== -->
+
+<section id="hardwareTestPage" class="page">
+
+    <div class="tm-page">
+
+        <div class="tm-top">
+
+            <button
+                class="back-btn"
+                onclick="showPage('adminHomePage')">
+
+                ← 返回
+
+            </button>
+
+            <h1 class="tm-title">
+
+                🖨️ 硬體測試中心
+
+            </h1>
+
+        </div>
+
+        <div class="hardware-test-grid">
+
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">🔊</div>
+
+                <div class="hardware-test-title">
+                    點擊音效
+                </div>
+
+                <div class="hardware-test-text">
+                    測試一般按鈕點擊音效是否正常播放。
+                </div>
+
+                <button
+                    class="hardware-test-btn sound-btn"
+                    onclick="testClickSound()">
+                    測試點擊音效
+                </button>
+
+            </div>
+
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">🎉</div>
+
+                <div class="hardware-test-title">
+                    成功音效
+                </div>
+
+                <div class="hardware-test-text">
+                    測試付款成功完成時的提示音效。
+                </div>
+
+                <button
+                    class="hardware-test-btn success-sound-btn"
+                    onclick="testSuccessSound()">
+                    測試成功音效
+                </button>
+
+            </div>
+
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">🧾</div>
+
+                <div class="hardware-test-title">
+                    瀏覽器列印
+                </div>
+
+                <div class="hardware-test-text">
+                    顯示測試票券並開啟系統列印視窗。
+                </div>
+
+                <button
+                    class="hardware-test-btn print-btn"
+                    onclick="testBrowserPrint()">
+                    開啟列印測試
+                </button>
+
+            </div>
+
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">⏱️</div>
+
+                <div class="hardware-test-title">
+                    列印動畫
+                </div>
+
+                <div class="hardware-test-text">
+                    測試出票進度、成功畫面與返回流程，不建立訂單。
+                </div>
+
+                <button
+                    class="hardware-test-btn animation-btn"
+                    onclick="testPrintAnimation()">
+                    測試列印流程
+                </button>
+
+            </div>
+
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">🖥️</div>
+
+                <div class="hardware-test-title">
+                    全螢幕模式
+                </div>
+
+                <div class="hardware-test-text">
+                    測試售票機瀏覽器能否切換全螢幕顯示。
+                </div>
+
+                <button
+                    class="hardware-test-btn fullscreen-btn"
+                    onclick="testFullscreen()">
+                    切換全螢幕
+                </button>
+
+            </div>
+
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">🔄</div>
+
+                <div class="hardware-test-title">
+                    系統重新整理
+                </div>
+
+                <div class="hardware-test-text">
+                    測試頁面重新載入，資料不會被刪除。
+                </div>
+
+                <button
+                    class="hardware-test-btn reload-btn"
+                    onclick="testReload()">
+                    重新整理系統
+                </button>
+
+            </div>
+
+        </div>
+
+        <div class="hardware-device-card">
+
+            <div class="hardware-device-title">
+                📱 裝置資訊
+            </div>
+
+            <div id="deviceInfoBox"></div>
+
+        </div>
+
+        <div
+            id="hardwareStatus"
+            class="hardware-status">
+            請選擇要執行的測試項目
+        </div>
+
+        <div
+            id="hardwareTestTicket"
+            class="hardware-test-ticket">
+        </div>
+
+    </div>
+
+</section>
+
 <!-- ==========================
 資料管理 V5.8
 ========================== -->
@@ -1009,6 +1186,7 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/businessMode.js"></script>    
 <script src="js/modules/systemSetting.js"></script>
     
+<script src="js/modules/hardwareTest.js"></script>
 <script src="js/modules/dataManager.js"></script>
 <script src="js/modules/payment.js"></script>
 <script src="js/modules/detail.js"></script>
