@@ -1,4 +1,3 @@
-
 /* ==========================================
    小怪獸放電所 售票機 V3
    Style Part 1
@@ -3190,6 +3189,929 @@ System Setting
     }
 
     #systemSettingPage .tm-footer{
+
+        flex-direction:column;
+
+        align-items:center;
+
+    }
+
+}
+
+/*====================================================
+  V5.5 票券管理正式版
+====================================================*/
+
+#ticketManagerPage{
+
+    flex-direction:column;
+
+    background:#f3f6fa;
+
+    overflow-y:auto;
+
+}
+
+#ticketManagerPage .tm-page{
+
+    width:100%;
+
+    max-width:1000px;
+
+    margin:0 auto;
+
+    padding:25px 35px 100px;
+
+}
+
+#ticketManagerPage .tm-top{
+
+    padding:20px 0 25px;
+
+    background:#f3f6fa;
+
+}
+
+#ticketManagerPage .tm-title{
+
+    margin:10px 0 25px;
+
+    font-size:52px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+#ticketManagerPage #ticketTable{
+
+    width:100%;
+
+    max-width:900px;
+
+    margin:0 auto;
+
+}
+
+#ticketManagerPage .ticket-manager-card{
+
+    width:100%;
+
+    margin-bottom:30px;
+
+    padding:34px 38px;
+
+    border-radius:24px;
+
+    background:#fff;
+
+    box-shadow:0 8px 22px rgba(0,0,0,.09);
+
+}
+
+#ticketManagerPage .tm-card-header{
+
+    min-height:62px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:24px;
+
+    margin-bottom:24px;
+
+    padding-bottom:20px;
+
+    border-bottom:2px solid #eeeeee;
+
+}
+
+#ticketManagerPage .tm-card-title{
+
+    flex:1;
+
+    min-width:0;
+
+    font-size:36px;
+
+    line-height:1.35;
+
+    font-weight:900;
+
+    color:#222;
+
+    white-space:normal;
+
+}
+
+#ticketManagerPage .tm-enable{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:13px;
+
+    flex-shrink:0;
+
+    padding:11px 16px;
+
+    border-radius:18px;
+
+    background:#edf7ef;
+
+    font-size:28px;
+
+    font-weight:900;
+
+    color:#237a35;
+
+    cursor:pointer;
+
+}
+
+#ticketManagerPage .tm-enable input{
+
+    width:34px;
+
+    height:34px;
+
+    margin:0;
+
+    accent-color:#43A047;
+
+    cursor:pointer;
+
+}
+
+#ticketManagerPage .tm-preview{
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    margin:8px 0 32px;
+
+    padding:24px;
+
+    border-radius:20px;
+
+    background:#f7f9fc;
+
+    border:2px solid #edf0f4;
+
+}
+
+#ticketManagerPage .tm-preview-img{
+
+    width:230px;
+
+    max-width:100%;
+
+    height:auto;
+
+    border-radius:20px;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.15);
+
+}
+
+#ticketManagerPage .image-switch{
+
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:68px minmax(0,1fr) 68px;
+
+    align-items:center;
+
+    gap:18px;
+
+    margin-top:22px;
+
+}
+
+#ticketManagerPage .imageArrow{
+
+    width:68px;
+
+    height:68px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:#43A047;
+
+    color:#fff;
+
+    font-size:31px;
+
+    font-weight:900;
+
+    cursor:pointer;
+
+    box-shadow:0 5px 12px rgba(67,160,71,.25);
+
+    transition:.15s;
+
+}
+
+#ticketManagerPage .imageArrow:hover{
+
+    background:#388E3C;
+
+    transform:translateY(-2px);
+
+}
+
+#ticketManagerPage .imageArrow:active{
+
+    transform:scale(.92);
+
+}
+
+#ticketManagerPage .tm-image-name{
+
+    min-width:0;
+
+    margin:0;
+
+    padding:14px 18px;
+
+    border-radius:18px;
+
+    background:#fff;
+
+    border:2px solid #dce5ee;
+
+    text-align:center;
+
+    font-size:25px;
+
+    line-height:1.35;
+
+    font-weight:900;
+
+    color:#333;
+
+    overflow-wrap:anywhere;
+
+}
+
+#ticketManagerPage .ticket-manager-grid{
+
+    display:grid;
+
+    grid-template-columns:2fr 1fr 1fr;
+
+    gap:22px;
+
+}
+
+#ticketManagerPage .ticket-title-field{
+
+    grid-column:1 / -1;
+
+}
+
+#ticketManagerPage .ticket-toy-field{
+
+    grid-column:1 / -1;
+
+}
+
+#ticketManagerPage .tm-field{
+
+    min-width:0;
+
+    margin-bottom:0;
+
+}
+
+#ticketManagerPage .tm-field label{
+
+    display:block;
+
+    margin-bottom:12px;
+
+    font-size:29px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+#ticketManagerPage .tm-field input:not([type="hidden"]){
+
+    width:100%;
+
+    height:68px;
+
+    padding:0 18px;
+
+    border:2px solid #d7dce2;
+
+    border-radius:15px;
+
+    background:#fff;
+
+    font-size:31px;
+
+    font-weight:700;
+
+    color:#333;
+
+    outline:none;
+
+}
+
+#ticketManagerPage .tm-field input:not([type="hidden"]):focus{
+
+    border-color:#2196F3;
+
+    box-shadow:0 0 0 4px rgba(33,150,243,.12);
+
+}
+
+#ticketManagerPage .toy-group{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:16px;
+
+    margin-top:0;
+
+}
+
+#ticketManagerPage .toy-btn{
+
+    width:100%;
+
+    height:68px;
+
+    border:2px solid #dfe3e8;
+
+    border-radius:16px;
+
+    background:#f1f3f5;
+
+    font-size:27px;
+
+    font-weight:900;
+
+    color:#444;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+}
+
+#ticketManagerPage .toy-btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+#ticketManagerPage .toy-btn.active{
+
+    border-color:#43A047;
+
+    background:#43A047;
+
+    color:#fff;
+
+    box-shadow:0 5px 12px rgba(67,160,71,.22);
+
+}
+
+#ticketManagerPage .tm-footer{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:22px;
+
+    margin:38px auto 50px;
+
+}
+
+#ticketManagerPage .tm-footer .big-btn{
+
+    width:360px;
+
+    height:90px;
+
+    margin:0;
+
+    font-size:31px;
+
+}
+
+#ticketManagerPage .danger-btn{
+
+    background:#F44336;
+
+}
+
+#ticketManagerPage .danger-btn:hover{
+
+    background:#D32F2F;
+
+}
+
+@media (max-width:700px){
+
+    #ticketManagerPage .tm-page{
+
+        padding:20px 18px 80px;
+
+    }
+
+    #ticketManagerPage .ticket-manager-card{
+
+        padding:26px 22px;
+
+    }
+
+    #ticketManagerPage .tm-card-header{
+
+        align-items:flex-start;
+
+    }
+
+    #ticketManagerPage .tm-card-title{
+
+        font-size:31px;
+
+    }
+
+    #ticketManagerPage .tm-enable{
+
+        font-size:24px;
+
+    }
+
+    #ticketManagerPage .ticket-manager-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    #ticketManagerPage .ticket-title-field,
+    #ticketManagerPage .ticket-toy-field{
+
+        grid-column:auto;
+
+    }
+
+    #ticketManagerPage .toy-group{
+
+        grid-template-columns:1fr;
+
+    }
+
+    #ticketManagerPage .image-switch{
+
+        grid-template-columns:62px minmax(0,1fr) 62px;
+
+    }
+
+    #ticketManagerPage .imageArrow{
+
+        width:62px;
+
+        height:62px;
+
+    }
+
+    #ticketManagerPage .tm-footer{
+
+        flex-direction:column;
+
+        align-items:center;
+
+    }
+
+}
+
+/*====================================================
+  V5.5 營業模式正式版
+====================================================*/
+
+#businessModePage{
+
+    flex-direction:column;
+
+    background:#f3f6fa;
+
+    overflow-y:auto;
+
+}
+
+#businessModePage .tm-page{
+
+    width:100%;
+
+    max-width:1000px;
+
+    margin:0 auto;
+
+    padding:25px 35px 100px;
+
+}
+
+#businessModePage .tm-top{
+
+    padding:20px 0 25px;
+
+    background:#f3f6fa;
+
+}
+
+#businessModePage .tm-title{
+
+    margin:10px 0 25px;
+
+    font-size:52px;
+
+    font-weight:900;
+
+    color:#333;
+
+}
+
+#businessModeTable{
+
+    width:100%;
+
+    max-width:900px;
+
+    margin:0 auto;
+
+}
+
+.business-mode-card{
+
+    width:100%;
+
+    display:flex;
+
+    align-items:flex-start;
+
+    gap:22px;
+
+    margin-bottom:24px;
+
+    padding:30px 34px;
+
+    border:3px solid transparent;
+
+    border-radius:24px;
+
+    background:#fff;
+
+    box-shadow:0 8px 22px rgba(0,0,0,.09);
+
+    cursor:pointer;
+
+    transition:.18s;
+
+}
+
+.business-mode-card:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 12px 28px rgba(0,0,0,.12);
+
+}
+
+.business-mode-card.active{
+
+    border-color:#43A047;
+
+    background:#f4fbf5;
+
+    box-shadow:0 10px 26px rgba(67,160,71,.18);
+
+}
+
+.business-mode-card input[type="radio"]{
+
+    width:36px;
+
+    height:36px;
+
+    margin-top:4px;
+
+    flex-shrink:0;
+
+    accent-color:#43A047;
+
+    cursor:pointer;
+
+}
+
+.business-mode-content{
+
+    flex:1;
+
+    min-width:0;
+
+}
+
+.business-mode-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:22px;
+
+    margin-bottom:14px;
+
+}
+
+.business-mode-title{
+
+    font-size:35px;
+
+    line-height:1.35;
+
+    font-weight:900;
+
+    color:#222;
+
+}
+
+.business-mode-status{
+
+    flex-shrink:0;
+
+    min-width:145px;
+
+    padding:10px 16px;
+
+    border-radius:22px;
+
+    background:#f0f1f3;
+
+    text-align:center;
+
+    font-size:23px;
+
+    font-weight:900;
+
+    color:#666;
+
+}
+
+.business-mode-card.active
+.business-mode-status{
+
+    background:#e6f6e9;
+
+    color:#237a35;
+
+}
+
+.business-mode-description{
+
+    margin-bottom:10px;
+
+    font-size:29px;
+
+    line-height:1.5;
+
+    font-weight:800;
+
+    color:#444;
+
+}
+
+.business-mode-note{
+
+    padding:12px 16px;
+
+    border-radius:14px;
+
+    background:#f4f6f8;
+
+    font-size:24px;
+
+    line-height:1.45;
+
+    font-weight:700;
+
+    color:#70757a;
+
+}
+
+.business-mode-card.active
+.business-mode-note{
+
+    background:#eaf6ed;
+
+    color:#347244;
+
+}
+
+.business-auto-card{
+
+    width:100%;
+
+    margin-top:30px;
+
+    padding:30px 34px;
+
+    border-radius:24px;
+
+    background:#fff;
+
+    box-shadow:0 8px 22px rgba(0,0,0,.09);
+
+}
+
+.business-auto-main{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:24px;
+
+}
+
+.business-auto-title{
+
+    margin-bottom:8px;
+
+    font-size:33px;
+
+    font-weight:900;
+
+    color:#222;
+
+}
+
+.business-auto-description{
+
+    font-size:26px;
+
+    font-weight:700;
+
+    color:#666;
+
+}
+
+.business-auto-switch{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    flex-shrink:0;
+
+    padding:13px 18px;
+
+    border-radius:18px;
+
+    background:#f2f4f6;
+
+    font-size:25px;
+
+    font-weight:900;
+
+    color:#555;
+
+    cursor:pointer;
+
+}
+
+.business-auto-switch input{
+
+    width:34px;
+
+    height:34px;
+
+    accent-color:#2196F3;
+
+    cursor:pointer;
+
+}
+
+.business-development-status{
+
+    margin-top:22px;
+
+    padding:15px 18px;
+
+    border-radius:15px;
+
+    background:#f0f1f3;
+
+    font-size:23px;
+
+    line-height:1.5;
+
+    font-weight:800;
+
+    color:#777;
+
+}
+
+#businessModePage .tm-footer{
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:22px;
+
+    margin:38px auto 50px;
+
+}
+
+#businessModePage .tm-footer .big-btn{
+
+    width:360px;
+
+    height:90px;
+
+    margin:0;
+
+    font-size:31px;
+
+}
+
+#businessModePage .danger-btn{
+
+    background:#F44336;
+
+}
+
+#businessModePage .danger-btn:hover{
+
+    background:#D32F2F;
+
+}
+
+@media (max-width:700px){
+
+    #businessModePage .tm-page{
+
+        padding:20px 18px 80px;
+
+    }
+
+    .business-mode-card{
+
+        padding:26px 22px;
+
+    }
+
+    .business-mode-top{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .business-mode-status{
+
+        align-self:flex-start;
+
+    }
+
+    .business-auto-main{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    #businessModePage .tm-footer{
 
         flex-direction:column;
 
