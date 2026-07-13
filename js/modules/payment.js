@@ -1,61 +1,65 @@
 // =========================================
+// 小怪獸售票機 V5.6.5
 // 付款模組
 // =========================================
 
-const countdownNumber = document.getElementById("countdownNumber");
-const successTip = document.getElementById("successTip");
+const countdownNumber =
+document.getElementById("countdownNumber");
 
-const linePayBtn = document.getElementById("linePayBtn");
-const cashBtn = document.getElementById("cashBtn");
+const successTip =
+document.getElementById("successTip");
+
+const linePayBtn =
+document.getElementById("linePayBtn");
+
+const cashBtn =
+document.getElementById("cashBtn");
 
 // =========================================
 // 建立售票紀錄
 // =========================================
-function saveSalesRecord(paymentType, totalAmount){
+function saveSalesRecord(paymentType,totalAmount){
 
     const now = new Date();
 
     const order = {
 
-        orderNo: generateOrderNo(),
+        orderNo:generateOrderNo(),
 
-        date: now.toLocaleDateString("zh-TW"),
+        date:now.toLocaleDateString("zh-TW"),
 
-        time: now.toLocaleTimeString("zh-TW", {
+        time:now.toLocaleTimeString("zh-TW",{
 
-            hour: "2-digit",
+            hour:"2-digit",
 
-            minute: "2-digit"
+            minute:"2-digit"
 
         }),
 
-        payment: paymentType,
+        payment:paymentType,
 
-        amount: Number(totalAmount) || 0,
+        amount:Number(totalAmount) || 0,
 
         items:
-
         cart.length > 0
-
         ? JSON.parse(JSON.stringify(cart))
-
         : [{
 
-            id: selectedTicket,
+            id:selectedTicket,
 
-            title: ticketData[selectedTicket].title,
+            title:ticketData[selectedTicket].title,
 
-            price: ticketData[selectedTicket].price,
+            price:ticketData[selectedTicket].price,
 
-            token: ticketData[selectedTicket].token || 0,
+            token:ticketData[selectedTicket].token || 0,
 
-            toy: ticketData[selectedTicket].toy || "none",
+            toy:ticketData[selectedTicket].toy || "none",
 
-            reward: ticketData[selectedTicket].reward || ""
+            reward:ticketData[selectedTicket].reward || ""
 
         }],
 
-        status: "normal"
+        status:"normal"
 
     };
 
@@ -70,11 +74,11 @@ function saveSalesRecord(paymentType, totalAmount){
 // =========================================
 // 共用付款按鈕
 // =========================================
-function bindPaymentButton(button, paymentType){
+function bindPaymentButton(button,paymentType){
 
     if(!button) return;
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click",()=>{
 
         playClick();
 
@@ -91,48 +95,61 @@ function paymentSuccess(paymentType){
 
     isReprint = false;
 
-    // =========================================
-    // 本次付款內容
-    // =========================================
     const payItems =
     cart.length > 0
     ? cart
     : [{
-        id: selectedTicket
+
+        id:selectedTicket
+
     }];
 
     let totalAmount = 0;
 
     if(cart.length > 0){
 
-        totalAmount = cart.reduce((sum, item) => {
+        totalAmount = cart.reduce((sum,item)=>{
 
             return sum + Number(item.price || 0);
 
-        }, 0);
+        },0);
 
     }else if(selectedTicket){
 
-        totalAmount = Number(ticketData[selectedTicket].price || 0);
+        totalAmount =
+        Number(ticketData[selectedTicket].price || 0);
 
     }
 
-    saveSalesRecord(paymentType, totalAmount);
+    saveSalesRecord(
+        paymentType,
+        totalAmount
+    );
 
-    // =========================================
-    // 更新統計
-    // =========================================
-    payItems.forEach(item => {
+    payItems.forEach(item=>{
 
-        const ticket = ticketData[item.id];
+        const ticket =
+        ticketData[item.id];
 
         if(!ticket) return;
 
-        updateStats(todayStats, ticket, item);
+        updateStats(
+            todayStats,
+            ticket,
+            item
+        );
 
-        updateStats(monthStats, ticket, item);
+        updateStats(
+            monthStats,
+            ticket,
+            item
+        );
 
-        updateStats(totalStats, ticket, item);
+        updateStats(
+            totalStats,
+            ticket,
+            item
+        );
 
     });
 
@@ -154,6 +171,12 @@ function paymentSuccess(paymentType){
 // =========================================
 // 單張票券付款按鈕
 // =========================================
-bindPaymentButton(linePayBtn, "LINE Pay");
+bindPaymentButton(
+    linePayBtn,
+    "LINE Pay"
+);
 
-bindPaymentButton(cashBtn, "現金");
+bindPaymentButton(
+    cashBtn,
+    "現金"
+);
