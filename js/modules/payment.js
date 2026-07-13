@@ -77,6 +77,8 @@ function saveSalesRecord(paymentType,totalAmount){
 
         amount:Number(totalAmount) || 0,
 
+        ...(typeof getCurrentMemberOrderInfo === "function" ? getCurrentMemberOrderInfo() : {}),
+
         items:
         cart.length > 0
         ? JSON.parse(JSON.stringify(cart))
@@ -172,6 +174,8 @@ function paymentSuccess(paymentType){
         paymentType,
         totalAmount
     );
+
+    if(typeof applyMemberPurchase === "function") applyMemberPurchase(totalAmount);
 
     payItems.forEach(item=>{
 
