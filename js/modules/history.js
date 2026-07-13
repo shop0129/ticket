@@ -100,6 +100,9 @@ function getFilteredSalesHistory(){
             order.time,
             order.payment,
             order.amount,
+            order.memberName,
+            order.memberPhone,
+            order.memberNo,
 
             ...(
                 Array.isArray(order.items)
@@ -246,6 +249,16 @@ function renderSalesHistory(){
             <div class="history-payment">
                 💳 ${order.payment || "未記錄"}
             </div>
+
+            ${
+                order.memberId
+                ? `
+                <div class="history-member-badge">
+                    👤 ${order.memberName || "會員"}
+                </div>
+                `
+                : ""
+            }
 
             ${
                 isCancelled
@@ -576,6 +589,43 @@ function openOrderDetail(index){
 
     </div>
 
+    ${
+        order.memberId
+        ? `
+        <div class="order-member-section">
+
+            <div class="order-member-title">
+                👤 會員資料
+            </div>
+
+            <div class="order-member-grid">
+
+                <div>
+                    <span>姓名</span>
+                    <strong>${order.memberName || ""}</strong>
+                </div>
+
+                <div>
+                    <span>手機</span>
+                    <strong>${order.memberPhone || ""}</strong>
+                </div>
+
+                <div>
+                    <span>會員編號</span>
+                    <strong>${order.memberNo || ""}</strong>
+                </div>
+
+            </div>
+
+        </div>
+        `
+        : `
+        <div class="order-nonmember-badge">
+            非會員交易
+        </div>
+        `
+    }
+
     <div class="order-detail-section">
 
         <h3>
@@ -713,6 +763,15 @@ function cancelOrder(orderNo){
     }
 
     order.status = "cancel";
+
+    if(
+        typeof rollbackMemberPurchase ===
+        "function"
+    ){
+
+        rollbackMemberPurchase(order);
+
+    }
 
     const items =
         Array.isArray(order.items)
