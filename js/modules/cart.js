@@ -1,13 +1,45 @@
-/* =========================================
-   V3.9 購物車
-========================================= */
+// =========================================
+// 小怪獸售票機 V5.6.5
+// 購物車模組
+// =========================================
+
+const cartCount =
+document.getElementById("cartCount");
+
+const cartItems =
+document.getElementById("cartItems");
+
+const cartAmount =
+document.getElementById("cartAmount");
+
+const checkoutBtn =
+document.getElementById("checkoutBtn");
+
+const paymentArea =
+document.getElementById("paymentArea");
+
+const cartLineBtn =
+document.getElementById("cartLineBtn");
+
+const cartCashBtn =
+document.getElementById("cartCashBtn");
+
+const cartBackBtn =
+document.getElementById("cartBackBtn");
+
+// =========================================
+// 加入目前票券
+// =========================================
 function addCurrentTicketToCart(){
 
     playClick();
 
     if(!selectedTicket) return;
 
-    const ticket = ticketData[selectedTicket];
+    const ticket =
+    ticketData[selectedTicket];
+
+    if(!ticket) return;
 
     cart.push({
 
@@ -31,24 +63,33 @@ function addCurrentTicketToCart(){
 
 }
 
-
+// =========================================
+// 更新購物車畫面
+// =========================================
 function updateCartPanel(){
 
-    const count=document.getElementById("cartCount");
-    const items=document.getElementById("cartItems");
-    const amount=document.getElementById("cartAmount");
+    if(
+        !cartCount ||
+        !cartItems ||
+        !cartAmount
+    ){
 
-    let total=0;
+        return;
 
-    const summary={};
+    }
+
+    let total = 0;
+
+    const summary = {};
 
     cart.forEach(ticket=>{
 
-        total+=ticket.price;
+        total +=
+        Number(ticket.price || 0);
 
         if(!summary[ticket.id]){
 
-            summary[ticket.id]={
+            summary[ticket.id] = {
 
                 title:ticket.title,
 
@@ -62,32 +103,30 @@ function updateCartPanel(){
 
         summary[ticket.id].qty++;
 
-        summary[ticket.id].amount+=ticket.price;
+        summary[ticket.id].amount +=
+        Number(ticket.price || 0);
 
     });
 
-    let html="";
+    let html = "";
 
     for(const id in summary){
 
-        const item=summary[id];
+        const item =
+        summary[id];
 
-        html+=`
+        html += `
 
 <div class="cartRow">
 
     <div class="cartTop">
 
         <div class="cartTitle">
-
             ${item.title}
-
         </div>
 
         <div class="cartPrice">
-
             NT$${item.amount}
-
         </div>
 
     </div>
@@ -103,16 +142,13 @@ function updateCartPanel(){
             </button>
 
             <div class="qtyNumber">
-
                 ${item.qty}
-
             </div>
 
             <button
                 class="qtyBtn"
                 onclick="changeQty('${id}',1)">
                 +
-
             </button>
 
         </div>
@@ -120,9 +156,7 @@ function updateCartPanel(){
         <button
             class="deleteBtn"
             onclick="removeCartItem('${id}')">
-
             ✕
-
         </button>
 
     </div>
@@ -133,30 +167,37 @@ function updateCartPanel(){
 
     }
 
-    count.innerHTML=
+    cartCount.innerHTML =
     `🛒 購物車（共 ${cart.length} 張）`;
 
-    items.innerHTML=html;
+    cartItems.innerHTML =
+    html;
 
-    amount.innerHTML=`
+    cartAmount.innerHTML = `
 
-
-    <div class="cartTotalPrice">
-
-        NT$${total}
-
-    </div>
+<div class="cartTotalPrice">
+    NT$${total}
+</div>
 
 `;
-applyPaymentSetting();
+
+    applyPaymentSetting();
+
 }
 
-
+// =========================================
+// 修改票券數量
+// =========================================
 function changeQty(id,step){
 
-    if(step>0){
+    playClick();
 
-        const ticket=ticketData[id];
+    if(step > 0){
+
+        const ticket =
+        ticketData[id];
+
+        if(!ticket) return;
 
         cart.push({
 
@@ -166,19 +207,23 @@ function changeQty(id,step){
 
             price:ticket.price,
 
-            token:ticket.token||0,
+            token:ticket.token || 0,
 
-            toy:ticket.toy||"none",
+            toy:ticket.toy || "none",
 
-            reward:ticket.reward||""
+            reward:ticket.reward || ""
 
         });
 
     }else{
 
-        const index=cart.findIndex(x=>x.id===id);
+        const index =
+        cart.findIndex(
+            item =>
+            item.id === id
+        );
 
-        if(index!=-1){
+        if(index !== -1){
 
             cart.splice(index,1);
 
@@ -190,102 +235,72 @@ function changeQty(id,step){
 
 }
 
-
+// =========================================
+// 刪除同票種
+// =========================================
 function removeCartItem(id){
 
-    cart=cart.filter(x=>x.id!==id);
+    playClick();
+
+    cart =
+    cart.filter(
+        item =>
+        item.id !== id
+    );
 
     updateCartPanel();
 
 }
-checkoutBtn.addEventListener("click",()=>{
-
-    playClick();
-
-    if(cart.length===0){
-
-        alert("請先加入票券！");
-
-        return;
-
-    }
-
-    checkoutBtn.style.display="none";
-
-    paymentArea.style.display="flex";
-
-});
-
-cartBackBtn.addEventListener("click",()=>{
-
-    playClick();
-
-    paymentArea.style.display="none";
-
-    checkoutBtn.style.display="block";
-
-});
-
 
 // =========================================
-// V3.9.9 購物車付款
+// 前往付款
 // =========================================
+if(checkoutBtn){
 
-console.log("checkoutBtn =", checkoutBtn);
-console.log("paymentArea =", paymentArea);
-console.log("cartLineBtn =", cartLineBtn);
-console.log("cartCashBtn =", cartCashBtn);
-console.log("cartBackBtn =", cartBackBtn);
+    checkoutBtn.addEventListener("click",()=>{
 
+        playClick();
 
-// =======================================
+        if(cart.length === 0){
+
+            alert("請先加入票券！");
+
+            return;
+
+        }
+
+        checkoutBtn.style.display =
+        "none";
+
+        paymentArea.style.display =
+        "flex";
+
+    });
+
+}
+
+// =========================================
+// 返回購物車
+// =========================================
+if(cartBackBtn){
+
+    cartBackBtn.addEventListener("click",()=>{
+
+        playClick();
+
+        paymentArea.style.display =
+        "none";
+
+        checkoutBtn.style.display =
+        "block";
+
+    });
+
+}
+
+// =========================================
 // 購物車付款
-// =======================================
-
-if(todayTab){
-
-    todayTab.onclick = ()=>{
-
-        renderStats(todayStats);
-
-        todayTab.classList.add("active");
-        monthTab.classList.remove("active");
-        totalTab.classList.remove("active");
-
-    };
-
-}
-
-if(monthTab){
-
-    monthTab.onclick = ()=>{
-
-        renderStats(monthStats);
-
-        todayTab.classList.remove("active");
-        monthTab.classList.add("active");
-        totalTab.classList.remove("active");
-
-    };
-
-}
-
-if(totalTab){
-
-    totalTab.onclick = ()=>{
-
-        renderStats(totalStats);
-
-        todayTab.classList.remove("active");
-        monthTab.classList.remove("active");
-        totalTab.classList.add("active");
-
-    };
-
-}
-
-
-
+// =========================================
 if(cartLineBtn){
 
     cartLineBtn.addEventListener("click",()=>{
