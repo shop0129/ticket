@@ -283,7 +283,7 @@ ${info}
             ticket.classList.remove("ticket-selected");
 
             showPage("detailPage");
-
+applyPaymentSetting();
         },150);
 
     });
@@ -341,8 +341,7 @@ payItems.forEach(item=>{
 
 });
     saveTodayStats();
-     linePayBtn.disabled = true;
-    cashBtn.disabled = true;
+
     showPage("successPage");
 countdownNumber.innerHTML = "";
 updateSuccessItems();
@@ -539,10 +538,8 @@ function updateCartPanel(){
 
     </div>
 
-</div>
-
 `;
-
+applyPaymentSetting();
 }
 
 
