@@ -1,6 +1,6 @@
 // =========================================
 // DOM 元件
-// =========================================
+// ========================================
 const detailImage = document.getElementById("detailImage");
 const detailTitle = document.getElementById("detailTitle");
 const detailPrice = document.getElementById("detailPrice");
