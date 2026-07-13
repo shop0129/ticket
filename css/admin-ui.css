@@ -720,3 +720,19 @@
     }
 
 }
+
+
+/*====================================================
+  V6.5 Admin UI
+====================================================*/
+
+#memberManagerPage .member-toy-adjust-btn,
+#memberManagerPage .member-history-btn{
+    min-height:70px !important;
+    font-size:28px !important;
+}
+
+#memberManagerPage .member-card-actions{
+    flex-wrap:wrap;
+}
+
