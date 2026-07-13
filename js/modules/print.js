@@ -265,6 +265,16 @@ function startReturnCountdown(){
         linePayBtn.disabled = false;
         cashBtn.disabled = false;
 
+
+        if(
+            typeof resetPaymentLock ===
+            "function"
+        ){
+
+            resetPaymentLock();
+
+        }
+
         // 清空購物車
         cart = [];
 
