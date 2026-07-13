@@ -14,83 +14,83 @@ function openSystemSetting(){
 // 顯示系統設定
 //==========================
 
+//==========================
+// 顯示系統設定
+//==========================
+
 function renderSystemSetting(){
 
     const table =
-    document.getElementById("systemSettingTable");
+        document.getElementById("systemSettingTable");
 
-  table.innerHTML = `
+    if(!table) return;
+
+    table.innerHTML = `
 
 <!-- ==========================
 系統
 ========================== -->
 
-<div class="tm-card">
+<div class="system-card">
 
-    <div class="tm-card-title">
-
+    <div class="system-card-title">
         ⏱️ 系統
-
     </div>
 
-    <div class="tm-field">
+    <div class="system-setting-row">
 
-        <label>自動回首頁</label>
+        <div class="system-setting-label">
+            自動回首頁
+        </div>
 
         <div class="settingStepper">
 
             <button
+                type="button"
                 class="stepBtn"
                 onclick="changeSetting('homeTimeout',-10)">
-
-                －
-
+                −
             </button>
 
             <span id="homeTimeoutText">
-
                 ${systemData.homeTimeout} 秒
-
             </span>
 
             <button
+                type="button"
                 class="stepBtn"
                 onclick="changeSetting('homeTimeout',10)">
-
                 ＋
-
             </button>
 
         </div>
 
     </div>
 
-    <div class="tm-field">
+    <div class="system-setting-row">
 
-        <label>列印完成倒數</label>
+        <div class="system-setting-label">
+            列印完成倒數
+        </div>
 
         <div class="settingStepper">
 
             <button
+                type="button"
                 class="stepBtn"
                 onclick="changeSetting('printDelay',-1)">
-
-                －
-
+                −
             </button>
 
             <span id="printDelayText">
-
                 ${systemData.printDelay} 秒
-
             </span>
 
             <button
+                type="button"
                 class="stepBtn"
                 onclick="changeSetting('printDelay',1)">
-
                 ＋
-
             </button>
 
         </div>
@@ -103,40 +103,36 @@ function renderSystemSetting(){
 列印
 ========================== -->
 
-<div class="tm-card">
+<div class="system-card">
 
-    <div class="tm-card-title">
-
+    <div class="system-card-title">
         🖨️ 列印
-
     </div>
 
-    <div class="tm-field">
+    <div class="system-setting-row">
 
-        <label>收據列印份數</label>
+        <div class="system-setting-label">
+            收據列印份數
+        </div>
 
         <div class="settingStepper">
 
             <button
+                type="button"
                 class="stepBtn"
                 onclick="changeSetting('receiptCopies',-1)">
-
-                －
-
+                −
             </button>
 
             <span id="receiptCopiesText">
-
                 ${systemData.receiptCopies} 份
-
             </span>
 
             <button
+                type="button"
                 class="stepBtn"
                 onclick="changeSetting('receiptCopies',1)">
-
                 ＋
-
             </button>
 
         </div>
@@ -144,106 +140,107 @@ function renderSystemSetting(){
     </div>
 
 </div>
+
 <!-- ==========================
 付款方式
 ========================== -->
 
-<div class="tm-card">
+<div class="system-card">
 
-    <div class="tm-card-title">
-
+    <div class="system-card-title">
         💳 付款方式
-
     </div>
 
-    <div class="tm-field">
+    <label class="payment-setting-row">
 
-        <label>
+        <input
+            type="checkbox"
+            id="cashEnable"
+            ${systemData.payment.cash ? "checked" : ""}>
 
-            <input
-                type="checkbox"
-                id="cashEnable"
-                ${systemData.payment.cash ? "checked" : ""}>
-
+        <span class="payment-setting-name">
             現金付款
+        </span>
 
+        <span class="payment-setting-status status-ready">
             🟢 正常
+        </span>
 
-        </label>
+    </label>
 
-    </div>
+    <label class="payment-setting-row">
 
-    <div class="tm-field">
+        <input
+            type="checkbox"
+            id="lineEnable"
+            ${systemData.payment.linepay ? "checked" : ""}>
 
-        <label>
-
-            <input
-                type="checkbox"
-                id="lineEnable"
-                ${systemData.payment.linepay ? "checked" : ""}>
-
+        <span class="payment-setting-name">
             LINE Pay
+        </span>
 
+        <span class="payment-setting-status status-pending">
             ⚪ 未串接
+        </span>
 
-        </label>
+    </label>
 
-    </div>
+    <label class="payment-setting-row">
 
-    <div class="tm-field">
+        <input
+            type="checkbox"
+            id="easyEnable"
+            ${systemData.payment.easycard ? "checked" : ""}>
 
-        <label>
-
-            <input
-                type="checkbox"
-                id="easyEnable"
-                ${systemData.payment.easycard ? "checked" : ""}>
-
+        <span class="payment-setting-name">
             悠遊卡
+        </span>
 
+        <span class="payment-setting-status status-pending">
             ⚪ 未安裝
+        </span>
 
-        </label>
+    </label>
 
-    </div>
+    <label class="payment-setting-row">
 
-    <div class="tm-field">
+        <input
+            type="checkbox"
+            id="creditEnable"
+            ${systemData.payment.credit ? "checked" : ""}>
 
-        <label>
-
-            <input
-                type="checkbox"
-                id="creditEnable"
-                ${systemData.payment.credit ? "checked" : ""}>
-
+        <span class="payment-setting-name">
             信用卡
+        </span>
 
+        <span class="payment-setting-status status-pending">
             ⚪ 未安裝
+        </span>
 
-        </label>
-
-    </div>
+    </label>
 
 </div>
+
 <!-- ==========================
 管理
 ========================== -->
 
-<div class="tm-card">
+<div class="system-card">
 
-    <div class="tm-card-title">
-
+    <div class="system-card-title">
         🔐 管理
-
     </div>
 
-    <div class="tm-field">
+    <div class="password-setting-box">
 
-        <label>管理密碼</label>
+        <label for="adminSettingPassword">
+            管理密碼
+        </label>
 
         <input
             id="adminSettingPassword"
             type="password"
+            autocomplete="new-password"
             value="${systemData.adminPassword}">
 
     </div>
