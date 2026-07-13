@@ -1,6 +1,6 @@
 // =========================================
 // 付款模組
-// ========================================
+// =========================================
 
 const countdownNumber = document.getElementById("countdownNumber");
 const successTip = document.getElementById("successTip");
@@ -8,7 +8,7 @@ const successTip = document.getElementById("successTip");
 const linePayBtn = document.getElementById("linePayBtn");
 const cashBtn = document.getElementById("cashBtn");
 
-// ========================================
+// =========================================
 // 建立售票紀錄
 // =========================================
 function saveSalesRecord(paymentType, totalAmount){
