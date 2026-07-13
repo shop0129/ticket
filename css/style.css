@@ -6120,3 +6120,142 @@ System Setting
         width:100%;
     }
 }
+
+
+/*====================================================
+  V6.3.1 圖片管理
+====================================================*/
+
+.image-library-card{
+    width:100%;
+    margin-bottom:30px;
+    padding:30px 34px;
+    border-radius:24px;
+    background:#fff;
+    box-shadow:0 8px 22px rgba(0,0,0,.09);
+}
+
+.image-library-title{
+    font-size:34px;
+    font-weight:900;
+    color:#333;
+}
+
+.image-library-note{
+    margin-top:10px;
+    font-size:23px;
+    line-height:1.5;
+    font-weight:700;
+    color:#71808b;
+}
+
+.image-library-empty{
+    margin-top:22px;
+    padding:28px;
+    border-radius:18px;
+    background:#f4f6f8;
+    text-align:center;
+    font-size:24px;
+    font-weight:800;
+    color:#888;
+}
+
+.image-library-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:18px;
+    margin-top:24px;
+}
+
+.image-library-item{
+    min-width:0;
+    padding:16px;
+    border:2px solid #edf0f3;
+    border-radius:18px;
+    background:#f9fafb;
+    text-align:center;
+}
+
+.image-library-item img{
+    width:100%;
+    height:160px;
+    object-fit:contain;
+    border-radius:14px;
+    background:#fff;
+}
+
+.image-library-name{
+    margin:12px 0;
+    font-size:20px;
+    line-height:1.35;
+    font-weight:800;
+    color:#555;
+    overflow-wrap:anywhere;
+}
+
+.image-library-item button{
+    width:100%;
+    height:48px;
+    border:none;
+    border-radius:13px;
+    background:#F44336;
+    color:#fff;
+    font-size:20px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.ticket-image-upload-area{
+    width:100%;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 230px;
+    gap:14px;
+    margin-top:20px;
+}
+
+.ticket-image-upload-area select{
+    width:100%;
+    height:62px;
+    padding:0 16px;
+    border:2px solid #d7dce2;
+    border-radius:15px;
+    background:#fff;
+    font-size:24px;
+    font-weight:800;
+    color:#333;
+}
+
+.ticket-upload-btn{
+    height:62px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    border-radius:15px;
+    background:#2196F3;
+    color:#fff;
+    font-size:24px;
+    font-weight:900;
+    cursor:pointer;
+    transition:.15s;
+}
+
+.ticket-upload-btn:hover{
+    transform:translateY(-2px);
+    background:#1976D2;
+}
+
+.ticket-upload-btn:active{
+    transform:scale(.96);
+}
+
+@media (max-width:700px){
+
+    .image-library-grid{
+        grid-template-columns:1fr;
+    }
+
+    .ticket-image-upload-area{
+        grid-template-columns:1fr;
+    }
+
+}
