@@ -1,1 +1,677 @@
+/*====================================================
+  小怪獸售票機 V6.4B
+  Admin UI Professional Edition
+====================================================*/
 
+:root{
+    --admin-bg:#f3f6fa;
+    --admin-card:#ffffff;
+    --admin-card-soft:#f7f9fb;
+    --admin-border:#e3e8ee;
+    --admin-text:#2f3439;
+    --admin-muted:#6f7881;
+    --admin-primary:#2196f3;
+    --admin-success:#43a047;
+    --admin-warning:#ff9800;
+    --admin-danger:#f44336;
+    --admin-secondary:#607d8b;
+
+    --admin-radius:24px;
+    --admin-radius-small:16px;
+    --admin-shadow:0 10px 28px rgba(0,0,0,.09);
+
+    --admin-title-size:52px;
+    --admin-section-title-size:36px;
+    --admin-text-size:30px;
+    --admin-small-size:24px;
+    --admin-button-size:29px;
+    --admin-input-size:30px;
+
+    --admin-button-height:70px;
+    --admin-input-height:72px;
+    --admin-gap:22px;
+}
+
+/* ====================================================
+   共用後台頁面
+==================================================== */
+
+#adminHomePage,
+#ticketManagerPage,
+#businessModePage,
+#systemSettingPage,
+#todayStatsPage,
+#salesHistoryPage,
+#orderDetailPage,
+#dataManagerPage,
+#hardwareTestPage,
+#memberManagerPage,
+#shiftReportPage{
+    background:var(--admin-bg) !important;
+    color:var(--admin-text);
+}
+
+.tm-page{
+    width:100%;
+    max-width:1080px !important;
+    margin:0 auto !important;
+    padding:28px 36px 100px !important;
+}
+
+.tm-top{
+    background:var(--admin-bg) !important;
+    padding:18px 0 24px !important;
+}
+
+.tm-title{
+    margin:10px 0 26px !important;
+    font-size:var(--admin-title-size) !important;
+    line-height:1.2;
+    font-weight:900 !important;
+    color:var(--admin-text) !important;
+}
+
+/* ====================================================
+   共用卡片
+==================================================== */
+
+.tm-card,
+.ticket-manager-card,
+.system-card,
+.business-mode-card,
+.business-auto-card,
+.statsCard,
+.historyCard,
+.detailCard,
+.order-detail-card,
+.backup-card,
+.backup-info-card,
+.hardware-test-card,
+.hardware-device-card,
+.member-card,
+.member-editor-card,
+.member-empty-card,
+.shift-report-card,
+.dashboard-panel,
+.dashboard-summary-card{
+    border-radius:var(--admin-radius) !important;
+    background:var(--admin-card) !important;
+    box-shadow:var(--admin-shadow) !important;
+}
+
+.tm-card,
+.ticket-manager-card,
+.system-card,
+.business-mode-card,
+.business-auto-card,
+.historyCard,
+.detailCard,
+.order-detail-card,
+.member-card,
+.member-editor-card,
+.shift-report-card{
+    padding:32px 36px !important;
+}
+
+/* ====================================================
+   共用按鈕
+==================================================== */
+
+.big-btn,
+.back-btn,
+.resetBtn,
+.history-detail-btn,
+.deleteHistoryBtn,
+.ticket-delete-btn,
+.member-edit-btn,
+.member-delete-btn,
+.member-add-btn,
+.member-export-btn,
+.member-import-btn,
+.member-cancel-btn,
+.member-save-btn,
+.backup-action-btn,
+.hardware-test-btn,
+.dashboard-action-btn,
+.dashboard-small-btn,
+.dashboard-logout-btn,
+.shift-refresh-btn,
+.shift-print-btn{
+    min-height:var(--admin-button-height);
+    border:none;
+    border-radius:18px !important;
+    font-size:var(--admin-button-size) !important;
+    font-weight:900 !important;
+    cursor:pointer;
+    transition:.16s;
+}
+
+.big-btn:hover,
+.back-btn:hover,
+.resetBtn:hover,
+.history-detail-btn:hover,
+.deleteHistoryBtn:hover,
+.ticket-delete-btn:hover,
+.member-edit-btn:hover,
+.member-delete-btn:hover,
+.member-add-btn:hover,
+.member-export-btn:hover,
+.member-import-btn:hover,
+.member-cancel-btn:hover,
+.member-save-btn:hover,
+.backup-action-btn:hover,
+.hardware-test-btn:hover,
+.dashboard-action-btn:hover,
+.dashboard-small-btn:hover,
+.dashboard-logout-btn:hover{
+    transform:translateY(-2px);
+}
+
+.big-btn:active,
+.back-btn:active,
+.resetBtn:active,
+.history-detail-btn:active,
+.deleteHistoryBtn:active,
+.ticket-delete-btn:active,
+.member-edit-btn:active,
+.member-delete-btn:active,
+.member-add-btn:active,
+.member-export-btn:active,
+.member-import-btn:active,
+.member-cancel-btn:active,
+.member-save-btn:active,
+.backup-action-btn:active,
+.hardware-test-btn:active,
+.dashboard-action-btn:active,
+.dashboard-small-btn:active,
+.dashboard-logout-btn:active{
+    transform:scale(.97);
+}
+
+.back-btn{
+    width:260px !important;
+    height:var(--admin-button-height) !important;
+    margin-top:0 !important;
+    font-size:28px !important;
+    background:var(--admin-secondary) !important;
+}
+
+/* ====================================================
+   共用輸入元件
+==================================================== */
+
+#ticketManagerPage input,
+#ticketManagerPage select,
+#ticketManagerPage textarea,
+#systemSettingPage input,
+#systemSettingPage select,
+#systemSettingPage textarea,
+#memberManagerPage input,
+#memberManagerPage select,
+#memberManagerPage textarea,
+.history-search-panel input,
+.history-search-panel select,
+.member-toolbar input{
+    width:100%;
+    min-height:var(--admin-input-height);
+    border:2px solid var(--admin-border);
+    border-radius:16px !important;
+    background:#fff;
+    padding:0 18px;
+    font-size:var(--admin-input-size) !important;
+    font-weight:700;
+    color:var(--admin-text);
+    outline:none;
+}
+
+#ticketManagerPage textarea,
+#memberManagerPage textarea{
+    min-height:140px;
+    padding:16px 18px;
+    line-height:1.5;
+}
+
+#ticketManagerPage input:focus,
+#ticketManagerPage select:focus,
+#ticketManagerPage textarea:focus,
+#systemSettingPage input:focus,
+#systemSettingPage select:focus,
+#systemSettingPage textarea:focus,
+#memberManagerPage input:focus,
+#memberManagerPage select:focus,
+#memberManagerPage textarea:focus,
+.history-search-panel input:focus,
+.history-search-panel select:focus,
+.member-toolbar input:focus{
+    border-color:var(--admin-primary) !important;
+    box-shadow:0 0 0 4px rgba(33,150,243,.12) !important;
+}
+
+/* ====================================================
+   Ticket Manager
+==================================================== */
+
+#ticketManagerPage .ticket-manager-card{
+    margin-bottom:30px !important;
+}
+
+#ticketManagerPage .tm-card-title{
+    font-size:40px !important;
+    font-weight:900 !important;
+}
+
+#ticketManagerPage .tm-field label{
+    margin-bottom:12px !important;
+    font-size:30px !important;
+    font-weight:900 !important;
+}
+
+#ticketManagerPage .tm-enable{
+    font-size:27px !important;
+}
+
+#ticketManagerPage .ticket-add-title{
+    font-size:42px !important;
+}
+
+#ticketManagerPage .ticket-add-text{
+    font-size:28px !important;
+}
+
+#ticketManagerPage .image-library-title{
+    font-size:38px !important;
+}
+
+#ticketManagerPage .image-library-note{
+    font-size:26px !important;
+}
+
+/* ====================================================
+   Member Manager
+==================================================== */
+
+#memberManagerPage .member-toolbar{
+    max-width:960px !important;
+    padding:24px !important;
+    gap:16px !important;
+}
+
+#memberManagerPage .member-toolbar input{
+    font-size:30px !important;
+}
+
+#memberManagerPage .member-toolbar button{
+    min-height:70px !important;
+    font-size:28px !important;
+}
+
+#memberManagerPage .member-card{
+    margin-bottom:24px !important;
+}
+
+#memberManagerPage .member-card-name{
+    font-size:44px !important;
+    line-height:1.25;
+}
+
+#memberManagerPage .member-card-number{
+    font-size:27px !important;
+}
+
+#memberManagerPage .member-card-phone{
+    font-size:31px !important;
+    padding:12px 18px !important;
+}
+
+#memberManagerPage .member-card-grid{
+    gap:18px !important;
+    margin-top:24px !important;
+}
+
+#memberManagerPage .member-card-grid div{
+    padding:20px !important;
+}
+
+#memberManagerPage .member-card-grid span{
+    font-size:25px !important;
+}
+
+#memberManagerPage .member-card-grid strong{
+    margin-top:10px !important;
+    font-size:32px !important;
+}
+
+#memberManagerPage .member-card-note{
+    font-size:28px !important;
+    line-height:1.5;
+}
+
+#memberManagerPage .member-card-actions button{
+    min-width:180px !important;
+    height:68px !important;
+    font-size:29px !important;
+}
+
+#memberManagerPage .member-editor-title{
+    font-size:44px !important;
+}
+
+#memberManagerPage .member-form-field label{
+    font-size:29px !important;
+}
+
+#memberManagerPage .member-empty-title{
+    font-size:42px !important;
+}
+
+#memberManagerPage .member-empty-text{
+    font-size:28px !important;
+}
+
+/* ====================================================
+   Business Mode
+==================================================== */
+
+#businessModePage .business-mode-title{
+    font-size:39px !important;
+}
+
+#businessModePage .business-mode-description{
+    font-size:31px !important;
+}
+
+#businessModePage .business-mode-note{
+    font-size:27px !important;
+}
+
+#businessModePage .business-mode-status{
+    font-size:26px !important;
+}
+
+#businessModePage .business-auto-title{
+    font-size:37px !important;
+}
+
+#businessModePage .business-auto-description{
+    font-size:29px !important;
+}
+
+/* ====================================================
+   System Setting
+==================================================== */
+
+#systemSettingPage .system-card-title{
+    font-size:39px !important;
+}
+
+#systemSettingPage .system-setting-label{
+    font-size:32px !important;
+}
+
+#systemSettingPage .settingStepper span{
+    font-size:37px !important;
+}
+
+#systemSettingPage .payment-setting-name{
+    font-size:32px !important;
+}
+
+#systemSettingPage .payment-setting-status{
+    font-size:26px !important;
+}
+
+#systemSettingPage .password-setting-box label{
+    font-size:31px !important;
+}
+
+#systemSettingPage .password-setting-note{
+    font-size:25px !important;
+}
+
+/* ====================================================
+   Stats
+==================================================== */
+
+#todayStatsPage .statsTab{
+    height:74px !important;
+    font-size:31px !important;
+}
+
+#todayStatsPage .statsDate{
+    font-size:31px !important;
+}
+
+#todayStatsPage .statsTitle{
+    font-size:32px !important;
+}
+
+#todayStatsPage .statsValue{
+    font-size:52px !important;
+}
+
+#todayStatsPage .resetBtn{
+    height:90px !important;
+    font-size:30px !important;
+}
+
+/* ====================================================
+   History
+==================================================== */
+
+.history-search-panel{
+    max-width:960px !important;
+    padding:24px !important;
+}
+
+.history-search-panel input,
+.history-search-panel select{
+    font-size:28px !important;
+}
+
+.history-search-panel button{
+    min-height:70px;
+    font-size:27px !important;
+}
+
+#salesHistoryPage .history-time{
+    font-size:32px !important;
+}
+
+#salesHistoryPage .historyOrderNo{
+    font-size:27px !important;
+}
+
+#salesHistoryPage .history-payment{
+    font-size:27px !important;
+}
+
+#salesHistoryPage .history-item-count{
+    font-size:31px !important;
+}
+
+#salesHistoryPage .historyAmount{
+    font-size:52px !important;
+}
+
+#salesHistoryPage .history-detail-btn,
+#salesHistoryPage .deleteHistoryBtn{
+    min-width:210px !important;
+    height:68px !important;
+    font-size:28px !important;
+}
+
+/* ====================================================
+   Order Detail
+==================================================== */
+
+#orderDetailPage .detailTitle{
+    font-size:39px !important;
+}
+
+#orderDetailPage .detailRow{
+    font-size:31px !important;
+}
+
+#orderDetailPage .order-detail-section h3{
+    font-size:35px !important;
+}
+
+#orderDetailPage .detailItem{
+    font-size:31px !important;
+}
+
+#orderDetailPage .detailItemPrice{
+    font-size:33px !important;
+}
+
+#orderDetailPage .order-detail-total-label{
+    font-size:34px !important;
+}
+
+#orderDetailPage .detailPrice{
+    font-size:56px !important;
+}
+
+/* ====================================================
+   Dashboard
+==================================================== */
+
+.dashboard-title{
+    font-size:52px !important;
+}
+
+.dashboard-date{
+    font-size:28px !important;
+}
+
+.dashboard-summary-label{
+    font-size:27px !important;
+}
+
+.dashboard-summary-value{
+    font-size:43px !important;
+}
+
+.dashboard-panel-title{
+    font-size:34px !important;
+}
+
+.dashboard-order-number{
+    font-size:27px !important;
+}
+
+.dashboard-order-meta{
+    font-size:23px !important;
+}
+
+.dashboard-order-amount{
+    font-size:31px !important;
+}
+
+.dashboard-action-btn{
+    min-height:72px !important;
+    font-size:27px !important;
+}
+
+/* ====================================================
+   Data Manager / Hardware Test
+==================================================== */
+
+.backup-info-title,
+.hardware-device-title{
+    font-size:37px !important;
+}
+
+.backup-info-text,
+.backup-card-text,
+.hardware-test-text{
+    font-size:28px !important;
+}
+
+.backup-card-title,
+.hardware-test-title{
+    font-size:37px !important;
+}
+
+.backup-status,
+.hardware-status{
+    font-size:29px !important;
+}
+
+.device-info-row{
+    font-size:27px !important;
+}
+
+/* ====================================================
+   Shift Report
+==================================================== */
+
+.shift-report-title{
+    font-size:42px !important;
+}
+
+.shift-report-date{
+    font-size:29px !important;
+}
+
+.shift-report-order-count{
+    font-size:28px !important;
+}
+
+.shift-summary-label{
+    font-size:29px !important;
+}
+
+.shift-summary-value{
+    font-size:49px !important;
+}
+
+.shift-detail-item{
+    font-size:29px !important;
+}
+
+/* ====================================================
+   Responsive
+==================================================== */
+
+@media (max-width:850px){
+    :root{
+        --admin-title-size:46px;
+        --admin-text-size:28px;
+        --admin-input-size:28px;
+        --admin-button-size:27px;
+    }
+
+    .tm-page{
+        padding:24px 22px 80px !important;
+    }
+
+    #memberManagerPage .member-card-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    }
+}
+
+@media (max-width:600px){
+    :root{
+        --admin-title-size:40px;
+        --admin-input-size:26px;
+        --admin-button-size:25px;
+    }
+
+    .tm-page{
+        padding:20px 16px 70px !important;
+    }
+
+    #memberManagerPage .member-card-grid{
+        grid-template-columns:1fr !important;
+    }
+
+    .member-toolbar,
+    .history-search-panel{
+        grid-template-columns:1fr !important;
+    }
+
+    .dashboard-title{
+        font-size:40px !important;
+    }
+}
