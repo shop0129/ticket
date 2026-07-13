@@ -220,8 +220,6 @@ cartBackBtn.addEventListener("click",()=>{
 
 });
 
-bindPaymentButton(cartLineBtn,"LINE Pay");
-bindPaymentButton(cartCashBtn,"現金");
 
 // =========================================
 // V3.9.9 購物車付款
@@ -277,5 +275,31 @@ if(totalTab){
         totalTab.classList.add("active");
 
     };
+
+}
+
+
+
+if(cartLineBtn){
+
+    cartLineBtn.addEventListener("click",()=>{
+
+        playClick();
+
+        paymentSuccess("LINE Pay");
+
+    });
+
+}
+
+if(cartCashBtn){
+
+    cartCashBtn.addEventListener("click",()=>{
+
+        playClick();
+
+        paymentSuccess("現金");
+
+    });
 
 }
