@@ -1,15 +1,16 @@
+// FILE: js/modules/hardwareTest.js | V6.5 Legacy R2
 // =========================================
 // 小怪獸售票機 V5.9
 // 硬體測試中心
 // =========================================
 
-const hardwareStatus =
+var hardwareStatus =
 document.getElementById("hardwareStatus");
 
-const deviceInfoBox =
+var deviceInfoBox =
 document.getElementById("deviceInfoBox");
 
-const hardwareTestTicket =
+var hardwareTestTicket =
 document.getElementById("hardwareTestTicket");
 
 // =========================================
