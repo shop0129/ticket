@@ -1,840 +1,353 @@
 // =========================================
-// 小怪獸售票機 V5.6.4
-// 售票紀錄模組
+// 小怪獸售票機 V5.9
+// 硬體測試中心
 // =========================================
 
-const salesHistoryList =
-document.getElementById("salesHistoryList");
+const hardwareStatus =
+document.getElementById("hardwareStatus");
 
-const orderDetailContent =
-document.getElementById("orderDetailContent");
+const deviceInfoBox =
+document.getElementById("deviceInfoBox");
+
+const hardwareTestTicket =
+document.getElementById("hardwareTestTicket");
 
 // =========================================
-// 開啟售票紀錄
+// 開啟硬體測試中心
 // =========================================
-function openSalesHistory(){
+function openHardwareTest(){
 
-    renderSalesHistory();
+    renderDeviceInfo();
 
-    showPage("salesHistoryPage");
+    resetHardwareTestStatus();
+
+    showPage("hardwareTestPage");
 
 }
 
 // =========================================
-// 金額格式
+// 測試狀態
 // =========================================
-function formatHistoryAmount(value){
+function setHardwareStatus(message,type="normal"){
 
-    return Number(value || 0)
-        .toLocaleString("zh-TW");
+    if(!hardwareStatus) return;
+
+    hardwareStatus.className =
+    `hardware-status ${type}`;
+
+    hardwareStatus.innerHTML =
+    message;
 
 }
 
+function resetHardwareTestStatus(){
+
+    setHardwareStatus(
+        "請選擇要執行的測試項目",
+        "normal"
+    );
+
+}
 
 // =========================================
-// 售票紀錄搜尋條件
+// 裝置資訊
 // =========================================
-function getHistorySearchValues(){
+function renderDeviceInfo(){
 
-    const keywordInput =
-    document.getElementById(
-        "historySearchInput"
-    );
+    if(!deviceInfoBox) return;
 
-    const paymentSelect =
-    document.getElementById(
-        "historyPaymentFilter"
-    );
+    const info = {
 
-    const statusSelect =
-    document.getElementById(
-        "historyStatusFilter"
-    );
+        platform:
+        navigator.platform || "未知",
 
-    return {
+        language:
+        navigator.language || "未知",
 
-        keyword:
-        keywordInput
-        ? keywordInput.value.trim().toLowerCase()
-        : "",
+        online:
+        navigator.onLine
+        ? "已連線"
+        : "離線",
 
-        payment:
-        paymentSelect
-        ? paymentSelect.value
-        : "all",
+        screen:
+        `${window.screen.width} × ${window.screen.height}`,
 
-        status:
-        statusSelect
-        ? statusSelect.value
-        : "all"
+        viewport:
+        `${window.innerWidth} × ${window.innerHeight}`,
+
+        userAgent:
+        navigator.userAgent || "未知"
 
     };
 
-}
+    deviceInfoBox.innerHTML = `
 
-function getFilteredSalesHistory(){
+<div class="device-info-row">
+    <span>作業平台</span>
+    <strong>${info.platform}</strong>
+</div>
 
-    const filters =
-    getHistorySearchValues();
+<div class="device-info-row">
+    <span>語言</span>
+    <strong>${info.language}</strong>
+</div>
 
-    return (
-        Array.isArray(salesHistory)
-        ? salesHistory
-        : []
-    )
-    .map((order,index)=>({
+<div class="device-info-row">
+    <span>網路狀態</span>
+    <strong>${info.online}</strong>
+</div>
 
-        order,
-        index
+<div class="device-info-row">
+    <span>螢幕解析度</span>
+    <strong>${info.screen}</strong>
+</div>
 
-    }))
-    .filter(entry=>{
+<div class="device-info-row">
+    <span>瀏覽器視窗</span>
+    <strong>${info.viewport}</strong>
+</div>
 
-        const order =
-        entry.order;
-
-        const searchableText = [
-
-            order.orderNo,
-            order.date,
-            order.time,
-            order.payment,
-            order.amount,
-            order.memberName,
-            order.memberPhone,
-            order.memberNo,
-
-            ...(
-                Array.isArray(order.items)
-                ? order.items.map(item=>
-                    item.title || item.id || ""
-                )
-                : []
-            )
-
-        ]
-        .join(" ")
-        .toLowerCase();
-
-        const keywordMatched =
-        !filters.keyword ||
-        searchableText.includes(
-            filters.keyword
-        );
-
-        const paymentMatched =
-        filters.payment === "all" ||
-        order.payment === filters.payment;
-
-        const statusMatched =
-        filters.status === "all" ||
-        (
-            filters.status === "normal" &&
-            order.status !== "cancel"
-        ) ||
-        (
-            filters.status === "cancel" &&
-            order.status === "cancel"
-        );
-
-        return (
-            keywordMatched &&
-            paymentMatched &&
-            statusMatched
-        );
-
-    });
-
-}
-
-// =========================================
-// 顯示售票紀錄
-// =========================================
-function renderSalesHistory(){
-
-    if(!salesHistoryList) return;
-
-    if(
-        !Array.isArray(salesHistory) ||
-        salesHistory.length === 0
-    ){
-
-        salesHistoryList.innerHTML = `
-
-<div class="history-empty-card">
-
-    <div class="history-empty-icon">
-        🧾
-    </div>
-
-    <div class="history-empty-title">
-        目前沒有售票紀錄
-    </div>
-
-    <div class="history-empty-text">
-        完成售票後，訂單會顯示在這裡
-    </div>
-
+<div class="device-info-row device-info-agent">
+    <span>User Agent</span>
+    <strong>${info.userAgent}</strong>
 </div>
 
 `;
 
-        return;
-
-    }
-
-    const filteredHistory =
-    getFilteredSalesHistory();
-
-    if(filteredHistory.length === 0){
-
-        salesHistoryList.innerHTML = `
-
-<div class="history-empty-card">
-
-    <div class="history-empty-icon">
-        🔍
-    </div>
-
-    <div class="history-empty-title">
-        找不到符合條件的訂單
-    </div>
-
-    <div class="history-empty-text">
-        請調整搜尋關鍵字或篩選條件
-    </div>
-
-</div>
-
-`;
-
-        return;
-
-    }
-
-    let html = "";
-
-    filteredHistory.forEach(({order,index})=>{
-
-        const isCancelled =
-            order.status === "cancel";
-
-        const itemCount =
-            Array.isArray(order.items)
-            ? order.items.length
-            : 0;
-
-        html += `
-
-<div
-    class="historyCard ${isCancelled ? "history-cancelled" : ""}"
-    onclick="openOrderDetail(${index})">
-
-    <div class="history-card-header">
-
-        <div>
-
-            <div class="history-time">
-                🕒 ${order.date || ""} ${order.time || ""}
-            </div>
-
-            <div class="historyOrderNo">
-                🆔 ${order.orderNo || "未編號"}
-            </div>
-
-        </div>
-
-        <div class="history-status-area">
-
-            <div class="history-payment">
-                💳 ${order.payment || "未記錄"}
-            </div>
-
-            ${
-                order.memberId
-                ? `
-                <div class="history-member-badge">
-                    👤 ${order.memberName || "會員"}
-                </div>
-                `
-                : ""
-            }
-
-            ${
-                isCancelled
-                ? `<div class="cancelBadge">❌ 已作廢</div>`
-                : `<div class="normalBadge">🟢 正常</div>`
-            }
-
-        </div>
-
-    </div>
-
-    <div class="history-card-body">
-
-        <div class="history-item-count">
-            🎫 共 ${itemCount} 張票券
-        </div>
-
-        <div class="historyAmount">
-            NT$${formatHistoryAmount(order.amount)}
-        </div>
-
-    </div>
-
-    <div class="history-card-footer">
-
-        <button
-            type="button"
-            class="history-detail-btn"
-            onclick="event.stopPropagation(); playClick(); openOrderDetail(${index})">
-            查看明細
-        </button>
-
-        <button
-            type="button"
-            class="deleteHistoryBtn"
-            onclick="deleteSalesHistory(event,${index})">
-            🗑️ 刪除紀錄
-        </button>
-
-    </div>
-
-</div>
-
-`;
-
-    });
-
-    salesHistoryList.innerHTML = html;
-
 }
 
 // =========================================
-// 刪除售票紀錄
+// 音效測試
 // =========================================
-function deleteSalesHistory(clickEvent,index){
-
-    if(clickEvent){
-
-        clickEvent.stopPropagation();
-
-    }
+function testClickSound(){
 
     playClick();
 
-    if(!confirm("確定要刪除這筆售票紀錄？")){
+    setHardwareStatus(
+        "✅ 點擊音效播放完成",
+        "success"
+    );
 
-        return;
+}
 
-    }
+function testSuccessSound(){
 
-    if(
-        !Array.isArray(salesHistory) ||
-        index < 0 ||
-        index >= salesHistory.length
-    ){
+    playSuccess();
 
-        return;
-
-    }
-
-    salesHistory.splice(index,1);
-
-    saveSalesHistory();
-
-    renderSalesHistory();
+    setHardwareStatus(
+        "✅ 付款成功音效播放完成",
+        "success"
+    );
 
 }
 
 // =========================================
-// 整理訂單內容
+// 顯示測試票券
 // =========================================
-function summarizeOrderItems(order){
+function showHardwareTestTicket(){
 
-    const items =
-        Array.isArray(order.items)
-        ? order.items
-        : [];
+    if(!hardwareTestTicket) return;
 
-    const groupedItems = {};
+    hardwareTestTicket.innerHTML = `
 
-    let totalToken = 0;
-    let greenToy = 0;
-    let redToy = 0;
+<div class="hardware-ticket-paper">
 
-    items.forEach(item=>{
+    <div class="hardware-ticket-title">
+        小怪獸放電所
+    </div>
 
-        if(!item) return;
+    <div class="hardware-ticket-subtitle">
+        硬體測試票券
+    </div>
 
-        const itemId =
-            item.id ||
-            item.title ||
-            "unknown";
+    <div class="hardware-ticket-line"></div>
 
-        if(!groupedItems[itemId]){
+    <div class="hardware-ticket-row">
+        <span>票券類型</span>
+        <strong>測試票券</strong>
+    </div>
 
-            groupedItems[itemId] = {
+    <div class="hardware-ticket-row">
+        <span>付款方式</span>
+        <strong>測試模式</strong>
+    </div>
 
-                title:
-                    item.title ||
-                    "未命名票券",
+    <div class="hardware-ticket-row">
+        <span>金額</span>
+        <strong>NT$0</strong>
+    </div>
 
-                qty:0,
+    <div class="hardware-ticket-row">
+        <span>狀態</span>
+        <strong>不記錄訂單</strong>
+    </div>
 
-                totalPrice:0
+    <div class="hardware-ticket-line"></div>
 
-            };
+    <div class="hardware-ticket-footer">
+        此票券僅供硬體測試使用
+    </div>
 
-        }
+</div>
 
-        groupedItems[itemId].qty++;
+`;
 
-        groupedItems[itemId].totalPrice +=
-            Number(item.price || 0);
+}
 
-        totalToken +=
-            Number(item.token || 0);
+// =========================================
+// 瀏覽器列印測試
+// =========================================
+function testBrowserPrint(){
 
-        if(item.toy === "green"){
+    playClick();
 
-            greenToy++;
+    showHardwareTestTicket();
 
-        }
+    setHardwareStatus(
+        "🖨️ 已開啟瀏覽器列印視窗",
+        "success"
+    );
 
-        if(item.toy === "red"){
+    setTimeout(()=>{
 
-            redToy++;
+        window.print();
 
-        }
+    },150);
 
-    });
+}
 
-    return {
+// =========================================
+// 列印動畫測試
+// 不建立訂單、不更新統計
+// =========================================
+function testPrintAnimation(){
 
-        groupedItems,
+    playClick();
 
-        totalToken,
+    const previousOrder =
+    currentPrintOrder;
 
-        greenToy,
+    const previousReprint =
+    isReprint;
 
-        redToy
+    currentPrintOrder = {
+
+        orderNo:"TEST-" + Date.now(),
+
+        date:
+        new Date().toLocaleDateString("zh-TW"),
+
+        time:
+        new Date().toLocaleTimeString("zh-TW",{
+
+            hour:"2-digit",
+
+            minute:"2-digit"
+
+        }),
+
+        payment:"測試模式",
+
+        amount:0,
+
+        items:[{
+
+            id:"hardwareTest",
+
+            title:"硬體測試票券",
+
+            price:0,
+
+            token:0,
+
+            toy:"none",
+
+            reward:""
+
+        }],
+
+        status:"normal"
 
     };
-
-}
-
-// =========================================
-// 產生購買內容
-// =========================================
-function renderOrderItemRows(groupedItems){
-
-    let html = "";
-
-    for(const id in groupedItems){
-
-        const item =
-            groupedItems[id];
-
-        html += `
-
-<div class="detailItem">
-
-    <span class="detail-item-name">
-        🎫 ${item.title} × ${item.qty}
-    </span>
-
-    <span class="detailItemPrice">
-        NT$${formatHistoryAmount(item.totalPrice)}
-    </span>
-
-</div>
-
-`;
-
-    }
-
-    if(html === ""){
-
-        html = `
-
-<div class="history-detail-empty">
-    無購買內容
-</div>
-
-`;
-
-    }
-
-    return html;
-
-}
-
-// =========================================
-// 產生贈送內容
-// =========================================
-function renderOrderRewardRows(
-    totalToken,
-    greenToy,
-    redToy
-){
-
-    let html = `
-
-<div class="detailRow">
-    🪙 遊戲代幣：${formatHistoryAmount(totalToken)} 枚
-</div>
-
-`;
-
-    if(greenToy > 0){
-
-        html += `
-
-<div class="detailRow">
-    🟢 綠標玩具：${greenToy} 個
-</div>
-
-`;
-
-    }
-
-    if(redToy > 0){
-
-        html += `
-
-<div class="detailRow">
-    🔴 紅標玩具：${redToy} 個
-</div>
-
-`;
-
-    }
-
-    if(
-        totalToken === 0 &&
-        greenToy === 0 &&
-        redToy === 0
-    ){
-
-        html = `
-
-<div class="detailRow">
-    無贈送內容
-</div>
-
-`;
-
-    }
-
-    return html;
-
-}
-
-// =========================================
-// 開啟訂單明細
-// =========================================
-function openOrderDetail(index){
-
-    const order =
-        salesHistory[index];
-
-    if(!order) return;
-
-    const summary =
-        summarizeOrderItems(order);
-
-    const htmlItems =
-        renderOrderItemRows(
-            summary.groupedItems
-        );
-
-    const htmlRewards =
-        renderOrderRewardRows(
-            summary.totalToken,
-            summary.greenToy,
-            summary.redToy
-        );
-
-    const isCancelled =
-        order.status === "cancel";
-
-    const html = `
-
-<div class="detailCard order-detail-card">
-
-    <div class="order-detail-header">
-
-        <div>
-
-            <div class="detailTitle">
-                🆔 ${order.orderNo || "未編號"}
-            </div>
-
-            <div class="detailRow">
-                🕒 ${order.date || ""} ${order.time || ""}
-            </div>
-
-            <div class="detailRow">
-                💳 ${order.payment || "未記錄"}
-            </div>
-
-        </div>
-
-        ${
-            isCancelled
-            ? `<div class="cancelBadge detail-status-badge">❌ 已作廢</div>`
-            : `<div class="normalBadge detail-status-badge">🟢 正常</div>`
-        }
-
-    </div>
-
-    ${
-        order.memberId
-        ? `
-        <div class="order-member-section">
-
-            <div class="order-member-title">
-                👤 會員資料
-            </div>
-
-            <div class="order-member-grid">
-
-                <div>
-                    <span>姓名</span>
-                    <strong>${order.memberName || ""}</strong>
-                </div>
-
-                <div>
-                    <span>手機</span>
-                    <strong>${order.memberPhone || ""}</strong>
-                </div>
-
-                <div>
-                    <span>會員編號</span>
-                    <strong>${order.memberNo || ""}</strong>
-                </div>
-
-            </div>
-
-        </div>
-        `
-        : `
-        <div class="order-nonmember-badge">
-            非會員交易
-        </div>
-        `
-    }
-
-    <div class="order-detail-section">
-
-        <h3>
-            🎫 購買內容
-        </h3>
-
-        ${htmlItems}
-
-    </div>
-
-    <div class="order-detail-section">
-
-        <h3>
-            🎁 贈送內容
-        </h3>
-
-        ${htmlRewards}
-
-    </div>
-
-    <div class="order-detail-total">
-
-        <div class="order-detail-total-label">
-            訂單金額
-        </div>
-
-        <div class="detailPrice">
-            NT$${formatHistoryAmount(order.amount)}
-        </div>
-
-    </div>
-
-    <div id="toyPointOrderPanel"></div>
-
-    <div class="detailButtons">
-
-        <button
-            type="button"
-            class="big-btn reprint-btn"
-            ${isCancelled
-                ? "disabled"
-                : `onclick="reprintOrder('${order.orderNo}')"`}>
-
-            ${
-                isCancelled
-                ? "🚫 已作廢不可補印"
-                : "🖨️ 補印票券"
-            }
-
-        </button>
-
-        <button
-            type="button"
-            class="big-btn cancelBtn"
-            ${isCancelled
-                ? "disabled"
-                : `onclick="cancelOrder('${order.orderNo}')"`}>
-
-            ${
-                isCancelled
-                ? "✅ 已作廢"
-                : "❌ 作廢訂單"
-            }
-
-        </button>
-
-    </div>
-
-</div>
-
-`;
-
-    if(orderDetailContent){
-
-        orderDetailContent.innerHTML = html;
-
-    }
-
-    if(
-        typeof renderToyPointOrderPanel ===
-        "function"
-    ){
-
-        renderToyPointOrderPanel(
-            order.orderNo
-        );
-
-    }
-
-    showPage("orderDetailPage");
-
-}
-
-// =========================================
-// 補印票券
-// =========================================
-function reprintOrder(orderNo){
-
-    playClick();
-
-    const order =
-        salesHistory.find(
-            item =>
-            item.orderNo === orderNo
-        );
-
-    if(!order) return;
 
     isReprint = true;
 
-    currentPrintOrder = order;
-
     showPage("successPage");
+
+    countdownNumber.innerHTML = "";
 
     updateSuccessItems();
 
     startPrintAnimation();
 
+    setTimeout(()=>{
+
+        currentPrintOrder =
+        previousOrder;
+
+        isReprint =
+        previousReprint;
+
+    },100);
+
 }
 
 // =========================================
-// 作廢訂單
+// 全螢幕測試
 // =========================================
-function cancelOrder(orderNo){
+async function testFullscreen(){
 
     playClick();
 
-    const order =
-        salesHistory.find(
-            item =>
-            item.orderNo === orderNo
+    try{
+
+        if(!document.fullscreenElement){
+
+            await document.documentElement.requestFullscreen();
+
+            setHardwareStatus(
+                "✅ 已進入全螢幕模式",
+                "success"
+            );
+
+        }else{
+
+            await document.exitFullscreen();
+
+            setHardwareStatus(
+                "✅ 已離開全螢幕模式",
+                "success"
+            );
+
+        }
+
+    }catch(error){
+
+        console.error(error);
+
+        setHardwareStatus(
+            "❌ 此裝置或瀏覽器不支援全螢幕切換",
+            "error"
         );
-
-    if(!order) return;
-
-    if(order.status === "cancel"){
-
-        alert("此訂單已經作廢！");
-
-        return;
 
     }
 
-    if(!confirm("確定要作廢這筆訂單？")){
+}
 
-        return;
+// =========================================
+// 重新整理測試
+// =========================================
+function testReload(){
 
-    }
+    playClick();
 
-    if(
-        typeof canRollbackMemberOrder ===
-        "function" &&
-        !canRollbackMemberOrder(order)
-    ){
+    const confirmed =
+    confirm(
+        "確定要重新整理售票機頁面？"
+    );
 
-        return;
+    if(!confirmed) return;
 
-    }
-
-    order.status = "cancel";
-
-    if(
-        typeof rollbackMemberPurchase ===
-        "function"
-    ){
-
-        rollbackMemberPurchase(order);
-
-    }
-
-    const items =
-        Array.isArray(order.items)
-        ? order.items
-        : [];
-
-    items.forEach(item=>{
-
-        rollbackStats(
-            todayStats,
-            item,
-            item
-        );
-
-        rollbackStats(
-            monthStats,
-            item,
-            item
-        );
-
-        rollbackStats(
-            totalStats,
-            item,
-            item
-        );
-
-    });
-
-    saveTodayStats();
-
-    saveSalesHistory();
-
-    alert("✅ 訂單已作廢");
-
-    const index =
-        salesHistory.findIndex(
-            item =>
-            item.orderNo === orderNo
-        );
-
-    openOrderDetail(index);
+    location.reload();
 
 }
