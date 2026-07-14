@@ -169,28 +169,28 @@ JSON.parse(localStorage.getItem("systemData")) || {
 // 補齊 systemData 預設值（相容舊版本）
 // ==========================
 
-systemData.homeTimeout ??= 60;
-systemData.paymentDelay ??= 8;
-systemData.printDelay ??= 5;
+if(systemData.homeTimeout === undefined || systemData.homeTimeout === null){ systemData.homeTimeout = 60; }
+if(systemData.paymentDelay === undefined || systemData.paymentDelay === null){ systemData.paymentDelay = 8; }
+if(systemData.printDelay === undefined || systemData.printDelay === null){ systemData.printDelay = 5; }
 
-systemData.receiptCopies ??= 1;
-systemData.autoPrint ??= true;
-systemData.showPrintAnimation ??= true;
+if(systemData.receiptCopies === undefined || systemData.receiptCopies === null){ systemData.receiptCopies = 1; }
+if(systemData.autoPrint === undefined || systemData.autoPrint === null){ systemData.autoPrint = true; }
+if(systemData.showPrintAnimation === undefined || systemData.showPrintAnimation === null){ systemData.showPrintAnimation = true; }
 
-systemData.autoHome ??= true;
-systemData.saveHistory ??= true;
-systemData.successAnimation ??= true;
-systemData.playSound ??= true;
+if(systemData.autoHome === undefined || systemData.autoHome === null){ systemData.autoHome = true; }
+if(systemData.saveHistory === undefined || systemData.saveHistory === null){ systemData.saveHistory = true; }
+if(systemData.successAnimation === undefined || systemData.successAnimation === null){ systemData.successAnimation = true; }
+if(systemData.playSound === undefined || systemData.playSound === null){ systemData.playSound = true; }
 
-systemData.payment ??= {};
+if(systemData.payment === undefined || systemData.payment === null){ systemData.payment = {}; }
 
-systemData.payment.cash ??= true;
-systemData.payment.linepay ??= true;
-systemData.payment.easycard ??= false;
-systemData.payment.credit ??= false;
+if(systemData.payment.cash === undefined || systemData.payment.cash === null){ systemData.payment.cash = true; }
+if(systemData.payment.linepay === undefined || systemData.payment.linepay === null){ systemData.payment.linepay = true; }
+if(systemData.payment.easycard === undefined || systemData.payment.easycard === null){ systemData.payment.easycard = false; }
+if(systemData.payment.credit === undefined || systemData.payment.credit === null){ systemData.payment.credit = false; }
 
-systemData.adminPassword ??= "1234";
-systemData.staffPassword ??= "0000";
+if(systemData.adminPassword === undefined || systemData.adminPassword === null){ systemData.adminPassword = "1234"; }
+if(systemData.staffPassword === undefined || systemData.staffPassword === null){ systemData.staffPassword = "0000"; }
 
 localStorage.setItem(
     "systemData",
@@ -342,19 +342,20 @@ const ticketCategoryDefaults = {
 
 for(const id in ticketData){
 
-    ticketData[id].category ??=
-    ticketCategoryDefaults[id] || "other";
+    if(ticketData[id].category === undefined || ticketData[id].category === null){
+        ticketData[id].category = ticketCategoryDefaults[id] || "other";
+    }
 
-    ticketData[id].description ??= "";
+    if(ticketData[id].description === undefined || ticketData[id].description === null){ ticketData[id].description = ""; }
 
-    ticketData[id].custom ??=
-    id.startsWith("custom_");
+    if(ticketData[id].custom === undefined || ticketData[id].custom === null){
+        ticketData[id].custom = id.startsWith("custom_");
+    }
 
-    ticketData[id].toy ??= "none";
+    if(ticketData[id].toy === undefined || ticketData[id].toy === null){ ticketData[id].toy = "none"; }
 
-    ticketData[id].token ??= 0;
+    if(ticketData[id].token === undefined || ticketData[id].token === null){ ticketData[id].token = 0; }
 
-    ticketData[id].reward ??= "";
+    if(ticketData[id].reward === undefined || ticketData[id].reward === null){ ticketData[id].reward = ""; }
 
 }
-
