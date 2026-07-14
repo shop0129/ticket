@@ -1,128 +1,64 @@
+// V7 Phase 1 Legacy Build | js/modules/ticketCatalog.js
 // =========================================
 // 小怪獸售票機 V6.3.1
 // 動態票券目錄
 // =========================================
-
-const ticketCategoryMap = {
-    general:"ticketGeneralGrid",
-    special:"ticketSpecialGrid",
-    other:"ticketOtherGrid"
+var ticketCategoryMap = {
+    general: "ticketGeneralGrid",
+    special: "ticketSpecialGrid",
+    other: "ticketOtherGrid"
 };
-
-function isTicketVisibleByBusinessMode(id,ticket){
-
-    if(!ticket || ticket.enable === false){
+function isTicketVisibleByBusinessMode(id, ticket) {
+    if (!ticket || ticket.enable === false) {
         return false;
     }
-
-    switch(businessMode.mode){
-
+    switch (businessMode.mode) {
         case "weekday":
             return id !== "summer";
-
         case "holiday":
             return id !== "early" &&
-                   id !== "summer";
-
+                id !== "summer";
         case "summer":
             return id !== "early";
-
         default:
             return true;
-
     }
-
 }
-
-function createTicketCard(id,ticket){
-
-    const imageSrc =
-    resolveTicketImageSrc(
-        ticket.image
-    );
-
-    return `
-
-<div class="ticket-item" data-ticket-id="${id}">
-
-    <img
-        src="${imageSrc}"
-        class="ticket-btn"
-        data-id="${id}"
-        alt="${ticket.title || "票券"}">
-
-    <div
-        class="ticket-price"
-        id="price-${id}">
-        NT$${Number(ticket.price || 0)}
-    </div>
-
-</div>
-
-`;
-
+function createTicketCard(id, ticket) {
+    var imageSrc = resolveTicketImageSrc(ticket.image);
+    return "\n\n<div class=\"ticket-item\" data-ticket-id=\"".concat(id, "\">\n\n    <img\n        src=\"").concat(imageSrc, "\"\n        class=\"ticket-btn\"\n        data-id=\"").concat(id, "\"\n        alt=\"").concat(ticket.title || "票券", "\">\n\n    <div\n        class=\"ticket-price\"\n        id=\"price-").concat(id, "\">\n        NT$").concat(Number(ticket.price || 0), "\n    </div>\n\n</div>\n\n");
 }
-
-function renderTicketCatalog(){
-
+function renderTicketCatalog() {
     Object.values(ticketCategoryMap)
-    .forEach(containerId=>{
-
-        const container =
-        document.getElementById(containerId);
-
-        if(container){
+        .forEach(function (containerId) {
+        var container = document.getElementById(containerId);
+        if (container) {
             container.innerHTML = "";
         }
-
     });
-
-    for(const id in ticketData){
-
-        const ticket =
-        ticketData[id];
-
-        if(!isTicketVisibleByBusinessMode(id,ticket)){
+    for (var id in ticketData) {
+        var ticket = ticketData[id];
+        if (!isTicketVisibleByBusinessMode(id, ticket)) {
             continue;
         }
-
-        const category =
-        ticket.category || "other";
-
-        const containerId =
-        ticketCategoryMap[category] ||
-        ticketCategoryMap.other;
-
-        const container =
-        document.getElementById(containerId);
-
-        if(!container) continue;
-
-        container.insertAdjacentHTML(
-            "beforeend",
-            createTicketCard(id,ticket)
-        );
-
+        var category = ticket.category || "other";
+        var containerId = ticketCategoryMap[category] ||
+            ticketCategoryMap.other;
+        var container = document.getElementById(containerId);
+        if (!container)
+            continue;
+        container.insertAdjacentHTML("beforeend", createTicketCard(id, ticket));
     }
-
     updateEmptyTicketCategories();
-
 }
-
-function updateEmptyTicketCategories(){
-
+function updateEmptyTicketCategories() {
     document
-    .querySelectorAll(".ticket-category-section")
-    .forEach(section=>{
-
-        const grid =
-        section.querySelector(".ticket-grid");
-
+        .querySelectorAll(".ticket-category-section")
+        .forEach(function (section) {
+        var grid = section.querySelector(".ticket-grid");
         section.style.display =
-        grid && grid.children.length > 0
-        ? ""
-        : "none";
-
+            grid && grid.children.length > 0
+                ? ""
+                : "none";
     });
-
 }
