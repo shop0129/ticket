@@ -73,7 +73,7 @@ normalizeMemberPointFields();
 function getMemberLevel(member){
 
     const spend =
-    Number(member?.totalSpend || 0);
+    Number((member && member.totalSpend) || 0);
 
     return MEMBER_LEVELS.find(level=>
         spend >= level.minSpend
@@ -202,9 +202,11 @@ function renderMemberList(){
 
     const query =
     (
-        document.getElementById(
+        (document.getElementById(
             "memberSearchInput"
-        )?.value || ""
+        ) ? document.getElementById(
+            "memberSearchInput"
+        ).value : "") || ""
     )
     .trim()
     .toLowerCase();
@@ -376,12 +378,12 @@ function renderMemberList(){
 
 }
 
-document
-.getElementById("memberSearchInput")
-?.addEventListener(
-    "input",
-    renderMemberList
-);
+(function(){
+    var memberSearchElement = document.getElementById("memberSearchInput");
+    if(memberSearchElement){
+        memberSearchElement.addEventListener("input", renderMemberList);
+    }
+})();
 
 // =========================================
 // 會員消費紀錄
@@ -969,7 +971,7 @@ function deleteMember(id){
         item.id !== id
     );
 
-    if(currentMember?.id === id){
+    if(currentMember && currentMember.id === id){
 
         currentMember = null;
 
@@ -1002,9 +1004,10 @@ function toggleMemberQuickPanel(){
     ? "none"
     : "block";
 
-    document
-    .getElementById("memberQuickPhone")
-    ?.focus();
+    (function(){
+        var quickPhoneInput = document.getElementById("memberQuickPhone");
+        if(quickPhoneInput){ quickPhoneInput.focus(); }
+    })();
 
 }
 
@@ -1025,9 +1028,11 @@ function searchQuickMember(){
 
     const phone =
     memberPhone(
-        document.getElementById(
+        (document.getElementById(
             "memberQuickPhone"
-        )?.value
+        ) ? document.getElementById(
+            "memberQuickPhone"
+        ).value : "")
     );
 
     if(!phone){
@@ -1372,7 +1377,7 @@ function applyMemberPurchase(amount,order){
         reason:"消費累積",
 
         orderNo:
-        order?.orderNo || "",
+        (order && order.orderNo) || "",
 
         balance:
         member.points
@@ -1422,7 +1427,7 @@ function canRollbackMemberOrder(order){
 
     const toyPoints =
     Number(
-        order.toyPointConversion?.points ||
+        (order.toyPointConversion && order.toyPointConversion.points) ||
         0
     );
 
@@ -1477,7 +1482,7 @@ function rollbackMemberPurchase(order){
 
     const toyPoints =
     Number(
-        order.toyPointConversion?.points ||
+        (order.toyPointConversion && order.toyPointConversion.points) ||
         0
     );
 
@@ -1708,7 +1713,7 @@ function getOrderToyCounts(order){
     };
 
     (
-        Array.isArray(order?.items)
+        Array.isArray(order && order.items)
         ? order.items
         : []
     ).forEach(item=>{
@@ -1855,8 +1860,8 @@ function renderToyPointOrderPanel(orderNo){
     </div>
 
     <div class="toy-order-member">
-        會員：${memberEsc(order.memberName || member?.name || "")}
-        ・玩具點數 ${Number(member?.toyPoints || 0)} 點
+        會員：${memberEsc(order.memberName || (member && member.name) || "")}
+        ・玩具點數 ${Number((member && member.toyPoints) || 0)} 點
     </div>
 
     <div class="toy-order-rate">
@@ -1944,7 +1949,7 @@ function lateBindOrderMember(orderNo){
 
     const phone =
     memberPhone(
-        phoneInput?.value
+        (phoneInput ? phoneInput.value : "")
     );
 
     if(!phone){
@@ -2134,9 +2139,11 @@ function convertOrderToysToPoints(orderNo){
     Math.max(
         0,
         Number(
-            document.getElementById(
+            (document.getElementById(
                 "convertGreenQty"
-            )?.value || 0
+            ) ? document.getElementById(
+                "convertGreenQty"
+            ).value : 0) || 0
         )
     );
 
@@ -2144,9 +2151,11 @@ function convertOrderToysToPoints(orderNo){
     Math.max(
         0,
         Number(
-            document.getElementById(
+            (document.getElementById(
                 "convertRedQty"
-            )?.value || 0
+            ) ? document.getElementById(
+                "convertRedQty"
+            ).value : 0) || 0
         )
     );
 
@@ -2394,14 +2403,13 @@ async function importMemberFile(file){
 
 }
 
-document
-.getElementById("memberImportInput")
-?.addEventListener(
-    "change",
-    event=>
-        importMemberFile(
-            event.target.files[0]
-        )
-);
+(function(){
+    var memberImportElement = document.getElementById("memberImportInput");
+    if(memberImportElement){
+        memberImportElement.addEventListener("change", function(event){
+            importMemberFile(event.target.files[0]);
+        });
+    }
+})();
 
 renderSelectedMember();
