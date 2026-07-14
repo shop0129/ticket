@@ -1,74 +1,53 @@
-let cart = [];
+// =========================================
+// 小怪獸售票機 V6.5 Legacy R2
+// 全域狀態（可安全重複載入）
+// =========================================
 
-// 目前列印中的訂單
-let currentPrintOrder = null;
+var cart = window.cart || [];
+window.cart = cart;
 
-// 是否為補印模式
-let isReprint = false;
+var currentPrintOrder = window.currentPrintOrder || null;
+var isReprint = window.isReprint || false;
+var idleTimer = window.idleTimer || null;
+var countdownTimer = window.countdownTimer || null;
+var selectedReward = window.selectedReward || "";
+var selectedTicket = window.selectedTicket || "";
 
-// 閒置計時
-let idleTimer;
-let countdownTimer;
+function loadStateObject(key, fallback){
+    try{
+        var raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    }catch(error){
+        console.warn("State load failed:", key, error);
+        return fallback;
+    }
+}
 
-// 目前選擇票券
-let selectedReward = "";
-let selectedTicket = "";
-let todayStats = JSON.parse(
-    localStorage.getItem("todayStats")
-) || {
+var todayStats = window.todayStats || loadStateObject("todayStats", {
+    tickets:0, income:0, tokens:0, greenToy:0, redToy:0, parent:0
+});
 
-    tickets:0,
+var monthStats = window.monthStats || loadStateObject("monthStats", {
+    tickets:0, income:0, tokens:0, greenToy:0, redToy:0, parent:0
+});
 
-    income:0,
+var totalStats = window.totalStats || loadStateObject("totalStats", {
+    tickets:0, income:0, tokens:0, greenToy:0, redToy:0, parent:0
+});
 
-    tokens:0,
+var salesHistory = window.salesHistory || loadStateObject("salesHistory", []);
 
-    greenToy:0,
-
-    redToy:0,
-
-    parent:0
-
-};
-let monthStats = JSON.parse(
-    localStorage.getItem("monthStats")
-) || {
-
-    tickets:0,
-    income:0,
-    tokens:0,
-    greenToy:0,
-    redToy:0,
-    parent:0
-
-};
-
-let totalStats = JSON.parse(
-    localStorage.getItem("totalStats")
-) || {
-
-    tickets:0,
-    income:0,
-    tokens:0,
-    greenToy:0,
-    redToy:0,
-    parent:0
-
-};
-let salesHistory = JSON.parse(
-
-    localStorage.getItem("salesHistory")
-
-) || [];
+window.currentPrintOrder = currentPrintOrder;
+window.isReprint = isReprint;
+window.idleTimer = idleTimer;
+window.countdownTimer = countdownTimer;
+window.selectedReward = selectedReward;
+window.selectedTicket = selectedTicket;
+window.todayStats = todayStats;
+window.monthStats = monthStats;
+window.totalStats = totalStats;
+window.salesHistory = salesHistory;
 
 function saveSalesHistory(){
-
-    localStorage.setItem(
-
-        "salesHistory",
-
-        JSON.stringify(salesHistory)
-
-    );
-
+    localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
 }
