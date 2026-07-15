@@ -60,7 +60,20 @@ function loadTicketImageLibrary() {
 // 儲存圖片庫
 // =========================================
 function saveTicketImageLibrary() {
-    localStorage.setItem(TICKET_IMAGE_LIBRARY_KEY, JSON.stringify(ticketImageLibrary));
+    localStorage.setItem(
+        TICKET_IMAGE_LIBRARY_KEY,
+        JSON.stringify(ticketImageLibrary)
+    );
+
+    if(
+        window.MonsterTicketCloud &&
+        typeof window.MonsterTicketCloud.onImageLibrarySave ===
+        "function"
+    ){
+        window.MonsterTicketCloud.onImageLibrarySave(
+            ticketImageLibrary
+        );
+    }
 }
 // =========================================
 // 取得圖片網址
@@ -187,7 +200,14 @@ function uploadTicketImage(ticketId, input) {
                         ticketData[ticketId].image =
                             "upload:" + imageId;
                     }
-                    localStorage.setItem("ticketData", JSON.stringify(ticketData));
+                    if(typeof saveTicketData === "function"){
+                        saveTicketData();
+                    }else{
+                        localStorage.setItem(
+                            "ticketData",
+                            JSON.stringify(ticketData)
+                        );
+                    }
                     renderTicketManager();
                     updateTicketButtons();
                     alert("✅ 圖片已上傳並套用");

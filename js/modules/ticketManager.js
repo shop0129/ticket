@@ -3,6 +3,25 @@
 // 小怪獸售票機 V6.3
 // 票券／商品管理
 // =========================================
+
+function saveTicketData(){
+
+    localStorage.setItem(
+        "ticketData",
+        JSON.stringify(ticketData)
+    );
+
+    if(
+        window.MonsterTicketCloud &&
+        typeof window.MonsterTicketCloud.onLocalSave ===
+        "function"
+    ){
+        window.MonsterTicketCloud.onLocalSave(
+            ticketData
+        );
+    }
+}
+
 function openTicketManager() {
     renderTicketManager();
     showPage("ticketManagerPage");
@@ -99,7 +118,7 @@ function deleteCustomTicket(id) {
         return;
     }
     delete ticketData[id];
-    localStorage.setItem("ticketData", JSON.stringify(ticketData));
+    saveTicketData();
     renderTicketManager();
     updateTicketButtons();
 }
@@ -123,7 +142,7 @@ function saveTicketManager() {
         ticket.reward =
             buildTicketReward(ticket);
     }
-    localStorage.setItem("ticketData", JSON.stringify(ticketData));
+    saveTicketData();
     updateTicketButtons();
     updateTicketPrices();
     renderTicketManager();
@@ -147,7 +166,14 @@ function resetTicketManager() {
     if (!confirm("確定恢復預設票券？")) {
         return;
     }
+
+    localStorage.setItem(
+        "monsterTicketForceLocalReset",
+        "1"
+    );
+
     localStorage.removeItem("ticketData");
+
     location.reload();
 }
 function setToy(clickEvent, id, toy) {
