@@ -6804,3 +6804,123 @@ System Setting
 
 }
 
+
+/*====================================================
+  V7 Phase 2A-1 Firebase 連線狀態
+  Chrome / Android WebView 61 相容
+====================================================*/
+
+.cloud-sync-status{
+    position:fixed;
+    top:12px;
+    right:12px;
+    z-index:100000;
+
+    min-width:190px;
+    max-width:320px;
+
+    -webkit-align-items:center;
+    align-items:center;
+
+    padding:10px 14px;
+    border:2px solid rgba(255,255,255,.75);
+    border-radius:16px;
+
+    color:#fff;
+    font-family:"Microsoft JhengHei",Arial,sans-serif;
+
+    box-shadow:0 6px 18px rgba(0,0,0,.22);
+    pointer-events:none;
+}
+
+.cloud-sync-dot{
+    display:block;
+    width:14px;
+    height:14px;
+    min-width:14px;
+    margin-right:10px;
+    border:3px solid rgba(255,255,255,.8);
+    border-radius:50%;
+    background:#fff;
+}
+
+.cloud-sync-copy{
+    display:block;
+    min-width:0;
+}
+
+.cloud-sync-copy strong{
+    display:block;
+    font-size:20px;
+    line-height:1.25;
+    font-weight:900;
+}
+
+.cloud-sync-copy small{
+    display:block;
+    margin-top:2px;
+    font-size:13px;
+    line-height:1.3;
+    font-weight:700;
+    opacity:.9;
+}
+
+.cloud-sync-connecting{
+    background:#1976D2;
+}
+
+.cloud-sync-connecting .cloud-sync-dot{
+    background:#BBDEFB;
+}
+
+.cloud-sync-online{
+    background:#2E7D32;
+}
+
+.cloud-sync-online .cloud-sync-dot{
+    background:#69F0AE;
+}
+
+.cloud-sync-offline{
+    background:#616161;
+}
+
+.cloud-sync-offline .cloud-sync-dot{
+    background:#E0E0E0;
+}
+
+.cloud-sync-warning{
+    background:#EF6C00;
+}
+
+.cloud-sync-warning .cloud-sync-dot{
+    background:#FFD180;
+}
+
+.cloud-sync-error{
+    background:#C62828;
+}
+
+.cloud-sync-error .cloud-sync-dot{
+    background:#FF8A80;
+}
+
+@media (max-width:700px){
+
+    .cloud-sync-status{
+        top:7px;
+        right:7px;
+        min-width:150px;
+        max-width:240px;
+        padding:8px 10px;
+    }
+
+    .cloud-sync-copy strong{
+        font-size:17px;
+    }
+
+    .cloud-sync-copy small{
+        font-size:11px;
+    }
+
+}
