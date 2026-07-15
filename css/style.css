@@ -6725,3 +6725,82 @@ System Setting
     }
 
 }
+
+
+/*====================================================
+  V7 Phase 1.1
+  Android WebView 61 票卡間距相容修正
+  舊版瀏覽器不依賴 flex/grid gap
+====================================================*/
+
+.ticket-category-section{
+    width:100%;
+    margin:0 auto 28px !important;
+}
+
+.ticket-grid{
+    width:700px !important;
+    max-width:94% !important;
+    margin:30px auto 55px !important;
+    padding:0 !important;
+
+    display:-webkit-flex !important;
+    display:flex !important;
+
+    -webkit-flex-wrap:wrap !important;
+    flex-wrap:wrap !important;
+
+    -webkit-justify-content:center !important;
+    justify-content:center !important;
+
+    -webkit-align-items:flex-start !important;
+    align-items:flex-start !important;
+
+    column-gap:0 !important;
+    row-gap:0 !important;
+    gap:0 !important;
+}
+
+.ticket-grid .ticket-item{
+    position:relative !important;
+
+    -webkit-flex:0 0 300px !important;
+    flex:0 0 300px !important;
+
+    width:300px !important;
+    margin:0 15px 75px !important;
+}
+
+.ticket-grid .ticket-item .ticket-btn{
+    width:300px !important;
+    max-width:300px !important;
+    height:auto !important;
+    display:block !important;
+}
+
+.category-title{
+    margin:32px auto 28px !important;
+}
+
+.ticket-content{
+    padding-bottom:150px !important;
+}
+
+#cartPanel{
+    clear:both !important;
+    margin:45px auto 55px !important;
+}
+
+@media (max-width:700px){
+
+    .ticket-grid{
+        width:340px !important;
+        max-width:96% !important;
+    }
+
+    .ticket-grid .ticket-item{
+        margin:0 auto 75px !important;
+    }
+
+}
+
