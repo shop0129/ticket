@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+
+    <title>小怪獸員工後台</title>
+
+    <link
+        rel="stylesheet"
+        href="css/staff.css?v=73a">
+</head>
+
+<body>
+
+<section
+    id="staffLoginPage"
+    class="staff-login-page">
+
+    <div class="staff-login-card">
+
+        <img
+            class="staff-login-logo"
+            src="images/btn-buy-default.png"
+            alt="小怪獸">
+
+        <h1 class="staff-login-title">
+            小怪獸員工後台
+        </h1>
+
+        <div class="staff-login-subtitle">
+            員工／店長共用登入入口
+        </div>
+
+        <input
+            id="staffPassword"
+            type="password"
+            inputmode="numeric"
+            autocomplete="current-password"
+            placeholder="請輸入密碼">
+
+        <button
+            id="staffLoginButton"
+            class="staff-login-button">
+            登入
+        </button>
+
+        <div
+            id="staffLoginMessage"
+            class="staff-login-message">
+        </div>
+
+        <div class="staff-login-hint">
+            員工密碼會進入日常店務模式；店長密碼可使用完整管理功能。
+        </div>
+
+    </div>
+
+</section>
+
+<section
+    id="staffHomePage"
+    class="staff-home-page">
+
+    <div class="staff-shell">
+
+        <header class="staff-topbar">
+
+            <div>
+                <div class="staff-top-title">
+                    小怪獸員工後台
+                </div>
+
+                <div
+                    id="staffHomeSubtitle"
+                    class="staff-top-subtitle">
+                    日常店務操作
+                </div>
+            </div>
+
+            <div class="staff-top-actions">
+
+                <div
+                    id="staffCloudBadge"
+                    class="staff-cloud-badge staff-cloud-connecting">
+                    <span class="staff-cloud-dot"></span>
+                    <span>雲端連線中</span>
+                </div>
+
+                <div
+                    id="staffRoleBadge"
+                    class="staff-role-badge role-staff">
+                    👤 員工模式
+                </div>
+
+                <button
+                    id="staffLogoutButton"
+                    class="staff-logout-button">
+                    登出
+                </button>
+
+            </div>
+
+        </header>
+
+        <section class="staff-section staff-allowed">
+
+            <div class="staff-section-title">
+                📊 今日營運
+            </div>
+
+            <div
+                id="staffDashboardDate"
+                class="staff-dashboard-date">
+                雲端即時概況
+            </div>
+
+            <div class="staff-summary-grid">
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">💰</div>
+                    <div class="staff-summary-label">今日營收</div>
+                    <div id="staffTodayIncome" class="staff-summary-value">NT$0</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">🧾</div>
+                    <div class="staff-summary-label">正常訂單</div>
+                    <div id="staffTodayOrders" class="staff-summary-value">0 筆</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">🎫</div>
+                    <div class="staff-summary-label">售出票券</div>
+                    <div id="staffTodayTickets" class="staff-summary-value">0 張</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">✨</div>
+                    <div class="staff-summary-label">今日新會員</div>
+                    <div id="staffTodayMembers" class="staff-summary-value">0 人</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">👤</div>
+                    <div class="staff-summary-label">會員交易</div>
+                    <div id="staffMemberOrders" class="staff-summary-value">0 筆</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">❌</div>
+                    <div class="staff-summary-label">作廢訂單</div>
+                    <div id="staffCancelledOrders" class="staff-summary-value">0 筆</div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="staff-section staff-allowed">
+
+            <div class="staff-section-title">
+                ⚡ 員工功能
+            </div>
+
+            <div class="staff-menu-grid">
+
+                <button
+                    class="staff-menu-button"
+                    data-feature="member"
+                    data-title="會員中心"
+                    data-detail="搜尋會員、查看消費點數與玩具點數">
+                    <span class="staff-menu-icon">👤</span>
+                    <span class="staff-menu-title">會員中心</span>
+                    <span class="staff-menu-detail">搜尋手機、查看會員資料</span>
+                </button>
+
+                <button
+                    class="staff-menu-button"
+                    data-feature="toy"
+                    data-title="玩具點數"
+                    data-detail="增加玩具點、扣點兌換與查看操作紀錄">
+                    <span class="staff-menu-icon">🎁</span>
+                    <span class="staff-menu-title">玩具點數</span>
+                    <span class="staff-menu-detail">累積、扣點與獎品兌換</span>
+                </button>
+
+                <button
+                    class="staff-menu-button"
+                    data-feature="orders"
+                    data-title="訂單查詢"
+                    data-detail="搜尋訂單、會員補綁與玩具轉點">
+                    <span class="staff-menu-icon">🧾</span>
+                    <span class="staff-menu-title">訂單查詢</span>
+                    <span class="staff-menu-detail">查詢交易與離場補綁會員</span>
+                </button>
+
+                <button
+                    class="staff-menu-button"
+                    data-feature="quick-member"
+                    data-title="快速新增會員"
+                    data-detail="用手機與姓名建立新會員">
+                    <span class="staff-menu-icon">➕</span>
+                    <span class="staff-menu-title">快速新增會員</span>
+                    <span class="staff-menu-detail">現場快速入會</span>
+                </button>
+
+            </div>
+
+        </section>
+
+        <section class="staff-section admin-only">
+
+            <div class="staff-section-title">
+                👑 店長功能
+            </div>
+
+            <div class="staff-menu-grid">
+
+                <button
+                    class="staff-menu-button admin-menu-button"
+                    data-admin-only="true"
+                    data-title="完整 Dashboard"
+                    data-detail="查看本月、累積營收與完整營運分析">
+                    <span class="staff-menu-icon">📊</span>
+                    <span class="staff-menu-title">完整 Dashboard</span>
+                    <span class="staff-menu-detail">營收與營運分析</span>
+                </button>
+
+                <button
+                    class="staff-menu-button admin-menu-button"
+                    data-admin-only="true"
+                    data-title="票券管理"
+                    data-detail="修改票名、價格、圖片、代幣與玩具">
+                    <span class="staff-menu-icon">🎫</span>
+                    <span class="staff-menu-title">票券管理</span>
+                    <span class="staff-menu-detail">新增與修改雲端票券</span>
+                </button>
+
+                <button
+                    class="staff-menu-button admin-menu-button"
+                    data-admin-only="true"
+                    data-title="會員管理"
+                    data-detail="新增、編輯、刪除與匯出會員資料">
+                    <span class="staff-menu-icon">👥</span>
+                    <span class="staff-menu-title">會員管理</span>
+                    <span class="staff-menu-detail">完整會員資料管理</span>
+                </button>
+
+                <button
+                    class="staff-menu-button admin-menu-button"
+                    data-admin-only="true"
+                    data-title="系統設定"
+                    data-detail="密碼、付款方式、營業模式與備份設定">
+                    <span class="staff-menu-icon">⚙️</span>
+                    <span class="staff-menu-title">系統設定</span>
+                    <span class="staff-menu-detail">店長專用管理功能</span>
+                </button>
+
+            </div>
+
+        </section>
+
+        <footer class="staff-footer">
+            小怪獸售票機・V7 Phase 3A Staff
+        </footer>
+
+    </div>
+
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script src="js/cloud/firebase-config.js?v=73a"></script>
+<script src="js/staff/staff-config.js?v=73a"></script>
+<script src="js/staff/staff-app.js?v=73a"></script>
+
+</body>
+</html>
