@@ -12,7 +12,22 @@ function saveTicketData() {
     localStorage.setItem("ticketData", JSON.stringify(ticketData));
 }
 function saveSalesHistory() {
-    localStorage.setItem("salesHistory", JSON.stringify(salesHistory));
+    localStorage.setItem(
+        "salesHistory",
+        JSON.stringify(salesHistory)
+    );
+
+    window.salesHistory = salesHistory;
+
+    if(
+        window.MonsterOrderCloud &&
+        typeof window.MonsterOrderCloud.onLocalSave ===
+        "function"
+    ){
+        window.MonsterOrderCloud.onLocalSave(
+            salesHistory
+        );
+    }
 }
 function saveSystemSetting() {
     localStorage.setItem("systemData", JSON.stringify(systemData));
