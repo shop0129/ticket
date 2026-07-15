@@ -18,6 +18,8 @@
     var connectTimeout = null;
 
     window.MonsterCloud = window.MonsterCloud || {};
+    window.MonsterCloud.readyCallbacks =
+        window.MonsterCloud.readyCallbacks || [];
 
     function findStatusElements(){
         statusElement = document.getElementById("cloudSyncStatus");
@@ -127,6 +129,7 @@
                     authReady = true;
                     window.MonsterCloud.uid = user.uid;
                     watchDatabaseConnection();
+                    notifyReadyCallbacks();
                 }else{
                     authReady = false;
                     firebase.auth().signInAnonymously().catch(handleFirebaseError);
@@ -170,6 +173,10 @@
             window.MonsterCloud.auth = firebase.auth();
             window.MonsterCloud.database = firebase.database();
 
+            if(authReady){
+                notifyReadyCallbacks();
+            }
+
             connectTimeout = setTimeout(
                 function(){
                     if(!connectionReady){
@@ -207,6 +214,55 @@
 
     window.addEventListener("online",handleBrowserOnline);
     window.addEventListener("offline",handleBrowserOffline);
+
+
+    window.MonsterCloud.setStatus = setStatus;
+
+    window.MonsterCloud.onReady = function(callback){
+
+        if(typeof callback !== "function"){
+            return;
+        }
+
+        if(
+            authReady &&
+            window.MonsterCloud.database
+        ){
+            setTimeout(
+                function(){
+                    callback(window.MonsterCloud);
+                },
+                0
+            );
+
+            return;
+        }
+
+        window.MonsterCloud.readyCallbacks.push(
+            callback
+        );
+    };
+
+    function notifyReadyCallbacks(){
+
+        var callbacks =
+        window.MonsterCloud.readyCallbacks.slice(0);
+
+        window.MonsterCloud.readyCallbacks = [];
+
+        callbacks.forEach(
+            function(callback){
+                try{
+                    callback(window.MonsterCloud);
+                }catch(error){
+                    console.error(
+                        "[MonsterCloud] ready callback error:",
+                        error
+                    );
+                }
+            }
+        );
+    }
 
     window.MonsterCloud.getConnectionInfo = function(){
         return {

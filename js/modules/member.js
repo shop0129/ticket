@@ -101,6 +101,13 @@ function getMemberLevel(member) {
 }
 function saveMembers() {
     localStorage.setItem(MEMBER_KEY, JSON.stringify(memberData));
+
+    if(
+        window.MonsterMemberCloud &&
+        typeof window.MonsterMemberCloud.onLocalSave === "function"
+    ){
+        window.MonsterMemberCloud.onLocalSave(memberData);
+    }
 }
 function memberPhone(value) {
     return String(value || "")
