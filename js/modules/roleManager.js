@@ -120,6 +120,19 @@ var currentUser = null;
         sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
     }
 
+
+    function readSessionLoginAt() {
+        var raw;
+        var session;
+        try {
+            raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
+            session = raw ? JSON.parse(raw) : null;
+            return session && session.loginAt ? session.loginAt : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
     function restoreSession() {
         var raw;
         var session;
@@ -207,7 +220,7 @@ var currentUser = null;
     }
 
     window.MonsterRole = {
-        version: "7.3F-Sprint1",
+        version: "7.3F-Sprint2",
         getEmployees: function () {
             return clone(ensureDefaultAccounts());
         },
@@ -236,6 +249,24 @@ var currentUser = null;
             applyRolePermissions();
         },
         restoreSession: restoreSession,
+        refreshCurrentUser: function () {
+            var list = ensureDefaultAccounts();
+            var i;
+            if (!currentUser) { return false; }
+            for (i = 0; i < list.length; i += 1) {
+                if (list[i].id === currentUser.id && list[i].enabled !== false) {
+                    currentUser = publicUser(list[i]);
+                    currentUser.loginAt = (readSessionLoginAt() || currentUser.loginAt);
+                    currentUserRole = currentUser.role;
+                    window.currentUser = currentUser;
+                    window.currentUserRole = currentUserRole;
+                    saveSession(currentUser);
+                    applyRolePermissions();
+                    return true;
+                }
+            }
+            return false;
+        },
         refresh: applyRolePermissions
     };
 

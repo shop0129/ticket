@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.3F Sprint 1 - Auth Core
+// 小怪獸售票機 V7.3F Sprint 2 - Auth Core
 // Firebase Auth + Role Session + 30 分鐘逾時
 // Android WebView 61 相容（ES5）
 // =========================================
@@ -126,7 +126,7 @@
     }
 
     window.RoleAuth = {
-        version: "7.3F-Sprint1",
+        version: "7.3F-Sprint2",
         init: init,
         sync: sync,
         touchSession: touch,

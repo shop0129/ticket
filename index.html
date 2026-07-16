@@ -630,7 +630,32 @@ content="width=device-width, initial-scale=1.0">
             <div class="employee-toolbar-info">
                 僅店長可新增、修改、停用與刪除員工帳號。
             </div>
-            <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
+            <div class="employee-toolbar-actions">
+                <button class="employee-export-btn" onclick="exportEmployeeSafeList()">📤 匯出清單</button>
+                <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
+            </div>
+        </div>
+
+        <div class="employee-overview-grid">
+            <div class="employee-overview-card"><span>全部帳號</span><strong id="employeeTotalCount">0</strong></div>
+            <div class="employee-overview-card"><span>啟用中</span><strong id="employeeEnabledCount">0</strong></div>
+            <div class="employee-overview-card"><span>店長</span><strong id="employeeAdminCount">0</strong></div>
+            <div class="employee-overview-card"><span>員工</span><strong id="employeeStaffCount">0</strong></div>
+        </div>
+
+        <div class="employee-filter-bar">
+            <input id="employeeSearchInput" type="search" placeholder="搜尋姓名或登入帳號" oninput="filterEmployeeManager()">
+            <select id="employeeRoleFilter" onchange="filterEmployeeManager()">
+                <option value="all">全部角色</option>
+                <option value="admin">店長</option>
+                <option value="staff">員工</option>
+            </select>
+            <select id="employeeStatusFilter" onchange="filterEmployeeManager()">
+                <option value="all">全部狀態</option>
+                <option value="enabled">啟用中</option>
+                <option value="disabled">已停用</option>
+            </select>
+            <button onclick="resetEmployeeFilters()">清除篩選</button>
         </div>
 
         <div id="employeeEditorPanel" class="employee-editor-panel" style="display:none;"></div>
@@ -1481,12 +1506,12 @@ content="width=device-width, initial-scale=1.0">
     
 <script src="js/modules/operation.js?v=72c"></script>
 <script src="js/modules/dashboard.js?v=72c"></script>
-<script src="js/modules/roleManager.js?v=73e2"></script>
-<script src="js/auth.js?v=73f1"></script>
-<script src="js/modules/employeeManager.js?v=73e2"></script>
+<script src="js/modules/roleManager.js?v=73f2"></script>
+<script src="js/auth.js?v=73f2"></script>
+<script src="js/modules/employeeManager.js?v=73f2"></script>
 <script src="js/script.js?v=73e2"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3E Part 1</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3F Sprint 2</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
