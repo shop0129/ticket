@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>入口候位看板</title>
-<link rel="stylesheet" href="css/display.css?v=71r">
+<link rel="stylesheet" href="css/display.css?v=72">
 </head>
 <body data-display-mode="lobby">
 
@@ -49,23 +49,20 @@
       <span id="displayRemaining">剩餘 40 人</span>
     </div>
   </div>
-  <div class="display-grid">
+  <div class="display-grid display-grid-single">
     <section class="display-panel">
-      <div class="display-panel-title">遊玩中／即將離場</div>
-      <div id="displayPrimaryList" class="display-list"></div>
-    </section>
-    <section class="display-panel">
-      <div class="display-panel-title">等待入場</div>
+      <div class="display-panel-title">等待入場／候位叫號</div>
       <div id="displayWaitingList" class="display-list"></div>
     </section>
   </div>
+  <div id="displayPrimaryList" style="display:none;"></div>
   <div class="display-footer">即時更新・<span id="displayClock"></span></div>
 </div>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="js/cloud/firebase-config.js?v=71r"></script>
-<script src="js/cloud/v71-migration.js?v=71r"></script>
-<script src="js/display.js?v=71r"></script>
+<script src="js/cloud/firebase-config.js?v=72"></script>
+<script src="js/cloud/v71-migration.js?v=72"></script>
+<script src="js/display.js?v=72"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3C
+// 小怪獸售票機 V7.2
 // Lobby / Play 電視即時看板
 // =========================================
 (function(){
@@ -219,11 +219,23 @@
     }
 
     function render(){
+
         updateCapacity();
-        renderPlay();
-        renderWaiting();
-        document.getElementById("displayClock").textContent =
-        new Date().toLocaleTimeString("zh-TW");
+
+        if(mode === "lobby"){
+
+            renderWaiting();
+
+        }else{
+
+            renderPlay();
+        }
+
+        document.getElementById(
+            "displayClock"
+        ).textContent =
+        new Date()
+        .toLocaleTimeString("zh-TW");
     }
 
     function start(){
@@ -261,6 +273,7 @@
             }
 
             if(
+                mode === "lobby" &&
                 callout &&
                 Number(callout.expiresAt || 0) >
                 Date.now()

@@ -160,3 +160,13 @@ html,body{
     font-weight:900;
     color:#90caf9;
 }
+
+.display-grid-single{
+    grid-template-columns:1fr;
+}
+.display-grid-single .display-panel{
+    width:100%;
+}
+.display-grid-single .display-row{
+    min-height:8.6vh;
+}

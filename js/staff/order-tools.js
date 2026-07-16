@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3D
+// 小怪獸售票機 V7.2
 // 訂單中心進階工具
 // =========================================
 (function(){
@@ -179,10 +179,14 @@
         });
     }
 
-    function eligibleToyCounts(order){
+    function totalToyCounts(order){
 
-        var green = 0;
-        var red = 0;
+        var result = {
+            green:0,
+            red:0,
+            total:0,
+            points:0
+        };
 
         (
             Array.isArray(order.items)
@@ -191,221 +195,473 @@
         ).forEach(function(item){
 
             if(item.toy === "green"){
-                green++;
+                result.green++;
+                result.total++;
+                result.points += 1;
             }
 
             if(item.toy === "red"){
-                red++;
+                result.red++;
+                result.total++;
+                result.points += 2;
             }
         });
 
-        var converted =
-        order.toyPointConversion || {};
+        return result;
+    }
+
+    function toyRewardStatus(order){
+
+        if(order.toyRewardStatus){
+            return order.toyRewardStatus;
+        }
+
+        if(
+            order.toyPointConversion &&
+            Number(
+                order.toyPointConversion.points ||
+                0
+            ) > 0
+        ){
+            return "converted";
+        }
+
+        if(order.toyClaimedAt){
+            return "claimed";
+        }
+
+        return "none";
+    }
+
+    function toyRewardStatusText(order){
+
+        var status =
+        toyRewardStatus(order);
+
+        if(status === "claimed"){
+            return "已領取玩具";
+        }
+
+        if(status === "converted"){
+            return "已轉玩具點數";
+        }
+
+        if(status === "pending"){
+            return "等待領取";
+        }
+
+        return "尚未處理";
+    }
+
+    function eligibleToyCounts(order){
+
+        var status =
+        toyRewardStatus(order);
+
+        if(
+            status === "claimed" ||
+            status === "converted"
+        ){
+            return {
+                green:0,
+                red:0
+            };
+        }
+
+        var counts =
+        totalToyCounts(order);
 
         return {
-            green:
-            Math.max(
-                0,
-                green -
-                Number(
-                    converted.greenCount || 0
-                )
-            ),
-            red:
-            Math.max(
-                0,
-                red -
-                Number(
-                    converted.redCount || 0
-                )
-            )
+            green:counts.green,
+            red:counts.red
         };
     }
 
     function convertToyPoints(){
 
-        if(
-            !selectedOrder.memberId
-        ){
+        if(!selectedOrder.memberId){
+
             alert(
-                "請先補綁會員，才能累積玩具點數"
+                "請先補綁會員，才能轉成玩具點數"
             );
             return;
         }
 
-        var eligible =
-        eligibleToyCounts(selectedOrder);
+        var status =
+        toyRewardStatus(selectedOrder);
 
-        if(
-            eligible.green <= 0 &&
-            eligible.red <= 0
-        ){
+        if(status === "claimed"){
+
             alert(
-                "此訂單沒有可轉換的玩具，或已全部轉點"
+                "此訂單的玩具已經領取，不能再轉成玩具點數"
             );
             return;
         }
 
-        var greenText =
-        prompt(
-            "可轉綠標：" +
-            eligible.green +
-            " 個\n每個 1 點\n\n請輸入要轉換的綠標數量",
-            "0"
-        );
+        if(status === "converted"){
 
-        if(greenText === null){
+            alert(
+                "此訂單已經轉成玩具點數"
+            );
             return;
         }
 
-        var redText =
-        prompt(
-            "可轉紅標：" +
-            eligible.red +
-            " 個\n每個 2 點\n\n請輸入要轉換的紅標數量",
-            "0"
-        );
+        var counts =
+        totalToyCounts(selectedOrder);
 
-        if(redText === null){
+        if(counts.total <= 0){
+
+            alert(
+                "此訂單沒有可處理的玩具"
+            );
             return;
         }
 
-        var green =
-        Math.max(
-            0,
-            Math.min(
-                eligible.green,
-                Number(greenText || 0)
+        if(
+            !confirm(
+                "確定放棄本訂單全部玩具，轉成玩具點數？\n\n" +
+                "綠標 " + counts.green +
+                " 個＝" + counts.green + " 點\n" +
+                "紅標 " + counts.red +
+                " 個＝" + (counts.red*2) + " 點\n\n" +
+                "合計 " + counts.points +
+                " 點\n\n轉換後不能再領取玩具。"
             )
-        );
-
-        var red =
-        Math.max(
-            0,
-            Math.min(
-                eligible.red,
-                Number(redText || 0)
-            )
-        );
-
-        var points =
-        green + red * 2;
-
-        if(points <= 0){
-            alert("未選擇轉換數量");
+        ){
             return;
         }
 
-        var memberId =
-        selectedOrder.memberId;
-
-        var memberRef =
+        var orderTransactionRef =
         firebase.database()
-        .ref(ROOT + "/members/" + memberId);
+        .ref(ROOT + "/orders/" + selectedOrderId);
 
-        memberRef.transaction(
-            function(member){
+        var reserved = false;
 
-                if(!member){
+        orderTransactionRef.transaction(
+            function(order){
+
+                if(!order){
                     return;
                 }
 
-                var current =
-                Number(member.toyPoints || 0);
+                var currentStatus =
+                toyRewardStatus(order);
 
-                var balance =
-                current + points;
+                if(
+                    currentStatus === "claimed" ||
+                    currentStatus === "converted"
+                ){
+                    return;
+                }
 
-                var history =
-                Array.isArray(
-                    member.toyPointHistory
-                )
-                ? member.toyPointHistory
-                : [];
+                order.toyRewardStatus =
+                "converted";
 
-                history.unshift({
-                    id:"toy_" + Date.now(),
-                    date:
-                    new Date()
-                    .toLocaleString("zh-TW"),
-                    amount:points,
-                    reason:"訂單玩具轉點",
-                    note:
-                    "綠標 " + green +
-                    "、紅標 " + red,
-                    orderNo:
-                    selectedOrder.orderNo || "",
-                    operator:
-                    operatorName(),
-                    balance:balance
-                });
+                order.toyPointConversion = {
+                    greenCount:counts.green,
+                    redCount:counts.red,
+                    points:counts.points,
+                    convertedAt:Date.now(),
+                    convertedBy:operatorName()
+                };
 
-                member.toyPoints = balance;
-                member.toyPointHistory =
-                history.slice(0,100);
+                order.toyConvertedPoints =
+                counts.points;
 
-                member.updatedAt =
+                order.toyConvertedAt =
                 Date.now();
 
-                member.updatedBy =
+                order.toyConvertedBy =
                 operatorName();
 
-                return member;
+                order.updatedAt =
+                Date.now();
+
+                reserved = true;
+
+                return order;
             },
             function(error,committed){
 
-                if(error || !committed){
-                    alert("玩具點數更新失敗");
+                if(error || !committed || !reserved){
+
+                    alert(
+                        "玩具已被其他裝置處理，請重新整理"
+                    );
                     return;
                 }
 
-                var old =
-                selectedOrder
-                .toyPointConversion || {};
+                var memberRef =
+                firebase.database()
+                .ref(
+                    ROOT +
+                    "/members/" +
+                    selectedOrder.memberId
+                );
 
-                orderRef()
-                .update({
-                    toyPointConversion:{
-                        greenCount:
+                memberRef.transaction(
+                    function(member){
+
+                        if(!member){
+                            return;
+                        }
+
+                        var current =
                         Number(
-                            old.greenCount || 0
-                        ) + green,
-                        redCount:
-                        Number(
-                            old.redCount || 0
-                        ) + red,
-                        points:
-                        Number(
-                            old.points || 0
-                        ) + points,
-                        convertedAt:
-                        Date.now(),
-                        convertedBy:
-                        operatorName()
+                            member.toyPoints || 0
+                        );
+
+                        var balance =
+                        current + counts.points;
+
+                        var history =
+                        Array.isArray(
+                            member.toyPointHistory
+                        )
+                        ? member.toyPointHistory
+                        : [];
+
+                        history.unshift({
+                            id:
+                            "toy_" + Date.now(),
+                            date:
+                            new Date()
+                            .toLocaleString("zh-TW"),
+                            amount:
+                            counts.points,
+                            reason:
+                            "訂單玩具轉點",
+                            note:
+                            "綠標 " +
+                            counts.green +
+                            "、紅標 " +
+                            counts.red,
+                            orderNo:
+                            selectedOrder.orderNo ||
+                            "",
+                            operator:
+                            operatorName(),
+                            balance:balance
+                        });
+
+                        member.toyPoints =
+                        balance;
+
+                        member.toyPointHistory =
+                        history.slice(0,100);
+
+                        member.updatedAt =
+                        Date.now();
+
+                        member.updatedBy =
+                        operatorName();
+
+                        return member;
                     },
-                    updatedAt:Date.now()
-                })
-                .then(function(){
+                    function(memberError,memberCommitted){
 
-                    logAction(
-                        "toy_conversion",
-                        "玩具轉點 +" +
-                        points +
-                        "（綠 " +
-                        green +
-                        "、紅 " +
-                        red +
-                        "）"
-                    );
+                        if(
+                            memberError ||
+                            !memberCommitted
+                        ){
 
-                    alert(
-                        "已增加 " +
-                        points +
-                        " 玩具點數"
-                    );
-                });
+                            orderTransactionRef
+                            .update({
+                                toyRewardStatus:"none",
+                                toyPointConversion:null,
+                                toyConvertedPoints:null,
+                                toyConvertedAt:null,
+                                toyConvertedBy:null,
+                                updatedAt:Date.now()
+                            });
+
+                            alert(
+                                "會員玩具點數更新失敗，訂單已恢復為未處理"
+                            );
+                            return;
+                        }
+
+                        logAction(
+                            "toy_conversion",
+                            "全部玩具轉點 +" +
+                            counts.points +
+                            "（綠 " +
+                            counts.green +
+                            "、紅 " +
+                            counts.red +
+                            "）"
+                        );
+
+                        alert(
+                            "已轉入 " +
+                            counts.points +
+                            " 點玩具點數"
+                        );
+                    }
+                );
             }
         );
+    }
+
+    function claimToy(){
+
+        var status =
+        toyRewardStatus(selectedOrder);
+
+        if(status === "converted"){
+
+            alert(
+                "此訂單已轉成玩具點數，不能再領取玩具"
+            );
+            return;
+        }
+
+        if(status === "claimed"){
+
+            alert(
+                "此訂單玩具已經領取"
+            );
+            return;
+        }
+
+        var counts =
+        totalToyCounts(selectedOrder);
+
+        if(counts.total <= 0){
+
+            alert(
+                "此訂單沒有玩具可領取"
+            );
+            return;
+        }
+
+        if(
+            !confirm(
+                "確認已交付本訂單全部玩具？\n\n" +
+                "綠標 " + counts.green +
+                " 個\n紅標 " + counts.red +
+                " 個\n\n領取後不能再轉成玩具點數。"
+            )
+        ){
+            return;
+        }
+
+        var committedClaim = false;
+
+        orderRef()
+        .transaction(
+            function(order){
+
+                if(!order){
+                    return;
+                }
+
+                var currentStatus =
+                toyRewardStatus(order);
+
+                if(
+                    currentStatus === "claimed" ||
+                    currentStatus === "converted"
+                ){
+                    return;
+                }
+
+                order.toyRewardStatus =
+                "claimed";
+
+                order.toyClaimedAt =
+                Date.now();
+
+                order.toyClaimedBy =
+                operatorName();
+
+                order.toyClaimedGreen =
+                counts.green;
+
+                order.toyClaimedRed =
+                counts.red;
+
+                order.updatedAt =
+                Date.now();
+
+                committedClaim = true;
+
+                return order;
+            },
+            function(error,committed){
+
+                if(
+                    error ||
+                    !committed ||
+                    !committedClaim
+                ){
+                    alert(
+                        "玩具已被其他裝置處理，請重新整理"
+                    );
+                    return;
+                }
+
+                logAction(
+                    "toy_claimed",
+                    "已領取玩具（綠 " +
+                    counts.green +
+                    "、紅 " +
+                    counts.red +
+                    "）"
+                );
+
+                alert(
+                    "玩具領取已完成"
+                );
+            }
+        );
+    }
+
+    function markToyPending(){
+
+        var status =
+        toyRewardStatus(selectedOrder);
+
+        if(
+            status === "claimed" ||
+            status === "converted"
+        ){
+
+            alert(
+                "此訂單的玩具已完成處理，不能改為等待領取"
+            );
+            return;
+        }
+
+        var reason =
+        prompt(
+            "請輸入等待領取原因",
+            "玩具暫缺，等待補貨"
+        );
+
+        if(reason === null){
+            return;
+        }
+
+        orderRef()
+        .update({
+            toyRewardStatus:"pending",
+            toyPendingReason:
+            reason || "等待領取",
+            toyPendingAt:
+            Date.now(),
+            toyPendingBy:
+            operatorName(),
+            updatedAt:Date.now()
+        })
+        .then(function(){
+
+            logAction(
+                "toy_pending",
+                "玩具等待領取：" +
+                (reason || "未填原因")
+            );
+        });
     }
 
     function callQueue(){
@@ -876,6 +1132,12 @@
         var eligible =
         eligibleToyCounts(order);
 
+        var rewardStatus =
+        toyRewardStatus(order);
+
+        var rewardCounts =
+        totalToyCounts(order);
+
         var tools =
         document.createElement("div");
 
@@ -891,6 +1153,49 @@
     ⚡ 訂單進階操作
 </div>
 
+<div class="staff-toy-reward-status reward-${rewardStatus}">
+
+    <span>玩具處理狀態</span>
+
+    <strong>
+        ${toyRewardStatusText(order)}
+    </strong>
+
+    ${
+        rewardStatus === "claimed"
+        ? "<small>領取時間：" +
+          esc(
+              order.toyClaimedAt
+              ? new Date(order.toyClaimedAt)
+                .toLocaleString("zh-TW")
+              : ""
+          ) +
+          "・" +
+          esc(order.toyClaimedBy || "") +
+          "</small>"
+        : ""
+    }
+
+    ${
+        rewardStatus === "converted"
+        ? "<small>已轉 " +
+          Number(order.toyConvertedPoints || 0) +
+          " 點・" +
+          esc(order.toyConvertedBy || "") +
+          "</small>"
+        : ""
+    }
+
+    ${
+        rewardStatus === "pending"
+        ? "<small>" +
+          esc(order.toyPendingReason || "等待領取") +
+          "</small>"
+        : ""
+    }
+
+</div>
+
 <div class="staff-order-tool-grid">
 
     <button id="orderToolCall" class="staff-primary-button">
@@ -901,9 +1206,42 @@
         👤 補綁會員
     </button>
 
-    <button id="orderToolToyPoint" class="staff-success-button">
-        🎁 玩具轉點
-        <small>綠 ${eligible.green}／紅 ${eligible.red}</small>
+    <button
+        id="orderToolToyClaim"
+        class="staff-primary-button"
+        ${
+            rewardStatus === "converted" ||
+            rewardStatus === "claimed"
+            ? "disabled"
+            : ""
+        }>
+        🧸 領取玩具
+        <small>綠 ${rewardCounts.green}／紅 ${rewardCounts.red}</small>
+    </button>
+
+    <button
+        id="orderToolToyPoint"
+        class="staff-success-button"
+        ${
+            rewardStatus === "converted" ||
+            rewardStatus === "claimed"
+            ? "disabled"
+            : ""
+        }>
+        🎁 轉玩具點數
+        <small>共 ${rewardCounts.points} 點</small>
+    </button>
+
+    <button
+        id="orderToolToyPending"
+        class="staff-secondary-button"
+        ${
+            rewardStatus === "converted" ||
+            rewardStatus === "claimed"
+            ? "disabled"
+            : ""
+        }>
+        📦 等待領取
     </button>
 
     <button id="orderToolReprint" class="staff-secondary-button">
@@ -973,10 +1311,22 @@
             bindMember
         );
 
+        byId("orderToolToyClaim")
+        .addEventListener(
+            "click",
+            claimToy
+        );
+
         byId("orderToolToyPoint")
         .addEventListener(
             "click",
             convertToyPoints
+        );
+
+        byId("orderToolToyPending")
+        .addEventListener(
+            "click",
+            markToyPending
         );
 
         byId("orderToolReprint")

@@ -1152,3 +1152,42 @@ input{
         grid-template-columns:1fr;
     }
 }
+
+
+/* V7.2 玩具領取／轉玩具點數 */
+.staff-toy-reward-status{
+    margin:14px 0;
+    padding:16px;
+    border:2px solid #e1e7eb;
+    border-radius:16px;
+    background:#f8fafb;
+}
+.staff-toy-reward-status span,
+.staff-toy-reward-status small{
+    display:block;
+    color:#71808b;
+    font-size:15px;
+    font-weight:800;
+}
+.staff-toy-reward-status strong{
+    display:block;
+    margin:6px 0;
+    font-size:24px;
+}
+.staff-toy-reward-status.reward-claimed{
+    border-color:#acd9b5;
+    background:#f1fbf3;
+}
+.staff-toy-reward-status.reward-converted{
+    border-color:#cbb9e7;
+    background:#f7f2fc;
+}
+.staff-toy-reward-status.reward-pending{
+    border-color:#f0d389;
+    background:#fff9e9;
+}
+.staff-order-tool-grid button:disabled{
+    opacity:.42;
+    cursor:not-allowed;
+    filter:grayscale(.5);
+}
