@@ -1,8 +1,8 @@
-# 小怪獸售票機 V7.3 Phase 3F Part 1
+# 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
 
-Simple Login 基底加上 PWA 安裝、手機／平板全螢幕、離線啟動與安全更新提示。
+修正購票後 Staff 與店長後台訂單未即時出現，同時保留 PWA 與 Simple Login。
 
 - 店長：`manager / 1234`
 - 員工：`staff / 0000`
 
-不需要 Firebase Authentication 或 Cloud Functions。詳細操作請看 `PWA_DEPLOY_GUIDE_V7.3_PHASE3F_PART1.md`。
+不需要 Firebase Authentication 或 Cloud Functions。更新後請在已安裝的 PWA 點一次「套用新版」。

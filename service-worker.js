@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "73f1-20260716-1";
+var CACHE_NAME = CACHE_PREFIX + "73f1-fix1-20260717-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -161,6 +161,25 @@ function networkFirstNavigation(request) {
     });
 }
 
+function networkFirstCodeAsset(request) {
+    return caches.open(CACHE_NAME).then(function (cache) {
+        return fetchWithTimeout(request, 3500).then(function (response) {
+            if (response && response.ok && response.type === "basic") {
+                cache.put(request, response.clone()).catch(function () {});
+            }
+            return response;
+        }).catch(function () {
+            return cache.match(request, { ignoreSearch: true }).then(function (cached) {
+                return cached || Response.error();
+            });
+        });
+    });
+}
+
+function isCodeAsset(url) {
+    return /\.(?:js|css|html|webmanifest)$/i.test(url.pathname);
+}
+
 function staleWhileRevalidate(event) {
     var request = event.request;
     var cachePromise = caches.open(CACHE_NAME);
@@ -203,6 +222,12 @@ self.addEventListener("fetch", function (event) {
 
     if (request.mode === "navigate") {
         event.respondWith(networkFirstNavigation(request));
+        return;
+    }
+
+    // 程式與樣式連線時優先抓最新版，避免部署後仍執行舊同步邏輯。
+    if (isCodeAsset(url)) {
+        event.respondWith(networkFirstCodeAsset(request));
         return;
     }
 

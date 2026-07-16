@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 2B
+// 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
 // 訂單／售票紀錄雲端同步
 // Firebase Realtime Database + localStorage 離線備援
 // Android WebView 61 相容版
@@ -18,6 +18,7 @@
     var pendingWrite = false;
     var writeTimer = null;
     var lastOrderMap = {};
+    var lastCloudUpdateAt = 0;
 
     window.MonsterOrderCloud =
         window.MonsterOrderCloud || {};
@@ -218,6 +219,56 @@
         return result;
     }
 
+    // 使用多路徑 update，只更新本機實際擁有的欄位。
+    // 避免整個 orders 節點 set() 覆蓋其他裝置剛建立的訂單，
+    // 也避免把生命週期模組補上的 queueNumber／playStatus 清掉。
+    function mapToFieldUpdates(map){
+
+        var updates = {};
+
+        Object.keys(map || {})
+        .forEach(function(id){
+
+            var order = map[id];
+
+            if(!order){
+                return;
+            }
+
+            Object.keys(order)
+            .forEach(function(field){
+
+                if(order[field] !== undefined){
+                    updates[
+                        safeKey(id) + "/" + field
+                    ] = cloneValue(order[field]);
+                }
+            });
+        });
+
+        return updates;
+    }
+
+    function notifyOrderUpdate(source,map){
+
+        var detail = {
+            source:source || "cloud",
+            count:mapToArray(map || {}).length,
+            updatedAt:Date.now()
+        };
+
+        try{
+            window.dispatchEvent(
+                new CustomEvent(
+                    "monster:orders-updated",
+                    {detail:detail}
+                )
+            );
+        }catch(error){
+            // 舊版 WebView 不支援 CustomEvent 建構式時略過通知。
+        }
+    }
+
     function refreshOrderScreens(){
 
         if(typeof renderSalesHistory === "function"){
@@ -269,10 +320,12 @@
         );
 
         lastOrderMap = cloneValue(map);
+        lastCloudUpdateAt = Date.now();
 
         applyingCloud = false;
 
         refreshOrderScreens();
+        notifyOrderUpdate("cloud",map);
     }
 
     function setSyncStatus(title,detail,state){
@@ -299,11 +352,19 @@
 
         pendingWrite = false;
 
+        var updates =
+        mapToFieldUpdates(map);
+
+        if(Object.keys(updates).length === 0){
+            return;
+        }
+
         orderRef
-        .set(map)
+        .update(updates)
         .then(function(){
 
-            lastOrderMap = cloneValue(map);
+            lastCloudUpdateAt = Date.now();
+            notifyOrderUpdate("local-upload",map);
 
             setSyncStatus(
                 "訂單已同步",
@@ -330,7 +391,7 @@
         });
     }
 
-    function scheduleUpload(){
+    function scheduleUpload(delay){
 
         if(writeTimer){
             clearTimeout(writeTimer);
@@ -356,7 +417,12 @@
 
             uploadMap(map);
 
-        },300);
+        },Math.max(
+            0,
+            delay === undefined
+            ? 80
+            : Number(delay)
+        ));
     }
 
     function handleCloudValue(snapshot){
@@ -470,12 +536,13 @@
             return;
         }
 
-        scheduleUpload();
+        // 新訂單優先傳送，讓其他裝置的 Staff／店長後台立即收到。
+        scheduleUpload(40);
     };
 
     window.MonsterOrderCloud.forceSync =
     function(){
-        scheduleUpload();
+        scheduleUpload(0);
     };
 
     window.MonsterOrderCloud.getInfo =
@@ -484,6 +551,7 @@
         return {
             initialized:initialized,
             pendingWrite:pendingWrite,
+            lastCloudUpdateAt:lastCloudUpdateAt,
             localCount:
             Array.isArray(salesHistory)
             ? salesHistory.length
@@ -521,7 +589,7 @@
         function(){
 
             if(pendingWrite){
-                scheduleUpload();
+                scheduleUpload(0);
             }
         }
     );

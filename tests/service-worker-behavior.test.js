@@ -39,6 +39,9 @@ var cache = {
         if (String(url).indexOf("icon-192.png") !== -1) {
             return Promise.resolve(response("cached-icon"));
         }
+        if (String(url).indexOf("cloud-order-sync.js") !== -1) {
+            return Promise.resolve(response("cached-code"));
+        }
         return Promise.resolve(null);
     }
 };
@@ -49,7 +52,7 @@ global.Request = function (input) {
 global.Response = { error: function () { return response("error"); } };
 global.caches = {
     open: function () { return Promise.resolve(cache); },
-    keys: function () { return Promise.resolve(["monster-ticket-pwa-old", "monster-ticket-pwa-73f1-20260716-1", "unrelated"]); },
+    keys: function () { return Promise.resolve(["monster-ticket-pwa-old", "monster-ticket-pwa-73f1-20260716-1", "monster-ticket-pwa-73f1-fix1-20260717-1", "unrelated"]); },
     delete: function (key) { deleted.push(key); return Promise.resolve(true); }
 };
 global.self = {
@@ -80,6 +83,7 @@ vm.runInThisContext(source, { filename: "service-worker.js" });
     listeners.activate[0]({ waitUntil: function (promise) { activatePromise = promise; } });
     await activatePromise;
     ok(deleted.indexOf("monster-ticket-pwa-old") !== -1, "activate 應移除舊 PWA cache");
+    ok(deleted.indexOf("monster-ticket-pwa-73f1-fix1-20260717-1") === -1, "activate 不可刪除 Fix1 cache");
     ok(deleted.indexOf("unrelated") === -1, "activate 不可刪除其他 cache");
     ok(claimed, "activate 應 claim clients");
 
@@ -90,7 +94,26 @@ vm.runInThisContext(source, { filename: "service-worker.js" });
     });
     ok(!externalResponded, "外部 Firebase 請求不可被攔截");
 
+    global.fetch = function () { return Promise.resolve(response("network-code")); };
+    var onlineCodePromise;
+    listeners.fetch[0]({
+        request: { method: "GET", url: "http://local.test/js/cloud/cloud-order-sync.js", mode: "same-origin" },
+        respondWith: function (promise) { onlineCodePromise = promise; },
+        waitUntil: function () {}
+    });
+    var onlineCodeResponse = await onlineCodePromise;
+    ok(onlineCodeResponse && onlineCodeResponse.name === "network-code", "連線時程式檔應優先使用網路新版");
+
     global.fetch = function () { return Promise.reject(new Error("offline")); };
+    var offlineCodePromise;
+    listeners.fetch[0]({
+        request: { method: "GET", url: "http://local.test/js/cloud/cloud-order-sync.js", mode: "same-origin" },
+        respondWith: function (promise) { offlineCodePromise = promise; },
+        waitUntil: function () {}
+    });
+    var offlineCodeResponse = await offlineCodePromise;
+    ok(offlineCodeResponse && offlineCodeResponse.name === "cached-code", "離線時程式檔應回退至 cache");
+
     var navigationPromise;
     listeners.fetch[0]({
         request: { method: "GET", url: "http://local.test/unknown", mode: "navigate" },

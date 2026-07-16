@@ -6,7 +6,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "7.3-Phase3F-Part1";
+    var VERSION = "7.3-Phase3F-Part1-Fix1";
     var deferredInstallPrompt = null;
     var registration = null;
     var refreshing = false;

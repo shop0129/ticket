@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 2C
+// 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
 // Dashboard 雲端即時統計
 // Firebase Realtime Database
 // Android WebView 61 相容版
@@ -400,7 +400,7 @@
         writeTimer =
         setTimeout(
             writeDashboard,
-            300
+            80
         );
     }
 

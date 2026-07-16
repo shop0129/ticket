@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3C
+// 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
 // Staff 訂單中心＋入離場＋容量候位
 // =========================================
 (function(){
@@ -23,6 +23,12 @@
 
     var selectedOrderId = "";
     var currentRole = "";
+    var started = false;
+    var bound = false;
+    var authWatchStarted = false;
+    var ordersRef = null;
+    var settingsRef = null;
+    var lastOrderUpdateAt = 0;
 
     function byId(id){
         return document.getElementById(id);
@@ -116,6 +122,60 @@
 
     function operatorName(){
         return currentActor().name;
+    }
+
+    function updateLiveStatus(text,isError){
+
+        var status =
+        byId("staffOrderLiveStatus");
+
+        if(!status){
+            return;
+        }
+
+        status.className =
+        "staff-order-live-status " +
+        (isError ? "is-error" : "is-online");
+
+        status.textContent = text || "";
+    }
+
+    function applyOrdersSnapshot(snapshot){
+
+        ordersMap =
+        snapshot.val() || {};
+
+        lastOrderUpdateAt = Date.now();
+
+        renderOrderList();
+        updateCapacityCards();
+
+        if(selectedOrderId){
+            renderOrderDetail();
+        }
+
+        updateLiveStatus(
+            "● 即時同步 " +
+            new Date(lastOrderUpdateAt)
+            .toLocaleTimeString("zh-TW") +
+            "｜" +
+            Object.keys(ordersMap).length +
+            " 筆訂單",
+            false
+        );
+    }
+
+    function handleOrderReadError(error){
+
+        console.error(
+            "[MonsterOrderCenter] orders read error:",
+            error
+        );
+
+        updateLiveStatus(
+            "● 訂單同步失敗，請確認網路後按重新整理",
+            true
+        );
     }
 
     function statusLabel(order){
@@ -1213,6 +1273,12 @@
 
     function bind(){
 
+        if(bound){
+            return;
+        }
+
+        bound = true;
+
         byId("staffOrderSearchInput")
         .addEventListener(
             "input",
@@ -1228,7 +1294,7 @@
         byId("staffOrderRefreshButton")
         .addEventListener(
             "click",
-            renderOrderList
+            refreshOrdersNow
         );
 
         byId("staffOrderDetailClose")
@@ -1244,11 +1310,50 @@
         );
     }
 
+    function refreshOrdersNow(){
+
+        var button =
+        byId("staffOrderRefreshButton");
+
+        if(!ordersRef){
+            updateLiveStatus(
+                "● Firebase 尚未完成登入，正在重試",
+                true
+            );
+            waitFirebase();
+            return;
+        }
+
+        if(button){
+            button.disabled = true;
+            button.textContent = "同步中…";
+        }
+
+        ordersRef
+        .once("value")
+        .then(function(snapshot){
+            applyOrdersSnapshot(snapshot);
+        })
+        .catch(handleOrderReadError)
+        .then(function(){
+            if(button){
+                button.disabled = false;
+                button.textContent = "重新整理";
+            }
+        });
+    }
+
     function start(){
+
+        if(started){
+            return;
+        }
+
+        started = true;
 
         currentRole = getRole();
 
-        var settingsRef =
+        settingsRef =
         firebase.database()
         .ref(ROOT + "/venue/settings");
 
@@ -1285,22 +1390,15 @@
             }
         );
 
+        ordersRef =
         firebase.database()
-        .ref(ROOT + "/orders")
+        .ref(ROOT + "/orders");
+
+        ordersRef
         .on(
             "value",
-            function(snapshot){
-
-                ordersMap =
-                snapshot.val() || {};
-
-                renderOrderList();
-                updateCapacityCards();
-
-                if(selectedOrderId){
-                    renderOrderDetail();
-                }
-            }
+            applyOrdersSnapshot,
+            handleOrderReadError
         );
 
         bind();
@@ -1313,7 +1411,28 @@
             firebase.apps &&
             firebase.apps.length
         ){
-            start();
+
+            if(
+                firebase.auth &&
+                firebase.auth().currentUser
+            ){
+                start();
+                return;
+            }
+
+            if(
+                firebase.auth &&
+                !authWatchStarted
+            ){
+                authWatchStarted = true;
+                firebase.auth()
+                .onAuthStateChanged(function(user){
+                    if(user){
+                        start();
+                    }
+                });
+            }
+
             return;
         }
 
@@ -1332,6 +1451,16 @@
         },
         getOrders:function(){
             return ordersMap;
+        },
+        refresh:refreshOrdersNow,
+        getSyncInfo:function(){
+            return {
+                started:started,
+                lastOrderUpdateAt:
+                lastOrderUpdateAt,
+                orderCount:
+                Object.keys(ordersMap).length
+            };
         },
         getVenueState:function(){
             return {
