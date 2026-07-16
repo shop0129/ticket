@@ -274,15 +274,22 @@ content="width=device-width, initial-scale=1.0">
 
     <div class="admin-login">
 
-        <h1>管理者登入</h1>
+        <h1>店長／員工登入</h1>
+
+        <input
+            type="text"
+            id="adminLoginAccount"
+            autocomplete="username"
+            placeholder="請輸入帳號（例如 manager）">
 
         <input
             type="password"
             id="adminLoginPassword"
-            placeholder="請輸入管理密碼">
+            autocomplete="current-password"
+            placeholder="請輸入密碼">
 
         <div class="login-role-hint">
-            店長與員工共用此登入畫面，系統會依密碼自動判斷權限。
+            店長與員工使用各自帳號登入，系統會依帳號角色套用權限。
         </div>
 
         <button class="big-btn" onclick="loginAdmin()">
@@ -1443,10 +1450,10 @@ content="width=device-width, initial-scale=1.0">
     
 <script src="js/modules/operation.js?v=72c"></script>
 <script src="js/modules/dashboard.js?v=72c"></script>
-<script src="js/modules/roleManager.js?v=72c"></script>
-<script src="js/script.js?v=72c"></script>
+<script src="js/modules/roleManager.js?v=73e1"></script>
+<script src="js/script.js?v=73e1"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7 Phase 2C</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3E Part 1</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>

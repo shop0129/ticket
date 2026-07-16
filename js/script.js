@@ -35,16 +35,31 @@ function rollbackStats(stats, ticket, item) {
 // 管理員／員工登入
 // =========================================
 function loginAdmin() {
-    var input = document.getElementById("adminLoginPassword");
-    if (!input)
-        return;
-    var password = input.value.trim();
-    input.value = "";
-    if (!loginByRole(password)) {
-        alert("❌ 密碼錯誤");
+    var accountInput = document.getElementById("adminLoginAccount");
+    var passwordInput = document.getElementById("adminLoginPassword");
+    var account;
+    var password;
+    if (!passwordInput) {
         return;
     }
+    account = accountInput ? accountInput.value.trim() : "";
+    password = passwordInput.value.trim();
+    if (!account) {
+        alert("❌ 請輸入員工帳號");
+        if (accountInput) {
+            accountInput.focus();
+        }
+        return;
+    }
+    if (!loginByRole(account, password)) {
+        alert("❌ 帳號、密碼錯誤或帳號已停用");
+        passwordInput.value = "";
+        passwordInput.focus();
+        return;
+    }
+    passwordInput.value = "";
     showPage("adminHomePage");
+    applyRolePermissions();
 }
 // =========================================
 // 統計分頁
