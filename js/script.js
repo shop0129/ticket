@@ -60,6 +60,10 @@ function loginAdmin() {
     passwordInput.value = "";
     showPage("adminHomePage");
     applyRolePermissions();
+    if (window.RoleAuth) {
+        window.RoleAuth.sync();
+        window.RoleAuth.touchSession();
+    }
 }
 // =========================================
 // 統計分頁

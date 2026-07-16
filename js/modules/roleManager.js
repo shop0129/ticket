@@ -207,7 +207,7 @@ var currentUser = null;
     }
 
     window.MonsterRole = {
-        version: "7.3-Phase3E-Part2",
+        version: "7.3F-Sprint1",
         getEmployees: function () {
             return clone(ensureDefaultAccounts());
         },
@@ -251,6 +251,9 @@ var currentUser = null;
             playClick();
         }
         window.MonsterRole.logout();
+        if (window.RoleAuth && window.RoleAuth.sync) {
+            window.RoleAuth.sync();
+        }
         if (window.showPage) {
             showPage("homePage");
         }

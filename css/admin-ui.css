@@ -754,3 +754,11 @@
 .employee-editor-panel{margin:0 0 22px}.employee-editor-card{padding:26px;background:#fff;border-radius:22px;box-shadow:0 7px 22px rgba(25,44,80,.12)}.employee-editor-title{margin-bottom:20px;font-size:30px;font-weight:950}.employee-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.employee-form-grid.one-column{grid-template-columns:1fr}.employee-form-grid label{display:flex;flex-direction:column;gap:8px;font-size:21px;font-weight:900}.employee-form-grid .full-row{grid-column:1/-1}.employee-form-grid input,.employee-form-grid select{width:100%;min-height:58px;box-sizing:border-box;padding:10px 14px;border:2px solid #ccd5e3;border-radius:14px;background:#fff;font-size:23px}.employee-account-check{min-height:28px;margin-top:12px;font-size:20px;font-weight:900}.employee-account-check.valid{color:#137a42}.employee-account-check.invalid{color:#b3261e}.employee-editor-actions{display:flex;justify-content:flex-end;gap:12px;margin-top:22px}.employee-editor-actions button{min-width:150px;min-height:58px;border:0;border-radius:14px;background:#e7ebf2;font-size:23px;font-weight:900}.employee-editor-actions button.save{background:#1b75d0;color:#fff}
 @media(max-width:1000px){.employee-list{grid-template-columns:1fr}.employee-actions{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:650px){.employee-toolbar{align-items:stretch;flex-direction:column}.employee-form-grid{grid-template-columns:1fr}.employee-form-grid .full-row{grid-column:auto}.employee-actions{grid-template-columns:1fr}}
+
+/* V7.3F Sprint 1：Dashboard 登入身分資訊 */
+.dashboard-user-area{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.dashboard-login-meta{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px 14px;font-size:13px;color:#5b6472}
+.dashboard-login-meta strong{color:#202938}
+body.role-staff-active .admin-only-action,
+body.role-staff-active .admin-only{display:none!important}
+@media(max-width:720px){.dashboard-user-area{align-items:flex-start}.dashboard-login-meta{justify-content:flex-start}}

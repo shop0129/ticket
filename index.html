@@ -326,9 +326,13 @@ content="width=device-width, initial-scale=1.0">
 
             </div>
 
-            <div
-                id="currentRoleBadge"
-                class="role-badge">
+            <div class="dashboard-user-area">
+                <div id="currentRoleBadge" class="role-badge"></div>
+                <div class="dashboard-login-meta">
+                    <span>登入：<strong id="dashboardCurrentUser">尚未登入</strong></span>
+                    <span>角色：<strong id="dashboardCurrentRole">-</strong></span>
+                    <span>時間：<strong id="dashboardLoginTime">-</strong></span>
+                </div>
             </div>
 
         </div>
@@ -1478,6 +1482,7 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/operation.js?v=72c"></script>
 <script src="js/modules/dashboard.js?v=72c"></script>
 <script src="js/modules/roleManager.js?v=73e2"></script>
+<script src="js/auth.js?v=73f1"></script>
 <script src="js/modules/employeeManager.js?v=73e2"></script>
 <script src="js/script.js?v=73e2"></script>
 
@@ -1485,7 +1490,5 @@ content="width=device-width, initial-scale=1.0">
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
-<script src="js/auth.js"></script>
-<script>RoleAuth.init();</script>
 </body>
 </html>
