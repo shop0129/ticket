@@ -65,6 +65,17 @@ function renderTicketManager() {
         return;
     var html = renderAddTicketPanel();
     html += "\n\n<div class=\"image-library-card\">\n\n    <div class=\"image-library-title\">\n        \uD83D\uDDBC\uFE0F \u5DF2\u4E0A\u50B3\u5716\u7247\u5EAB\n    </div>\n\n    <div class=\"image-library-note\">\n        \u5716\u7247\u6703\u5132\u5B58\u5728\u76EE\u524D\u9019\u53F0\u552E\u7968\u6A5F\u7684\u700F\u89BD\u5668\u4E2D\uFF0C\u5099\u4EFD\u8CC7\u6599\u6642\u4E5F\u6703\u4E00\u8D77\u532F\u51FA\u3002\n    </div>\n\n    ".concat(renderImageLibraryPanel(), "\n\n</div>\n\n");
+    var seenNames = {};
+    for (var checkId in ticketData) {
+        var titleInput = document.getElementById("title-" + checkId);
+        var priceInput = document.getElementById("priceInput-" + checkId);
+        var checkTitle = titleInput ? titleInput.value.trim() : "";
+        if (!checkTitle) { alert("❌ 票券名稱不能空白"); if (titleInput) titleInput.focus(); return; }
+        var titleKey = checkTitle.toLowerCase();
+        if (seenNames[titleKey]) { alert("❌ 票券名稱重複：" + checkTitle); if (titleInput) titleInput.focus(); return; }
+        seenNames[titleKey] = true;
+        if (!priceInput || Number(priceInput.value) < 0) { alert("❌ 票券價格不能小於 0"); if (priceInput) priceInput.focus(); return; }
+    }
     for (var id in ticketData) {
         var ticket = ticketData[id];
         html += "\n\n<div\n    class=\"tm-card ticket-manager-card\"\n    data-ticket-manager-id=\"".concat(id, "\">\n\n    <div class=\"tm-card-header\">\n\n        <div class=\"tm-card-title\">\n            ").concat(ticket.title || id, "\n        </div>\n\n        <div class=\"ticket-manager-actions\">\n\n            <label class=\"tm-enable\">\n\n                <input\n                    type=\"checkbox\"\n                    id=\"enable-").concat(id, "\"\n                    ").concat(ticket.enable !== false ? "checked" : "", ">\n\n                \u555F\u7528\n\n            </label>\n\n            ").concat(ticket.custom
@@ -72,6 +83,9 @@ function renderTicketManager() {
             : "", "\n\n        </div>\n\n    </div>\n\n    <div class=\"tm-preview\">\n\n        <img\n            src=\"").concat(resolveTicketImageSrc(ticket.image || imageList[0]), "\"\n            class=\"tm-preview-img\"\n            id=\"preview-").concat(id, "\">\n\n        <div class=\"image-switch\">\n\n            <button\n                type=\"button\"\n                class=\"imageArrow\"\n                onclick=\"changeTicketImage('").concat(id, "',-1)\">\n                \u25C0\n            </button>\n\n            <div\n                class=\"tm-image-name\"\n                id=\"imageName-").concat(id, "\">\n                ").concat(getTicketImageLabel(ticket.image), "\n            </div>\n\n            <button\n                type=\"button\"\n                class=\"imageArrow\"\n                onclick=\"changeTicketImage('").concat(id, "',1)\">\n                \u25B6\n            </button>\n\n        </div>\n\n        <div class=\"ticket-image-upload-area\">\n\n            <select\n                onchange=\"selectUploadedTicketImage('").concat(id, "',this.value)\">\n\n                ").concat(renderUploadedImageOptions(ticket.image), "\n\n            </select>\n\n            <label class=\"ticket-upload-btn\">\n\n                \uD83D\uDCE4 \u4E0A\u50B3\u65B0\u5716\u7247\n\n                <input\n                    type=\"file\"\n                    accept=\"image/*\"\n                    onchange=\"uploadTicketImage('").concat(id, "',this)\"\n                    hidden>\n\n            </label>\n\n        </div>\n\n    </div>\n\n    <div class=\"ticket-manager-grid\">\n\n        <div class=\"tm-field ticket-title-field\">\n\n            <label>\u7968\u5238\u540D\u7A31</label>\n\n            <input\n                id=\"title-").concat(id, "\"\n                value=\"").concat(escapeTicketValue(ticket.title), "\">\n\n        </div>\n\n        <div class=\"tm-field\">\n\n            <label>\u5206\u985E</label>\n\n            <select id=\"category-").concat(id, "\">\n\n                <option\n                    value=\"general\"\n                    ").concat(ticket.category === "general" ? "selected" : "", ">\n                    \u4E00\u822C\u7968\n                </option>\n\n                <option\n                    value=\"special\"\n                    ").concat(ticket.category === "special" ? "selected" : "", ">\n                    \u9650\u5B9A\u7968\n                </option>\n\n                <option\n                    value=\"other\"\n                    ").concat(ticket.category === "other" ? "selected" : "", ">\n                    \u5176\u4ED6\u7968\u7A2E\n                </option>\n\n            </select>\n\n        </div>\n\n        <div class=\"tm-field\">\n\n            <label>\u50F9\u683C</label>\n\n            <input\n                id=\"priceInput-").concat(id, "\"\n                type=\"number\"\n                min=\"0\"\n                value=\"").concat(Number(ticket.price || 0), "\">\n\n        </div>\n\n        <div class=\"tm-field\">\n\n            <label>\u4EE3\u5E63</label>\n\n            <input\n                id=\"token-").concat(id, "\"\n                type=\"number\"\n                min=\"0\"\n                value=\"").concat(Number(ticket.token || 0), "\">\n\n        </div>\n\n        <div class=\"tm-field ticket-toy-field\">\n\n            <label>\u73A9\u5177</label>\n\n            <div class=\"toy-group\">\n\n                <button\n                    type=\"button\"\n                    class=\"toy-btn ").concat(ticket.toy === "none" ? "active" : "", "\"\n                    onclick=\"setToy(event,'").concat(id, "','none')\">\n                    \uD83D\uDEAB \u7121\n                </button>\n\n                <button\n                    type=\"button\"\n                    class=\"toy-btn ").concat(ticket.toy === "green" ? "active" : "", "\"\n                    onclick=\"setToy(event,'").concat(id, "','green')\">\n                    \uD83D\uDFE2 \u7DA0\u6A19\n                </button>\n\n                <button\n                    type=\"button\"\n                    class=\"toy-btn ").concat(ticket.toy === "red" ? "active" : "", "\"\n                    onclick=\"setToy(event,'").concat(id, "','red')\">\n                    \uD83D\uDD34 \u7D05\u6A19\n                </button>\n\n            </div>\n\n            <input\n                type=\"hidden\"\n                id=\"toy-").concat(id, "\"\n                value=\"").concat(ticket.toy || "none", "\">\n\n        </div>\n\n        <div class=\"tm-field ticket-description-field\">\n\n            <label>\u7968\u5238\u8AAA\u660E</label>\n\n            <textarea\n                id=\"description-").concat(id, "\"\n                placeholder=\"\u4F8B\u5982\uFF1A\u9650\u5E73\u65E5\u4F7F\u7528\u3001\u8D08\u9001\u4EE3\u5E63\u8207\u73A9\u5177\">").concat(escapeTicketValue(ticket.description), "</textarea>\n\n        </div>\n\n    </div>\n\n</div>\n\n");
     }
     table.innerHTML = html;
+    enhanceTicketManagerCards();
+    renderTicketManagerSummary();
+    applyTicketManagerFilters();
 }
 function escapeTicketValue(value) {
     return String(value || "")
@@ -235,4 +249,59 @@ function changeTicketImage(id, step) {
         name.textContent =
             getTicketImageLabel(ticket.image);
     }
+}
+
+
+// V7.3 Phase 3F Part 2 - 票券管理強化
+function renderTicketManagerSummary() {
+    var ids = Object.keys(ticketData || {});
+    var enabled = ids.filter(function(id){ return ticketData[id] && ticketData[id].enable !== false; }).length;
+    var totalBox = document.getElementById("ticketManagerTotal");
+    var enabledBox = document.getElementById("ticketManagerEnabled");
+    var disabledBox = document.getElementById("ticketManagerDisabled");
+    if (totalBox) totalBox.textContent = ids.length + " 張票券";
+    if (enabledBox) enabledBox.textContent = "啟用 " + enabled;
+    if (disabledBox) disabledBox.textContent = "停用 " + (ids.length-enabled);
+}
+function applyTicketManagerFilters() {
+    var search = String((document.getElementById("ticketManagerSearch")||{}).value||"").toLowerCase().trim();
+    var category = String((document.getElementById("ticketManagerCategoryFilter")||{}).value||"all");
+    var status = String((document.getElementById("ticketManagerStatusFilter")||{}).value||"all");
+    var shown = 0;
+    document.querySelectorAll("[data-ticket-manager-id]").forEach(function(card){
+        var id = card.getAttribute("data-ticket-manager-id"); var ticket = ticketData[id] || {};
+        var matchSearch = !search || String(ticket.title||id).toLowerCase().indexOf(search)>=0;
+        var matchCategory = category === "all" || ticket.category === category;
+        var matchStatus = status === "all" || (status === "enabled" ? ticket.enable !== false : ticket.enable === false);
+        var show = matchSearch && matchCategory && matchStatus;
+        card.style.display = show ? "" : "none"; if(show) shown++;
+    });
+    var empty = document.getElementById("ticketManagerEmpty"); if(empty) empty.style.display = shown ? "none" : "block";
+}
+function enhanceTicketManagerCards() {
+    Object.keys(ticketData || {}).forEach(function(id){
+        var card = document.querySelector('[data-ticket-manager-id="'+id+'"]');
+        if (!card || card.querySelector('.ticket-quick-actions')) return;
+        var actions = card.querySelector('.ticket-manager-actions'); if(!actions) return;
+        var quick = document.createElement('div'); quick.className='ticket-quick-actions';
+        quick.innerHTML='<button type="button" onclick="duplicateTicket(\''+id+'\')">📄 複製</button><button type="button" onclick="moveTicket(\''+id+'\',-1)">⬆ 上移</button><button type="button" onclick="moveTicket(\''+id+'\',1)">⬇ 下移</button>';
+        actions.insertBefore(quick, actions.firstChild);
+        var enable=document.getElementById('enable-'+id);if(enable)enable.addEventListener('change',function(){ticketData[id].enable=enable.checked;renderTicketManagerSummary();applyTicketManagerFilters();});
+    });
+}
+function duplicateTicket(id) {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以複製票券")) return;
+    var source=ticketData[id]; if(!source)return;
+    var newId='custom_'+Date.now(); var copy=JSON.parse(JSON.stringify(source));
+    copy.title=(source.title||'票券')+' 複製'; copy.custom=true; ticketData[newId]=copy;
+    saveTicketData(); renderTicketManager(); updateTicketButtons();
+    setTimeout(function(){var el=document.querySelector('[data-ticket-manager-id="'+newId+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},50);
+}
+function moveTicket(id, direction) {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以調整票券順序")) return;
+    var ids=Object.keys(ticketData); var index=ids.indexOf(id); var target=index+Number(direction||0);
+    if(index<0||target<0||target>=ids.length)return;
+    var temp=ids[index];ids[index]=ids[target];ids[target]=temp;
+    var reordered={};ids.forEach(function(key){reordered[key]=ticketData[key];});ticketData=reordered;window.ticketData=ticketData;
+    saveTicketData();renderTicketManager();updateTicketButtons();
 }

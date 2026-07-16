@@ -343,6 +343,15 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
         </div>
 
+        <div class="dashboard-period-toolbar">
+            <div class="dashboard-period-tabs" role="tablist" aria-label="Dashboard 統計期間">
+                <button id="dashboardPeriodToday" class="dashboard-period-btn active" onclick="setDashboardPeriod('today')">今日</button>
+                <button id="dashboardPeriodMonth" class="dashboard-period-btn" onclick="setDashboardPeriod('month')">本月</button>
+                <button id="dashboardPeriodAll" class="dashboard-period-btn" onclick="setDashboardPeriod('all')">累積</button>
+            </div>
+            <div id="dashboardRealtimeStatus" class="dashboard-realtime-status">● 即時更新</div>
+        </div>
+
         <div class="dashboard-summary-grid">
 
             <div class="dashboard-summary-card dashboard-income-card">
@@ -506,6 +515,32 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
             </div>
 
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon">🧮</div>
+                <div class="dashboard-summary-label">平均客單價</div>
+                <div id="dashboardAverageOrder" class="dashboard-summary-value">NT$0</div>
+            </div>
+
+            <div class="dashboard-summary-card">
+                <div class="dashboard-summary-icon">🪙</div>
+                <div class="dashboard-summary-label">送出代幣</div>
+                <div id="dashboardTokens" class="dashboard-summary-value">0 枚</div>
+            </div>
+        </div>
+
+        <div class="dashboard-insight-grid">
+            <div class="dashboard-panel">
+                <div class="dashboard-panel-title">🏆 熱門票券排行</div>
+                <div id="dashboardTopTickets" class="dashboard-ranking-list"></div>
+            </div>
+            <div class="dashboard-panel">
+                <div class="dashboard-panel-title">🕒 時段營收</div>
+                <div id="dashboardHourlySales" class="dashboard-bar-list"></div>
+            </div>
+            <div class="dashboard-panel">
+                <div class="dashboard-panel-title">👤 員工銷售表現</div>
+                <div id="dashboardStaffSales" class="dashboard-ranking-list"></div>
+            </div>
         </div>
 
         <div class="dashboard-content-grid">
@@ -720,6 +755,30 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             </h1>
 
         </div>
+
+        <div class="ticket-manager-toolbar">
+            <div class="ticket-manager-summary">
+                <strong id="ticketManagerTotal">0 張票券</strong>
+                <span id="ticketManagerEnabled">啟用 0</span>
+                <span id="ticketManagerDisabled">停用 0</span>
+            </div>
+            <div class="ticket-manager-controls">
+                <input id="ticketManagerSearch" type="search" placeholder="搜尋票券名稱" oninput="applyTicketManagerFilters()">
+                <select id="ticketManagerCategoryFilter" onchange="applyTicketManagerFilters()">
+                    <option value="all">全部分類</option>
+                    <option value="general">一般票</option>
+                    <option value="special">限定票</option>
+                    <option value="other">其他票種</option>
+                </select>
+                <select id="ticketManagerStatusFilter" onchange="applyTicketManagerFilters()">
+                    <option value="all">全部狀態</option>
+                    <option value="enabled">僅啟用</option>
+                    <option value="disabled">僅停用</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="ticketManagerEmpty" class="ticket-manager-empty" style="display:none;">找不到符合條件的票券</div>
 
         <div id="ticketTable">
 
@@ -1491,7 +1550,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/stats.js?v=72c"></script>
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/modules/ticketCatalog.js?v=72c"></script>
-<script src="js/modules/ticketManager.js?v=72c"></script>
+<script src="js/modules/ticketManager.js?v=73f2"></script>
 <script src="js/cloud/cloud-ticket-sync.js?v=72c"></script>  
 <script src="js/modules/businessMode.js?v=72c"></script>    
 <script src="js/modules/systemSetting.js?v=72c"></script>
@@ -1505,13 +1564,13 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/cart.js?v=72c"></script>
     
 <script src="js/modules/operation.js?v=72c"></script>
-<script src="js/modules/dashboard.js?v=72c"></script>
+<script src="js/modules/dashboard.js?v=73f2"></script>
 <script src="js/modules/roleManager.js?v=73simple"></script>
 <script src="js/cloud/auth.js?v=73simple"></script>
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3F Part 1 Fix 1</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3F Part 2</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
