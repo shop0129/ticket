@@ -242,14 +242,15 @@ var currentUser = null;
         }
     };
 
-    window.applyRolePermissions = function () {
+    function applyRolePermissions() {
         var badge;
         var loginName;
         var roleText;
         if (!document.body) {
             return;
         }
-        document.body.classList.remove("role-admin-active", "role-staff-active");
+        document.body.classList.remove("role-admin-active");
+        document.body.classList.remove("role-staff-active");
         if (currentUserRole === ROLE_ADMIN) {
             document.body.classList.add("role-admin-active");
         } else if (currentUserRole === ROLE_STAFF) {
@@ -274,7 +275,9 @@ var currentUser = null;
         if (loginName) {
             loginName.textContent = currentUser ? currentUser.name : "尚未登入";
         }
-    };
+    }
+
+    window.applyRolePermissions = applyRolePermissions;
 
     ensureDefaultAccounts();
     restoreSession();
