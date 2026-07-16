@@ -118,3 +118,45 @@ html,body{
     .display-panel-title{font-size:3.5vw}
     .display-row{min-height:6vh}
 }
+
+
+.display-callout-overlay{
+    position:fixed;
+    z-index:9999;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:rgba(4,12,18,.93);
+}
+
+.display-callout-card{
+    width:80vw;
+    padding:6vh 4vw;
+    border:8px solid #ffd54f;
+    border-radius:3vw;
+    background:#14232f;
+    text-align:center;
+    box-shadow:0 0 60px rgba(255,213,79,.5);
+}
+
+.display-callout-label{
+    font-size:4vw;
+    font-weight:900;
+    color:#ffd54f;
+}
+
+.display-callout-number{
+    margin-top:2vh;
+    font-size:13vw;
+    line-height:1;
+    font-weight:900;
+    color:#fff;
+}
+
+.display-callout-people{
+    margin-top:2vh;
+    font-size:3vw;
+    font-weight:900;
+    color:#90caf9;
+}

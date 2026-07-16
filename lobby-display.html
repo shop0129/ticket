@@ -4,9 +4,42 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>入口候位看板</title>
-<link rel="stylesheet" href="css/display.css?v=73c">
+<link rel="stylesheet" href="css/display.css?v=73d">
 </head>
 <body data-display-mode="lobby">
+
+<div
+    id="displayCalloutOverlay"
+    class="display-callout-overlay"
+    style="display:none;">
+
+    <div class="display-callout-card">
+
+        <div class="display-callout-label">
+            🔔 請準備入場
+        </div>
+
+        <div
+            id="displayCalloutNumber"
+            class="display-callout-number">
+            A001
+        </div>
+
+        <div
+            id="displayCalloutPeople"
+            class="display-callout-people">
+            1 人
+        </div>
+
+    </div>
+
+</div>
+
+<audio
+    id="displayCalloutSound"
+    preload="auto">
+</audio>
+
 <div class="display-shell">
   <div class="display-header">
     <div class="display-title">小怪獸放電所</div>
@@ -31,7 +64,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="js/cloud/firebase-config.js?v=73c"></script>
-<script src="js/display.js?v=73c"></script>
+<script src="js/cloud/firebase-config.js?v=73d"></script>
+<script src="js/display.js?v=73d"></script>
 </body>
 </html>

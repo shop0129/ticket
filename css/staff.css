@@ -1095,3 +1095,60 @@ input{
         align-items:flex-start;
     }
 }
+
+
+/*====================================================
+  V7 Phase 3D 訂單進階操作
+====================================================*/
+
+.staff-order-tools-section{
+    margin-top:22px;
+    padding-top:20px;
+    border-top:3px solid #edf0f3;
+}
+
+.staff-order-tool-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:11px;
+    margin-bottom:24px;
+}
+
+.staff-order-tool-grid button{
+    min-height:66px;
+}
+
+.staff-order-tool-grid button small{
+    display:block;
+    margin-top:4px;
+    font-size:14px;
+    opacity:.85;
+}
+
+.staff-order-log-list{
+    max-height:300px;
+    overflow-y:auto;
+}
+
+.staff-order-log-row{
+    padding:12px 0;
+    border-bottom:1px solid #e7ebee;
+}
+
+.staff-order-log-row strong{
+    display:block;
+    font-size:17px;
+}
+
+.staff-order-log-row span{
+    display:block;
+    margin-top:4px;
+    color:#7b8790;
+    font-size:14px;
+}
+
+@media(max-width:520px){
+    .staff-order-tool-grid{
+        grid-template-columns:1fr;
+    }
+}

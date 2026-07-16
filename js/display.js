@@ -70,6 +70,14 @@
     function remaining(order){
         var expected =
         Number(order.expectedExitTime || 0);
+        if(order.timeMode === "unlimited"){
+            return {
+                text:"不限時間",
+                cls:"status-normal",
+                minutes:9998
+            };
+        }
+
         if(!expected){
             return {
                 text:"計時中",
@@ -183,6 +191,74 @@
             venue=snapshot.val()||venue;
             render();
         });
+
+        firebase.database()
+        .ref(ROOT+"/venue/callout")
+        .on("value",function(snapshot){
+
+            var callout =
+            snapshot.val();
+
+            var overlay =
+            document.getElementById(
+                "displayCalloutOverlay"
+            );
+
+            if(!overlay){
+                return;
+            }
+
+            if(
+                callout &&
+                Number(callout.expiresAt || 0) >
+                Date.now()
+            ){
+                overlay.style.display =
+                "flex";
+
+                document.getElementById(
+                    "displayCalloutNumber"
+                ).textContent =
+                callout.queueNumber || "";
+
+                document.getElementById(
+                    "displayCalloutPeople"
+                ).textContent =
+                Number(
+                    callout.playerCount || 1
+                ) + " 人";
+
+                if(
+                    window.MONSTER_DISPLAY_SOUND !==
+                    false
+                ){
+                    try{
+                        var audio =
+                        document.getElementById(
+                            "displayCalloutSound"
+                        );
+
+                        if(audio){
+                            audio.currentTime = 0;
+                            audio.play();
+                        }
+                    }catch(error){}
+                }
+
+                setTimeout(function(){
+
+                    overlay.style.display =
+                    "none";
+
+                },15000);
+
+            }else{
+
+                overlay.style.display =
+                "none";
+            }
+        });
+
         setInterval(render,1000);
     }
 

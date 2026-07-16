@@ -448,13 +448,22 @@
         Number(order.expectedExitTime || 0);
 
         var fixedRuleText =
-        order.fixedExitTime
-        ? "固定至 " + order.fixedExitTime
-        : "";
+        order.timeMode === "unlimited"
+        ? "不限時間"
+        : (
+            order.fixedExitTime
+            ? "固定至 " + order.fixedExitTime
+            : ""
+        );
 
         var remainingText = "--";
 
         if(
+            status === "playing" &&
+            order.timeMode === "unlimited"
+        ){
+            remainingText = "不限時間";
+        }else if(
             status === "playing" &&
             expected
         ){
@@ -563,8 +572,17 @@
                 id="staffOrderPlayMinutes"
                 type="number"
                 min="10"
-                value="${Number(order.playMinutes || 120)}"
-                ${status === "playing" ? "disabled" : ""}>
+                value="${
+                    order.timeMode === "unlimited"
+                    ? 0
+                    : Number(order.playMinutes || 120)
+                }"
+                ${
+                    status === "playing" ||
+                    order.timeMode === "unlimited"
+                    ? "disabled"
+                    : ""
+                }>
         </label>
 
         <label class="staff-form-full">
@@ -623,6 +641,18 @@
             .addEventListener(
                 "click",
                 resetSelectedOrder
+            );
+        }
+
+        if(
+            window.MonsterOrderTools &&
+            typeof window.MonsterOrderTools.render ===
+            "function"
+        ){
+            window.MonsterOrderTools.render(
+                selectedOrderId,
+                order,
+                currentRole
             );
         }
     }
@@ -686,14 +716,17 @@
                 ) || 0
             );
 
-            updates.playMinutes =
-            Math.max(
-                10,
-                Number(
-                    byId("staffOrderPlayMinutes")
-                    .value
-                ) || 120
-            );
+            if(order.timeMode !== "unlimited"){
+
+                updates.playMinutes =
+                Math.max(
+                    10,
+                    Number(
+                        byId("staffOrderPlayMinutes")
+                        .value
+                    ) || 120
+                );
+            }
         }
 
         firebase.database()
@@ -729,7 +762,9 @@
         );
 
         var minutes =
-        Math.max(
+        order.timeMode === "unlimited"
+        ? 0
+        : Math.max(
             10,
             Number(
                 byId("staffOrderPlayMinutes")
@@ -846,9 +881,14 @@
                 ? window.MonsterOrderLifecycle.expectedExitTimestamp(
                     now,
                     minutes,
-                    order.fixedExitTime || ""
+                    order.fixedExitTime || "",
+                    order.timeMode || "duration"
                 )
-                : now + minutes * 60000;
+                : (
+                    order.timeMode === "unlimited"
+                    ? null
+                    : now + minutes * 60000
+                );
 
                 firebase.database()
                 .ref(
@@ -1153,6 +1193,28 @@
             500
         );
     }
+
+    window.MonsterOrderCenter = {
+        getSelectedOrderId:function(){
+            return selectedOrderId;
+        },
+        getSelectedOrder:function(){
+            return selectedOrder();
+        },
+        getOrders:function(){
+            return ordersMap;
+        },
+        getVenueState:function(){
+            return venueState;
+        },
+        getRole:getRole,
+        rerender:function(){
+            renderOrderList();
+            renderOrderDetail();
+            updateCapacityCards();
+        },
+        closeDetail:closeOrderDetail
+    };
 
     window.addEventListener(
         "load",

@@ -1,7 +1,6 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3C-1 Fix
-// 訂單生命週期／每日叫號初始化
-// 修正：非入場商品、早鳥與寒暑假固定離場時間
+// 小怪獸售票機 V7 Phase 3D
+// 訂單生命週期、入場商品與時間規則
 // =========================================
 (function(){
 
@@ -11,15 +10,21 @@
     var ordersRef = null;
 
     function pad(value,width){
-        var text = String(value || 0);
+
+        var text =
+        String(value || 0);
+
         while(text.length < width){
             text = "0" + text;
         }
+
         return text;
     }
 
     function dayKey(){
+
         var d = new Date();
+
         return (
             d.getFullYear() +
             pad(d.getMonth()+1,2) +
@@ -27,13 +32,18 @@
         );
     }
 
+    function itemId(item){
+        return String(item && item.id || "");
+    }
+
+    function itemTitle(item){
+        return String(item && item.title || "");
+    }
+
     function isNonAdmissionItem(item){
 
-        var id =
-        String(item.id || "");
-
-        var title =
-        String(item.title || "");
+        var id = itemId(item);
+        var title = itemTitle(item);
 
         return (
             id === "token10" ||
@@ -46,11 +56,8 @@
 
     function isGuardianItem(item){
 
-        var id =
-        String(item.id || "");
-
-        var title =
-        String(item.title || "");
+        var id = itemId(item);
+        var title = itemTitle(item);
 
         return (
             id === "parent" ||
@@ -58,10 +65,22 @@
         );
     }
 
+    function isUnlimitedItem(item){
+
+        var id = itemId(item);
+        var title = itemTitle(item);
+
+        return (
+            item.timeMode === "unlimited" ||
+            id === "baby" ||
+            title.indexOf("幼幼") !== -1
+        );
+    }
+
     function admissionItems(order){
 
         return (
-            Array.isArray(order.items)
+            Array.isArray(order && order.items)
             ? order.items
             : []
         ).filter(function(item){
@@ -74,26 +93,46 @@
     }
 
     function hasAdmission(order){
-
         return admissionItems(order).length > 0;
     }
 
-    function fixedExitRule(order){
+    function inferTimeRule(order){
 
         var items =
         admissionItems(order);
 
-        var result = "";
+        var rule = {
+            mode:"duration",
+            minutes:120,
+            fixedTime:""
+        };
+
+        var maxMinutes = 0;
+        var hasUnlimited = false;
 
         items.forEach(function(item){
 
             var title =
-            String(item.title || "");
+            itemTitle(item);
+
+            if(isUnlimitedItem(item)){
+                hasUnlimited = true;
+            }
+
+            if(
+                item.timeMode === "fixed" &&
+                item.fixedExitTime
+            ){
+                rule.mode = "fixed";
+                rule.fixedTime =
+                String(item.fixedExitTime);
+            }
 
             if(
                 title.indexOf("早鳥") !== -1
             ){
-                result = "18:00";
+                rule.mode = "fixed";
+                rule.fixedTime = "18:00";
             }
 
             if(
@@ -101,21 +140,9 @@
                 title.indexOf("寒假") !== -1 ||
                 title.indexOf("寒暑假") !== -1
             ){
-                result = "16:00";
+                rule.mode = "fixed";
+                rule.fixedTime = "16:00";
             }
-        });
-
-        return result;
-    }
-
-    function inferMinutes(order){
-
-        var items =
-        admissionItems(order);
-
-        var maxMinutes = 0;
-
-        items.forEach(function(item){
 
             var minutes =
             Number(item.playMinutes || 0);
@@ -127,16 +154,9 @@
 
             if(!minutes){
 
-                var title =
-                String(item.title || "");
-
                 if(/3H/i.test(title)){
                     minutes = 180;
                 }else if(/2H/i.test(title)){
-                    minutes = 120;
-                }else if(
-                    title.indexOf("幼幼") !== -1
-                ){
                     minutes = 120;
                 }
             }
@@ -146,7 +166,22 @@
             }
         });
 
-        return maxMinutes || 120;
+        if(hasUnlimited){
+            return {
+                mode:"unlimited",
+                minutes:0,
+                fixedTime:""
+            };
+        }
+
+        if(rule.mode === "fixed"){
+            return rule;
+        }
+
+        rule.minutes =
+        maxMinutes || 120;
+
+        return rule;
     }
 
     function inferPlayerCount(order){
@@ -155,7 +190,7 @@
         var guardians = 0;
 
         (
-            Array.isArray(order.items)
+            Array.isArray(order && order.items)
             ? order.items
             : []
         ).forEach(function(item){
@@ -178,40 +213,75 @@
         };
     }
 
+    function expectedExitTimestamp(
+        entryTime,
+        playMinutes,
+        fixedExitTime,
+        timeMode
+    ){
+
+        if(timeMode === "unlimited"){
+            return null;
+        }
+
+        if(fixedExitTime){
+
+            var parts =
+            String(fixedExitTime)
+            .split(":");
+
+            var date =
+            new Date(Number(entryTime));
+
+            date.setHours(
+                Number(parts[0] || 0),
+                Number(parts[1] || 0),
+                0,
+                0
+            );
+
+            return date.getTime();
+        }
+
+        return (
+            Number(entryTime) +
+            Number(playMinutes || 120) *
+            60000
+        );
+    }
+
     function assignQueue(orderId,order){
 
         var dateKey =
         order.queueDateKey ||
         dayKey();
 
-        var ref =
         firebase.database()
         .ref(
             ROOT +
             "/queueCounters/" +
             dateKey
-        );
+        )
+        .transaction(
+            function(current){
+                return Number(current || 0) + 1;
+            },
+            function(error,committed,snapshot){
 
-        ref.transaction(function(current){
+                if(error || !committed){
+                    return;
+                }
 
-            return Number(current || 0) + 1;
-
-        },function(error,committed,snapshot){
-
-            if(error || !committed){
-                return;
+                ordersRef
+                .child(orderId)
+                .update({
+                    queueNumber:
+                    "A" + pad(snapshot.val(),3),
+                    queueDateKey:dateKey,
+                    updatedAt:Date.now()
+                });
             }
-
-            var number =
-            "A" + pad(snapshot.val(),3);
-
-            ordersRef.child(orderId)
-            .update({
-                queueNumber:number,
-                queueDateKey:dateKey,
-                updatedAt:Date.now()
-            });
-        });
+        );
     }
 
     function initializeOrder(orderId,order){
@@ -225,31 +295,31 @@
 
         if(!hasAdmission(order)){
 
-            var nonAdmissionUpdates = {
+            ordersRef
+            .child(orderId)
+            .update({
                 admissionRequired:false,
                 playStatus:"not_required",
                 playerCount:0,
                 guardianCount:0,
                 playMinutes:0,
+                timeMode:"none",
                 fixedExitTime:"",
+                queueNumber:null,
                 updatedAt:Date.now()
-            };
-
-            if(
-                order.queueNumber
-            ){
-                nonAdmissionUpdates.queueNumber = null;
-            }
-
-            ordersRef
-            .child(orderId)
-            .update(nonAdmissionUpdates);
+            });
 
             return;
         }
 
+        var timeRule =
+        inferTimeRule(order);
+
         var updates = {
-            admissionRequired:true
+            admissionRequired:true,
+            timeMode:timeRule.mode,
+            fixedExitTime:
+            timeRule.fixedTime || ""
         };
 
         if(
@@ -276,16 +346,16 @@
             inferred.guardians;
         }
 
-        if(!order.playMinutes){
+        if(
+            order.playMinutes === undefined ||
+            order.playMinutes === null ||
+            (
+                timeRule.mode === "duration" &&
+                Number(order.playMinutes) <= 0
+            )
+        ){
             updates.playMinutes =
-            inferMinutes(order);
-        }
-
-        var fixed =
-        fixedExitRule(order);
-
-        if(fixed){
-            updates.fixedExitTime = fixed;
+            timeRule.minutes;
         }
 
         if(!order.waitingSince){
@@ -303,46 +373,12 @@
             assignQueue(orderId,order);
         }
 
-        if(Object.keys(updates).length > 0){
+        updates.updatedAt =
+        Date.now();
 
-            updates.updatedAt = Date.now();
-
-            ordersRef
-            .child(orderId)
-            .update(updates);
-        }
-    }
-
-    function expectedExitTimestamp(
-        entryTime,
-        playMinutes,
-        fixedExitTime
-    ){
-
-        if(fixedExitTime){
-
-            var parts =
-            String(fixedExitTime)
-            .split(":");
-
-            var date =
-            new Date(entryTime);
-
-            date.setHours(
-                Number(parts[0] || 0),
-                Number(parts[1] || 0),
-                0,
-                0
-            );
-
-            return date.getTime();
-        }
-
-        return (
-            Number(entryTime) +
-            Number(playMinutes || 120) *
-            60000
-        );
+        ordersRef
+        .child(orderId)
+        .update(updates);
     }
 
     function start(){
@@ -371,7 +407,10 @@
 
                 if(
                     order &&
-                    order.admissionRequired === undefined
+                    (
+                        order.admissionRequired === undefined ||
+                        !order.timeMode
+                    )
                 ){
                     initializeOrder(
                         snapshot.key,
@@ -403,10 +442,9 @@
     }
 
     window.MonsterOrderLifecycle = {
-        inferMinutes:inferMinutes,
         inferPlayerCount:inferPlayerCount,
+        inferTimeRule:inferTimeRule,
         hasAdmission:hasAdmission,
-        fixedExitRule:fixedExitRule,
         expectedExitTimestamp:
         expectedExitTimestamp
     };
