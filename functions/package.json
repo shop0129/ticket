@@ -1,0 +1,17 @@
+{
+  "name": "monster-ticket-role-functions",
+  "version": "7.3.4",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "test": "node test/validators.test.js",
+    "bootstrap-manager": "node scripts/bootstrap-manager.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.7.0",
+    "firebase-functions": "^6.3.2"
+  }
+}

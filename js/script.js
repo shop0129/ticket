@@ -39,6 +39,7 @@ function loginAdmin() {
     var passwordInput = document.getElementById("adminLoginPassword");
     var account;
     var password;
+    var loginButton = document.getElementById("adminLoginButton");
     if (!passwordInput) {
         return;
     }
@@ -51,15 +52,32 @@ function loginAdmin() {
         }
         return;
     }
-    if (!window.MonsterAuth || !MonsterAuth.login(account, password)) {
-        alert("❌ 帳號、密碼錯誤或帳號已停用");
-        passwordInput.value = "";
-        passwordInput.focus();
+    if (!window.MonsterAuth || !MonsterAuth.loginAsync) {
+        alert("❌ 登入模組尚未載入");
         return;
     }
-    passwordInput.value = "";
-    showPage("adminHomePage");
-    applyRolePermissions();
+    if (loginButton) {
+        loginButton.disabled = true;
+        loginButton.textContent = "登入中…";
+    }
+    MonsterAuth.loginAsync(account, password).then(function (success) {
+        if (!success) {
+            throw { code: "auth/invalid-login", message: "帳號、密碼錯誤或帳號已停用" };
+        }
+        passwordInput.value = "";
+        showPage("adminHomePage");
+        applyRolePermissions();
+    }).catch(function (error) {
+        var message = error && error.message ? error.message : "帳號、密碼錯誤或帳號已停用";
+        alert("❌ " + message);
+        passwordInput.value = "";
+        passwordInput.focus();
+    }).then(function () {
+        if (loginButton) {
+            loginButton.disabled = false;
+            loginButton.textContent = "登入";
+        }
+    });
 }
 // =========================================
 // 統計分頁

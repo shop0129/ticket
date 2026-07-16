@@ -1,6 +1,6 @@
 // =========================================
 // 小怪獸售票機 V7.3 Phase 3E - Role System
-// Part 1：角色核心、多人員工帳號、登入工作階段
+// Part 4：本機相容層＋Firebase Authentication 工作階段
 // Android WebView 61 相容（ES5）
 // =========================================
 var ROLE_ADMIN = "admin";
@@ -112,11 +112,29 @@ var currentUser = null;
         }
         return {
             id: employee.id,
+            uid: employee.uid || "",
             account: employee.account,
             name: employee.name,
             role: employee.role,
+            provider: employee.provider || "local",
             loginAt: nowIso()
         };
+    }
+
+    function setAuthenticatedUser(profile) {
+        if (!profile || !profile.id || (profile.role !== ROLE_ADMIN && profile.role !== ROLE_STAFF)) {
+            return false;
+        }
+        currentUser = publicUser(profile);
+        currentUser.uid = profile.uid || profile.id;
+        currentUser.provider = "firebase";
+        currentUser.loginAt = profile.loginAt || currentUser.loginAt;
+        currentUserRole = currentUser.role;
+        window.currentUser = currentUser;
+        window.currentUserRole = currentUserRole;
+        saveSession(currentUser);
+        applyRolePermissions();
+        return true;
     }
 
     function saveSession(user) {
@@ -140,6 +158,13 @@ var currentUser = null;
         }
         if (!session || !session.id) {
             return false;
+        }
+        if (session.provider === "firebase" && (session.role === ROLE_ADMIN || session.role === ROLE_STAFF)) {
+            currentUser = clone(session);
+            currentUserRole = currentUser.role;
+            window.currentUser = currentUser;
+            window.currentUserRole = currentUserRole;
+            return true;
         }
         list = ensureDefaultAccounts();
         for (i = 0; i < list.length; i += 1) {
@@ -214,7 +239,7 @@ var currentUser = null;
     }
 
     window.MonsterRole = {
-        version: "7.3-Phase3E-Part2",
+        version: "7.3-Phase3E-Part4",
         getEmployees: function () {
             return clone(ensureDefaultAccounts());
         },
@@ -234,6 +259,7 @@ var currentUser = null;
             return currentUserRole === ROLE_STAFF;
         },
         login: login,
+        setAuthenticatedUser: setAuthenticatedUser,
         logout: function () {
             currentUser = null;
             currentUserRole = null;

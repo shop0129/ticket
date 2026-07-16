@@ -15,6 +15,7 @@
     var membersMap = {};
     var selectedMemberId = "";
     var toyPointMode = "add";
+    var cloudWatchStarted = false;
 
     var loginPage;
     var homePage;
@@ -246,25 +247,34 @@
             return;
         }
 
-        if(
-            !window.MonsterAuth ||
-            !MonsterAuth.login(account,password)
-        ){
-
-            showLoginMessage(
-                "帳號、密碼錯誤或帳號已停用",
-                true
-            );
-
-            passwordInput.select();
+        if(!window.MonsterAuth || !MonsterAuth.loginAsync){
+            showLoginMessage("登入模組尚未載入",true);
             return;
         }
 
-        currentRole =
-        MonsterAuth.getCurrentRole();
+        byId("staffLoginButton").disabled = true;
+        byId("staffLoginButton").textContent = "登入中…";
 
-        saveSession(currentRole);
-        showHome();
+        MonsterAuth.loginAsync(account,password)
+        .then(function(success){
+            if(!success){
+                throw {message:"帳號、密碼錯誤或帳號已停用"};
+            }
+            currentRole = MonsterAuth.getCurrentRole();
+            saveSession(currentRole);
+            showHome();
+        })
+        .catch(function(error){
+            showLoginMessage(
+                error && error.message ? error.message : "帳號、密碼錯誤或帳號已停用",
+                true
+            );
+            passwordInput.select();
+        })
+        .then(function(){
+            byId("staffLoginButton").disabled = false;
+            byId("staffLoginButton").textContent = "登入";
+        });
     }
 
     function logout(){
@@ -1254,25 +1264,24 @@
                 );
             }
 
-            firebase.auth()
-            .signInAnonymously()
-            .then(function(){
+            firebase.auth().onAuthStateChanged(function(user){
+                if(!user){
+                    firebase.auth().signInAnonymously().catch(function(error){
+                        console.error(error);
+                        setCloudState("error","雲端登入失敗");
+                    });
+                    return;
+                }
 
-                setCloudState(
-                    "online",
-                    "雲端已連線"
-                );
+                setCloudState("online","雲端已連線");
 
-                watchCloudData();
-            })
-            .catch(function(error){
-
+                if(!cloudWatchStarted){
+                    cloudWatchStarted = true;
+                    watchCloudData();
+                }
+            },function(error){
                 console.error(error);
-
-                setCloudState(
-                    "error",
-                    "雲端登入失敗"
-                );
+                setCloudState("error","雲端登入失敗");
             });
 
             firebase.database()
@@ -1497,17 +1506,23 @@
         bindEvents();
         startFirebase();
 
-        var savedRole =
-        loadSession();
+        showLogin();
 
-        if(savedRole){
-
-            currentRole = savedRole;
-            showHome();
-
+        if(window.MonsterAuth && MonsterAuth.restoreSessionAsync){
+            MonsterAuth.restoreSessionAsync().then(function(restored){
+                var savedRole = restored ? MonsterAuth.getCurrentRole() : loadSession();
+                if(savedRole){
+                    currentRole = savedRole;
+                    saveSession(currentRole);
+                    showHome();
+                }
+            });
         }else{
-
-            showLogin();
+            var savedRole = loadSession();
+            if(savedRole){
+                currentRole = savedRole;
+                showHome();
+            }
         }
     }
 

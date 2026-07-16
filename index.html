@@ -11,7 +11,7 @@ content="width=device-width, initial-scale=1.0">
 <title>小怪獸放電所 售票機</title>
 
 <link rel="stylesheet" href="css/style.css?v=72c">
-<link rel="stylesheet" href="css/admin-ui.css?v=73e3">
+<link rel="stylesheet" href="css/admin-ui.css?v=73e4">
 
 </head>
 
@@ -292,7 +292,7 @@ content="width=device-width, initial-scale=1.0">
             店長與員工使用各自帳號登入，系統會依帳號角色套用權限。
         </div>
 
-        <button class="big-btn" onclick="loginAdmin()">
+        <button id="adminLoginButton" class="big-btn" onclick="loginAdmin()">
             登入
         </button>
 
@@ -620,7 +620,7 @@ content="width=device-width, initial-scale=1.0">
 </section>
 
 
-<!-- 操作紀錄 V7.3 Phase 3E Part 3 -->
+<!-- 操作紀錄 V7.3 Phase 3E Part 4 -->
 <section id="auditLogPage" class="page">
     <div class="tm-page audit-log-page">
         <div class="tm-top">
@@ -645,7 +645,10 @@ content="width=device-width, initial-scale=1.0">
             <div class="employee-toolbar-info">
                 僅店長可新增、修改、停用與刪除員工帳號。
             </div>
-            <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
+            <div class="employee-toolbar-actions">
+                <button id="employeeMigrateButton" class="employee-migrate-btn" onclick="migrateLegacyEmployeesToFirebase()">☁️ 遷移舊帳號</button>
+                <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
+            </div>
         </div>
 
         <div id="employeeEditorPanel" class="employee-editor-panel" style="display:none;"></div>
@@ -1464,7 +1467,9 @@ content="width=device-width, initial-scale=1.0">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="js/cloud/firebase-config.js?v=72c"></script>
+<script src="js/cloud/firebase-role-config.js?v=73e4"></script>
 <script src="js/cloud/firebase-connect.js?v=72c"></script>
 <script src="js/config/state.js?v=72c"></script>
 <script src="js/config/data.js?v=72c"></script>
@@ -1496,12 +1501,14 @@ content="width=device-width, initial-scale=1.0">
     
 <script src="js/modules/operation.js?v=72c"></script>
 <script src="js/modules/dashboard.js?v=72c"></script>
-<script src="js/modules/roleManager.js?v=73e3"></script>
-<script src="js/cloud/auth.js?v=73e3"></script>
-<script src="js/modules/employeeManager.js?v=73e3"></script>
-<script src="js/script.js?v=73e3"></script>
+<script src="js/modules/roleManager.js?v=73e4"></script>
+<script src="js/cloud/firebase-role-auth.js?v=73e4"></script>
+<script src="js/cloud/auth.js?v=73e4"></script>
+<script src="js/cloud/firebase-employee-service.js?v=73e4"></script>
+<script src="js/modules/employeeManager.js?v=73e4"></script>
+<script src="js/script.js?v=73e4"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3E Part 3</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3E Part 4</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
