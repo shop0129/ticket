@@ -3,6 +3,9 @@
 // 開啟系統設定
 //==========================
 function openSystemSetting() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("system.update", "❌ 只有店長可以修改系統設定")) {
+        return;
+    }
     renderSystemSetting();
     showPage("systemSettingPage");
 }
@@ -22,6 +25,9 @@ function renderSystemSetting() {
 // 儲存
 //==========================
 function saveSystemSetting() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("system.update", "❌ 只有店長可以修改系統設定")) {
+        return;
+    }
     //==========================
     // 付款方式
     //==========================
@@ -50,6 +56,9 @@ function saveSystemSetting() {
     }
     // 儲存全部設定
     localStorage.setItem("systemData", JSON.stringify(systemData));
+    if (window.MonsterAuth) {
+        MonsterAuth.audit("system.update", "儲存系統設定", { source: "admin", targetType: "system", targetId: "settings" });
+    }
     applyPaymentSetting();
     alert("✅ 系統設定已儲存");
 }
@@ -57,6 +66,9 @@ function saveSystemSetting() {
 // 恢復預設
 //==========================
 function resetSystemSetting() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("system.update", "❌ 只有店長可以恢復系統設定")) {
+        return;
+    }
     if (!confirm("確定恢復預設？"))
         return;
     systemData = {
@@ -80,9 +92,15 @@ function resetSystemSetting() {
         staffPassword: "0000"
     };
     localStorage.setItem("systemData", JSON.stringify(systemData));
+    if (window.MonsterAuth) {
+        MonsterAuth.audit("system.reset", "恢復預設系統設定", { source: "admin", targetType: "system", targetId: "settings" });
+    }
     renderSystemSetting();
 }
 function changeSetting(key, step) {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("system.update", "❌ 只有店長可以修改系統設定")) {
+        return;
+    }
     systemData[key] += step;
     if (key == "homeTimeout") {
         if (systemData[key] < 10) {

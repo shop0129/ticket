@@ -64,6 +64,12 @@ var MEMBER_LEVELS = [
 var memberData = loadMembers();
 var currentMember = null;
 var currentMemberHistoryId = "";
+function memberOperatorName() {
+    if (window.MonsterAuth) {
+        return MonsterAuth.getActor("staff").name;
+    }
+    return currentUserRole === "staff" ? "員工" : "店長";
+}
 function loadMembers() {
     try {
         var data = JSON.parse(localStorage.getItem(MEMBER_KEY) || "[]");
@@ -295,6 +301,7 @@ function closeMemberEditor() {
 function saveMemberEditor() {
     playClick();
     var id = document.getElementById("memberEditId").value;
+    var isNew = !id;
     var name = document.getElementById("memberEditName").value.trim();
     var phone = memberPhone(document.getElementById("memberEditPhone").value);
     if (!name || !phone) {
@@ -327,12 +334,25 @@ function saveMemberEditor() {
         memberData.unshift(__assign(__assign({ id: "member_" + Date.now(), memberNo: newMemberNo() }, values), { lastPurchaseDate: "", toyPoints: 0, pointHistory: [], toyPointHistory: [] }));
     }
     saveMembers();
+    if (window.MonsterAuth) {
+        var savedMember = memberData.find(function (member) {
+            return member.phone === phone;
+        });
+        MonsterAuth.audit(
+            isNew ? "member.create" : "member.update",
+            (isNew ? "新增會員：" : "修改會員：") + name,
+            { source: "staff", targetType: "member", targetId: savedMember ? savedMember.id : id }
+        );
+    }
     closeMemberEditor();
     renderMemberList();
     alert("✅ 會員資料已儲存");
 }
 function deleteMember(id) {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("member.delete", "❌ 只有店長可以刪除會員")) {
+        return;
+    }
     var member = memberData.find(function (item) {
         return item.id === id;
     });
@@ -348,6 +368,13 @@ function deleteMember(id) {
         currentMember = null;
     }
     saveMembers();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "member.delete",
+            "刪除會員：" + member.name,
+            { source: "admin", targetType: "member", targetId: id }
+        );
+    }
     renderMemberList();
     renderSelectedMember();
 }
@@ -583,9 +610,7 @@ function rollbackMemberPurchase(order) {
             amount: -toyPoints,
             reason: "訂單作廢扣回",
             orderNo: order.orderNo || "",
-            operator: currentUserRole === "staff"
-                ? "員工"
-                : "店長",
+            operator: memberOperatorName(),
             balance: member.toyPoints
         });
     }
@@ -638,12 +663,17 @@ function adjustToyPoints(memberId) {
         reason: reason.trim(),
         note: (note || "").trim(),
         orderNo: "",
-        operator: currentUserRole === "staff"
-            ? "員工"
-            : "店長",
+        operator: memberOperatorName(),
         balance: member.toyPoints
     });
     saveMembers();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "member.toy_points",
+            member.name + "：" + (amount > 0 ? "+" : "") + amount + " 點",
+            { source: "staff", targetType: "member", targetId: member.id }
+        );
+    }
     renderMemberList();
     if (currentMemberHistoryId ===
         member.id) {
@@ -830,9 +860,7 @@ function convertOrderToysToPoints(orderNo) {
         reason: "放棄票券贈送玩具",
         note: "\u7DA0\u6A19 ".concat(greenQty, " \u500B\u3001\u7D05\u6A19 ").concat(redQty, " \u500B"),
         orderNo: order.orderNo || "",
-        operator: currentUserRole === "staff"
-            ? "員工"
-            : "店長",
+        operator: memberOperatorName(),
         balance: member.toyPoints
     });
     order.toyPointConversion = {
@@ -844,12 +872,17 @@ function convertOrderToysToPoints(orderNo) {
             points,
         memberId: member.id,
         convertedAt: new Date().toLocaleString("zh-TW"),
-        operator: currentUserRole === "staff"
-            ? "員工"
-            : "店長"
+        operator: memberOperatorName()
     };
     saveMembers();
     saveSalesHistory();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "order.toy_convert",
+            "訂單 " + (order.orderNo || "") + " 轉玩具點數 " + points + " 點",
+            { source: "staff", targetType: "order", targetId: order.orderNo || "" }
+        );
+    }
     renderToyPointOrderPanel(orderNo);
     alert("\u2705 \u5DF2\u589E\u52A0 ".concat(points, " \u73A9\u5177\u9EDE\n\u76EE\u524D\u9918\u984D\uFF1A").concat(member.toyPoints, " \u9EDE"));
 }
@@ -874,6 +907,9 @@ function resetCurrentMemberSelection() {
 // =========================================
 function exportMemberData() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("member.export", "❌ 只有店長可以匯出會員資料")) {
+        return;
+    }
     var data = {
         app: "小怪獸售票機",
         version: "V6.4C",
@@ -881,9 +917,15 @@ function exportMemberData() {
         members: memberData
     };
     downloadTextFile("monster-members-".concat(Date.now(), ".json"), JSON.stringify(data, null, 2), "application/json;charset=utf-8");
+    if (window.MonsterAuth) {
+        MonsterAuth.audit("member.export", "匯出會員資料 " + memberData.length + " 筆", { source: "admin", targetType: "member", targetId: "all" });
+    }
 }
 function chooseMemberImportFile() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("member.import", "❌ 只有店長可以匯入會員資料")) {
+        return;
+    }
     var input = document.getElementById("memberImportInput");
     if (input) {
         input.value = "";
@@ -891,6 +933,9 @@ function chooseMemberImportFile() {
     }
 }
 function importMemberFile(file) {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("member.import", "❌ 只有店長可以匯入會員資料")) {
+        return Promise.resolve();
+    }
     return __awaiter(this, void 0, void 0, function () {
         var data, _a, _b, error_1;
         return __generator(this, function (_c) {

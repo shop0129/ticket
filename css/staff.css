@@ -79,6 +79,15 @@ input{
     outline:none;
 }
 
+.staff-login-card input + input{
+    margin-top:12px;
+}
+
+#staffAccount{
+    font-size:26px;
+    letter-spacing:1px;
+}
+
 .staff-login-card input:focus{
     border-color:#2196f3;
     box-shadow:0 0 0 4px rgba(33,150,243,.13);

@@ -62,6 +62,9 @@ var lastBackupTime = document.getElementById("lastBackupTime");
 // 開啟資料管理
 // =========================================
 function openDataManager() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("data.backup", "❌ 只有店長可以使用資料管理")) {
+        return;
+    }
     renderBackupInfo();
     showPage("dataManagerPage");
 }
@@ -136,6 +139,9 @@ function collectAllStorageData() {
 // =========================================
 function exportFullBackup() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("data.backup", "❌ 只有店長可以備份資料")) {
+        return;
+    }
     try {
         var now = new Date();
         var backup = {
@@ -150,6 +156,9 @@ function exportFullBackup() {
         localStorage.setItem("lastBackupTime", displayTime);
         renderBackupInfo();
         setBackupStatus("✅ 完整備份已匯出", "success");
+        if (window.MonsterAuth) {
+            MonsterAuth.audit("data.backup", "匯出完整備份", { source: "admin", targetType: "data", targetId: "backup" });
+        }
     }
     catch (error) {
         console.error(error);
@@ -161,6 +170,9 @@ function exportFullBackup() {
 // =========================================
 function chooseBackupFile() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("data.restore", "❌ 只有店長可以還原資料")) {
+        return;
+    }
     if (!backupFileInput)
         return;
     backupFileInput.value = "";
@@ -179,6 +191,9 @@ function validateBackupData(backup) {
 // 匯入備份
 // =========================================
 function importBackupFile(file) {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("data.restore", "❌ 只有店長可以還原資料")) {
+        return Promise.resolve();
+    }
     return __awaiter(this, void 0, void 0, function () {
         var content, backup, keyCount, confirmed, error_1;
         return __generator(this, function (_a) {
@@ -233,6 +248,9 @@ if (backupFileInput) {
 // =========================================
 function exportSalesHistory() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("data.backup", "❌ 只有店長可以匯出售票紀錄")) {
+        return;
+    }
     try {
         var exportData = {
             app: "小怪獸售票機",
@@ -256,6 +274,9 @@ function exportSalesHistory() {
 // =========================================
 function clearAllAppData() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("data.clear", "❌ 只有店長可以清除資料")) {
+        return;
+    }
     var firstConfirm = confirm("⚠️ 確定要清除全部售票機資料？\n\n包含售票紀錄、統計、票券設定、系統設定與管理密碼。");
     if (!firstConfirm)
         return;

@@ -80,6 +80,10 @@
 
     function getRole(){
 
+        if(window.MonsterAuth){
+            return MonsterAuth.getCurrentRole();
+        }
+
         try{
 
             var session =
@@ -97,6 +101,21 @@
         }catch(error){
             return "";
         }
+    }
+
+    function currentActor(){
+        if(window.MonsterAuth){
+            return MonsterAuth.getActor("staff");
+        }
+        return {
+            id:"",
+            name:getRole() === "admin" ? "店長" : "員工",
+            role:getRole() || "staff"
+        };
+    }
+
+    function operatorName(){
+        return currentActor().name;
     }
 
     function statusLabel(order){
@@ -953,9 +972,13 @@
                 null;
 
                 currentOrder.enteredBy =
-                currentRole === "admin"
-                ? "店長"
-                : "員工";
+                operatorName();
+
+                currentOrder.enteredById =
+                currentActor().id || "";
+
+                currentOrder.enteredByRole =
+                currentActor().role || currentRole;
 
                 currentOrder.updatedAt =
                 now;
@@ -998,6 +1021,14 @@
                     }
 
                     return;
+                }
+
+                if(window.MonsterAuth){
+                    MonsterAuth.audit(
+                        "order.enter",
+                        "確認入場：" + (order.queueNumber || order.orderNo || ""),
+                        {source:"staff",targetType:"order",targetId:selectedOrderId}
+                    );
                 }
             }
         );
@@ -1047,9 +1078,13 @@
                 Date.now();
 
                 current.exitedBy =
-                currentRole === "admin"
-                ? "店長"
-                : "員工";
+                operatorName();
+
+                current.exitedById =
+                currentActor().id || "";
+
+                current.exitedByRole =
+                currentActor().role || currentRole;
 
                 current.updatedAt =
                 Date.now();
@@ -1062,6 +1097,15 @@
                     alert(
                         "離場更新失敗，請重新整理"
                     );
+                    return;
+                }
+
+                if(window.MonsterAuth){
+                    MonsterAuth.audit(
+                        "order.exit",
+                        "完成離場：" + (order.queueNumber || order.orderNo || ""),
+                        {source:"staff",targetType:"order",targetId:selectedOrderId}
+                    );
                 }
             }
         );
@@ -1069,7 +1113,10 @@
 
     function resetSelectedOrder(){
 
-        if(getRole() !== "admin"){
+        if(
+            window.MonsterPermission &&
+            !MonsterPermission.requirePermission("order.cancel","❌ 只有店長可以重設訂單狀態")
+        ){
             return;
         }
 
@@ -1084,14 +1131,26 @@
             entryTime:null,
             expectedExitTime:null,
             exitTime:null,
-            updatedAt:Date.now()
+            updatedAt:Date.now(),
+            updatedBy:operatorName()
+        })
+        .then(function(){
+            if(window.MonsterAuth){
+                MonsterAuth.audit(
+                    "order.reset_waiting",
+                    "重設訂單為等待狀態",
+                    {source:"staff",targetType:"order",targetId:selectedOrderId}
+                );
+            }
         });
     }
 
     function saveCapacity(){
 
-        if(getRole() !== "admin"){
-            alert("只有店長可以修改人數上限");
+        if(
+            window.MonsterPermission &&
+            !MonsterPermission.requirePermission("capacity.update","❌ 只有店長可以修改人數上限")
+        ){
             return;
         }
 
@@ -1113,11 +1172,25 @@
                 byId("staffCountGuardiansInput")
                 .checked
             ),
-            updatedAt:Date.now()
+            updatedAt:Date.now(),
+            updatedBy:operatorName()
+        })
+        .then(function(){
+            if(window.MonsterAuth){
+                MonsterAuth.audit(
+                    "capacity.update",
+                    "場內人數上限：" + max,
+                    {source:"staff",targetType:"venue",targetId:"settings"}
+                );
+            }
         });
     }
 
     function getRole(){
+
+        if(window.MonsterAuth){
+            return MonsterAuth.getCurrentRole();
+        }
 
         try{
 

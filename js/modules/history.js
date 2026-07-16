@@ -142,6 +142,9 @@ function deleteSalesHistory(clickEvent, index) {
         clickEvent.stopPropagation();
     }
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("order.cancel", "❌ 只有店長可以刪除售票紀錄")) {
+        return;
+    }
     if (!confirm("確定要刪除這筆售票紀錄？")) {
         return;
     }
@@ -150,8 +153,16 @@ function deleteSalesHistory(clickEvent, index) {
         index >= salesHistory.length) {
         return;
     }
+    var deletedOrder = salesHistory[index];
     salesHistory.splice(index, 1);
     saveSalesHistory();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "order.delete_record",
+            "刪除售票紀錄：" + (deletedOrder.orderNo || ""),
+            { source: "admin", targetType: "order", targetId: deletedOrder.orderNo || "" }
+        );
+    }
     renderSalesHistory();
 }
 // =========================================
@@ -275,6 +286,13 @@ function reprintOrder(orderNo) {
         return;
     isReprint = true;
     currentPrintOrder = order;
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "order.reprint",
+            "補印訂單：" + orderNo,
+            { source: "staff", targetType: "order", targetId: orderNo }
+        );
+    }
     showPage("successPage");
     updateSuccessItems();
     startPrintAnimation();
@@ -284,6 +302,9 @@ function reprintOrder(orderNo) {
 // =========================================
 function cancelOrder(orderNo) {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("order.cancel", "❌ 只有店長可以作廢訂單")) {
+        return;
+    }
     var order = salesHistory.find(function (item) {
         return item.orderNo === orderNo;
     });
@@ -302,6 +323,13 @@ function cancelOrder(orderNo) {
         return;
     }
     order.status = "cancel";
+    if (window.MonsterAuth) {
+        var cancelActor = MonsterAuth.getActor("admin");
+        order.cancelledAt = Date.now();
+        order.cancelledBy = cancelActor.name;
+        order.cancelledById = cancelActor.id;
+        order.cancelledByRole = cancelActor.role;
+    }
     if (typeof rollbackMemberPurchase ===
         "function") {
         rollbackMemberPurchase(order);
@@ -316,6 +344,13 @@ function cancelOrder(orderNo) {
     });
     saveTodayStats();
     saveSalesHistory();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "order.cancel",
+            "作廢訂單：" + orderNo,
+            { source: "admin", targetType: "order", targetId: orderNo }
+        );
+    }
     alert("✅ 訂單已作廢");
     var index = salesHistory.findIndex(function (item) {
         return item.orderNo === orderNo;

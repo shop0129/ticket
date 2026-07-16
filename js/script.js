@@ -51,7 +51,7 @@ function loginAdmin() {
         }
         return;
     }
-    if (!loginByRole(account, password)) {
+    if (!window.MonsterAuth || !MonsterAuth.login(account, password)) {
         alert("❌ 帳號、密碼錯誤或帳號已停用");
         passwordInput.value = "";
         passwordInput.focus();
@@ -60,10 +60,6 @@ function loginAdmin() {
     passwordInput.value = "";
     showPage("adminHomePage");
     applyRolePermissions();
-    if (window.RoleAuth) {
-        window.RoleAuth.sync();
-        window.RoleAuth.touchSession();
-    }
 }
 // =========================================
 // 統計分頁

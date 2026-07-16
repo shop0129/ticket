@@ -1,12 +1,11 @@
 // =========================================
-// 小怪獸售票機 V7.3F Sprint 2 - Employee Manager
+// 小怪獸售票機 V7.3 Phase 3E - Part 2
 // 員工管理後台（Android WebView 61 / ES5 相容）
 // =========================================
 (function () {
     "use strict";
 
     var editingEmployeeId = null;
-    var employeeFilterState = { query: "", role: "all", status: "all" };
 
     function roleApiReady() {
         return !!(window.MonsterRole && MonsterRole.getEmployees && MonsterRole.saveEmployees);
@@ -17,12 +16,14 @@
     }
 
     function requireAdmin() {
-        if (window.RoleAuth && window.RoleAuth.requireOwner) {
-            return window.RoleAuth.requireOwner();
+        if (window.MonsterPermission && !MonsterPermission.requirePermission("employee.manage", "❌ 此功能僅限店長使用")) {
+            return false;
         }
         if (!isAdmin()) {
             alert("❌ 此功能僅限店長使用");
-            if (window.showPage) { showPage("adminHomePage"); }
+            if (window.showPage) {
+                showPage("adminHomePage");
+            }
             return false;
         }
         return true;
@@ -108,48 +109,6 @@
         return count;
     }
 
-    function updateOverview(list) {
-        var total = list.length;
-        var enabled = 0;
-        var admins = 0;
-        var staff = 0;
-        var i;
-        for (i = 0; i < list.length; i += 1) {
-            if (list[i].enabled !== false) { enabled += 1; }
-            if (list[i].role === "admin") { admins += 1; } else { staff += 1; }
-        }
-        [
-            ["employeeTotalCount", total],
-            ["employeeEnabledCount", enabled],
-            ["employeeAdminCount", admins],
-            ["employeeStaffCount", staff]
-        ].forEach(function (item) {
-            var el = document.getElementById(item[0]);
-            if (el) { el.textContent = String(item[1]); }
-        });
-    }
-
-    function matchesFilter(employee) {
-        var haystack = (String(employee.name || "") + " " + String(employee.account || "")).toLowerCase();
-        if (employeeFilterState.query && haystack.indexOf(employeeFilterState.query) < 0) { return false; }
-        if (employeeFilterState.role !== "all" && employee.role !== employeeFilterState.role) { return false; }
-        if (employeeFilterState.status === "enabled" && employee.enabled === false) { return false; }
-        if (employeeFilterState.status === "disabled" && employee.enabled !== false) { return false; }
-        return true;
-    }
-
-    function downloadText(filename, text, mime) {
-        var blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
-        var url = URL.createObjectURL(blob);
-        var link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
-    }
-
     function renderEmployeeManager() {
         var listBox = document.getElementById("employeeManagerList");
         var list;
@@ -169,8 +128,6 @@
         }
         list = MonsterRole.getEmployees();
         current = MonsterRole.getCurrentUser();
-        updateOverview(list);
-        list = list.filter(matchesFilter);
         list.sort(function (a, b) {
             if (a.role !== b.role) {
                 return a.role === "admin" ? -1 : 1;
@@ -178,7 +135,7 @@
             return String(a.name || "").localeCompare(String(b.name || ""));
         });
         if (!list.length) {
-            listBox.innerHTML = '<div class="employee-empty">沒有符合篩選條件的員工帳號。</div>';
+            listBox.innerHTML = '<div class="employee-empty">尚未建立員工帳號。</div>';
             return;
         }
         for (i = 0; i < list.length; i += 1) {
@@ -186,7 +143,7 @@
             roleText = employee.role === "admin" ? "店長" : "員工";
             statusText = employee.enabled === false ? "已停用" : "啟用中";
             selfMark = current && current.id === employee.id ? '<span class="employee-self-tag">目前登入</span>' : "";
-            html += '<div class="employee-card ' + (employee.enabled === false ? 'is-disabled ' : '') + (current && current.id === employee.id ? 'is-current' : '') + '">' +
+            html += '<div class="employee-card ' + (employee.enabled === false ? 'is-disabled' : '') + '">' +
                 '<div class="employee-card-main">' +
                     '<div class="employee-avatar">' + (employee.role === "admin" ? "👑" : "👤") + '</div>' +
                     '<div class="employee-info">' +
@@ -217,7 +174,7 @@
             return '<div class="employee-editor-card">' +
                 '<div class="employee-editor-title">🔑 修改「' + escapeHtml(employee.name) + '」密碼</div>' +
                 '<div class="employee-form-grid one-column">' +
-                    '<label>新密碼<input id="employeeEditPassword" type="password" autocomplete="new-password" placeholder="至少 6 碼"></label>' +
+                    '<label>新密碼<input id="employeeEditPassword" type="password" autocomplete="new-password" placeholder="至少 4 碼"></label>' +
                     '<label>再次輸入<input id="employeeEditPasswordConfirm" type="password" autocomplete="new-password" placeholder="再次輸入新密碼"></label>' +
                 '</div>' +
                 '<div class="employee-editor-actions"><button class="save" onclick="saveEmployeePassword()">儲存新密碼</button><button onclick="closeEmployeeEditor()">取消</button></div>' +
@@ -230,7 +187,7 @@
                 '<label>登入帳號<input id="employeeEditAccount" type="text" maxlength="30" autocomplete="off" value="' + escapeHtml(employee ? employee.account : "") + '" placeholder="英文字母或數字"></label>' +
                 '<label>角色<select id="employeeEditRole"><option value="staff"' + (role === "staff" ? ' selected' : '') + '>員工</option><option value="admin"' + (role === "admin" ? ' selected' : '') + '>店長</option></select></label>' +
                 '<label>狀態<select id="employeeEditEnabled"><option value="true"' + (!employee || employee.enabled !== false ? ' selected' : '') + '>啟用</option><option value="false"' + (employee && employee.enabled === false ? ' selected' : '') + '>停用</option></select></label>' +
-                (!isEdit ? '<label class="full-row">初始密碼<input id="employeeEditPassword" type="password" autocomplete="new-password" placeholder="至少 6 碼"><span class="employee-password-hint">建議混合數字與英文字母，請勿使用店家電話。</span></label><label class="full-row">再次輸入<input id="employeeEditPasswordConfirm" type="password" autocomplete="new-password" placeholder="再次輸入初始密碼"></label>' : '') +
+                (!isEdit ? '<label class="full-row">初始密碼<input id="employeeEditPassword" type="password" autocomplete="new-password" placeholder="至少 4 碼"></label>' : '') +
             '</div>' +
             '<div id="employeeAccountCheck" class="employee-account-check"></div>' +
             '<div class="employee-editor-actions"><button class="save" onclick="saveEmployeeEditor()">儲存</button><button onclick="closeEmployeeEditor()">取消</button></div>' +
@@ -327,9 +284,8 @@
         var enabled;
         var passwordInput;
         var password;
-        var passwordConfirm;
-        var wasEditing;
         var i;
+        var wasEditing;
         if (!requireAdmin()) {
             return;
         }
@@ -339,8 +295,6 @@
         enabled = document.getElementById("employeeEditEnabled").value === "true";
         passwordInput = document.getElementById("employeeEditPassword");
         password = passwordInput ? passwordInput.value : "";
-        passwordConfirm = document.getElementById("employeeEditPasswordConfirm") ? document.getElementById("employeeEditPasswordConfirm").value : "";
-        wasEditing = !!editingEmployeeId;
         if (!name || !account) {
             alert("❌ 姓名與登入帳號不可空白");
             return;
@@ -353,16 +307,13 @@
             alert("❌ 此登入帳號已存在");
             return;
         }
-        if (!editingEmployeeId && password.length < 6) {
-            alert("❌ 初始密碼至少需要 6 碼");
-            return;
-        }
-        if (!editingEmployeeId && password !== passwordConfirm) {
-            alert("❌ 兩次輸入的初始密碼不一致");
+        if (!editingEmployeeId && password.length < 4) {
+            alert("❌ 初始密碼至少需要 4 碼");
             return;
         }
         list = MonsterRole.getEmployees();
         current = MonsterRole.getCurrentUser();
+        wasEditing = !!editingEmployeeId;
         if (editingEmployeeId) {
             employee = null;
             for (i = 0; i < list.length; i += 1) {
@@ -402,8 +353,12 @@
             });
         }
         MonsterRole.saveEmployees(list);
-        if (wasEditing && current && current.id === employee.id && MonsterRole.refreshCurrentUser) {
-            MonsterRole.refreshCurrentUser();
+        if (window.MonsterAuth) {
+            MonsterAuth.audit(
+                wasEditing ? "employee.update" : "employee.create",
+                (wasEditing ? "修改員工：" : "新增員工：") + name,
+                { source: "admin", targetType: "employee", targetId: employee ? employee.id : list[list.length - 1].id }
+            );
         }
         closeEmployeeEditor();
         renderEmployeeManager();
@@ -421,8 +376,8 @@
         }
         password = document.getElementById("employeeEditPassword").value;
         confirmPassword = document.getElementById("employeeEditPasswordConfirm").value;
-        if (password.length < 6) {
-            alert("❌ 新密碼至少需要 6 碼");
+        if (password.length < 4) {
+            alert("❌ 新密碼至少需要 4 碼");
             return;
         }
         if (password !== confirmPassword) {
@@ -443,6 +398,13 @@
             return;
         }
         MonsterRole.saveEmployees(list);
+        if (window.MonsterAuth) {
+            MonsterAuth.audit(
+                "employee.password_change",
+                "修改員工密碼",
+                { source: "admin", targetType: "employee", targetId: editingEmployeeId }
+            );
+        }
         closeEmployeeEditor();
         renderEmployeeManager();
         setMessage("密碼已修改", "success");
@@ -476,6 +438,13 @@
         employee.enabled = employee.enabled === false;
         employee.updatedAt = nowIso();
         MonsterRole.saveEmployees(list);
+        if (window.MonsterAuth) {
+            MonsterAuth.audit(
+                employee.enabled ? "employee.enable" : "employee.disable",
+                (employee.enabled ? "啟用員工：" : "停用員工：") + employee.name,
+                { source: "admin", targetType: "employee", targetId: employee.id }
+            );
+        }
         renderEmployeeManager();
         setMessage(employee.enabled ? "帳號已啟用" : "帳號已停用", "success");
     };
@@ -510,54 +479,16 @@
             }
         }
         MonsterRole.saveEmployees(next);
+        if (window.MonsterAuth) {
+            MonsterAuth.audit(
+                "employee.delete",
+                "刪除員工：" + employee.name,
+                { source: "admin", targetType: "employee", targetId: employee.id }
+            );
+        }
         closeEmployeeEditor();
         renderEmployeeManager();
         setMessage("員工帳號已刪除", "success");
-    };
-
-
-    window.filterEmployeeManager = function () {
-        var query = document.getElementById("employeeSearchInput");
-        var role = document.getElementById("employeeRoleFilter");
-        var status = document.getElementById("employeeStatusFilter");
-        employeeFilterState.query = query ? normalizeAccount(query.value) : "";
-        employeeFilterState.role = role ? role.value : "all";
-        employeeFilterState.status = status ? status.value : "all";
-        renderEmployeeManager();
-    };
-
-    window.resetEmployeeFilters = function () {
-        var query = document.getElementById("employeeSearchInput");
-        var role = document.getElementById("employeeRoleFilter");
-        var status = document.getElementById("employeeStatusFilter");
-        if (query) { query.value = ""; }
-        if (role) { role.value = "all"; }
-        if (status) { status.value = "all"; }
-        employeeFilterState = { query: "", role: "all", status: "all" };
-        renderEmployeeManager();
-    };
-
-    window.exportEmployeeSafeList = function () {
-        var list;
-        var safe;
-        var filename;
-        if (!requireAdmin()) { return; }
-        list = MonsterRole.getEmployees();
-        safe = list.map(function (employee) {
-            return {
-                id: employee.id,
-                name: employee.name,
-                account: employee.account,
-                role: employee.role,
-                enabled: employee.enabled !== false,
-                createdAt: employee.createdAt || null,
-                updatedAt: employee.updatedAt || null,
-                lastLogin: employee.lastLogin || null
-            };
-        });
-        filename = "monster_employee_list_" + new Date().toISOString().slice(0, 10) + ".json";
-        downloadText(filename, JSON.stringify(safe, null, 2), "application/json;charset=utf-8");
-        setMessage("員工清單已匯出（不含密碼）", "success");
     };
 
     document.addEventListener("DOMContentLoaded", function () {

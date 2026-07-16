@@ -14,7 +14,7 @@
 
     <link
         rel="stylesheet"
-        href="css/staff.css?v=72">
+        href="css/staff.css?v=73e3">
 </head>
 
 <body>
@@ -37,9 +37,14 @@
         </div>
 
         <input
+            id="staffAccount"
+            type="text"
+            autocomplete="username"
+            placeholder="請輸入帳號（例如 staff01）">
+
+        <input
             id="staffPassword"
             type="password"
-            inputmode="numeric"
             autocomplete="current-password"
             placeholder="請輸入密碼">
 
@@ -55,7 +60,7 @@
         </div>
 
         <div class="staff-login-hint">
-            員工密碼進入日常店務模式；店長密碼可編輯及刪除會員。
+            使用員工管理中建立的帳號登入，系統會依角色自動套用權限。
         </div>
 
     </div>
@@ -551,12 +556,14 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script src="js/cloud/firebase-config.js?v=72"></script>
-<script src="js/staff/staff-config.js?v=72"></script>
-<script src="js/staff/staff-app.js?v=72"></script>
+<script src="js/staff/staff-config.js?v=73e3"></script>
+<script src="js/modules/roleManager.js?v=73e3"></script>
+<script src="js/cloud/auth.js?v=73e3"></script>
+<script src="js/staff/staff-app.js?v=73e3"></script>
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
-<script src="js/staff/order-center.js?v=72"></script>
-<script src="js/staff/order-tools.js?v=72"></script>
+<script src="js/staff/order-center.js?v=73e3"></script>
+<script src="js/staff/order-tools.js?v=73e3"></script>
 
 </body>
 </html>

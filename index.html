@@ -11,7 +11,7 @@ content="width=device-width, initial-scale=1.0">
 <title>小怪獸放電所 售票機</title>
 
 <link rel="stylesheet" href="css/style.css?v=72c">
-<link rel="stylesheet" href="css/admin-ui.css?v=72c">
+<link rel="stylesheet" href="css/admin-ui.css?v=73e3">
 
 </head>
 
@@ -326,13 +326,9 @@ content="width=device-width, initial-scale=1.0">
 
             </div>
 
-            <div class="dashboard-user-area">
-                <div id="currentRoleBadge" class="role-badge"></div>
-                <div class="dashboard-login-meta">
-                    <span>登入：<strong id="dashboardCurrentUser">尚未登入</strong></span>
-                    <span>角色：<strong id="dashboardCurrentRole">-</strong></span>
-                    <span>時間：<strong id="dashboardLoginTime">-</strong></span>
-                </div>
+            <div
+                id="currentRoleBadge"
+                class="role-badge">
             </div>
 
         </div>
@@ -585,6 +581,12 @@ content="width=device-width, initial-scale=1.0">
 
                     <button
                         class="dashboard-action-btn admin-only-action"
+                        onclick="openAuditLogPage()">
+                        🧭 操作紀錄
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
                         onclick="openSystemSetting()">
                         ⚙️ 系統設定
                     </button>
@@ -618,6 +620,19 @@ content="width=device-width, initial-scale=1.0">
 </section>
 
 
+<!-- 操作紀錄 V7.3 Phase 3E Part 3 -->
+<section id="auditLogPage" class="page">
+    <div class="tm-page audit-log-page">
+        <div class="tm-top">
+            <button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button>
+            <h1 class="tm-title">🧭 操作紀錄</h1>
+        </div>
+        <div class="audit-log-note">顯示登入、員工管理、訂單、會員、入離場、設定與資料管理等操作。</div>
+        <div id="auditLogList" class="audit-log-list"></div>
+    </div>
+</section>
+
+
 <!-- 員工管理 V7.3 Phase 3E Part 2 -->
 <section id="employeeManagerPage" class="page">
     <div class="tm-page employee-manager-page">
@@ -630,32 +645,7 @@ content="width=device-width, initial-scale=1.0">
             <div class="employee-toolbar-info">
                 僅店長可新增、修改、停用與刪除員工帳號。
             </div>
-            <div class="employee-toolbar-actions">
-                <button class="employee-export-btn" onclick="exportEmployeeSafeList()">📤 匯出清單</button>
-                <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
-            </div>
-        </div>
-
-        <div class="employee-overview-grid">
-            <div class="employee-overview-card"><span>全部帳號</span><strong id="employeeTotalCount">0</strong></div>
-            <div class="employee-overview-card"><span>啟用中</span><strong id="employeeEnabledCount">0</strong></div>
-            <div class="employee-overview-card"><span>店長</span><strong id="employeeAdminCount">0</strong></div>
-            <div class="employee-overview-card"><span>員工</span><strong id="employeeStaffCount">0</strong></div>
-        </div>
-
-        <div class="employee-filter-bar">
-            <input id="employeeSearchInput" type="search" placeholder="搜尋姓名或登入帳號" oninput="filterEmployeeManager()">
-            <select id="employeeRoleFilter" onchange="filterEmployeeManager()">
-                <option value="all">全部角色</option>
-                <option value="admin">店長</option>
-                <option value="staff">員工</option>
-            </select>
-            <select id="employeeStatusFilter" onchange="filterEmployeeManager()">
-                <option value="all">全部狀態</option>
-                <option value="enabled">啟用中</option>
-                <option value="disabled">已停用</option>
-            </select>
-            <button onclick="resetEmployeeFilters()">清除篩選</button>
+            <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
         </div>
 
         <div id="employeeEditorPanel" class="employee-editor-panel" style="display:none;"></div>
@@ -1506,12 +1496,12 @@ content="width=device-width, initial-scale=1.0">
     
 <script src="js/modules/operation.js?v=72c"></script>
 <script src="js/modules/dashboard.js?v=72c"></script>
-<script src="js/modules/roleManager.js?v=73f2"></script>
-<script src="js/auth.js?v=73f2"></script>
-<script src="js/modules/employeeManager.js?v=73f2"></script>
-<script src="js/script.js?v=73e2"></script>
+<script src="js/modules/roleManager.js?v=73e3"></script>
+<script src="js/cloud/auth.js?v=73e3"></script>
+<script src="js/modules/employeeManager.js?v=73e3"></script>
+<script src="js/script.js?v=73e3"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3F Sprint 2</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3E Part 3</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>

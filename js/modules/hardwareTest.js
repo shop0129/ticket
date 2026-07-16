@@ -47,6 +47,9 @@ var hardwareTestTicket = document.getElementById("hardwareTestTicket");
 // 開啟硬體測試中心
 // =========================================
 function openHardwareTest() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("hardware.manage", "❌ 只有店長可以使用硬體測試")) {
+        return;
+    }
     renderDeviceInfo();
     resetHardwareTestStatus();
     showPage("hardwareTestPage");

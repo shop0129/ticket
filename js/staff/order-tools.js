@@ -32,10 +32,17 @@
     }
 
     function operatorName(){
+        if(window.MonsterAuth){
+            return MonsterAuth.getActor("staff").name;
+        }
+        return selectedRole === "admin" ? "店長" : "員工";
+    }
 
-        return selectedRole === "admin"
-        ? "店長"
-        : "員工";
+    function currentActor(){
+        if(window.MonsterAuth){
+            return MonsterAuth.getActor("staff");
+        }
+        return {id:"",role:selectedRole || "staff",name:operatorName()};
     }
 
     function orderRef(){
@@ -53,7 +60,8 @@
             selectedOrder &&
             selectedOrder.queueNumber || "",
             operator:operatorName(),
-            role:selectedRole,
+            operatorId:currentActor().id || "",
+            role:currentActor().role || selectedRole,
             createdAt:Date.now(),
             date:
             new Date()
@@ -67,6 +75,14 @@
         orderRef()
         .child("operationLogs")
         .push(data);
+
+        if(window.MonsterAuth){
+            MonsterAuth.audit(
+                "order." + type,
+                detail || "",
+                {source:"staff",targetType:"order",targetId:selectedOrderId}
+            );
+        }
     }
 
     function memberList(){
@@ -923,8 +939,10 @@
 
     function cancelOrder(){
 
-        if(selectedRole !== "admin"){
-            alert("只有店長可以作廢訂單");
+        if(
+            window.MonsterPermission &&
+            !MonsterPermission.requirePermission("order.cancel","❌ 只有店長可以作廢訂單")
+        ){
             return;
         }
 
@@ -961,6 +979,8 @@
                 cancelledAt:Date.now(),
                 cancelledBy:
                 operatorName(),
+                cancelledById:currentActor().id || "",
+                cancelledByRole:currentActor().role || selectedRole,
                 updatedAt:Date.now()
             });
         })
@@ -978,7 +998,10 @@
 
     function forceEnter(){
 
-        if(selectedRole !== "admin"){
+        if(
+            window.MonsterPermission &&
+            !MonsterPermission.requirePermission("capacity.update","❌ 只有店長可以強制入場")
+        ){
             return;
         }
 

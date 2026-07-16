@@ -18,6 +18,7 @@
 
     var loginPage;
     var homePage;
+    var accountInput;
     var passwordInput;
     var loginMessage;
     var roleBadge;
@@ -108,13 +109,35 @@
         : "staff-login-message";
     }
 
+    function currentActor(){
+        if(window.MonsterAuth && MonsterAuth.getActor){
+            return MonsterAuth.getActor("staff");
+        }
+        return {
+            id:"",
+            account:"",
+            name:currentRole === "admin" ? "店長" : "員工",
+            role:currentRole || "staff",
+            source:"staff"
+        };
+    }
+
+    function operatorName(){
+        return currentActor().name;
+    }
+
     function saveSession(role){
+
+        var actor = currentActor();
 
         sessionStorage.setItem(
             config.sessionKey ||
             "monsterStaffSession",
             JSON.stringify({
                 role:role,
+                userId:actor.id || "",
+                account:actor.account || "",
+                name:actor.name || "",
                 loginAt:Date.now()
             })
         );
@@ -123,6 +146,14 @@
     function loadSession(){
 
         try{
+
+            if(
+                window.MonsterAuth &&
+                MonsterAuth.restoreSession &&
+                MonsterAuth.restoreSession()
+            ){
+                return MonsterAuth.getCurrentRole();
+            }
 
             var data =
             JSON.parse(
@@ -166,9 +197,10 @@
         currentRole;
 
         roleBadge.textContent =
-        currentRole === "admin"
-        ? "👑 店長模式"
-        : "👤 員工模式";
+        (currentRole === "admin" ? "👑 " : "👤 ") +
+        operatorName() +
+        "｜" +
+        (currentRole === "admin" ? "店長" : "員工");
 
         byId("staffHomeSubtitle").textContent =
         currentRole === "admin"
@@ -193,32 +225,34 @@
         loginPage.style.display = "flex";
 
         passwordInput.value = "";
-        passwordInput.focus();
+        if(accountInput){
+            accountInput.focus();
+        }
 
         showLoginMessage("",false);
     }
 
     function login(){
 
+        var account =
+        accountInput.value.trim();
+
         var password =
         passwordInput.value;
 
+        if(!account){
+            showLoginMessage("請輸入員工帳號",true);
+            accountInput.focus();
+            return;
+        }
+
         if(
-            password ===
-            String(config.adminPassword || "1234")
+            !window.MonsterAuth ||
+            !MonsterAuth.login(account,password)
         ){
-            currentRole = "admin";
-
-        }else if(
-            password ===
-            String(config.staffPassword || "0000")
-        ){
-            currentRole = "staff";
-
-        }else{
 
             showLoginMessage(
-                "密碼錯誤，請重新輸入",
+                "帳號、密碼錯誤或帳號已停用",
                 true
             );
 
@@ -226,11 +260,18 @@
             return;
         }
 
+        currentRole =
+        MonsterAuth.getCurrentRole();
+
         saveSession(currentRole);
         showHome();
     }
 
     function logout(){
+
+        if(window.MonsterAuth){
+            MonsterAuth.logout();
+        }
 
         sessionStorage.removeItem(
             config.sessionKey ||
@@ -727,6 +768,8 @@
         byId("staffEditMemberId")
         .value;
 
+        var isNew = !id;
+
         var name =
         byId("staffEditMemberName")
         .value.trim();
@@ -770,10 +813,7 @@
         var now =
         Date.now();
 
-        var roleName =
-        currentRole === "admin"
-        ? "店長"
-        : "員工";
+        var roleName = operatorName();
 
         var data;
 
@@ -824,6 +864,7 @@
                 pointHistory:[],
                 toyPointHistory:[],
                 lastPurchaseDate:"",
+                createdAt:now,
                 updatedAt:now,
                 updatedBy:roleName,
                 deleted:false
@@ -838,6 +879,14 @@
         )
         .set(data)
         .then(function(){
+
+            if(window.MonsterAuth){
+                MonsterAuth.audit(
+                    isNew ? "member.create" : "member.update",
+                    "會員：" + data.name,
+                    {source:"staff",targetType:"member",targetId:id}
+                );
+            }
 
             closeMemberModal();
 
@@ -865,6 +914,16 @@
 
     function deleteSelectedMember(){
 
+        if(
+            window.MonsterPermission &&
+            !MonsterPermission.requirePermission(
+                "member.delete",
+                "❌ 只有店長可以刪除會員"
+            )
+        ){
+            return;
+        }
+
         var member =
         selectedMember();
 
@@ -888,7 +947,7 @@
         var update = {
             deleted:true,
             updatedAt:Date.now(),
-            updatedBy:"店長"
+            updatedBy:operatorName()
         };
 
         firebase.database()
@@ -899,6 +958,14 @@
         )
         .update(update)
         .then(function(){
+
+            if(window.MonsterAuth){
+                MonsterAuth.audit(
+                    "member.delete",
+                    "刪除會員：" + member.name,
+                    {source:"staff",targetType:"member",targetId:member.id}
+                );
+            }
 
             closeMemberDetail();
             searchMembers();
@@ -1073,10 +1140,7 @@
             reason:reason,
             note:note,
             orderNo:"",
-            operator:
-            currentRole === "admin"
-            ? "店長"
-            : "員工",
+            operator:operatorName(),
             balance:balance
         });
 
@@ -1084,10 +1148,7 @@
             toyPoints:balance,
             toyPointHistory:history,
             updatedAt:Date.now(),
-            updatedBy:
-            currentRole === "admin"
-            ? "店長"
-            : "員工"
+            updatedBy:operatorName()
         };
 
         firebase.database()
@@ -1099,6 +1160,14 @@
         )
         .update(updates)
         .then(function(){
+
+            if(window.MonsterAuth){
+                MonsterAuth.audit(
+                    "member.toy_points",
+                    member.name + "：" + (change > 0 ? "+" : "") + change + " 點",
+                    {source:"staff",targetType:"member",targetId:member.id}
+                );
+            }
 
             closeToyPointModal();
 
@@ -1254,6 +1323,16 @@
         byId("staffLogoutButton")
         .addEventListener("click",logout);
 
+        accountInput
+        .addEventListener(
+            "keydown",
+            function(event){
+                if(event.key === "Enter" || event.keyCode === 13){
+                    passwordInput.focus();
+                }
+            }
+        );
+
         passwordInput
         .addEventListener(
             "keydown",
@@ -1399,6 +1478,9 @@
 
         homePage =
         byId("staffHomePage");
+
+        accountInput =
+        byId("staffAccount");
 
         passwordInput =
         byId("staffPassword");

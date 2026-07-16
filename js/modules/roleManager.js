@@ -53,11 +53,18 @@ var currentUser = null;
         var list = readEmployees();
         var changed = false;
         var hasAdmin = false;
+        var hasStaff = false;
+        var legacyConfig = window.MONSTER_STAFF_CONFIG || {};
+        var adminPassword = String((window.systemData && systemData.adminPassword) || legacyConfig.adminPassword || "1234");
+        var staffPassword = String((window.systemData && systemData.staffPassword) || legacyConfig.staffPassword || "0000");
         var i;
 
         for (i = 0; i < list.length; i += 1) {
             if (list[i].role === ROLE_ADMIN && list[i].enabled !== false) {
                 hasAdmin = true;
+            }
+            if (list[i].role === ROLE_STAFF) {
+                hasStaff = true;
             }
         }
 
@@ -66,7 +73,7 @@ var currentUser = null;
                 id: makeId("manager"),
                 account: "manager",
                 name: "店長",
-                password: String((window.systemData && systemData.adminPassword) || "1234"),
+                password: adminPassword,
                 role: ROLE_ADMIN,
                 enabled: true,
                 createdAt: nowIso(),
@@ -76,12 +83,12 @@ var currentUser = null;
             changed = true;
         }
 
-        if (list.length === 1 && window.systemData && systemData.staffPassword) {
+        if (!hasStaff) {
             list.push({
                 id: makeId("staff"),
                 account: "staff01",
                 name: "員工01",
-                password: String(systemData.staffPassword || "0000"),
+                password: staffPassword,
                 role: ROLE_STAFF,
                 enabled: true,
                 createdAt: nowIso(),
@@ -118,19 +125,6 @@ var currentUser = null;
             return;
         }
         sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(user));
-    }
-
-
-    function readSessionLoginAt() {
-        var raw;
-        var session;
-        try {
-            raw = sessionStorage.getItem(SESSION_STORAGE_KEY);
-            session = raw ? JSON.parse(raw) : null;
-            return session && session.loginAt ? session.loginAt : null;
-        } catch (error) {
-            return null;
-        }
     }
 
     function restoreSession() {
@@ -220,7 +214,7 @@ var currentUser = null;
     }
 
     window.MonsterRole = {
-        version: "7.3F-Sprint2",
+        version: "7.3-Phase3E-Part2",
         getEmployees: function () {
             return clone(ensureDefaultAccounts());
         },
@@ -249,24 +243,6 @@ var currentUser = null;
             applyRolePermissions();
         },
         restoreSession: restoreSession,
-        refreshCurrentUser: function () {
-            var list = ensureDefaultAccounts();
-            var i;
-            if (!currentUser) { return false; }
-            for (i = 0; i < list.length; i += 1) {
-                if (list[i].id === currentUser.id && list[i].enabled !== false) {
-                    currentUser = publicUser(list[i]);
-                    currentUser.loginAt = (readSessionLoginAt() || currentUser.loginAt);
-                    currentUserRole = currentUser.role;
-                    window.currentUser = currentUser;
-                    window.currentUserRole = currentUserRole;
-                    saveSession(currentUser);
-                    applyRolePermissions();
-                    return true;
-                }
-            }
-            return false;
-        },
         refresh: applyRolePermissions
     };
 
@@ -281,9 +257,10 @@ var currentUser = null;
         if (window.playClick) {
             playClick();
         }
-        window.MonsterRole.logout();
-        if (window.RoleAuth && window.RoleAuth.sync) {
-            window.RoleAuth.sync();
+        if (window.MonsterAuth && MonsterAuth.logout) {
+            MonsterAuth.logout();
+        } else {
+            window.MonsterRole.logout();
         }
         if (window.showPage) {
             showPage("homePage");

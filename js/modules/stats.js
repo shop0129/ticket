@@ -117,6 +117,9 @@ function setStatsTabActive(type) {
 // 今日統計歸零
 //==========================
 function resetTodayStats() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("stats.reset", "❌ 只有店長可以歸零統計")) {
+        return;
+    }
     if (!confirm("確定要將今日統計歸零？")) {
         return;
     }
@@ -130,6 +133,9 @@ function resetTodayStats() {
 // 本月統計歸零
 //==========================
 function resetMonthStats() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("stats.reset", "❌ 只有店長可以歸零統計")) {
+        return;
+    }
     if (!confirm("確定清除本月統計？")) {
         return;
     }
@@ -143,6 +149,9 @@ function resetMonthStats() {
 // 所有統計歸零
 //==========================
 function resetAllStats() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("stats.reset", "❌ 只有店長可以歸零統計")) {
+        return;
+    }
     if (!confirm("確定清除今日、本月及累積統計？")) {
         return;
     }

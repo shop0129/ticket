@@ -57,9 +57,19 @@ function saveSalesRecord(paymentType, totalAmount) {
                     toy: ticketData[selectedTicket].toy || "none",
                     reward: ticketData[selectedTicket].reward || ""
                 }], status: "normal" });
+    if (window.MonsterAuth) {
+        order = MonsterAuth.decorateRecord(order, "kiosk");
+    }
     currentPrintOrder = order;
     salesHistory.unshift(order);
     saveSalesHistory();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit(
+            "order.create",
+            "建立訂單：" + order.orderNo + "，金額 NT$" + order.amount,
+            { source: order.source || "kiosk", targetType: "order", targetId: order.orderNo }
+        );
+    }
 }
 // =========================================
 // 共用付款按鈕

@@ -3,6 +3,9 @@
 // 開啟營業模式
 //==========================
 function openBusinessMode() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("business.update", "❌ 只有店長可以修改營業模式")) {
+        return;
+    }
     renderBusinessMode();
     showPage("businessModePage");
 }
@@ -67,6 +70,9 @@ function previewBusinessMode(id) {
 // 儲存
 //==========================
 function saveBusinessMode() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("business.update", "❌ 只有店長可以修改營業模式")) {
+        return;
+    }
     var selected = document.querySelector("input[name='businessMode']:checked");
     var autoMode = document.getElementById("autoMode");
     if (!selected) {
@@ -83,12 +89,18 @@ function saveBusinessMode() {
     // 立即更新首頁票券
     updateTicketButtons();
     renderBusinessMode();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit("business.update", "營業模式：" + businessMode.mode, { source: "admin", targetType: "business", targetId: "mode" });
+    }
     alert("✅ 營業模式已儲存");
 }
 //==========================
 // 恢復預設
 //==========================
 function resetBusinessMode() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("business.update", "❌ 只有店長可以恢復營業模式")) {
+        return;
+    }
     if (!confirm("確定恢復預設營業模式？")) {
         return;
     }

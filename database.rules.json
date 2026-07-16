@@ -1,24 +1,18 @@
 {
   "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null",
-    "roleBindings": {
-      "$uid": {
-        ".read": "$uid === auth.uid || root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'",
-        ".write": "root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'",
-        ".validate": "newData.hasChildren(['role','name']) && (newData.child('role').val() === 'admin' || newData.child('role').val() === 'staff')"
+    ".read": false,
+    ".write": false,
+    "monsterTicket": {
+      "v1": {
+        ".read": "auth != null",
+        "orders": { ".write": "auth != null" },
+        "members": { ".write": "auth != null" },
+        "tickets": { ".write": "auth != null" },
+        "dashboard": { ".write": "auth != null" },
+        "venue": { ".write": "auth != null" },
+        "logs": { ".write": "auth != null" },
+        "auditLogs": { ".write": "auth != null" }
       }
-    },
-    "employees": {
-      ".read": "root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'",
-      ".write": "root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'"
-    },
-    "systemSettings": {
-      ".write": "root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'"
-    },
-    "backups": {
-      ".read": "root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'",
-      ".write": "root.child('roleBindings').child(auth.uid).child('role').val() === 'admin'"
     }
   }
 }

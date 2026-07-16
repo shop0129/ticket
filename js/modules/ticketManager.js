@@ -23,6 +23,9 @@ function saveTicketData(){
 }
 
 function openTicketManager() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以管理票券")) {
+        return;
+    }
     renderTicketManager();
     showPage("ticketManagerPage");
 }
@@ -79,6 +82,9 @@ function escapeTicketValue(value) {
 }
 function addNewTicket() {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以新增票券")) {
+        return;
+    }
     var id = "custom_" + Date.now();
     ticketData[id] = {
         title: "新票券",
@@ -110,6 +116,9 @@ function addNewTicket() {
 }
 function deleteCustomTicket(id) {
     playClick();
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以刪除票券")) {
+        return;
+    }
     var ticket = ticketData[id];
     if (!ticket || !ticket.custom) {
         return;
@@ -123,6 +132,9 @@ function deleteCustomTicket(id) {
     updateTicketButtons();
 }
 function saveTicketManager() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以修改票券")) {
+        return;
+    }
     for (var id in ticketData) {
         var ticket = ticketData[id];
         ticket.enable =
@@ -146,6 +158,9 @@ function saveTicketManager() {
     updateTicketButtons();
     updateTicketPrices();
     renderTicketManager();
+    if (window.MonsterAuth) {
+        MonsterAuth.audit("ticket.update", "儲存票券設定", { source: "admin", targetType: "ticket", targetId: "catalog" });
+    }
     alert("✅ 票券設定已儲存");
 }
 function buildTicketReward(ticket) {
@@ -163,6 +178,9 @@ function buildTicketReward(ticket) {
     return rewards.join(",");
 }
 function resetTicketManager() {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以恢復票券設定")) {
+        return;
+    }
     if (!confirm("確定恢復預設票券？")) {
         return;
     }
