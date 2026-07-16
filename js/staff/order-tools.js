@@ -660,52 +660,9 @@
         });
     }
 
-    function releaseVenueCapacity(orderId,order){
+    function releaseVenueCapacity(){
 
-        if(
-            order.playStatus !==
-            "playing"
-        ){
-            return Promise.resolve();
-        }
-
-        return firebase.database()
-        .ref(ROOT + "/venue/state")
-        .transaction(function(state){
-
-            state = state || {
-                maxPlayers:40,
-                currentPlayers:0,
-                activeOrders:{}
-            };
-
-            state.activeOrders =
-            state.activeOrders || {};
-
-            var count =
-            Number(
-                state.activeOrders[
-                    orderId
-                ] || 0
-            );
-
-            state.currentPlayers =
-            Math.max(
-                0,
-                Number(
-                    state.currentPlayers || 0
-                ) - count
-            );
-
-            delete state.activeOrders[
-                orderId
-            ];
-
-            state.updatedAt =
-            Date.now();
-
-            return state;
-        });
+        return Promise.resolve();
     }
 
     function cancelOrder(){
@@ -778,101 +735,79 @@
 
         if(
             !confirm(
-                "此操作可能超過場內上限。\n確定由店長強制入場？"
+                "此操作會略過容量限制。\n確定由店長強制入場？"
             )
         ){
             return;
         }
 
-        var players =
-        Math.max(
-            1,
-            Number(
-                selectedOrder.playerCount ||
-                1
-            )
+        orderRef()
+        .transaction(
+            function(current){
+
+                if(
+                    !current ||
+                    current.deleted ||
+                    current.playStatus !==
+                    "waiting"
+                ){
+                    return;
+                }
+
+                var now = Date.now();
+
+                var expected =
+                window.MonsterOrderLifecycle
+                .expectedExitTimestamp(
+                    now,
+                    Number(
+                        current.playMinutes ||
+                        120
+                    ),
+                    current.fixedExitTime ||
+                    "",
+                    current.timeMode ||
+                    "duration"
+                );
+
+                current.playStatus =
+                "playing";
+
+                current.entryTime =
+                now;
+
+                current.expectedExitTime =
+                expected;
+
+                current.exitTime =
+                null;
+
+                current.forcedEntry =
+                true;
+
+                current.enteredBy =
+                "店長";
+
+                current.updatedAt =
+                now;
+
+                return current;
+            },
+            function(error,committed){
+
+                if(error || !committed){
+                    alert(
+                        "強制入場失敗，訂單狀態可能已變更"
+                    );
+                    return;
+                }
+
+                logAction(
+                    "force_entry",
+                    "店長強制入場"
+                );
+            }
         );
-
-        var guardians =
-        Math.max(
-            0,
-            Number(
-                selectedOrder.guardianCount ||
-                0
-            )
-        );
-
-        firebase.database()
-        .ref(ROOT + "/venue/state")
-        .transaction(function(state){
-
-            state = state || {
-                maxPlayers:40,
-                currentPlayers:0,
-                activeOrders:{}
-            };
-
-            state.activeOrders =
-            state.activeOrders || {};
-
-            var count =
-            players +
-            (
-                state.countGuardians
-                ? guardians
-                : 0
-            );
-
-            state.currentPlayers =
-            Number(
-                state.currentPlayers || 0
-            ) + count;
-
-            state.activeOrders[
-                selectedOrderId
-            ] = count;
-
-            state.updatedAt =
-            Date.now();
-
-            return state;
-        })
-        .then(function(){
-
-            var now = Date.now();
-
-            var expected =
-            window.MonsterOrderLifecycle
-            .expectedExitTimestamp(
-                now,
-                Number(
-                    selectedOrder.playMinutes ||
-                    120
-                ),
-                selectedOrder.fixedExitTime ||
-                "",
-                selectedOrder.timeMode ||
-                "duration"
-            );
-
-            return orderRef()
-            .update({
-                playStatus:"playing",
-                entryTime:now,
-                expectedExitTime:
-                expected,
-                forcedEntry:true,
-                enteredBy:"店長",
-                updatedAt:now
-            });
-        })
-        .then(function(){
-
-            logAction(
-                "force_entry",
-                "店長強制入場"
-            );
-        });
     }
 
     function historyHtml(order){

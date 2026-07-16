@@ -12,9 +12,9 @@
     "play";
 
     var orders = {};
-    var venue = {
+    var venueSettings = {
         maxPlayers:40,
-        currentPlayers:0
+        countGuardians:false
     };
 
     function esc(value){
@@ -56,15 +56,61 @@
         return result;
     }
 
+    function calculateCurrentPlayers(){
+
+        var total = 0;
+
+        Object.keys(orders || {})
+        .forEach(function(id){
+
+            var order =
+            orders[id];
+
+            if(
+                order &&
+                !order.deleted &&
+                order.playStatus ===
+                "playing"
+            ){
+                total +=
+                Number(
+                    order.playerCount || 0
+                ) +
+                (
+                    venueSettings.countGuardians
+                    ? Number(
+                        order.guardianCount || 0
+                    )
+                    : 0
+                );
+            }
+        });
+
+        return total;
+    }
+
     function updateCapacity(){
+
         var current =
-        Number(venue.currentPlayers || 0);
+        calculateCurrentPlayers();
+
         var max =
-        Number(venue.maxPlayers || 40);
-        document.getElementById("displayCapacity").textContent =
+        Number(
+            venueSettings.maxPlayers ||
+            40
+        );
+
+        document.getElementById(
+            "displayCapacity"
+        ).textContent =
         current + " / " + max;
-        document.getElementById("displayRemaining").textContent =
-        "剩餘 " + Math.max(0,max-current) + " 人";
+
+        document.getElementById(
+            "displayRemaining"
+        ).textContent =
+        "剩餘 " +
+        Math.max(0,max-current) +
+        " 人";
     }
 
     function remaining(order){
@@ -152,8 +198,10 @@
         var remainingCapacity =
         Math.max(
             0,
-            Number(venue.maxPlayers||40) -
-            Number(venue.currentPlayers||0)
+            Number(
+                venueSettings.maxPlayers || 40
+            ) -
+            calculateCurrentPlayers()
         );
         box.innerHTML=rows.slice(0,10).map(function(order,index){
             var ready =
@@ -186,9 +234,13 @@
             render();
         });
         firebase.database()
-        .ref(ROOT+"/venue/state")
+        .ref(ROOT+"/venue/settings")
         .on("value",function(snapshot){
-            venue=snapshot.val()||venue;
+
+            venueSettings =
+            snapshot.val() ||
+            venueSettings;
+
             render();
         });
 

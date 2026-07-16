@@ -14,11 +14,11 @@
     "monsterTicket/v1";
 
     var ordersMap = {};
-    var venueState = {
+    var venueSettings = {
         maxPlayers:
         Number(config.defaultMaxPlayers || 40),
-        currentPlayers:0,
-        activeOrders:{}
+        countGuardians:
+        Boolean(config.countGuardians)
     };
 
     var selectedOrderId = "";
@@ -161,13 +161,54 @@
         return list;
     }
 
+    function orderCapacityCount(order){
+
+        if(
+            !order ||
+            order.deleted ||
+            order.playStatus !== "playing"
+        ){
+            return 0;
+        }
+
+        return (
+            Number(order.playerCount || 0) +
+            (
+                venueSettings.countGuardians
+                ? Number(order.guardianCount || 0)
+                : 0
+            )
+        );
+    }
+
+    function calculateCurrentPlayers(orderMap){
+
+        var map =
+        orderMap || ordersMap || {};
+
+        var total = 0;
+
+        Object.keys(map)
+        .forEach(function(id){
+
+            total +=
+            orderCapacityCount(map[id]);
+        });
+
+        return total;
+    }
+
     function updateCapacityCards(){
 
         var max =
-        Number(venueState.maxPlayers || 40);
+        Number(
+            venueSettings.maxPlayers ||
+            config.defaultMaxPlayers ||
+            40
+        );
 
         var current =
-        Number(venueState.currentPlayers || 0);
+        calculateCurrentPlayers();
 
         var waiting =
         listOrders().filter(function(order){
@@ -207,6 +248,14 @@
         if(byId("staffMaxPlayersInput")){
             byId("staffMaxPlayersInput")
             .value = max;
+        }
+
+        if(byId("staffCountGuardiansInput")){
+            byId("staffCountGuardiansInput")
+            .checked =
+            Boolean(
+                venueSettings.countGuardians
+            );
         }
     }
 
@@ -772,80 +821,152 @@
             ) || 120
         );
 
-        var countGuardians =
-        Boolean(
-            venueState.countGuardians
-        );
-
         var enteringCount =
         players +
         (
-            countGuardians
+            venueSettings.countGuardians
             ? guardians
             : 0
         );
 
-        var stateRef =
+        var maxPlayers =
+        Number(
+            venueSettings.maxPlayers ||
+            config.defaultMaxPlayers ||
+            40
+        );
+
+        var ordersRef =
         firebase.database()
-        .ref(ROOT + "/venue/state");
+        .ref(ROOT + "/orders");
 
-        stateRef.transaction(
-            function(current){
+        var blockedInfo = null;
 
-                current = current || {
-                    maxPlayers:
-                    Number(
-                        config.defaultMaxPlayers ||
-                        40
-                    ),
-                    currentPlayers:0,
-                    activeOrders:{}
-                };
+        ordersRef.transaction(
+            function(currentOrders){
 
-                current.activeOrders =
-                current.activeOrders || {};
+                currentOrders =
+                currentOrders || {};
+
+                var currentOrder =
+                currentOrders[
+                    selectedOrderId
+                ];
 
                 if(
-                    current.activeOrders[
-                        selectedOrderId
-                    ]
-                ){
-                    return current;
-                }
-
-                var max =
-                Number(
-                    current.maxPlayers ||
-                    config.defaultMaxPlayers ||
-                    40
-                );
-
-                var nowCount =
-                Number(
-                    current.currentPlayers ||
-                    0
-                );
-
-                if(
-                    nowCount + enteringCount >
-                    max
+                    !currentOrder ||
+                    currentOrder.deleted
                 ){
                     return;
                 }
 
-                current.currentPlayers =
-                nowCount + enteringCount;
+                if(
+                    currentOrder.playStatus ===
+                    "playing"
+                ){
+                    return currentOrders;
+                }
 
-                current.activeOrders[
+                var currentPlayers = 0;
+
+                Object.keys(currentOrders)
+                .forEach(function(id){
+
+                    var row =
+                    currentOrders[id];
+
+                    if(
+                        row &&
+                        !row.deleted &&
+                        row.playStatus ===
+                        "playing"
+                    ){
+                        currentPlayers +=
+                        Number(
+                            row.playerCount || 0
+                        ) +
+                        (
+                            venueSettings.countGuardians
+                            ? Number(
+                                row.guardianCount || 0
+                            )
+                            : 0
+                        );
+                    }
+                });
+
+                if(
+                    currentPlayers +
+                    enteringCount >
+                    maxPlayers
+                ){
+                    blockedInfo = {
+                        current:currentPlayers,
+                        entering:enteringCount,
+                        max:maxPlayers
+                    };
+
+                    return;
+                }
+
+                var now = Date.now();
+
+                var expectedExit =
+                window.MonsterOrderLifecycle &&
+                typeof window.MonsterOrderLifecycle
+                .expectedExitTimestamp ===
+                "function"
+                ? window.MonsterOrderLifecycle
+                .expectedExitTimestamp(
+                    now,
+                    minutes,
+                    currentOrder.fixedExitTime || "",
+                    currentOrder.timeMode ||
+                    "duration"
+                )
+                : (
+                    currentOrder.timeMode ===
+                    "unlimited"
+                    ? null
+                    : now + minutes * 60000
+                );
+
+                currentOrder.playStatus =
+                "playing";
+
+                currentOrder.playerCount =
+                players;
+
+                currentOrder.guardianCount =
+                guardians;
+
+                currentOrder.playMinutes =
+                minutes;
+
+                currentOrder.entryTime =
+                now;
+
+                currentOrder.expectedExitTime =
+                expectedExit;
+
+                currentOrder.exitTime =
+                null;
+
+                currentOrder.enteredBy =
+                currentRole === "admin"
+                ? "店長"
+                : "員工";
+
+                currentOrder.updatedAt =
+                now;
+
+                currentOrders[
                     selectedOrderId
-                ] = enteringCount;
+                ] = currentOrder;
 
-                current.updatedAt =
-                Date.now();
-
-                return current;
+                return currentOrders;
             },
-            function(error,committed,snapshot){
+            function(error,committed){
 
                 if(error){
 
@@ -857,60 +978,27 @@
 
                 if(!committed){
 
-                    var state =
-                    snapshot.val() || venueState;
+                    if(blockedInfo){
 
-                    alert(
-                        "目前場內 " +
-                        Number(state.currentPlayers || 0) +
-                        " 人\n此訂單需 " +
-                        enteringCount +
-                        " 個名額\n上限 " +
-                        Number(state.maxPlayers || 40) +
-                        " 人\n\n場內人數已滿，請先候位。"
-                    );
+                        alert(
+                            "目前場內 " +
+                            blockedInfo.current +
+                            " 人\n此訂單需 " +
+                            blockedInfo.entering +
+                            " 個名額\n上限 " +
+                            blockedInfo.max +
+                            " 人\n\n場內人數已滿，請先候位。"
+                        );
+
+                    }else{
+
+                        alert(
+                            "訂單狀態已變更，請重新整理"
+                        );
+                    }
+
                     return;
                 }
-
-                var now = Date.now();
-
-                var expectedExit =
-                window.MonsterOrderLifecycle &&
-                typeof window.MonsterOrderLifecycle.expectedExitTimestamp ===
-                "function"
-                ? window.MonsterOrderLifecycle.expectedExitTimestamp(
-                    now,
-                    minutes,
-                    order.fixedExitTime || "",
-                    order.timeMode || "duration"
-                )
-                : (
-                    order.timeMode === "unlimited"
-                    ? null
-                    : now + minutes * 60000
-                );
-
-                firebase.database()
-                .ref(
-                    ROOT +
-                    "/orders/" +
-                    selectedOrderId
-                )
-                .update({
-                    playStatus:"playing",
-                    playerCount:players,
-                    guardianCount:guardians,
-                    playMinutes:minutes,
-                    entryTime:now,
-                    expectedExitTime:
-                    expectedExit,
-                    exitTime:null,
-                    enteredBy:
-                    currentRole === "admin"
-                    ? "店長"
-                    : "員工",
-                    updatedAt:now
-                });
             }
         );
     }
@@ -934,41 +1022,34 @@
             return;
         }
 
-        var stateRef =
         firebase.database()
-        .ref(ROOT + "/venue/state");
-
-        stateRef.transaction(
+        .ref(
+            ROOT +
+            "/orders/" +
+            selectedOrderId
+        )
+        .transaction(
             function(current){
 
-                current = current || {
-                    maxPlayers:40,
-                    currentPlayers:0,
-                    activeOrders:{}
-                };
+                if(
+                    !current ||
+                    current.deleted ||
+                    current.playStatus !==
+                    "playing"
+                ){
+                    return;
+                }
 
-                current.activeOrders =
-                current.activeOrders || {};
+                current.playStatus =
+                "finished";
 
-                var count =
-                Number(
-                    current.activeOrders[
-                        selectedOrderId
-                    ] || 0
-                );
+                current.exitTime =
+                Date.now();
 
-                current.currentPlayers =
-                Math.max(
-                    0,
-                    Number(
-                        current.currentPlayers ||
-                        0
-                    ) - count
-                );
-
-                delete current.activeOrders[
-                    selectedOrderId
-                ];
+                current.exitedBy =
+                currentRole === "admin"
+                ? "店長"
+                : "員工";
 
                 current.updatedAt =
                 Date.now();
@@ -978,25 +1059,10 @@
             function(error,committed){
 
                 if(error || !committed){
-                    alert("離場更新失敗");
-                    return;
+                    alert(
+                        "離場更新失敗，請重新整理"
+                    );
                 }
-
-                firebase.database()
-                .ref(
-                    ROOT +
-                    "/orders/" +
-                    selectedOrderId
-                )
-                .update({
-                    playStatus:"finished",
-                    exitTime:Date.now(),
-                    exitedBy:
-                    currentRole === "admin"
-                    ? "店長"
-                    : "員工",
-                    updatedAt:Date.now()
-                });
             }
         );
     }
@@ -1039,7 +1105,7 @@
         );
 
         firebase.database()
-        .ref(ROOT + "/venue/state")
+        .ref(ROOT + "/venue/settings")
         .update({
             maxPlayers:max,
             countGuardians:
@@ -1109,11 +1175,11 @@
 
         currentRole = getRole();
 
-        var stateRef =
+        var settingsRef =
         firebase.database()
-        .ref(ROOT + "/venue/state");
+        .ref(ROOT + "/venue/settings");
 
-        stateRef.on(
+        settingsRef.on(
             "value",
             function(snapshot){
 
@@ -1128,31 +1194,21 @@
                             config.defaultMaxPlayers ||
                             40
                         ),
-                        currentPlayers:0,
-                        activeOrders:{},
                         countGuardians:
                         Boolean(
                             config.countGuardians
-                        )
+                        ),
+                        updatedAt:
+                        Date.now()
                     };
 
-                    stateRef.set(value);
+                    settingsRef.set(value);
                 }
 
-                venueState =
-                value || venueState;
+                venueSettings =
+                value || venueSettings;
 
                 updateCapacityCards();
-
-                if(
-                    byId("staffCountGuardiansInput")
-                ){
-                    byId("staffCountGuardiansInput")
-                    .checked =
-                    Boolean(
-                        venueState.countGuardians
-                    );
-                }
             }
         );
 
@@ -1205,7 +1261,19 @@
             return ordersMap;
         },
         getVenueState:function(){
-            return venueState;
+            return {
+                maxPlayers:
+                Number(
+                    venueSettings.maxPlayers ||
+                    40
+                ),
+                countGuardians:
+                Boolean(
+                    venueSettings.countGuardians
+                ),
+                currentPlayers:
+                calculateCurrentPlayers()
+            };
         },
         getRole:getRole,
         rerender:function(){
