@@ -6,16 +6,26 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+<meta name="theme-color" content="#ff9818">
+<meta name="description" content="小怪獸放電所 Kiosk 售票與營運管理">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="小怪獸售票">
 
 <title>小怪獸放電所 售票機</title>
 
+<link rel="manifest" href="manifest.webmanifest?v=73f1">
+<link rel="apple-touch-icon" href="images/pwa/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
 <link rel="stylesheet" href="css/style.css?v=72c">
 <link rel="stylesheet" href="css/admin-ui.css?v=73e3">
+<link rel="stylesheet" href="css/pwa.css?v=73f1">
 
 </head>
 
-<body>
+<body data-pwa-app="kiosk">
 
 <!-- ==========================
 首頁
@@ -1501,9 +1511,10 @@ content="width=device-width, initial-scale=1.0">
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Simple Login</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.3 Phase 3F Part 1</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
+<script src="js/pwa/pwa-manager.js?v=73f1"></script>
 </body>
 </html>

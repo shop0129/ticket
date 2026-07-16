@@ -5,19 +5,27 @@
 
     <meta
         name="viewport"
-        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小怪獸 Staff">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#137a42">
+    <meta name="description" content="小怪獸放電所員工手機後台">
 
     <title>小怪獸員工後台</title>
 
+    <link rel="manifest" href="staff.webmanifest?v=73f1">
+    <link rel="apple-touch-icon" href="images/pwa/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
     <link
         rel="stylesheet"
         href="css/staff.css?v=73e3">
+    <link rel="stylesheet" href="css/pwa.css?v=73f1">
 </head>
 
-<body>
+<body data-pwa-app="staff">
 
 <section id="staffLoginPage" class="staff-login-page">
 
@@ -564,6 +572,7 @@
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/staff/order-center.js?v=73e3"></script>
 <script src="js/staff/order-tools.js?v=73e3"></script>
+<script src="js/pwa/pwa-manager.js?v=73f1"></script>
 
 </body>
 </html>

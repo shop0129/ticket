@@ -327,6 +327,16 @@
         setInterval(render,1000);
     }
 
+    if(
+        !window.firebase ||
+        !window.MONSTER_FIREBASE_CONFIG
+    ){
+        console.warn("[MonsterDisplay] 離線啟動：等待網路恢復後重新連線");
+        render();
+        setInterval(render,1000);
+        return;
+    }
+
     if(!firebase.apps.length){
         firebase.initializeApp(
             window.MONSTER_FIREBASE_CONFIG
