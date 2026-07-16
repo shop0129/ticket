@@ -45,6 +45,8 @@
             if(
                 order &&
                 !order.deleted &&
+                order.admissionRequired !== false &&
+                order.playStatus !== "not_required" &&
                 (order.playStatus || "waiting") === status
             ){
                 order.__id=id;

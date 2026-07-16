@@ -129,7 +129,12 @@
             var order =
             ordersMap[id];
 
-            if(!order || order.deleted){
+            if(
+                !order ||
+                order.deleted ||
+                order.admissionRequired === false ||
+                order.playStatus === "not_required"
+            ){
                 return;
             }
 
@@ -442,6 +447,11 @@
         var expected =
         Number(order.expectedExitTime || 0);
 
+        var fixedRuleText =
+        order.fixedExitTime
+        ? "固定至 " + order.fixedExitTime
+        : "";
+
         var remainingText = "--";
 
         if(
@@ -499,7 +509,13 @@
 
         <div>
             <span>遊玩時間</span>
-            <strong>${Number(order.playMinutes || 120)} 分鐘</strong>
+            <strong>
+                ${
+                    fixedRuleText
+                    ? esc(fixedRuleText)
+                    : Number(order.playMinutes || 120) + " 分鐘"
+                }
+            </strong>
         </div>
 
         <div>
@@ -823,6 +839,17 @@
 
                 var now = Date.now();
 
+                var expectedExit =
+                window.MonsterOrderLifecycle &&
+                typeof window.MonsterOrderLifecycle.expectedExitTimestamp ===
+                "function"
+                ? window.MonsterOrderLifecycle.expectedExitTimestamp(
+                    now,
+                    minutes,
+                    order.fixedExitTime || ""
+                )
+                : now + minutes * 60000;
+
                 firebase.database()
                 .ref(
                     ROOT +
@@ -836,7 +863,7 @@
                     playMinutes:minutes,
                     entryTime:now,
                     expectedExitTime:
-                    now + minutes * 60000,
+                    expectedExit,
                     exitTime:null,
                     enteredBy:
                     currentRole === "admin"

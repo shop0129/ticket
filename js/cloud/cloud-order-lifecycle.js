@@ -1,6 +1,7 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3C
+// 小怪獸售票機 V7 Phase 3C-1 Fix
 // 訂單生命週期／每日叫號初始化
+// 修正：非入場商品、早鳥與寒暑假固定離場時間
 // =========================================
 (function(){
 
@@ -8,7 +9,6 @@
 
     var ROOT = "monsterTicket/v1";
     var ordersRef = null;
-    var counterRef = null;
 
     function pad(value,width){
         var text = String(value || 0);
@@ -27,12 +27,91 @@
         );
     }
 
+    function isNonAdmissionItem(item){
+
+        var id =
+        String(item.id || "");
+
+        var title =
+        String(item.title || "");
+
+        return (
+            id === "token10" ||
+            id === "token25" ||
+            id === "powerbank" ||
+            title.indexOf("代幣") !== -1 ||
+            title.indexOf("行動電源") !== -1
+        );
+    }
+
+    function isGuardianItem(item){
+
+        var id =
+        String(item.id || "");
+
+        var title =
+        String(item.title || "");
+
+        return (
+            id === "parent" ||
+            title.indexOf("陪同") !== -1
+        );
+    }
+
+    function admissionItems(order){
+
+        return (
+            Array.isArray(order.items)
+            ? order.items
+            : []
+        ).filter(function(item){
+
+            return (
+                !isNonAdmissionItem(item) &&
+                !isGuardianItem(item)
+            );
+        });
+    }
+
+    function hasAdmission(order){
+
+        return admissionItems(order).length > 0;
+    }
+
+    function fixedExitRule(order){
+
+        var items =
+        admissionItems(order);
+
+        var result = "";
+
+        items.forEach(function(item){
+
+            var title =
+            String(item.title || "");
+
+            if(
+                title.indexOf("早鳥") !== -1
+            ){
+                result = "18:00";
+            }
+
+            if(
+                title.indexOf("暑假") !== -1 ||
+                title.indexOf("寒假") !== -1 ||
+                title.indexOf("寒暑假") !== -1
+            ){
+                result = "16:00";
+            }
+        });
+
+        return result;
+    }
+
     function inferMinutes(order){
 
         var items =
-        Array.isArray(order.items)
-        ? order.items
-        : [];
+        admissionItems(order);
 
         var maxMinutes = 0;
 
@@ -42,7 +121,8 @@
             Number(item.playMinutes || 0);
 
             if(!minutes && item.hour){
-                minutes = Number(item.hour) * 60;
+                minutes =
+                Number(item.hour) * 60;
             }
 
             if(!minutes){
@@ -55,11 +135,9 @@
                 }else if(/2H/i.test(title)){
                     minutes = 120;
                 }else if(
-                    title.indexOf("早鳥") !== -1 ||
-                    title.indexOf("暑假") !== -1 ||
-                    title.indexOf("寒假") !== -1
+                    title.indexOf("幼幼") !== -1
                 ){
-                    minutes = 240;
+                    minutes = 120;
                 }
             }
 
@@ -73,8 +151,8 @@
 
     function inferPlayerCount(order){
 
-        var count = 0;
-        var guardian = 0;
+        var players = 0;
+        var guardians = 0;
 
         (
             Array.isArray(order.items)
@@ -82,33 +160,21 @@
             : []
         ).forEach(function(item){
 
-            var title =
-            String(item.title || "");
-
-            if(
-                title.indexOf("陪同") !== -1 ||
-                item.id === "parent"
-            ){
-                guardian++;
+            if(isNonAdmissionItem(item)){
                 return;
             }
 
-            if(
-                title.indexOf("代幣") !== -1 ||
-                title.indexOf("行動電源") !== -1 ||
-                item.id === "token10" ||
-                item.id === "token25" ||
-                item.id === "powerbank"
-            ){
+            if(isGuardianItem(item)){
+                guardians++;
                 return;
             }
 
-            count++;
+            players++;
         });
 
         return {
-            players:count || 1,
-            guardians:guardian
+            players:players,
+            guardians:guardians
         };
     }
 
@@ -157,14 +223,49 @@
         var inferred =
         inferPlayerCount(order);
 
-        var updates = {};
+        if(!hasAdmission(order)){
 
-        if(!order.playStatus){
+            var nonAdmissionUpdates = {
+                admissionRequired:false,
+                playStatus:"not_required",
+                playerCount:0,
+                guardianCount:0,
+                playMinutes:0,
+                fixedExitTime:"",
+                updatedAt:Date.now()
+            };
+
+            if(
+                order.queueNumber
+            ){
+                nonAdmissionUpdates.queueNumber = null;
+            }
+
+            ordersRef
+            .child(orderId)
+            .update(nonAdmissionUpdates);
+
+            return;
+        }
+
+        var updates = {
+            admissionRequired:true
+        };
+
+        if(
+            !order.playStatus ||
+            order.playStatus === "not_required"
+        ){
             updates.playStatus = "waiting";
         }
 
-        if(!order.playerCount){
-            updates.playerCount = inferred.players;
+        if(
+            order.playerCount === undefined ||
+            order.playerCount === null ||
+            Number(order.playerCount) <= 0
+        ){
+            updates.playerCount =
+            inferred.players;
         }
 
         if(
@@ -178,6 +279,13 @@
         if(!order.playMinutes){
             updates.playMinutes =
             inferMinutes(order);
+        }
+
+        var fixed =
+        fixedExitRule(order);
+
+        if(fixed){
+            updates.fixedExitTime = fixed;
         }
 
         if(!order.waitingSince){
@@ -205,6 +313,38 @@
         }
     }
 
+    function expectedExitTimestamp(
+        entryTime,
+        playMinutes,
+        fixedExitTime
+    ){
+
+        if(fixedExitTime){
+
+            var parts =
+            String(fixedExitTime)
+            .split(":");
+
+            var date =
+            new Date(entryTime);
+
+            date.setHours(
+                Number(parts[0] || 0),
+                Number(parts[1] || 0),
+                0,
+                0
+            );
+
+            return date.getTime();
+        }
+
+        return (
+            Number(entryTime) +
+            Number(playMinutes || 120) *
+            60000
+        );
+    }
+
     function start(){
 
         ordersRef =
@@ -219,6 +359,25 @@
                     snapshot.key,
                     snapshot.val()
                 );
+            }
+        );
+
+        ordersRef.on(
+            "child_changed",
+            function(snapshot){
+
+                var order =
+                snapshot.val();
+
+                if(
+                    order &&
+                    order.admissionRequired === undefined
+                ){
+                    initializeOrder(
+                        snapshot.key,
+                        order
+                    );
+                }
             }
         );
     }
@@ -245,7 +404,11 @@
 
     window.MonsterOrderLifecycle = {
         inferMinutes:inferMinutes,
-        inferPlayerCount:inferPlayerCount
+        inferPlayerCount:inferPlayerCount,
+        hasAdmission:hasAdmission,
+        fixedExitRule:fixedExitRule,
+        expectedExitTimestamp:
+        expectedExitTimestamp
     };
 
     boot();
