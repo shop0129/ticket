@@ -1,5 +1,5 @@
 /*====================================================
-  小怪獸售票機 V7 Phase 3A
+  小怪獸售票機 V7 Phase 3B
   Staff 手機／iPad 後台
 ====================================================*/
 
@@ -366,6 +366,461 @@ input{
 
     .staff-summary-grid{
         grid-template-columns:1fr;
+    }
+
+}
+
+
+/*====================================================
+  V7 Phase 3B 會員中心＋玩具點數
+====================================================*/
+
+.staff-member-search{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 120px 160px;
+    gap:12px;
+    margin-top:20px;
+}
+
+.staff-member-search input{
+    width:100%;
+    height:62px;
+    padding:0 16px;
+    border:2px solid #dce3e9;
+    border-radius:16px;
+    font-size:22px;
+    outline:none;
+}
+
+.staff-member-search button,
+.staff-primary-button,
+.staff-success-button,
+.staff-danger-button,
+.staff-secondary-button{
+    min-height:58px;
+    padding:10px 18px;
+    border:none;
+    border-radius:16px;
+    color:#fff;
+    font-size:20px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.staff-member-search button,
+.staff-primary-button{
+    background:#2196f3;
+}
+
+.staff-success-button{
+    background:#43a047;
+}
+
+.staff-danger-button{
+    background:#e53935;
+}
+
+.staff-secondary-button{
+    background:#607d8b;
+}
+
+.staff-inline-status{
+    margin:14px 0;
+    font-size:18px;
+    font-weight:800;
+    color:#7b8790;
+}
+
+.staff-member-result{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+    margin-top:12px;
+    padding:18px;
+    border:2px solid #e7ecf0;
+    border-radius:18px;
+    background:#fafbfc;
+    text-align:left;
+    cursor:pointer;
+}
+
+.staff-member-result-name{
+    font-size:25px;
+    font-weight:900;
+    color:#2f3942;
+}
+
+.staff-member-result-meta{
+    margin-top:6px;
+    font-size:17px;
+    font-weight:700;
+    color:#7b8790;
+}
+
+.staff-member-result-points{
+    flex-shrink:0;
+    text-align:right;
+}
+
+.staff-member-result-points strong{
+    display:block;
+    font-size:23px;
+    color:#7e57c2;
+}
+
+.staff-member-result-points span{
+    display:block;
+    margin-top:5px;
+    font-size:16px;
+    font-weight:800;
+    color:#7b8790;
+}
+
+.staff-empty-card{
+    padding:30px 18px;
+    border-radius:18px;
+    background:#f3f5f7;
+    text-align:center;
+    font-size:20px;
+    font-weight:800;
+    color:#87919a;
+}
+
+.staff-detail-heading{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:18px;
+}
+
+.staff-member-profile{
+    margin-top:20px;
+    padding:22px;
+    border-radius:22px;
+    background:#f9fafb;
+    border:2px solid #e8edf1;
+}
+
+.staff-member-profile-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+}
+
+.staff-member-profile-name{
+    font-size:34px;
+    font-weight:900;
+}
+
+.staff-member-profile-phone{
+    margin-top:7px;
+    font-size:21px;
+    font-weight:800;
+    color:#65737d;
+}
+
+.staff-level-badge{
+    padding:10px 15px;
+    border-radius:18px;
+    background:#fff2cf;
+    color:#895b00;
+    font-size:18px;
+    font-weight:900;
+}
+
+.staff-profile-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:13px;
+    margin-top:20px;
+}
+
+.staff-profile-grid div{
+    padding:16px;
+    border-radius:16px;
+    background:#fff;
+}
+
+.staff-profile-grid span{
+    display:block;
+    font-size:16px;
+    font-weight:800;
+    color:#7a8690;
+}
+
+.staff-profile-grid strong{
+    display:block;
+    margin-top:7px;
+    font-size:23px;
+    overflow-wrap:anywhere;
+}
+
+.staff-profile-grid .toy-highlight{
+    background:#f6effc;
+    border:2px solid #e3d4f0;
+}
+
+.staff-profile-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:20px;
+}
+
+.staff-point-history-card{
+    margin-top:20px;
+    padding:20px;
+    border-radius:20px;
+    background:#fff;
+    border:2px solid #edf0f3;
+}
+
+.staff-subsection-title{
+    margin-bottom:14px;
+    font-size:25px;
+    font-weight:900;
+}
+
+.staff-point-history-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:14px 0;
+    border-bottom:1px solid #eceff1;
+}
+
+.staff-point-history-row:last-child{
+    border-bottom:none;
+}
+
+.staff-point-history-row strong{
+    display:block;
+    font-size:19px;
+}
+
+.staff-point-history-row span,
+.staff-point-history-row small{
+    display:block;
+    margin-top:4px;
+    font-size:15px;
+    color:#7d8992;
+}
+
+.point-plus,
+.point-minus{
+    flex-shrink:0;
+    text-align:right;
+    font-size:23px;
+    font-weight:900;
+}
+
+.point-plus{
+    color:#43a047;
+}
+
+.point-minus{
+    color:#e53935;
+}
+
+.staff-modal{
+    position:fixed;
+    z-index:9999;
+    left:0;
+    right:0;
+    top:0;
+    bottom:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:18px;
+    background:rgba(20,28,34,.55);
+    overflow-y:auto;
+}
+
+.staff-modal-card{
+    width:100%;
+    max-width:650px;
+    max-height:94vh;
+    overflow-y:auto;
+    padding:24px;
+    border-radius:24px;
+    background:#fff;
+    box-shadow:0 18px 50px rgba(0,0,0,.23);
+}
+
+.staff-modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+}
+
+.staff-modal-title{
+    font-size:29px;
+    font-weight:900;
+}
+
+.staff-modal-close{
+    width:46px;
+    height:46px;
+    border:none;
+    border-radius:14px;
+    background:#eef1f3;
+    color:#4d5962;
+    font-size:30px;
+    cursor:pointer;
+}
+
+.staff-form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+    margin-top:20px;
+}
+
+.staff-form-grid label{
+    display:block;
+}
+
+.staff-form-grid label span{
+    display:block;
+    margin-bottom:7px;
+    font-size:18px;
+    font-weight:900;
+}
+
+.staff-form-grid input,
+.staff-form-grid textarea{
+    width:100%;
+    min-height:58px;
+    padding:12px 14px;
+    border:2px solid #dce3e9;
+    border-radius:15px;
+    font-size:21px;
+    outline:none;
+}
+
+.staff-form-grid textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.staff-form-full{
+    grid-column:1 / -1;
+}
+
+.staff-modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:12px;
+    margin-top:22px;
+}
+
+.staff-modal-member{
+    margin-top:15px;
+    font-size:22px;
+    font-weight:900;
+}
+
+.staff-point-balance{
+    margin-top:15px;
+    padding:18px;
+    border-radius:17px;
+    background:#f5effb;
+    font-size:19px;
+    font-weight:800;
+}
+
+.staff-point-balance strong{
+    display:block;
+    margin-top:7px;
+    font-size:35px;
+    color:#7e57c2;
+}
+
+.staff-point-mode{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:18px;
+}
+
+.staff-point-mode button{
+    min-height:56px;
+    border:2px solid #dfe5e9;
+    border-radius:15px;
+    background:#f8f9fa;
+    font-size:20px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+.staff-point-mode button.active{
+    border-color:#7e57c2;
+    background:#f3edfa;
+    color:#673ab7;
+}
+
+.staff-quick-points{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:8px;
+    margin-top:15px;
+}
+
+.staff-quick-points button{
+    min-height:48px;
+    border:none;
+    border-radius:13px;
+    background:#edf3f7;
+    font-size:18px;
+    font-weight:900;
+    cursor:pointer;
+}
+
+@media (max-width:700px){
+
+    .staff-member-search{
+        grid-template-columns:1fr;
+    }
+
+    .staff-profile-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .staff-form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .staff-form-full{
+        grid-column:auto;
+    }
+
+    .staff-quick-points{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+}
+
+@media (max-width:420px){
+
+    .staff-member-profile-head,
+    .staff-point-history-row{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .staff-profile-grid{
+        grid-template-columns:1fr;
+    }
+
+    .point-plus,
+    .point-minus{
+        text-align:left;
     }
 
 }

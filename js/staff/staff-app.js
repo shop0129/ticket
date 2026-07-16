@@ -1,7 +1,6 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3A
-// Staff 員工版：登入＋權限系統
-// Android / iPhone / iPad / Windows 相容
+// 小怪獸售票機 V7 Phase 3B
+// Staff 會員中心＋玩具點數
 // =========================================
 
 (function(){
@@ -12,15 +11,17 @@
     window.MONSTER_STAFF_CONFIG || {};
 
     var currentRole = "";
-    var firebaseReady = false;
     var dashboardCurrent = null;
+    var membersMap = {};
+    var selectedMemberId = "";
+    var toyPointMode = "add";
 
-    var loginPage = null;
-    var homePage = null;
-    var passwordInput = null;
-    var loginMessage = null;
-    var roleBadge = null;
-    var cloudBadge = null;
+    var loginPage;
+    var homePage;
+    var passwordInput;
+    var loginMessage;
+    var roleBadge;
+    var cloudBadge;
 
     function byId(id){
         return document.getElementById(id);
@@ -41,15 +42,52 @@
         .toLocaleString("zh-TW");
     }
 
+    function normalizePhone(value){
+
+        return String(value || "")
+        .replace(/\D/g,"");
+    }
+
+    function createMemberNo(){
+
+        var now = new Date();
+
+        function pad(value){
+            return Number(value) < 10
+            ? "0" + value
+            : String(value);
+        }
+
+        return (
+            "M" +
+            now.getFullYear() +
+            pad(now.getMonth() + 1) +
+            pad(now.getDate()) +
+            String(Date.now()).slice(-5)
+        );
+    }
+
+    function getMemberLevel(member){
+
+        var spend =
+        Number(member.totalSpend || 0);
+
+        if(spend >= 30000){
+            return "VIP會員";
+        }
+
+        if(spend >= 15000){
+            return "金卡會員";
+        }
+
+        if(spend >= 5000){
+            return "銀卡會員";
+        }
+
+        return "一般會員";
+    }
+
     function setCloudState(type,text){
-
-        if(!cloudBadge){
-            cloudBadge = byId("staffCloudBadge");
-        }
-
-        if(!cloudBadge){
-            return;
-        }
 
         cloudBadge.className =
         "staff-cloud-badge staff-cloud-" + type;
@@ -61,15 +99,8 @@
 
     function showLoginMessage(text,isError){
 
-        if(!loginMessage){
-            loginMessage = byId("staffLoginMessage");
-        }
-
-        if(!loginMessage){
-            return;
-        }
-
-        loginMessage.textContent = text || "";
+        loginMessage.textContent =
+        text || "";
 
         loginMessage.className =
         isError
@@ -79,20 +110,14 @@
 
     function saveSession(role){
 
-        try{
-
-            sessionStorage.setItem(
-                config.sessionKey ||
-                "monsterStaffSession",
-                JSON.stringify({
-                    role:role,
-                    loginAt:Date.now()
-                })
-            );
-
-        }catch(error){
-            console.error(error);
-        }
+        sessionStorage.setItem(
+            config.sessionKey ||
+            "monsterStaffSession",
+            JSON.stringify({
+                role:role,
+                loginAt:Date.now()
+            })
+        );
     }
 
     function loadSession(){
@@ -107,46 +132,24 @@
                 ) || "null"
             );
 
-            if(
-                data &&
-                (
-                    data.role === "staff" ||
-                    data.role === "admin"
-                )
-            ){
-                return data.role;
-            }
+            return data &&
+            (
+                data.role === "staff" ||
+                data.role === "admin"
+            )
+            ? data.role
+            : "";
 
         }catch(error){
-            console.error(error);
-        }
 
-        return "";
-    }
-
-    function clearSession(){
-
-        try{
-            sessionStorage.removeItem(
-                config.sessionKey ||
-                "monsterStaffSession"
-            );
-        }catch(error){
-            console.error(error);
+            return "";
         }
     }
 
     function applyRoleVisibility(){
 
         var adminElements =
-        document.querySelectorAll(
-            ".admin-only"
-        );
-
-        var staffElements =
-        document.querySelectorAll(
-            ".staff-allowed"
-        );
+        document.querySelectorAll(".admin-only");
 
         var i;
 
@@ -158,36 +161,19 @@
             : "none";
         }
 
-        for(i=0;i<staffElements.length;i++){
+        roleBadge.className =
+        "staff-role-badge role-" +
+        currentRole;
 
-            staffElements[i].style.display =
-            currentRole
-            ? ""
-            : "none";
-        }
+        roleBadge.textContent =
+        currentRole === "admin"
+        ? "👑 店長模式"
+        : "👤 員工模式";
 
-        if(roleBadge){
-
-            roleBadge.className =
-            "staff-role-badge role-" +
-            currentRole;
-
-            roleBadge.textContent =
-            currentRole === "admin"
-            ? "👑 店長模式"
-            : "👤 員工模式";
-        }
-
-        var subtitle =
-        byId("staffHomeSubtitle");
-
-        if(subtitle){
-
-            subtitle.textContent =
-            currentRole === "admin"
-            ? "完整管理權限"
-            : "日常店務操作";
-        }
+        byId("staffHomeSubtitle").textContent =
+        currentRole === "admin"
+        ? "完整管理權限"
+        : "日常店務操作";
     }
 
     function showHome(){
@@ -206,10 +192,8 @@
         homePage.style.display = "none";
         loginPage.style.display = "flex";
 
-        if(passwordInput){
-            passwordInput.value = "";
-            passwordInput.focus();
-        }
+        passwordInput.value = "";
+        passwordInput.focus();
 
         showLoginMessage("",false);
     }
@@ -217,22 +201,18 @@
     function login(){
 
         var password =
-        passwordInput
-        ? passwordInput.value
-        : "";
+        passwordInput.value;
 
         if(
             password ===
             String(config.adminPassword || "1234")
         ){
-
             currentRole = "admin";
 
         }else if(
             password ===
             String(config.staffPassword || "0000")
         ){
-
             currentRole = "staff";
 
         }else{
@@ -242,10 +222,7 @@
                 true
             );
 
-            if(passwordInput){
-                passwordInput.select();
-            }
-
+            passwordInput.select();
             return;
         }
 
@@ -255,7 +232,12 @@
 
     function logout(){
 
-        clearSession();
+        sessionStorage.removeItem(
+            config.sessionKey ||
+            "monsterStaffSession"
+        );
+
+        closeMemberDetail();
         showLogin();
     }
 
@@ -273,13 +255,8 @@
         ? dashboardCurrent.date
         : new Date().toLocaleDateString("zh-TW");
 
-        var dateElement =
-        byId("staffDashboardDate");
-
-        if(dateElement){
-            dateElement.textContent =
-            date + " 雲端即時概況";
-        }
+        byId("staffDashboardDate").textContent =
+        date + " 雲端即時概況";
 
         var fields = {
             staffTodayIncome:
@@ -313,60 +290,875 @@
         });
     }
 
-    function openFeature(title,detail,adminOnly){
+    function memberArray(){
 
-        if(
-            adminOnly &&
-            currentRole !== "admin"
-        ){
+        var list = [];
+
+        Object.keys(membersMap || {})
+        .forEach(function(id){
+
+            var member =
+            membersMap[id];
+
+            if(
+                !member ||
+                member.deleted
+            ){
+                return;
+            }
+
+            if(!member.id){
+                member.id = id;
+            }
+
+            list.push(member);
+        });
+
+        return list;
+    }
+
+    function searchMembers(){
+
+        var keyword =
+        byId("staffMemberSearchInput")
+        .value
+        .trim()
+        .toLowerCase();
+
+        if(!keyword){
+
+            byId("staffMemberSearchStatus")
+            .textContent =
+            "請輸入會員姓名、手機或會員編號";
+
+            byId("staffMemberSearchResults")
+            .innerHTML = "";
+
+            return;
+        }
+
+        var results =
+        memberArray()
+        .filter(function(member){
+
+            return [
+                member.name,
+                member.phone,
+                member.memberNo
+            ]
+            .join(" ")
+            .toLowerCase()
+            .indexOf(keyword) !== -1;
+        })
+        .slice(0,30);
+
+        renderSearchResults(results);
+    }
+
+    function renderSearchResults(results){
+
+        var box =
+        byId("staffMemberSearchResults");
+
+        if(results.length === 0){
+
+            byId("staffMemberSearchStatus")
+            .textContent =
+            "找不到符合條件的會員";
+
+            box.innerHTML = `
+
+<div class="staff-empty-card">
+    找不到會員，可使用「快速新增」
+</div>
+
+`;
+            return;
+        }
+
+        byId("staffMemberSearchStatus")
+        .textContent =
+        "找到 " + results.length + " 位會員";
+
+        var html = "";
+
+        results.forEach(function(member){
+
+            html += `
+
+<button
+    type="button"
+    class="staff-member-result"
+    data-member-id="${escapeText(member.id)}">
+
+    <div>
+
+        <div class="staff-member-result-name">
+            ${escapeText(member.name)}
+        </div>
+
+        <div class="staff-member-result-meta">
+            ${escapeText(member.phone || "")}
+            ・${escapeText(member.memberNo || "")}
+        </div>
+
+    </div>
+
+    <div class="staff-member-result-points">
+
+        <strong>
+            🎁 ${Number(member.toyPoints || 0)} 點
+        </strong>
+
+        <span>
+            ${getMemberLevel(member)}
+        </span>
+
+    </div>
+
+</button>
+
+`;
+        });
+
+        box.innerHTML = html;
+
+        var buttons =
+        box.querySelectorAll(
+            "[data-member-id]"
+        );
+
+        var i;
+
+        for(i=0;i<buttons.length;i++){
+
+            buttons[i].addEventListener(
+                "click",
+                function(){
+
+                    openMemberDetail(
+                        this.getAttribute(
+                            "data-member-id"
+                        )
+                    );
+                }
+            );
+        }
+    }
+
+    function selectedMember(){
+
+        return membersMap[
+            selectedMemberId
+        ] || null;
+    }
+
+    function openMemberDetail(memberId){
+
+        selectedMemberId = memberId;
+
+        renderMemberDetail();
+
+        byId("staffMemberDetailSection")
+        .style.display = "block";
+
+        byId("staffMemberDetailSection")
+        .scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+    }
+
+    function closeMemberDetail(){
+
+        selectedMemberId = "";
+
+        byId("staffMemberDetailSection")
+        .style.display = "none";
+
+        byId("staffMemberDetailContent")
+        .innerHTML = "";
+    }
+
+    function renderMemberDetail(){
+
+        var member =
+        selectedMember();
+
+        if(!member){
+            closeMemberDetail();
+            return;
+        }
+
+        byId("staffMemberDetailSubtitle")
+        .textContent =
+        member.memberNo || "";
+
+        var history =
+        Array.isArray(member.toyPointHistory)
+        ? member.toyPointHistory.slice(0,20)
+        : [];
+
+        var historyHtml = "";
+
+        if(history.length === 0){
+
+            historyHtml = `
+
+<div class="staff-empty-card">
+    尚無玩具點數紀錄
+</div>
+
+`;
+
+        }else{
+
+            history.forEach(function(row){
+
+                var amount =
+                Number(row.amount || 0);
+
+                historyHtml += `
+
+<div class="staff-point-history-row">
+
+    <div>
+
+        <strong>
+            ${escapeText(row.reason || "點數調整")}
+        </strong>
+
+        <span>
+            ${escapeText(row.date || "")}
+            ${row.operator ? "・" + escapeText(row.operator) : ""}
+        </span>
+
+        ${
+            row.note
+            ? "<small>" + escapeText(row.note) + "</small>"
+            : ""
+        }
+
+    </div>
+
+    <div class="${amount >= 0 ? "point-plus" : "point-minus"}">
+
+        ${amount >= 0 ? "+" : ""}${amount} 點
+
+        <small>
+            餘額 ${Number(row.balance || 0)}
+        </small>
+
+    </div>
+
+</div>
+
+`;
+            });
+        }
+
+        var adminButtons =
+        currentRole === "admin"
+        ? `
+
+<button
+    id="staffEditMemberButton"
+    class="staff-primary-button">
+    編輯會員
+</button>
+
+<button
+    id="staffDeleteMemberButton"
+    class="staff-danger-button">
+    刪除會員
+</button>
+
+`
+        : "";
+
+        byId("staffMemberDetailContent")
+        .innerHTML = `
+
+<div class="staff-member-profile">
+
+    <div class="staff-member-profile-head">
+
+        <div>
+
+            <div class="staff-member-profile-name">
+                ${escapeText(member.name)}
+            </div>
+
+            <div class="staff-member-profile-phone">
+                📱 ${escapeText(member.phone || "")}
+            </div>
+
+        </div>
+
+        <div class="staff-level-badge">
+            ${getMemberLevel(member)}
+        </div>
+
+    </div>
+
+    <div class="staff-profile-grid">
+
+        <div>
+            <span>累積消費</span>
+            <strong>NT$${formatMoney(member.totalSpend)}</strong>
+        </div>
+
+        <div>
+            <span>消費點數</span>
+            <strong>${Number(member.points || 0)} 點</strong>
+        </div>
+
+        <div class="toy-highlight">
+            <span>玩具點數</span>
+            <strong>${Number(member.toyPoints || 0)} 點</strong>
+        </div>
+
+        <div>
+            <span>生日</span>
+            <strong>${escapeText(member.birthday || "未填寫")}</strong>
+        </div>
+
+        <div>
+            <span>加入日期</span>
+            <strong>${escapeText(member.joinDate || "")}</strong>
+        </div>
+
+        <div>
+            <span>備註</span>
+            <strong>${escapeText(member.note || "無")}</strong>
+        </div>
+
+    </div>
+
+    <div class="staff-profile-actions">
+
+        <button
+            id="staffOpenToyPointButton"
+            class="staff-success-button">
+            🎁 玩具點數操作
+        </button>
+
+        ${adminButtons}
+
+    </div>
+
+</div>
+
+<div class="staff-point-history-card">
+
+    <div class="staff-subsection-title">
+        🎁 玩具點數紀錄
+    </div>
+
+    ${historyHtml}
+
+</div>
+
+`;
+
+        byId("staffOpenToyPointButton")
+        .addEventListener(
+            "click",
+            openToyPointModal
+        );
+
+        if(currentRole === "admin"){
+
+            byId("staffEditMemberButton")
+            .addEventListener(
+                "click",
+                function(){
+                    openMemberModal(member);
+                }
+            );
+
+            byId("staffDeleteMemberButton")
+            .addEventListener(
+                "click",
+                deleteSelectedMember
+            );
+        }
+    }
+
+    function openMemberModal(member){
+
+        var isEdit =
+        Boolean(member && member.id);
+
+        byId("staffMemberModalTitle")
+        .textContent =
+        isEdit
+        ? "編輯會員"
+        : "快速新增會員";
+
+        byId("staffEditMemberId").value =
+        isEdit ? member.id : "";
+
+        byId("staffEditMemberName").value =
+        isEdit ? member.name || "" : "";
+
+        byId("staffEditMemberPhone").value =
+        isEdit ? member.phone || "" : "";
+
+        byId("staffEditMemberBirthday").value =
+        isEdit ? member.birthday || "" : "";
+
+        byId("staffEditMemberNote").value =
+        isEdit ? member.note || "" : "";
+
+        byId("staffMemberModal")
+        .style.display = "flex";
+    }
+
+    function closeMemberModal(){
+
+        byId("staffMemberModal")
+        .style.display = "none";
+    }
+
+    function saveMember(){
+
+        var id =
+        byId("staffEditMemberId")
+        .value;
+
+        var name =
+        byId("staffEditMemberName")
+        .value.trim();
+
+        var phone =
+        normalizePhone(
+            byId("staffEditMemberPhone")
+            .value
+        );
+
+        if(!name || !phone){
 
             alert(
-                "🔒 此功能僅限店長使用"
+                "姓名與手機不可空白"
             );
 
             return;
         }
 
-        alert(
-            title +
-            "\n\n" +
-            detail +
-            "\n\n此入口已建立，下一階段會接上完整功能。"
-        );
+        var duplicate = false;
+
+        memberArray().forEach(function(member){
+
+            if(
+                member.phone === phone &&
+                member.id !== id
+            ){
+                duplicate = true;
+            }
+        });
+
+        if(duplicate){
+
+            alert(
+                "此手機已經是會員"
+            );
+
+            return;
+        }
+
+        var now =
+        Date.now();
+
+        var roleName =
+        currentRole === "admin"
+        ? "店長"
+        : "員工";
+
+        var data;
+
+        if(id){
+
+            data =
+            membersMap[id];
+
+            if(!data){
+                return;
+            }
+
+            data.name = name;
+            data.phone = phone;
+            data.birthday =
+            byId("staffEditMemberBirthday")
+            .value;
+
+            data.note =
+            byId("staffEditMemberNote")
+            .value.trim();
+
+            data.updatedAt = now;
+            data.updatedBy = roleName;
+
+        }else{
+
+            id =
+            "member_" + now;
+
+            data = {
+                id:id,
+                memberNo:createMemberNo(),
+                name:name,
+                phone:phone,
+                birthday:
+                byId("staffEditMemberBirthday")
+                .value,
+                note:
+                byId("staffEditMemberNote")
+                .value.trim(),
+                joinDate:
+                new Date()
+                .toLocaleDateString("zh-TW"),
+                totalSpend:0,
+                points:0,
+                toyPoints:0,
+                pointHistory:[],
+                toyPointHistory:[],
+                lastPurchaseDate:"",
+                updatedAt:now,
+                updatedBy:roleName,
+                deleted:false
+            };
+        }
+
+        firebase.database()
+        .ref(
+            (config.firebaseRoot ||
+            "monsterTicket/v1") +
+            "/members/" + id
+        )
+        .set(data)
+        .then(function(){
+
+            closeMemberModal();
+
+            alert(
+                id === selectedMemberId
+                ? "會員資料已更新"
+                : "會員已建立"
+            );
+
+            byId("staffMemberSearchInput")
+            .value = phone;
+
+            searchMembers();
+            openMemberDetail(id);
+        })
+        .catch(function(error){
+
+            console.error(error);
+
+            alert(
+                "會員儲存失敗，請檢查網路"
+            );
+        });
     }
 
-    function watchDashboard(){
+    function deleteSelectedMember(){
+
+        var member =
+        selectedMember();
 
         if(
-            !window.MonsterCloud ||
-            !window.MonsterCloud.database
+            !member ||
+            currentRole !== "admin"
         ){
             return;
         }
+
+        if(
+            !confirm(
+                "確定刪除會員「" +
+                member.name +
+                "」？"
+            )
+        ){
+            return;
+        }
+
+        var update = {
+            deleted:true,
+            updatedAt:Date.now(),
+            updatedBy:"店長"
+        };
+
+        firebase.database()
+        .ref(
+            (config.firebaseRoot ||
+            "monsterTicket/v1") +
+            "/members/" + member.id
+        )
+        .update(update)
+        .then(function(){
+
+            closeMemberDetail();
+            searchMembers();
+
+            alert(
+                "會員已刪除"
+            );
+        });
+    }
+
+    function setToyPointMode(mode){
+
+        toyPointMode = mode;
+
+        byId("staffToyAddMode")
+        .className =
+        mode === "add"
+        ? "active"
+        : "";
+
+        byId("staffToyDeductMode")
+        .className =
+        mode === "deduct"
+        ? "active"
+        : "";
+
+        byId("staffToyPointSave")
+        .textContent =
+        mode === "add"
+        ? "確認增加點數"
+        : "確認扣除點數";
+
+        byId("staffToyPointSave")
+        .className =
+        mode === "add"
+        ? "staff-success-button"
+        : "staff-danger-button";
+    }
+
+    function openToyPointModal(){
+
+        var member =
+        selectedMember();
+
+        if(!member){
+            return;
+        }
+
+        setToyPointMode("add");
+
+        byId("staffToyPointMember")
+        .textContent =
+        member.name +
+        "・" +
+        (member.phone || "");
+
+        byId("staffToyPointBalance")
+        .textContent =
+        Number(member.toyPoints || 0) +
+        " 點";
+
+        byId("staffToyPointAmount")
+        .value = "1";
+
+        byId("staffToyPointReason")
+        .value = "";
+
+        byId("staffToyPointNote")
+        .value = "";
+
+        byId("staffToyPointModal")
+        .style.display = "flex";
+    }
+
+    function closeToyPointModal(){
+
+        byId("staffToyPointModal")
+        .style.display = "none";
+    }
+
+    function saveToyPointOperation(){
+
+        var member =
+        selectedMember();
+
+        if(!member){
+            return;
+        }
+
+        var amount =
+        Number(
+            byId("staffToyPointAmount")
+            .value
+        );
+
+        var reason =
+        byId("staffToyPointReason")
+        .value.trim();
+
+        var note =
+        byId("staffToyPointNote")
+        .value.trim();
+
+        if(
+            !Number.isInteger(amount) ||
+            amount <= 0
+        ){
+
+            alert(
+                "請輸入正確的整數點數"
+            );
+
+            return;
+        }
+
+        if(!reason){
+
+            alert(
+                "必須填寫原因"
+            );
+
+            return;
+        }
+
+        var current =
+        Number(member.toyPoints || 0);
+
+        var change =
+        toyPointMode === "add"
+        ? amount
+        : -amount;
+
+        var balance =
+        current + change;
+
+        if(balance < 0){
+
+            alert(
+                "玩具點數不足"
+            );
+
+            return;
+        }
+
+        if(
+            !confirm(
+                member.name +
+                "\n目前：" +
+                current +
+                " 點\n本次：" +
+                (change > 0 ? "+" : "") +
+                change +
+                " 點\n操作後：" +
+                balance +
+                " 點\n\n確定執行？"
+            )
+        ){
+            return;
+        }
+
+        var history =
+        Array.isArray(member.toyPointHistory)
+        ? member.toyPointHistory.slice(0)
+        : [];
+
+        history.unshift({
+            id:"toy_" + Date.now(),
+            date:
+            new Date()
+            .toLocaleString("zh-TW"),
+            amount:change,
+            reason:reason,
+            note:note,
+            orderNo:"",
+            operator:
+            currentRole === "admin"
+            ? "店長"
+            : "員工",
+            balance:balance
+        });
+
+        var updates = {
+            toyPoints:balance,
+            toyPointHistory:history,
+            updatedAt:Date.now(),
+            updatedBy:
+            currentRole === "admin"
+            ? "店長"
+            : "員工"
+        };
+
+        firebase.database()
+        .ref(
+            (config.firebaseRoot ||
+            "monsterTicket/v1") +
+            "/members/" +
+            member.id
+        )
+        .update(updates)
+        .then(function(){
+
+            closeToyPointModal();
+
+            alert(
+                "玩具點數已更新"
+            );
+        })
+        .catch(function(error){
+
+            console.error(error);
+
+            alert(
+                "點數更新失敗，請檢查網路"
+            );
+        });
+    }
+
+    function watchCloudData(){
 
         var root =
         config.firebaseRoot ||
         "monsterTicket/v1";
 
-        window.MonsterCloud.database
+        firebase.database()
         .ref(root + "/dashboard/current")
-        .on(
-            "value",
-            function(snapshot){
+        .on("value",function(snapshot){
 
-                dashboardCurrent =
-                snapshot.val();
+            dashboardCurrent =
+            snapshot.val();
 
-                renderDashboard();
-            },
-            function(error){
+            renderDashboard();
+        });
 
-                console.error(
-                    "[Staff] dashboard error:",
-                    error
-                );
+        firebase.database()
+        .ref(root + "/members")
+        .on("value",function(snapshot){
+
+            membersMap =
+            snapshot.val() || {};
+
+            if(selectedMemberId){
+
+                if(
+                    membersMap[selectedMemberId] &&
+                    !membersMap[selectedMemberId].deleted
+                ){
+                    renderMemberDetail();
+                }else{
+                    closeMemberDetail();
+                }
             }
-        );
+
+            var keyword =
+            byId("staffMemberSearchInput")
+            .value.trim();
+
+            if(keyword){
+                searchMembers();
+            }
+        });
     }
 
     function startFirebase(){
@@ -393,36 +1185,20 @@
                 );
             }
 
-            window.MonsterCloud =
-            window.MonsterCloud || {};
-
-            window.MonsterCloud.database =
-            firebase.database();
-
             firebase.auth()
             .signInAnonymously()
-            .then(function(result){
-
-                firebaseReady = true;
-
-                window.MonsterCloud.uid =
-                result.user
-                ? result.user.uid
-                : "";
+            .then(function(){
 
                 setCloudState(
                     "online",
                     "雲端已連線"
                 );
 
-                watchDashboard();
+                watchCloudData();
             })
             .catch(function(error){
 
-                console.error(
-                    "[Staff] Firebase auth error:",
-                    error
-                );
+                console.error(error);
 
                 setCloudState(
                     "error",
@@ -473,16 +1249,10 @@
     function bindEvents(){
 
         byId("staffLoginButton")
-        .addEventListener(
-            "click",
-            login
-        );
+        .addEventListener("click",login);
 
         byId("staffLogoutButton")
-        .addEventListener(
-            "click",
-            logout
-        );
+        .addEventListener("click",logout);
 
         passwordInput
         .addEventListener(
@@ -498,32 +1268,124 @@
             }
         );
 
-        var buttons =
+        byId("staffMemberSearchButton")
+        .addEventListener(
+            "click",
+            searchMembers
+        );
+
+        byId("staffMemberSearchInput")
+        .addEventListener(
+            "input",
+            searchMembers
+        );
+
+        byId("staffQuickAddButton")
+        .addEventListener(
+            "click",
+            function(){
+                openMemberModal(null);
+            }
+        );
+
+        byId("staffCloseDetailButton")
+        .addEventListener(
+            "click",
+            closeMemberDetail
+        );
+
+        byId("staffMemberModalClose")
+        .addEventListener(
+            "click",
+            closeMemberModal
+        );
+
+        byId("staffMemberModalCancel")
+        .addEventListener(
+            "click",
+            closeMemberModal
+        );
+
+        byId("staffMemberModalSave")
+        .addEventListener(
+            "click",
+            saveMember
+        );
+
+        byId("staffToyPointModalClose")
+        .addEventListener(
+            "click",
+            closeToyPointModal
+        );
+
+        byId("staffToyPointCancel")
+        .addEventListener(
+            "click",
+            closeToyPointModal
+        );
+
+        byId("staffToyPointSave")
+        .addEventListener(
+            "click",
+            saveToyPointOperation
+        );
+
+        byId("staffToyAddMode")
+        .addEventListener(
+            "click",
+            function(){
+                setToyPointMode("add");
+            }
+        );
+
+        byId("staffToyDeductMode")
+        .addEventListener(
+            "click",
+            function(){
+                setToyPointMode("deduct");
+            }
+        );
+
+        var quickPointButtons =
         document.querySelectorAll(
-            "[data-feature]"
+            "[data-points]"
         );
 
         var i;
 
-        for(i=0;i<buttons.length;i++){
+        for(i=0;i<quickPointButtons.length;i++){
 
-            buttons[i]
+            quickPointButtons[i]
             .addEventListener(
                 "click",
                 function(){
 
-                    openFeature(
-                        this.getAttribute(
-                            "data-title"
-                        ) || "功能",
+                    byId("staffToyPointAmount")
+                    .value =
+                    this.getAttribute(
+                        "data-points"
+                    );
+                }
+            );
+        }
 
-                        this.getAttribute(
-                            "data-detail"
-                        ) || "",
+        var placeholders =
+        document.querySelectorAll(
+            "[data-placeholder]"
+        );
 
+        for(i=0;i<placeholders.length;i++){
+
+            placeholders[i]
+            .addEventListener(
+                "click",
+                function(){
+
+                    alert(
                         this.getAttribute(
-                            "data-admin-only"
-                        ) === "true"
+                            "data-placeholder"
+                        ) +
+                        "\n\n此功能會在下一階段接入。"
                     );
                 }
             );

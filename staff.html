@@ -2,6 +2,7 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
@@ -13,14 +14,12 @@
 
     <link
         rel="stylesheet"
-        href="css/staff.css?v=73a">
+        href="css/staff.css?v=73b">
 </head>
 
 <body>
 
-<section
-    id="staffLoginPage"
-    class="staff-login-page">
+<section id="staffLoginPage" class="staff-login-page">
 
     <div class="staff-login-card">
 
@@ -56,16 +55,14 @@
         </div>
 
         <div class="staff-login-hint">
-            員工密碼會進入日常店務模式；店長密碼可使用完整管理功能。
+            員工密碼進入日常店務模式；店長密碼可編輯及刪除會員。
         </div>
 
     </div>
 
 </section>
 
-<section
-    id="staffHomePage"
-    class="staff-home-page">
+<section id="staffHomePage" class="staff-home-page">
 
     <div class="staff-shell">
 
@@ -108,7 +105,7 @@
 
         </header>
 
-        <section class="staff-section staff-allowed">
+        <section class="staff-section">
 
             <div class="staff-section-title">
                 📊 今日營運
@@ -162,55 +159,69 @@
 
         </section>
 
-        <section class="staff-section staff-allowed">
+        <section class="staff-section">
 
             <div class="staff-section-title">
-                ⚡ 員工功能
+                👤 會員中心
             </div>
 
-            <div class="staff-menu-grid">
+            <div class="staff-member-search">
 
-                <button
-                    class="staff-menu-button"
-                    data-feature="member"
-                    data-title="會員中心"
-                    data-detail="搜尋會員、查看消費點數與玩具點數">
-                    <span class="staff-menu-icon">👤</span>
-                    <span class="staff-menu-title">會員中心</span>
-                    <span class="staff-menu-detail">搜尋手機、查看會員資料</span>
+                <input
+                    id="staffMemberSearchInput"
+                    type="search"
+                    inputmode="search"
+                    placeholder="輸入姓名、手機或會員編號">
+
+                <button id="staffMemberSearchButton">
+                    搜尋
                 </button>
 
                 <button
-                    class="staff-menu-button"
-                    data-feature="toy"
-                    data-title="玩具點數"
-                    data-detail="增加玩具點、扣點兌換與查看操作紀錄">
-                    <span class="staff-menu-icon">🎁</span>
-                    <span class="staff-menu-title">玩具點數</span>
-                    <span class="staff-menu-detail">累積、扣點與獎品兌換</span>
-                </button>
-
-                <button
-                    class="staff-menu-button"
-                    data-feature="orders"
-                    data-title="訂單查詢"
-                    data-detail="搜尋訂單、會員補綁與玩具轉點">
-                    <span class="staff-menu-icon">🧾</span>
-                    <span class="staff-menu-title">訂單查詢</span>
-                    <span class="staff-menu-detail">查詢交易與離場補綁會員</span>
-                </button>
-
-                <button
-                    class="staff-menu-button"
-                    data-feature="quick-member"
-                    data-title="快速新增會員"
-                    data-detail="用手機與姓名建立新會員">
-                    <span class="staff-menu-icon">➕</span>
-                    <span class="staff-menu-title">快速新增會員</span>
-                    <span class="staff-menu-detail">現場快速入會</span>
+                    id="staffQuickAddButton"
+                    class="staff-success-button">
+                    ＋ 快速新增
                 </button>
 
             </div>
+
+            <div
+                id="staffMemberSearchStatus"
+                class="staff-inline-status">
+                請輸入會員姓名、手機或會員編號
+            </div>
+
+            <div id="staffMemberSearchResults"></div>
+
+        </section>
+
+        <section
+            id="staffMemberDetailSection"
+            class="staff-section"
+            style="display:none;">
+
+            <div class="staff-detail-heading">
+
+                <div>
+                    <div class="staff-section-title">
+                        👤 會員資料
+                    </div>
+
+                    <div
+                        id="staffMemberDetailSubtitle"
+                        class="staff-dashboard-date">
+                    </div>
+                </div>
+
+                <button
+                    id="staffCloseDetailButton"
+                    class="staff-secondary-button">
+                    關閉
+                </button>
+
+            </div>
+
+            <div id="staffMemberDetailContent"></div>
 
         </section>
 
@@ -224,42 +235,18 @@
 
                 <button
                     class="staff-menu-button admin-menu-button"
-                    data-admin-only="true"
-                    data-title="完整 Dashboard"
-                    data-detail="查看本月、累積營收與完整營運分析">
+                    data-placeholder="完整 Dashboard">
                     <span class="staff-menu-icon">📊</span>
                     <span class="staff-menu-title">完整 Dashboard</span>
-                    <span class="staff-menu-detail">營收與營運分析</span>
+                    <span class="staff-menu-detail">本月與累積營運分析</span>
                 </button>
 
                 <button
                     class="staff-menu-button admin-menu-button"
-                    data-admin-only="true"
-                    data-title="票券管理"
-                    data-detail="修改票名、價格、圖片、代幣與玩具">
+                    data-placeholder="票券管理">
                     <span class="staff-menu-icon">🎫</span>
                     <span class="staff-menu-title">票券管理</span>
-                    <span class="staff-menu-detail">新增與修改雲端票券</span>
-                </button>
-
-                <button
-                    class="staff-menu-button admin-menu-button"
-                    data-admin-only="true"
-                    data-title="會員管理"
-                    data-detail="新增、編輯、刪除與匯出會員資料">
-                    <span class="staff-menu-icon">👥</span>
-                    <span class="staff-menu-title">會員管理</span>
-                    <span class="staff-menu-detail">完整會員資料管理</span>
-                </button>
-
-                <button
-                    class="staff-menu-button admin-menu-button"
-                    data-admin-only="true"
-                    data-title="系統設定"
-                    data-detail="密碼、付款方式、營業模式與備份設定">
-                    <span class="staff-menu-icon">⚙️</span>
-                    <span class="staff-menu-title">系統設定</span>
-                    <span class="staff-menu-detail">店長專用管理功能</span>
+                    <span class="staff-menu-detail">下一階段接入完整管理</span>
                 </button>
 
             </div>
@@ -267,20 +254,193 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7 Phase 3A Staff
+            小怪獸售票機・V7 Phase 3B Staff
         </footer>
 
     </div>
 
 </section>
 
+<!-- 快速新增會員 -->
+<div id="staffMemberModal" class="staff-modal" style="display:none;">
+
+    <div class="staff-modal-card">
+
+        <div class="staff-modal-header">
+
+            <div id="staffMemberModalTitle" class="staff-modal-title">
+                快速新增會員
+            </div>
+
+            <button
+                id="staffMemberModalClose"
+                class="staff-modal-close">
+                ×
+            </button>
+
+        </div>
+
+        <input type="hidden" id="staffEditMemberId">
+
+        <div class="staff-form-grid">
+
+            <label>
+                <span>姓名 *</span>
+                <input id="staffEditMemberName" placeholder="會員姓名">
+            </label>
+
+            <label>
+                <span>手機 *</span>
+                <input
+                    id="staffEditMemberPhone"
+                    inputmode="tel"
+                    placeholder="0912345678">
+            </label>
+
+            <label>
+                <span>生日</span>
+                <input id="staffEditMemberBirthday" type="date">
+            </label>
+
+            <label class="staff-form-full">
+                <span>備註</span>
+                <textarea
+                    id="staffEditMemberNote"
+                    placeholder="可不填"></textarea>
+            </label>
+
+        </div>
+
+        <div class="staff-modal-actions">
+
+            <button
+                id="staffMemberModalCancel"
+                class="staff-secondary-button">
+                取消
+            </button>
+
+            <button
+                id="staffMemberModalSave"
+                class="staff-primary-button">
+                儲存會員
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 玩具點數操作 -->
+<div id="staffToyPointModal" class="staff-modal" style="display:none;">
+
+    <div class="staff-modal-card">
+
+        <div class="staff-modal-header">
+
+            <div class="staff-modal-title">
+                🎁 玩具點數操作
+            </div>
+
+            <button
+                id="staffToyPointModalClose"
+                class="staff-modal-close">
+                ×
+            </button>
+
+        </div>
+
+        <div id="staffToyPointMember" class="staff-modal-member"></div>
+
+        <div class="staff-point-balance">
+
+            目前玩具點數
+
+            <strong id="staffToyPointBalance">
+                0 點
+            </strong>
+
+        </div>
+
+        <div class="staff-point-mode">
+
+            <button
+                id="staffToyAddMode"
+                class="active">
+                ＋ 增加
+            </button>
+
+            <button id="staffToyDeductMode">
+                － 扣除／兌換
+            </button>
+
+        </div>
+
+        <div class="staff-quick-points">
+
+            <button data-points="1">1 點</button>
+            <button data-points="2">2 點</button>
+            <button data-points="5">5 點</button>
+            <button data-points="10">10 點</button>
+            <button data-points="20">20 點</button>
+
+        </div>
+
+        <div class="staff-form-grid">
+
+            <label>
+                <span>點數 *</span>
+                <input
+                    id="staffToyPointAmount"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    value="1">
+            </label>
+
+            <label>
+                <span>原因 *</span>
+                <input
+                    id="staffToyPointReason"
+                    placeholder="例如：放棄紅標玩具">
+            </label>
+
+            <label class="staff-form-full">
+                <span>備註</span>
+                <textarea
+                    id="staffToyPointNote"
+                    placeholder="例如：兌換恐龍玩具"></textarea>
+            </label>
+
+        </div>
+
+        <div class="staff-modal-actions">
+
+            <button
+                id="staffToyPointCancel"
+                class="staff-secondary-button">
+                取消
+            </button>
+
+            <button
+                id="staffToyPointSave"
+                class="staff-success-button">
+                確認增加點數
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<script src="js/cloud/firebase-config.js?v=73a"></script>
-<script src="js/staff/staff-config.js?v=73a"></script>
-<script src="js/staff/staff-app.js?v=73a"></script>
+<script src="js/cloud/firebase-config.js?v=73b"></script>
+<script src="js/staff/staff-config.js?v=73b"></script>
+<script src="js/staff/staff-app.js?v=73b"></script>
 
 </body>
 </html>
