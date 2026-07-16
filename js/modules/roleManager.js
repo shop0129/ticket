@@ -170,7 +170,21 @@ var currentUser = null;
         if (!employee) {
             return false;
         }
+        employee.lastLogin = nowIso();
+        employee.updatedAt = employee.updatedAt || employee.lastLogin;
+        (function () {
+            var employees = ensureDefaultAccounts();
+            var employeeIndex;
+            for (employeeIndex = 0; employeeIndex < employees.length; employeeIndex += 1) {
+                if (employees[employeeIndex].id === employee.id) {
+                    employees[employeeIndex].lastLogin = employee.lastLogin;
+                    saveEmployees(employees);
+                    break;
+                }
+            }
+        }());
         currentUser = publicUser(employee);
+        currentUser.loginAt = employee.lastLogin;
         currentUserRole = currentUser.role;
         window.currentUser = currentUser;
         window.currentUserRole = currentUserRole;
@@ -193,7 +207,7 @@ var currentUser = null;
     }
 
     window.MonsterRole = {
-        version: "7.3-Phase3E-Part1",
+        version: "7.3-Phase3E-Part2",
         getEmployees: function () {
             return clone(ensureDefaultAccounts());
         },
