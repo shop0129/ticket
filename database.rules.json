@@ -1,6 +1,8 @@
-{
-  "rules": {
-    ".read": "auth != null",
-    ".write": "auth != null"
-  }
-}
+rules_version = '2';
+service cloud.firestore {
+match /databases/{database}/documents {
+function signedIn(){return request.auth!=null;}
+function isOwner(){return signedIn() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role=="owner";}
+match /users/{uid}{allow read: if signedIn(); allow write: if isOwner();}
+match /{document=**}{allow read: if signedIn(); allow write: if isOwner();}
+}}

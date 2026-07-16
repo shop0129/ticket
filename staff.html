@@ -17,7 +17,7 @@
         href="css/staff.css?v=72">
 </head>
 
-<body>
+<body onload="RoleAuth.init().then(()=>RoleAuth.requireOwner())">
 
 <section id="staffLoginPage" class="staff-login-page">
 
@@ -558,5 +558,7 @@
 <script src="js/staff/order-center.js?v=72"></script>
 <script src="js/staff/order-tools.js?v=72"></script>
 
+<script src="js/auth.js"></script>
+<script>RoleAuth.init();</script>
 </body>
 </html>
