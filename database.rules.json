@@ -4,76 +4,14 @@
     ".write": false,
     "monsterTicket": {
       "v1": {
-        "tickets": {
-          ".read": "auth != null",
-          ".write": "auth != null && auth.token.staff === true && auth.token.role === 'admin'"
-        },
-        "orders": {
-          ".read": "auth != null",
-          "$orderId": {
-            ".write": "auth != null && (!data.exists() || auth.token.staff === true || (newData.child('status').val() === data.child('status').val() && newData.child('playStatus').val() === data.child('playStatus').val() && newData.child('amount').val() === data.child('amount').val()))",
-            "status": {
-              ".validate": "newData.val() !== 'cancel' || (auth.token.staff === true && auth.token.role === 'admin')"
-            },
-            "playStatus": {
-              ".validate": "newData.val() !== 'cancelled' || (auth.token.staff === true && auth.token.role === 'admin')"
-            },
-            "deleted": {
-              ".validate": "newData.val() !== true || (auth.token.staff === true && auth.token.role === 'admin')"
-            },
-            "cancelReason": {
-              ".validate": "!newData.exists() || (auth.token.staff === true && auth.token.role === 'admin')"
-            },
-            "cancelledBy": {
-              ".validate": "!newData.exists() || (auth.token.staff === true && auth.token.role === 'admin')"
-            }
-          }
-        },
-        "members": {
-          ".read": "auth != null",
-          "$memberId": {
-            ".write": "auth != null",
-            "deleted": {
-              ".validate": "newData.val() !== true || (auth.token.staff === true && auth.token.role === 'admin')"
-            }
-          }
-        },
-        "dashboard": {
-          ".read": "auth != null",
-          ".write": "auth != null"
-        },
-        "venue": {
-          ".read": "auth != null",
-          "settings": {
-            ".write": "auth != null && auth.token.staff === true && auth.token.role === 'admin'"
-          }
-        },
-        "logs": {
-          ".read": "auth != null && auth.token.staff === true",
-          "$logId": {
-            ".write": "auth != null && auth.token.staff === true && !data.exists()"
-          }
-        },
-        "auditLogs": {
-          ".read": "auth != null && auth.token.staff === true && auth.token.role === 'admin'",
-          "$logId": {
-            ".write": "auth != null && auth.token.staff === true && !data.exists()"
-          }
-        },
-        "staffUsers": {
-          "$uid": {
-            ".read": "auth != null && (auth.uid === $uid || (auth.token.staff === true && auth.token.role === 'admin'))",
-            ".write": false
-          }
-        },
-        "staffAccountIndex": {
-          ".read": false,
-          ".write": false
-        },
-        "settings": {
-          ".read": "auth != null",
-          ".write": "auth != null && auth.token.staff === true && auth.token.role === 'admin'"
-        }
+        ".read": "auth != null",
+        "orders": { ".write": "auth != null" },
+        "members": { ".write": "auth != null" },
+        "tickets": { ".write": "auth != null" },
+        "dashboard": { ".write": "auth != null" },
+        "venue": { ".write": "auth != null" },
+        "logs": { ".write": "auth != null" },
+        "auditLogs": { ".write": "auth != null" }
       }
     }
   }

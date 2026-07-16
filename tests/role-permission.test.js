@@ -47,15 +47,15 @@ require("../js/cloud/auth.js");
 var employees = MonsterRole.getEmployees();
 assert.strictEqual(employees.length, 2, "首次啟動應建立店長與員工帳號");
 
-assert.strictEqual(MonsterAuth.login("staff01", "0000"), true, "員工應可登入");
+assert.strictEqual(MonsterAuth.login("staff", "0000"), true, "員工應可登入");
 assert.strictEqual(MonsterAuth.getCurrentRole(), "staff", "員工角色應正確");
 assert.strictEqual(MonsterAuth.hasPermission("order.cancel"), false, "員工不可作廢訂單");
 assert.strictEqual(MonsterAuth.hasPermission("capacity.update"), false, "員工不可修改容量");
 assert.strictEqual(MonsterAuth.hasPermission("order.reprint"), true, "員工可補印訂單");
-assert.strictEqual(MonsterAuth.getActor("staff").name, "員工01", "操作人應記錄員工姓名");
+assert.strictEqual(MonsterAuth.getActor("staff").name, "員工", "操作人應記錄員工姓名");
 
 MonsterAuth.audit("test.staff", "員工測試", { source: "staff" });
-assert.strictEqual(MonsterAuth.getLocalAuditLogs()[0].actorName, "員工01", "操作紀錄應包含員工姓名");
+assert.strictEqual(MonsterAuth.getLocalAuditLogs()[0].actorName, "員工", "操作紀錄應包含員工姓名");
 
 MonsterAuth.logout();
 assert.strictEqual(MonsterAuth.login("manager", "1234"), true, "店長應可登入");
