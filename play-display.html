@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>場內時間看板</title>
+<link rel="stylesheet" href="css/display.css?v=73c">
+</head>
+<body data-display-mode="play">
+<div class="display-shell">
+  <div class="display-header">
+    <div class="display-title">小怪獸放電所</div>
+    <div class="display-capacity">
+      <span>目前場內</span>
+      <strong id="displayCapacity">0 / 40</strong>
+      <span id="displayRemaining">剩餘 40 人</span>
+    </div>
+  </div>
+  <div class="display-grid">
+    <section class="display-panel">
+      <div class="display-panel-title">場內遊玩時間</div>
+      <div id="displayPrimaryList" class="display-list"></div>
+    </section>
+    <section class="display-panel">
+      <div class="display-panel-title">等待入場</div>
+      <div id="displayWaitingList" class="display-list"></div>
+    </section>
+  </div>
+  <div class="display-footer">即時更新・<span id="displayClock"></span></div>
+</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="js/cloud/firebase-config.js?v=73c"></script>
+<script src="js/display.js?v=73c"></script>
+</body>
+</html>

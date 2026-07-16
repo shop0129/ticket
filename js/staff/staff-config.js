@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7 Phase 3B
+// 小怪獸售票機 V7 Phase 3C
 // Staff 手機後台登入設定
 // =========================================
 
@@ -14,6 +14,9 @@ window.MONSTER_STAFF_CONFIG = {
 
     sessionKey:"monsterStaffSession",
 
-    firebaseRoot:"monsterTicket/v1"
+    firebaseRoot:"monsterTicket/v1",
+
+    defaultMaxPlayers:40,
+    countGuardians:false
 
 };

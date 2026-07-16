@@ -1,5 +1,5 @@
 /*====================================================
-  小怪獸售票機 V7 Phase 3B
+  小怪獸售票機 V7 Phase 3C
   Staff 手機／iPad 後台
 ====================================================*/
 
@@ -372,7 +372,7 @@ input{
 
 
 /*====================================================
-  V7 Phase 3B 會員中心＋玩具點數
+  V7 Phase 3C 會員中心＋玩具點數
 ====================================================*/
 
 .staff-member-search{
@@ -823,4 +823,275 @@ input{
         text-align:left;
     }
 
+}
+
+
+/*====================================================
+  V7 Phase 3C 訂單中心／容量控管
+====================================================*/
+
+.staff-capacity-grid{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:12px;
+    margin-top:18px;
+}
+
+.staff-capacity-settings{
+    display:flex;
+    align-items:flex-end;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-top:18px;
+    padding:16px;
+    border-radius:18px;
+    background:#fff8e5;
+}
+
+.staff-capacity-settings label{
+    font-size:17px;
+    font-weight:900;
+}
+
+.staff-capacity-settings input[type="number"]{
+    display:block;
+    width:150px;
+    height:52px;
+    margin-top:7px;
+    padding:0 12px;
+    border:2px solid #ddd;
+    border-radius:13px;
+    font-size:22px;
+}
+
+.staff-check-label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    min-height:52px;
+}
+
+.staff-check-label input{
+    width:24px;
+    height:24px;
+}
+
+.staff-order-toolbar{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 180px 130px;
+    gap:10px;
+    margin-top:20px;
+}
+
+.staff-order-toolbar input,
+.staff-order-toolbar select{
+    min-height:58px;
+    padding:0 14px;
+    border:2px solid #dce3e9;
+    border-radius:15px;
+    background:#fff;
+    font-size:19px;
+}
+
+.staff-order-card{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:16px;
+    margin-top:12px;
+    padding:18px;
+    border:2px solid #e5eaee;
+    border-radius:18px;
+    background:#fff;
+    text-align:left;
+    cursor:pointer;
+}
+
+.staff-order-card.status-playing{
+    border-color:#b9e3c3;
+    background:#f5fff7;
+}
+
+.staff-order-card.status-waiting{
+    border-color:#d8e3ef;
+    background:#f8fbff;
+}
+
+.staff-order-card.status-finished{
+    opacity:.72;
+}
+
+.staff-order-number{
+    font-size:29px;
+    font-weight:900;
+    color:#1565c0;
+}
+
+.staff-order-number span{
+    margin-left:8px;
+    font-size:16px;
+    color:#7b8790;
+}
+
+.staff-order-items{
+    margin-top:6px;
+    font-size:19px;
+    font-weight:800;
+}
+
+.staff-order-meta{
+    margin-top:5px;
+    font-size:16px;
+    color:#7b8790;
+}
+
+.staff-order-right{
+    flex-shrink:0;
+    text-align:right;
+}
+
+.staff-order-right strong{
+    display:block;
+    font-size:24px;
+    color:#ff6d00;
+}
+
+.staff-order-status{
+    display:inline-block;
+    margin-top:7px;
+    padding:7px 12px;
+    border-radius:14px;
+    background:#eef2f5;
+    font-size:16px;
+    font-weight:900;
+}
+
+.staff-order-detail-card{
+    margin-top:16px;
+}
+
+.staff-order-detail-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:14px;
+}
+
+.staff-order-detail-number{
+    font-size:42px;
+    font-weight:900;
+    color:#1565c0;
+}
+
+.staff-order-detail-tail{
+    margin-top:5px;
+    color:#74818b;
+    font-weight:800;
+}
+
+.staff-order-detail-status{
+    padding:10px 15px;
+    border-radius:16px;
+    font-size:19px;
+    font-weight:900;
+    background:#eef2f5;
+}
+
+.staff-order-info-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+    margin-top:18px;
+}
+
+.staff-order-info-grid div{
+    padding:15px;
+    border-radius:15px;
+    background:#f5f7f9;
+}
+
+.staff-order-info-grid span{
+    display:block;
+    font-size:15px;
+    color:#77838d;
+    font-weight:800;
+}
+
+.staff-order-info-grid strong{
+    display:block;
+    margin-top:7px;
+    font-size:21px;
+}
+
+.staff-order-edit-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
+    margin-top:18px;
+}
+
+.staff-order-edit-grid label span{
+    display:block;
+    margin-bottom:6px;
+    font-size:16px;
+    font-weight:900;
+}
+
+.staff-order-edit-grid input,
+.staff-order-edit-grid textarea{
+    width:100%;
+    min-height:54px;
+    padding:10px 12px;
+    border:2px solid #dce3e9;
+    border-radius:14px;
+    font-size:19px;
+}
+
+.staff-order-edit-grid textarea{
+    min-height:85px;
+}
+
+.staff-order-items-box{
+    margin-top:12px;
+    padding:14px;
+    border-radius:16px;
+    background:#f7f9fa;
+}
+
+.staff-order-item-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    padding:10px 0;
+    border-bottom:1px solid #e4e8eb;
+    font-size:18px;
+}
+
+.staff-order-item-row:last-child{
+    border-bottom:none;
+}
+
+.staff-order-actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+}
+
+@media(max-width:760px){
+
+    .staff-capacity-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+
+    .staff-order-toolbar,
+    .staff-order-info-grid,
+    .staff-order-edit-grid{
+        grid-template-columns:1fr;
+    }
+
+    .staff-order-card{
+        align-items:flex-start;
+    }
 }

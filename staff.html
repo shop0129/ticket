@@ -14,7 +14,7 @@
 
     <link
         rel="stylesheet"
-        href="css/staff.css?v=73b">
+        href="css/staff.css?v=73c">
 </head>
 
 <body>
@@ -225,7 +225,91 @@
 
         </section>
 
-        <section class="staff-section admin-only">
+        
+        <section class="staff-section">
+
+            <div class="staff-section-title">
+                🧾 訂單中心
+            </div>
+
+            <div class="staff-capacity-grid">
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">目前場內</div>
+                    <div id="staffVenueCurrent" class="staff-summary-value">0 / 40</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">剩餘名額</div>
+                    <div id="staffVenueRemaining" class="staff-summary-value">40 人</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">候位</div>
+                    <div id="staffVenueWaiting" class="staff-summary-value">0 組</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">遊玩中</div>
+                    <div id="staffVenuePlaying" class="staff-summary-value">0 組</div>
+                </div>
+
+            </div>
+
+            <div class="staff-capacity-settings admin-only">
+
+                <label>
+                    場內人數上限
+                    <input
+                        id="staffMaxPlayersInput"
+                        type="number"
+                        min="1"
+                        value="40">
+                </label>
+
+                <label class="staff-check-label">
+                    <input
+                        id="staffCountGuardiansInput"
+                        type="checkbox">
+                    陪同者也計入容量
+                </label>
+
+                <button
+                    id="staffSaveCapacityButton"
+                    class="staff-primary-button">
+                    儲存容量設定
+                </button>
+
+            </div>
+
+            <div class="staff-order-toolbar">
+
+                <input
+                    id="staffOrderSearchInput"
+                    type="search"
+                    placeholder="搜尋叫號、訂單尾號、會員姓名或手機">
+
+                <select id="staffOrderStatusFilter">
+                    <option value="active">等待＋遊玩中</option>
+                    <option value="waiting">等待入場</option>
+                    <option value="playing">遊玩中</option>
+                    <option value="finished">已離場</option>
+                    <option value="all">全部訂單</option>
+                </select>
+
+                <button
+                    id="staffOrderRefreshButton"
+                    class="staff-secondary-button">
+                    重新整理
+                </button>
+
+            </div>
+
+            <div id="staffOrderResults"></div>
+
+        </section>
+
+<section class="staff-section admin-only">
 
             <div class="staff-section-title">
                 👑 店長功能
@@ -254,7 +338,7 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7 Phase 3B Staff
+            小怪獸售票機・V7 Phase 3C Staff
         </footer>
 
     </div>
@@ -434,13 +518,43 @@
 
 </div>
 
+
+<div
+    id="staffOrderDetailModal"
+    class="staff-modal"
+    style="display:none;">
+
+    <div class="staff-modal-card staff-order-modal-card">
+
+        <div class="staff-modal-header">
+
+            <div class="staff-modal-title">
+                🧾 訂單資料
+            </div>
+
+            <button
+                id="staffOrderDetailClose"
+                class="staff-modal-close">
+                ×
+            </button>
+
+        </div>
+
+        <div id="staffOrderDetailContent"></div>
+
+    </div>
+
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<script src="js/cloud/firebase-config.js?v=73b"></script>
-<script src="js/staff/staff-config.js?v=73b"></script>
-<script src="js/staff/staff-app.js?v=73b"></script>
+<script src="js/cloud/firebase-config.js?v=73c"></script>
+<script src="js/staff/staff-config.js?v=73c"></script>
+<script src="js/staff/staff-app.js?v=73c"></script>
+<script src="js/cloud/cloud-order-lifecycle.js?v=73c"></script>
+<script src="js/staff/order-center.js?v=73c"></script>
 
 </body>
 </html>
