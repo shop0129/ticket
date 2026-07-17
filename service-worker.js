@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "741-mobile-20260717-1";
+var CACHE_NAME = CACHE_PREFIX + "742-staff-feedback-20260717-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -18,6 +18,7 @@ var CORE_ASSETS = [
     "./css/display.css",
     "./css/pwa.css",
     "./css/staff.css",
+    "./css/staff-feedback.css",
     "./css/style.css",
     "./css/mobile-enterprise.css",
     "./images/btn-buy-default.png",
@@ -81,6 +82,7 @@ var CORE_ASSETS = [
     "./js/staff/order-center.js",
     "./js/staff/order-tools.js",
     "./js/staff/staff-app.js",
+    "./js/staff/staff-feedback.js",
     "./js/staff/staff-config.js",
     "./js/utils/helper.js",
     "./js/utils/legacy-polyfills.js",

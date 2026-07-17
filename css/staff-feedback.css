@@ -1,0 +1,30 @@
+/* 小怪獸售票機 V7.4.2｜後台按鍵觸覺回饋 */
+button,
+[role="button"],
+a.staff-menu-button{
+    transition:transform .08s ease, filter .12s ease, box-shadow .12s ease;
+    touch-action:manipulation;
+}
+
+button:not(:disabled):active,
+button.staff-button-pressed,
+[role="button"].staff-button-pressed,
+a.staff-menu-button.staff-button-pressed{
+    transform:scale(.975);
+    filter:brightness(.94);
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+a.staff-menu-button:focus-visible{
+    outline:4px solid rgba(33,150,243,.28);
+    outline-offset:3px;
+}
+
+@media (prefers-reduced-motion: reduce){
+    button,
+    [role="button"],
+    a.staff-menu-button{
+        transition:none;
+    }
+}
