@@ -31,9 +31,32 @@ function ticketCard(x){var t=x.data,id=x.id;return '<article class="enterprise-t
 function collectTickets(){document.querySelectorAll('.enterprise-ticket').forEach(function(card){var id=card.dataset.id,t=tickets[id]||{};card.querySelectorAll('[data-f]').forEach(function(f){var k=f.dataset.f;if(k==='enable')t[k]=f.checked;else if(k==='price'||k==='token')t[k]=Math.max(0,Number(f.value||0));else t[k]=String(f.value||'').trim();});tickets[id]=t;});}
 function addTicket(){collectTickets();var id='custom_'+Date.now();tickets[id]={title:'新票券',price:0,token:0,toy:'none',category:'other',enable:true,image:'ticket-bg.png',description:'',custom:true};renderTickets();setTimeout(function(){var c=document.querySelector('[data-id="'+id+'"]');if(c)c.scrollIntoView({behavior:'smooth'});},30);}
 function ticketAction(e){var btn=e.target.closest('[data-act]');if(!btn)return;collectTickets();var card=btn.closest('.enterprise-ticket'),id=card.dataset.id,act=btn.dataset.act,ids=Object.keys(tickets),i=ids.indexOf(id);if(act==='delete'){if(!confirm('確定刪除「'+(tickets[id].title||id)+'」？'))return;delete tickets[id];}else if(act==='copy'){var nid='custom_'+Date.now();tickets[nid]=JSON.parse(JSON.stringify(tickets[id]));tickets[nid].title=(tickets[id].title||'票券')+' 複製';tickets[nid].custom=true;}else{var j=i+(act==='up'?-1:1);if(j<0||j>=ids.length)return;var tmp=ids[i];ids[i]=ids[j];ids[j]=tmp;var n={};ids.forEach(function(k){n[k]=tickets[k];});tickets=n;}renderTickets();}
+function resetAllOrders(){
+if(!adminOnly()){notify('只有店長可以重置訂單紀錄',false);return;}
+var first=confirm('⚠️ 確定要清除所有訂單紀錄？\n\n包含點餐機、Staff 與 Dashboard 的訂單資料，且無法復原。');
+if(!first)return;
+var code=prompt('請輸入 RESET 確認清除全部訂單：','');
+if(String(code||'').toUpperCase()!=='RESET'){notify('已取消重置',false);return;}
+var user=(window.MonsterRole&&MonsterRole.getCurrentUser&&MonsterRole.getCurrentUser())||window.currentUser||{};
+var audit={action:'order.resetAll',operatorName:user.name||user.displayName||'店長',operatorAccount:user.account||user.username||'manager',createdAt:Date.now(),detail:'清除所有訂單紀錄'};
+function clearLocal(){
+  localStorage.setItem('salesHistory','[]');
+  localStorage.removeItem('lastOrder');
+  localStorage.removeItem('currentOrder');
+  orders=[];
+  try{localStorage.setItem('monsterTicketLastReset',JSON.stringify(audit));}catch(e){}
+}
+clearLocal();
+if(ordersRef){
+  ordersRef.remove().then(function(){
+    try{var logRef=firebase.database().ref(ROOT+'/auditLogs').push();logRef.set(audit);}catch(e){}
+    renderDashboard();notify('所有訂單紀錄已清除');
+  }).catch(function(err){renderDashboard();notify('本機已清除，但雲端清除失敗：'+(err&&err.message?err.message:'請檢查權限'),false);});
+}else{renderDashboard();notify('本機訂單紀錄已清除');}
+}
 function saveTickets(){collectTickets();var titles={};for(var id in tickets){var title=(tickets[id].title||'').trim();if(!title){notify('票券名稱不可空白',false);return;}if(titles[title]){notify('票券名稱重複：'+title,false);return;}titles[title]=true;tickets[id].reward=[Number(tickets[id].token)>0?'token':'',tickets[id].toy&&tickets[id].toy!=='none'?'toy':''].filter(Boolean).join(',');}
 localStorage.setItem('ticketData',JSON.stringify(tickets));if(ticketsRef){var map={};Object.keys(tickets).forEach(function(id){map[id]=Object.assign({id:id,updatedAt:Date.now(),updatedBy:(window.currentUser&&window.currentUser.name)||'manager'},tickets[id]);});ticketsRef.set(map).then(function(){notify('票券設定已儲存並同步');}).catch(function(){notify('已存本機，但雲端同步失敗',false);});}else notify('票券設定已儲存在本機');}
-function bind(){document.querySelectorAll('[data-enterprise-open]').forEach(function(b){b.addEventListener('click',function(){openPanel(b.dataset.enterpriseOpen);});});el('enterpriseClose').addEventListener('click',closePanel);el('enterpriseOverlay').addEventListener('click',function(e){if(e.target===this)closePanel();});document.querySelectorAll('.enterprise-period button').forEach(function(b){b.addEventListener('click',function(){setPeriod(b.dataset.period);});});el('ticketSearch').addEventListener('input',renderTickets);el('ticketCategory').addEventListener('change',renderTickets);el('ticketStatus').addEventListener('change',renderTickets);el('ticketAdd').addEventListener('click',addTicket);el('ticketSave').addEventListener('click',saveTickets);el('enterpriseTicketList').addEventListener('click',ticketAction);el('dashRefresh').addEventListener('click',renderDashboard);}
+function bind(){document.querySelectorAll('[data-enterprise-open]').forEach(function(b){b.addEventListener('click',function(){openPanel(b.dataset.enterpriseOpen);});});el('enterpriseClose').addEventListener('click',closePanel);el('enterpriseOverlay').addEventListener('click',function(e){if(e.target===this)closePanel();});document.querySelectorAll('.enterprise-period button').forEach(function(b){b.addEventListener('click',function(){setPeriod(b.dataset.period);});});el('ticketSearch').addEventListener('input',renderTickets);el('ticketCategory').addEventListener('change',renderTickets);el('ticketStatus').addEventListener('change',renderTickets);el('ticketAdd').addEventListener('click',addTicket);el('ticketSave').addEventListener('click',saveTickets);el('enterpriseTicketList').addEventListener('click',ticketAction);el('dashRefresh').addEventListener('click',renderDashboard);var resetBtn=el('dashResetOrders');if(resetBtn)resetBtn.addEventListener('click',resetAllOrders);}
 document.addEventListener('DOMContentLoaded',function(){bind();startData();});
-window.MonsterEnterpriseManager={open:openPanel,close:closePanel,renderDashboard:renderDashboard,renderTickets:renderTickets};
+window.MonsterEnterpriseManager={open:openPanel,close:closePanel,renderDashboard:renderDashboard,renderTickets:renderTickets,resetAllOrders:resetAllOrders};
 })();

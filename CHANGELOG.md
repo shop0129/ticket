@@ -8,3 +8,10 @@
 
 ## V7.4.0 Enterprise
 - 加入 Enterprise Core、事件匯流排、集中權限與健康狀態。
+
+## V7.4.4 — Ticket Manager & Order Reset FIX
+- 修正點餐機開啟票券管理時，渲染前誤判票券名稱空白而造成空白頁。
+- 票券名稱、重複名稱與負數價格驗證改到儲存時執行。
+- Dashboard 新增店長限定「重置全部訂單」功能，需二次確認並輸入 RESET。
+- 同步清除 Firebase Realtime Database 與本機 salesHistory，並留下操作紀錄。
+- 更新 PWA 快取版本。

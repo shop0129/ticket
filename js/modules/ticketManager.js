@@ -65,17 +65,8 @@ function renderTicketManager() {
         return;
     var html = renderAddTicketPanel();
     html += "\n\n<div class=\"image-library-card\">\n\n    <div class=\"image-library-title\">\n        \uD83D\uDDBC\uFE0F \u5DF2\u4E0A\u50B3\u5716\u7247\u5EAB\n    </div>\n\n    <div class=\"image-library-note\">\n        \u5716\u7247\u6703\u5132\u5B58\u5728\u76EE\u524D\u9019\u53F0\u552E\u7968\u6A5F\u7684\u700F\u89BD\u5668\u4E2D\uFF0C\u5099\u4EFD\u8CC7\u6599\u6642\u4E5F\u6703\u4E00\u8D77\u532F\u51FA\u3002\n    </div>\n\n    ".concat(renderImageLibraryPanel(), "\n\n</div>\n\n");
-    var seenNames = {};
-    for (var checkId in ticketData) {
-        var titleInput = document.getElementById("title-" + checkId);
-        var priceInput = document.getElementById("priceInput-" + checkId);
-        var checkTitle = titleInput ? titleInput.value.trim() : "";
-        if (!checkTitle) { alert("❌ 票券名稱不能空白"); if (titleInput) titleInput.focus(); return; }
-        var titleKey = checkTitle.toLowerCase();
-        if (seenNames[titleKey]) { alert("❌ 票券名稱重複：" + checkTitle); if (titleInput) titleInput.focus(); return; }
-        seenNames[titleKey] = true;
-        if (!priceInput || Number(priceInput.value) < 0) { alert("❌ 票券價格不能小於 0"); if (priceInput) priceInput.focus(); return; }
-    }
+    // V7.4.4 FIX：開啟票券管理時，輸入框尚未建立，不能在渲染前讀取 DOM 驗證。
+    // 驗證統一移到 saveTicketManager()，避免點餐機出現「票券名稱不能空白」後整頁空白。
     for (var id in ticketData) {
         var ticket = ticketData[id];
         html += "\n\n<div\n    class=\"tm-card ticket-manager-card\"\n    data-ticket-manager-id=\"".concat(id, "\">\n\n    <div class=\"tm-card-header\">\n\n        <div class=\"tm-card-title\">\n            ").concat(ticket.title || id, "\n        </div>\n\n        <div class=\"ticket-manager-actions\">\n\n            <label class=\"tm-enable\">\n\n                <input\n                    type=\"checkbox\"\n                    id=\"enable-").concat(id, "\"\n                    ").concat(ticket.enable !== false ? "checked" : "", ">\n\n                \u555F\u7528\n\n            </label>\n\n            ").concat(ticket.custom
@@ -149,12 +140,35 @@ function saveTicketManager() {
     if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以修改票券")) {
         return;
     }
+    var seenNames = {};
+    for (var validateId in ticketData) {
+        var titleField = document.getElementById("title-".concat(validateId));
+        var priceField = document.getElementById("priceInput-".concat(validateId));
+        var validateTitle = titleField ? titleField.value.trim() : "";
+        if (!validateTitle) {
+            alert("❌ 票券名稱不能空白");
+            if (titleField) titleField.focus();
+            return;
+        }
+        var titleKey = validateTitle.toLowerCase();
+        if (seenNames[titleKey]) {
+            alert("❌ 票券名稱重複：" + validateTitle);
+            if (titleField) titleField.focus();
+            return;
+        }
+        seenNames[titleKey] = true;
+        if (!priceField || Number(priceField.value) < 0) {
+            alert("❌ 票券價格不能小於 0");
+            if (priceField) priceField.focus();
+            return;
+        }
+    }
     for (var id in ticketData) {
         var ticket = ticketData[id];
         ticket.enable =
             document.getElementById("enable-".concat(id)).checked;
         ticket.title =
-            document.getElementById("title-".concat(id)).value.trim() || "未命名票券";
+            document.getElementById("title-".concat(id)).value.trim();
         ticket.category =
             document.getElementById("category-".concat(id)).value;
         ticket.price =
