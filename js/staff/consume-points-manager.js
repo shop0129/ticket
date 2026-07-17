@@ -3,7 +3,15 @@
   "use strict";
   var root="monsterTicket/v1", selected=null, members={};
   function byId(id){return document.getElementById(id);} function n(v,f){v=Number(v);return isFinite(v)?v:f;}
-  function manager(){ try{ return !window.MonsterAuth || MonsterAuth.getActor("staff").role==="manager"; }catch(e){return false;} }
+  function manager(){
+    try{
+      var role="";
+      if(window.MonsterRole&&MonsterRole.getCurrentRole) role=String(MonsterRole.getCurrentRole()||"").toLowerCase();
+      if(!role&&window.MonsterAuth&&MonsterAuth.getActor) role=String((MonsterAuth.getActor("staff")||{}).role||"").toLowerCase();
+      if(!role) role=String(window.currentUserRole||"").toLowerCase();
+      return role==="admin"||role==="manager"||role==="店長";
+    }catch(e){return false;}
+  }
   function actor(){ try{return MonsterAuth.getActor("staff").name||"店長";}catch(e){return "店長";} }
   function toast(t){ if(window.enterpriseToast) enterpriseToast(t); else alert(t); }
   function settings(){ try{return Object.assign({earnAmount:100,earnPoints:1,pointValue:1,maxPercent:50,enabled:true},JSON.parse(localStorage.getItem("consumePointSettings")||"{}"));}catch(e){return {earnAmount:100,earnPoints:1,pointValue:1,maxPercent:50,enabled:true};} }
@@ -14,7 +22,7 @@
     document.body.appendChild(d);
     byId("consumePointClose").onclick=close; byId("cpSaveSettings").onclick=saveSettings; byId("cpSearchBtn").onclick=search; byId("cpAdjustSave").onclick=adjust;
   }
-  function open(){ if(!manager()){alert("❌ 只有店長可以管理消費點數");return;} var s=settings(); byId("cpEnabled").checked=!!s.enabled;byId("cpEarnAmount").value=s.earnAmount;byId("cpEarnPoints").value=s.earnPoints;byId("cpPointValue").value=s.pointValue;byId("cpMaxPercent").value=s.maxPercent;byId("consumePointManagerModal").style.display="flex"; loadMembers(); }
+  function open(){ if(!manager()){alert("❌ 只有店長可以管理消費點數");return;} if(!byId("consumePointManagerModal")){inject();} var s=settings(); byId("cpEnabled").checked=!!s.enabled;byId("cpEarnAmount").value=s.earnAmount;byId("cpEarnPoints").value=s.earnPoints;byId("cpPointValue").value=s.pointValue;byId("cpMaxPercent").value=s.maxPercent;byId("consumePointManagerModal").style.display="flex"; loadMembers(); }
   function close(){byId("consumePointManagerModal").style.display="none";}
   function saveSettings(){
     if(!manager())return; var s={enabled:byId("cpEnabled").checked,earnAmount:Math.max(1,n(byId("cpEarnAmount").value,100)),earnPoints:Math.max(1,Math.floor(n(byId("cpEarnPoints").value,1))),pointValue:Math.max(.01,n(byId("cpPointValue").value,1)),maxPercent:Math.max(0,Math.min(100,n(byId("cpMaxPercent").value,50))),updatedAt:Date.now(),updatedBy:actor()};

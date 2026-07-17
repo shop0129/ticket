@@ -42,7 +42,7 @@ function calculateShiftReport() {
     var redToy = 0;
     var parentCount = 0;
     normalOrders.forEach(function (order) {
-        var amount = Number(order.amount || 0);
+        var amount = Number(order.paidAmount != null ? order.paidAmount : order.amount || 0);
         if (order.payment === "現金") {
             cashAmount += amount;
         }

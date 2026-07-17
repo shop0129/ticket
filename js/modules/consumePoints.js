@@ -46,8 +46,19 @@
       var bal=box.querySelector("[data-point-balance]"); if(bal) bal.textContent=num(member.points,0)+" 點";
       var max=box.querySelector("[data-point-max]"); if(max) max.textContent="最高可折 NT$"+maxRedeem(total,member);
       var input=box.querySelector("[data-point-input]"); if(input && document.activeElement!==input) input.value=redemption.points||"";
-      var result=box.querySelector("[data-point-result]"); if(result) result.textContent=redemption.discount>0 ? "本次折抵 NT$"+redemption.discount+"，實付 NT$"+Math.max(0,total-redemption.discount) : "本次未使用點數";
+      var paid=Math.max(0,total-redemption.discount);
+      var result=box.querySelector("[data-point-result]"); if(result) result.textContent=redemption.discount>0 ? "本次折抵 NT$"+redemption.discount+"，實付 NT$"+paid : "本次未使用點數";
     });
+    var cartPrice=document.querySelector("#cartAmount .cartTotalPrice");
+    if(cartPrice){
+      var paidTotal=Math.max(0,total-redemption.discount);
+      cartPrice.innerHTML=redemption.discount>0 ? '<small class="consume-original-total">原價 NT$'+total+'</small>NT$'+paidTotal+'<small class="consume-discount-total">點數折抵 -NT$'+redemption.discount+'</small>' : 'NT$'+total;
+    }
+    [["cartLineBtn","LINE Pay"],["cartCashBtn","現金付款"],["linePayBtn","LINE Pay"],["cashBtn","現金付款"]].forEach(function(row){
+      var b=document.getElementById(row[0]); if(!b)return;
+      b.textContent=redemption.discount>0 ? row[1]+" NT$"+Math.max(0,total-redemption.discount) : row[1];
+    });
+    window.dispatchEvent(new CustomEvent("consume-points-changed",{detail:{originalAmount:total,usedPoints:redemption.points,discount:redemption.discount,paidAmount:Math.max(0,total-redemption.discount)}}));
   }
   function applyInput(input){
     var r=calc(input.value,totalAmount(),window.currentMember||null); redemption=r; input.value=r.points||""; render();

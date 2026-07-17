@@ -458,7 +458,7 @@
     <div class="staff-order-right">
 
         <strong>
-            NT$${money(order.amount)}
+            NT$${money(order.paidAmount != null ? order.paidAmount : order.amount)}
         </strong>
 
         <span class="staff-order-status">

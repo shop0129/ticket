@@ -12,7 +12,7 @@ function closePanel(){var p=el('enterpriseOverlay');if(p)p.style.display='none';
 function parseOrderDate(o){var raw=o.createdAt||o.timestamp||o.dateTime||o.date; if(typeof raw==='number')return new Date(raw); if(raw&&raw.seconds)return new Date(raw.seconds*1000); if(o.date){var s=String(o.date)+' '+String(o.time||'00:00'); var d=new Date(s.replace(/-/g,'/')); if(!isNaN(d))return d;} return null;}
 function inPeriod(o){if(period==='all')return true;var d=parseOrderDate(o);if(!d)return false;var n=new Date();if(period==='month')return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth();return d.toDateString()===n.toDateString();}
 function isCancelled(o){return o.status==='cancel'||o.status==='cancelled'||o.cancelled===true||o.voided===true;}
-function amount(o){return Number(o.amount||o.total||o.totalAmount||0);}
+function amount(o){return Number(o.paidAmount != null ? o.paidAmount : (o.amount||o.total||o.totalAmount||0));}
 function qty(o){if(Array.isArray(o.items))return o.items.reduce(function(s,i){return s+Math.max(1,Number(i.qty||i.quantity||1));},0);return Number(o.ticketCount||o.people||1);}
 function payment(o){return String(o.payment||o.paymentMethod||'').toLowerCase();}
 function loadOrdersLocal(){try{return JSON.parse(localStorage.getItem('salesHistory')||'[]')||[];}catch(e){return [];}}

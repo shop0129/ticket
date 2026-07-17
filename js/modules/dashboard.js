@@ -1,4 +1,8 @@
 // V7.3 Phase 3F Part 2 | 完整營運 Dashboard
+
+function getDashboardOrderAmount(order) {
+    return Number(order && order.paidAmount != null ? order.paidAmount : (order && order.amount || 0));
+}
 var dashboardPeriod = "today";
 
 function formatDashboardAmount(value) {
@@ -69,7 +73,7 @@ function renderDashboardRecentOrders() {
         return '<button type="button" class="dashboard-order-row '+(cancelled?'cancelled':'')+'" onclick="playClick(); openOrderDetail('+index+')">'+
             '<div class="dashboard-order-main"><div class="dashboard-order-number">'+(order.orderNo||'未編號')+'</div>'+
             '<div class="dashboard-order-meta">'+(order.date||'')+' '+(order.time||'')+'・'+(order.payment||'未記錄')+'・'+count+' 張・'+operator+(order.memberId?'・👤 '+(order.memberName||'會員'):'')+'</div></div>'+
-            '<div class="dashboard-order-right"><div class="dashboard-order-amount">NT$'+formatDashboardAmount(order.amount)+'</div><div class="dashboard-order-status">'+(cancelled?'已作廢':'正常')+'</div></div></button>';
+            '<div class="dashboard-order-right"><div class="dashboard-order-amount">NT$'+formatDashboardAmount(getDashboardOrderAmount(order))+'</div><div class="dashboard-order-status">'+(cancelled?'已作廢':'正常')+'</div></div></button>';
     }).join('');
 }
 function renderDashboardRanking(targetId, rows, emptyText) {
@@ -93,13 +97,13 @@ function renderDashboardTopTickets(orders) {
 }
 function renderDashboardHourlySales(orders) {
     var buckets={};
-    orders.forEach(function(order){var match=String(order.time||'').match(/(\d{1,2})[:：]/);var hour=match?Number(match[1]):-1;if(hour>=0){var key=String(hour).padStart?String(hour).padStart(2,'0'):('0'+hour).slice(-2);key+=':00';buckets[key]=(buckets[key]||0)+Number(order.amount||0);}});
+    orders.forEach(function(order){var match=String(order.time||'').match(/(\d{1,2})[:：]/);var hour=match?Number(match[1]):-1;if(hour>=0){var key=String(hour).padStart?String(hour).padStart(2,'0'):('0'+hour).slice(-2);key+=':00';buckets[key]=(buckets[key]||0)+getDashboardOrderAmount(order);}});
     var rows=Object.keys(buckets).sort().map(function(key){return {label:key,value:buckets[key],display:'NT$'+formatDashboardAmount(buckets[key])};});
     renderDashboardRanking('dashboardHourlySales',rows,'尚無時段營收資料');
 }
 function renderDashboardStaffSales(orders) {
     var map={};
-    orders.forEach(function(order){var name=order.operatorName||(order.createdBy&&order.createdBy.name)||'售票機';if(!map[name])map[name]={label:name,value:0,count:0};map[name].value+=Number(order.amount||0);map[name].count+=1;});
+    orders.forEach(function(order){var name=order.operatorName||(order.createdBy&&order.createdBy.name)||'售票機';if(!map[name])map[name]={label:name,value:0,count:0};map[name].value+=getDashboardOrderAmount(order);map[name].count+=1;});
     var rows=Object.keys(map).map(function(key){return map[key];}).sort(function(a,b){return b.value-a.value;}).slice(0,6).map(function(row){row.display='NT$'+formatDashboardAmount(row.value)+' / '+row.count+' 筆';return row;});
     renderDashboardRanking('dashboardStaffSales',rows,'尚無員工銷售資料');
 }
@@ -108,11 +112,11 @@ function renderAdminDashboard() {
     var all = getDashboardPeriodOrders(true);
     var normal = all.filter(function(order){return order.status!=="cancel";});
     var cancelled = all.filter(function(order){return order.status==="cancel";});
-    var income = normal.reduce(function(sum,order){return sum+Number(order.amount||0);},0);
-    var cash = normal.filter(function(order){return String(order.payment||'').indexOf('現金')>=0;}).reduce(function(sum,order){return sum+Number(order.amount||0);},0);
-    var line = normal.filter(function(order){return String(order.payment||'').toLowerCase().indexOf('line')>=0;}).reduce(function(sum,order){return sum+Number(order.amount||0);},0);
+    var income = normal.reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
+    var cash = normal.filter(function(order){return String(order.payment||'').indexOf('現金')>=0;}).reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
+    var line = normal.filter(function(order){return String(order.payment||'').toLowerCase().indexOf('line')>=0;}).reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
     var members = normal.filter(function(order){return Boolean(order.memberId);});
-    var memberIncome=members.reduce(function(sum,order){return sum+Number(order.amount||0);},0);
+    var memberIncome=members.reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
     var nonMemberIncome=income-memberIncome;
     var newMembers=(typeof memberData!=="undefined"&&Array.isArray(memberData)?memberData:[]).filter(function(member){return dashboardOrderInPeriod({date:member.joinDate},dashboardPeriod);}).length;
     dashboardSetText('dashboardDate',dashboardPeriodLabel());
