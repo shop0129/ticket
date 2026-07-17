@@ -1483,7 +1483,8 @@
             renderOrderDetail();
             updateCapacityCards();
         },
-        closeDetail:closeOrderDetail
+        closeDetail:closeOrderDetail,
+        openOrderDetail:openOrderDetail
     };
 
     window.addEventListener(
