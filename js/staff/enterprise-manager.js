@@ -60,9 +60,14 @@ function done(message,ok){
   notify(message,ok);
 }
 if(ordersRef){
-  ordersRef.remove().then(function(){
+  var resetAt=audit.createdAt;
+  var resetRef=firebase.database().ref(ROOT+'/system/orderResetAt');
+  resetRef.set(resetAt).then(function(){
+    try{if(window.MonsterOrderCloud&&MonsterOrderCloud.applyGlobalReset){MonsterOrderCloud.applyGlobalReset(resetAt);}}catch(e){}
+    return ordersRef.remove();
+  }).then(function(){
     try{var logRef=firebase.database().ref(ROOT+'/auditLogs').push();logRef.set(audit);}catch(e){}
-    done('所有訂單紀錄已清除',true);
+    done('所有裝置的訂單紀錄已清除',true);
   }).catch(function(err){
     done('本機已清除，但雲端清除失敗：'+(err&&err.message?err.message:'請檢查權限'),false);
   });

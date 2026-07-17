@@ -12,7 +12,12 @@
     var ORDER_PATH =
         "monsterTicket/v1/orders";
 
+    var RESET_PATH =
+        "monsterTicket/v1/system/orderResetAt";
+
     var orderRef = null;
+    var resetRef = null;
+    var globalResetAt = 0;
     var initialized = false;
     var applyingCloud = false;
     var pendingWrite = false;
@@ -328,6 +333,49 @@
         notifyOrderUpdate("cloud",map);
     }
 
+
+    function clearLocalAfterGlobalReset(resetAt){
+
+        var stamp = Number(resetAt || 0);
+
+        if(!stamp || stamp <= globalResetAt){
+            return;
+        }
+
+        globalResetAt = stamp;
+
+        if(writeTimer){
+            clearTimeout(writeTimer);
+            writeTimer = null;
+        }
+
+        pendingWrite = false;
+        applyingCloud = true;
+
+        salesHistory = [];
+        window.salesHistory = salesHistory;
+        lastOrderMap = {};
+
+        try{
+            localStorage.setItem("salesHistory","[]");
+            localStorage.setItem("monsterTicketOrderResetAt",String(stamp));
+            localStorage.removeItem("lastOrder");
+            localStorage.removeItem("currentOrder");
+            localStorage.removeItem("selectedOrder");
+        }catch(error){}
+
+        applyingCloud = false;
+
+        refreshOrderScreens();
+        notifyOrderUpdate("global-reset",{});
+
+        setSyncStatus(
+            "訂單已重置",
+            "所有裝置已套用店長的訂單清除指令",
+            "online"
+        );
+    }
+
     function setSyncStatus(title,detail,state){
 
         if(
@@ -508,25 +556,56 @@
         window.MonsterCloud.database
         .ref(ORDER_PATH);
 
-        orderRef.on(
-            "value",
-            handleCloudValue,
-            function(error){
+        resetRef =
+        window.MonsterCloud.database
+        .ref(RESET_PATH);
+
+        function attachOrderListener(){
+            orderRef.on(
+                "value",
+                handleCloudValue,
+                function(error){
 
                 console.error(
                     "[MonsterOrderCloud] read error:",
                     error
                 );
 
-                setSyncStatus(
-                    "訂單同步失敗",
-                    error.code ||
-                    error.message ||
-                    "database read failed",
-                    "error"
-                );
+                    setSyncStatus(
+                        "訂單同步失敗",
+                        error.code ||
+                        error.message ||
+                        "database read failed",
+                        "error"
+                    );
+                }
+            );
+        }
+
+        var orderListenerAttached = false;
+
+        function attachOrdersOnce(){
+            if(orderListenerAttached){
+                return;
+            }
+            orderListenerAttached = true;
+            attachOrderListener();
+        }
+
+        resetRef.on(
+            "value",
+            function(resetSnapshot){
+                clearLocalAfterGlobalReset(resetSnapshot.val());
+                attachOrdersOnce();
+            },
+            function(){
+                attachOrdersOnce();
             }
         );
+
+        // 測試環境或極舊 Firebase mock 可能不會立即回呼 value。
+        // 下一個事件迴圈仍啟動訂單監聽，正式 Firebase 通常會先收到 reset marker。
+        setTimeout(attachOrdersOnce,0);
     }
 
     window.MonsterOrderCloud.onLocalSave =
@@ -543,6 +622,11 @@
     window.MonsterOrderCloud.forceSync =
     function(){
         scheduleUpload(0);
+    };
+
+    window.MonsterOrderCloud.applyGlobalReset =
+    function(resetAt){
+        clearLocalAfterGlobalReset(resetAt || Date.now());
     };
 
     window.MonsterOrderCloud.getInfo =
