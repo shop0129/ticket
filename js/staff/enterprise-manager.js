@@ -34,25 +34,41 @@ function ticketAction(e){var btn=e.target.closest('[data-act]');if(!btn)return;c
 function resetAllOrders(){
 if(!adminOnly()){notify('只有店長可以重置訂單紀錄',false);return;}
 var first=confirm('⚠️ 確定要清除所有訂單紀錄？\n\n包含點餐機、Staff 與 Dashboard 的訂單資料，且無法復原。');
-if(!first)return;
-var code=prompt('請輸入 RESET 確認清除全部訂單：','');
-if(String(code||'').toUpperCase()!=='RESET'){notify('已取消重置',false);return;}
+if(!first){notify('已取消重置',false);return;}
+var second=confirm('最後確認：真的要永久清除全部訂單嗎？\n\n按「確定」後會立即執行。');
+if(!second){notify('已取消重置',false);return;}
 var user=(window.MonsterRole&&MonsterRole.getCurrentUser&&MonsterRole.getCurrentUser())||window.currentUser||{};
 var audit={action:'order.resetAll',operatorName:user.name||user.displayName||'店長',operatorAccount:user.account||user.username||'manager',createdAt:Date.now(),detail:'清除所有訂單紀錄'};
 function clearLocal(){
+  orders=[];
+  window.salesHistory=[];
+  try{salesHistory=[];}catch(e){}
   localStorage.setItem('salesHistory','[]');
   localStorage.removeItem('lastOrder');
   localStorage.removeItem('currentOrder');
-  orders=[];
+  localStorage.removeItem('selectedOrder');
   try{localStorage.setItem('monsterTicketLastReset',JSON.stringify(audit));}catch(e){}
+  try{window.dispatchEvent(new StorageEvent('storage',{key:'salesHistory',newValue:'[]'}));}catch(e){}
 }
+var btn=el('dashResetOrders');
+if(btn){btn.disabled=true;btn.textContent='清除中…';}
 clearLocal();
+function done(message,ok){
+  clearLocal();
+  renderDashboard();
+  if(btn){btn.disabled=false;btn.textContent='🗑 重置全部訂單';}
+  notify(message,ok);
+}
 if(ordersRef){
   ordersRef.remove().then(function(){
     try{var logRef=firebase.database().ref(ROOT+'/auditLogs').push();logRef.set(audit);}catch(e){}
-    renderDashboard();notify('所有訂單紀錄已清除');
-  }).catch(function(err){renderDashboard();notify('本機已清除，但雲端清除失敗：'+(err&&err.message?err.message:'請檢查權限'),false);});
-}else{renderDashboard();notify('本機訂單紀錄已清除');}
+    done('所有訂單紀錄已清除',true);
+  }).catch(function(err){
+    done('本機已清除，但雲端清除失敗：'+(err&&err.message?err.message:'請檢查權限'),false);
+  });
+}else{
+  done('本機訂單紀錄已清除',true);
+}
 }
 function saveTickets(){collectTickets();var titles={};for(var id in tickets){var title=(tickets[id].title||'').trim();if(!title){notify('票券名稱不可空白',false);return;}if(titles[title]){notify('票券名稱重複：'+title,false);return;}titles[title]=true;tickets[id].reward=[Number(tickets[id].token)>0?'token':'',tickets[id].toy&&tickets[id].toy!=='none'?'toy':''].filter(Boolean).join(',');}
 localStorage.setItem('ticketData',JSON.stringify(tickets));if(ticketsRef){var map={};Object.keys(tickets).forEach(function(id){map[id]=Object.assign({id:id,updatedAt:Date.now(),updatedBy:(window.currentUser&&window.currentUser.name)||'manager'},tickets[id]);});ticketsRef.set(map).then(function(){notify('票券設定已儲存並同步');}).catch(function(){notify('已存本機，但雲端同步失敗',false);});}else notify('票券設定已儲存在本機');}
