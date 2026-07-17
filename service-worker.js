@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "74-enterprise-20260717-1";
+var CACHE_NAME = CACHE_PREFIX + "741-mobile-20260717-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -19,6 +19,7 @@ var CORE_ASSETS = [
     "./css/pwa.css",
     "./css/staff.css",
     "./css/style.css",
+    "./css/mobile-enterprise.css",
     "./images/btn-buy-default.png",
     "./images/category-early.png",
     "./images/category-general.png",
