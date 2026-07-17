@@ -1,0 +1,11 @@
+// 小怪獸售票機 V7.5.1｜員工快速驗票與短碼查詢
+(function(){
+ 'use strict';
+ function byId(id){return document.getElementById(id);} function esc(v){return String(v||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+ function findOrder(value){var q=String(value||'').trim().toUpperCase();if(!q)return null;var map=window.MonsterOrderCenter?MonsterOrderCenter.getOrders():{};var found=null;Object.keys(map||{}).some(function(id){var o=map[id]||{};if(String(o.shortCode||'').toUpperCase()===q||String(o.orderNo||'').toUpperCase()===q||String(id).toUpperCase()===q){found={id:id,order:o};return true;}return false;});return found;}
+ function statusText(o){var s=o.playStatus||o.validationStatus||'waiting';return s==='playing'?'遊玩中':s==='finished'?'已離場':s==='cancelled'?'已作廢':'等待入場';}
+ function showResult(found){var box=byId('staffQuickValidationResult');if(!box)return;if(!found){box.innerHTML='<div class="tv-alert error">找不到此訂單，請確認號碼後再試。</div>';return;}var o=found.order;var items=(o.items||[]).map(function(i){return '<li>'+esc(i.title||i.id||'票券')+'</li>';}).join('');box.innerHTML='<div class="tv-order-card"><div><small>訂單號碼</small><strong>'+esc(o.shortCode||String(o.orderNo||'').slice(-6))+'</strong></div><div><small>狀態</small><strong>'+statusText(o)+'</strong></div><div><small>實付</small><strong>NT$'+Number(o.paidAmount!=null?o.paidAmount:o.amount||0)+'</strong></div><ul>'+items+'</ul><button id="tvOpenOrderButton" class="staff-primary-button">帶入訂單中心</button></div>';
+ var btn=byId('tvOpenOrderButton');if(btn)btn.onclick=function(){var input=byId('staffOrderSearchInput');if(input){input.value=o.shortCode||o.orderNo||'';input.dispatchEvent(new Event('input',{bubbles:true}));}document.getElementById('staffOrderResults').scrollIntoView({behavior:'smooth',block:'start'});};}
+ function bind(){var b=byId('staffQuickLookupButton'),i=byId('staffQuickCodeInput');if(b)b.onclick=function(){showResult(findOrder(i&&i.value));};if(i)i.addEventListener('keydown',function(e){if(e.key==='Enter')showResult(findOrder(i.value));});var scan=byId('staffQrScanButton');if(scan)scan.onclick=function(){alert('📷 相機掃描會在 V7.5.2 啟用。此版先完成 QR 訂單資料、收據 QR 與短訂單號碼查詢。');};}
+ window.addEventListener('load',bind);
+})();

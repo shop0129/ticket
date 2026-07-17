@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "74-enterprise-749-points-payment-fix-20260717-1";
+var CACHE_NAME = CACHE_PREFIX + "74-enterprise-751-qr-order-core-20260717-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -91,7 +91,10 @@ var CORE_ASSETS = [
     "./js/utils/sound.js",
     "./js/utils/storage.js",
     "./sounds/click.wav",
-    "./sounds/success.wav"
+    "./sounds/success.wav",
+    "./js/vendor-qrcode.js",
+    "./js/modules/ticketValidation.js",
+    "./js/staff/ticket-validator.js"
 ];
 
 function cacheCoreAsset(cache, asset) {

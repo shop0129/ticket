@@ -1219,3 +1219,5 @@ input{
     color:#9d2626;
     background:#fff0f0;
 }
+/* V7.5.1 快速驗票 */
+.staff-validation-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.staff-validation-actions button{min-height:58px;font-size:17px}.staff-code-lookup{display:flex;gap:10px;flex-wrap:wrap}.staff-code-lookup input{flex:1;min-width:180px;font-size:20px;text-transform:uppercase;letter-spacing:2px}.tv-order-card,.tv-alert{margin-top:14px;padding:16px;border-radius:14px;background:#fff;border:1px solid #ddd}.tv-order-card>div{display:flex;justify-content:space-between;margin:6px 0}.tv-order-card ul{padding-left:20px}.tv-alert.error{background:#fff0f0;border-color:#ef9a9a;color:#b71c1c}@media(max-width:600px){.staff-validation-actions{grid-template-columns:1fr}.staff-code-lookup button{width:100%}}

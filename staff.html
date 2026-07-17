@@ -237,6 +237,26 @@
         <section class="staff-section">
 
             <div class="staff-section-title">
+                ⚡ 快速驗票
+            </div>
+
+            <div class="staff-validation-actions">
+                <button id="staffQrScanButton" class="staff-primary-button">📷 掃描收據 QR Code</button>
+                <button type="button" class="staff-secondary-button" onclick="document.getElementById('staffOrderResults').scrollIntoView({behavior:'smooth'})">📋 今日訂單</button>
+            </div>
+
+            <div class="staff-code-lookup">
+                <input id="staffQuickCodeInput" type="text" maxlength="30" placeholder="輸入短訂單號碼，例如 A01238">
+                <button id="staffQuickLookupButton" class="staff-primary-button">查詢訂單</button>
+            </div>
+
+            <div id="staffQuickValidationResult"></div>
+
+        </section>
+
+        <section class="staff-section">
+
+            <div class="staff-section-title">
                 🧾 訂單中心
             </div>
 
@@ -352,7 +372,7 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7.4.7 Enterprise
+            小怪獸售票機・V7.5.1 QR Order Core
         </footer>
 
     </div>
@@ -598,6 +618,7 @@
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/staff/order-center.js?v=73f1fix1"></script>
+<script src="js/staff/ticket-validator.js?v=751"></script>
 <script src="js/staff/order-tools.js?v=73e3"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 

@@ -60,6 +60,9 @@ function saveSalesRecord(paymentType, totalAmount, pointUse) {
     if (window.MonsterAuth) {
         order = MonsterAuth.decorateRecord(order, "kiosk");
     }
+    if (window.MonsterTicketValidation) {
+        order = MonsterTicketValidation.decorateOrder(order);
+    }
     currentPrintOrder = order;
     salesHistory.unshift(order);
     saveSalesHistory();

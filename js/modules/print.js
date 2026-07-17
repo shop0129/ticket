@@ -84,8 +84,12 @@ function updateSuccessItems() {
         html =
             "<div>無需領取物品</div>";
     }
+    var receiptPreview = "";
+    if (window.MonsterTicketValidation) {
+        receiptPreview = MonsterTicketValidation.receiptHtml(currentPrintOrder);
+    }
     successItemsBox.innerHTML =
-        "<div class=\"success-items-content\">\n        ".concat(html, "\n    </div>");
+        "<div class=\"success-items-content\">\n        ".concat(html, "\n    </div>") + receiptPreview;
 }
 // =========================================
 // 重設列印畫面
