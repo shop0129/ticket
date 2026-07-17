@@ -1,9 +1,9 @@
-// 小怪獸售票機 V7.3 Phase 3F Part 1
+// 小怪獸售票機 V7.4 Enterprise
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "73f1-fix1-20260717-1";
+var CACHE_NAME = CACHE_PREFIX + "74-enterprise-20260717-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -52,6 +52,9 @@ var CORE_ASSETS = [
     "./js/cloud/v71-migration.js",
     "./js/config/data.js",
     "./js/config/state.js",
+    "./js/core/enterprise-core.js",
+    "./js/core/enterprise-bridge.js",
+    "./js/core/enterprise-guards.js",
     "./js/display.js",
     "./js/modules/businessMode.js",
     "./js/modules/cart.js",

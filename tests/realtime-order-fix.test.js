@@ -81,7 +81,7 @@ require("../js/cloud/cloud-order-sync.js");
 
     var workerSource = fs.readFileSync(path.resolve(__dirname, "../service-worker.js"), "utf8");
     ok(workerSource.indexOf("networkFirstCodeAsset") !== -1, "程式檔應採 network-first");
-    ok(workerSource.indexOf("73f1-fix1") !== -1, "Fix1 應使用新 PWA cache");
+    ok(workerSource.indexOf("74-enterprise") !== -1, "V7.4 應使用 Enterprise PWA cache");
 
     console.log("PASS realtime order fix: " + count + " assertions");
 }()).catch(function (error) {
