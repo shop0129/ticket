@@ -1,12 +1,20 @@
-# 小怪獸售票機 V7.4 Enterprise
+# 小怪獸售票機 V7.4.1 Enterprise
 
-> 完整保留 V7.3 功能，新增統一核心、事件、權限、健康狀態與企業級相容層。
+目前正式版本：V7.4.1 Enterprise Mobile Fix
 
-# 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
+## 主要入口
+- `index.html`：Kiosk 售票機
+- `staff.html`：Staff／店長後台
+- `lobby-display.html`：大廳顯示
+- `play-display.html`：遊玩區顯示
 
-修正購票後 Staff 與店長後台訂單未即時出現，同時保留 PWA 與 Simple Login。
+## 核心資料夾
+- `js/`：系統程式
+- `css/`：介面樣式
+- `images/`：票券與 PWA 圖片
+- `sounds/`：操作音效
+- `tests/`：自動測試
+- `docs/`：架構與維護文件
 
-- 店長：`manager / 1234`
-- 員工：`staff / 0000`
-
-不需要 Firebase Authentication 或 Cloud Functions。更新後請在已安裝的 PWA 點一次「套用新版」。
+## 部署
+GitHub Pages 使用 `main` 分支的 `/(root)`，並保留根目錄的 `.nojekyll`。
