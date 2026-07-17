@@ -1,3 +1,90 @@
 body.enterprise-open{overflow:hidden}.enterprise-overlay{position:fixed;inset:0;z-index:100000;background:#eef3f8;display:none;align-items:stretch;justify-content:center;overflow:auto}.enterprise-shell{width:100%;max-width:1500px;min-height:100%;padding:18px}.enterprise-top{position:sticky;top:0;z-index:4;display:flex;align-items:center;justify-content:space-between;background:rgba(238,243,248,.96);backdrop-filter:blur(8px);padding:8px 0 14px}.enterprise-top h2{margin:0;font-size:30px}.enterprise-close{border:0;border-radius:14px;background:#263746;color:#fff;padding:12px 20px;font-size:18px}.enterprise-period{display:flex;gap:8px;margin:14px 0}.enterprise-period button,.enterprise-toolbar button{border:0;border-radius:12px;padding:11px 18px;background:#dbe6ef;font-size:16px}.enterprise-period button.active{background:#2698ed;color:#fff}.enterprise-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.enterprise-stat,.enterprise-card,.enterprise-ticket{background:#fff;border-radius:20px;box-shadow:0 8px 24px rgba(20,50,70,.08);padding:18px}.enterprise-stat small{display:block;color:#728292;font-size:15px}.enterprise-stat b{display:block;margin-top:8px;font-size:28px}.enterprise-analysis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:14px}.enterprise-card h3{margin:0 0 14px}.rank-item{margin:12px 0}.rank-head{display:flex;justify-content:space-between;gap:10px;font-size:14px}.rank-bar{height:8px;background:#edf2f5;border-radius:9px;margin-top:6px;overflow:hidden}.rank-bar i{display:block;height:100%;background:#2698ed}.enterprise-recent{margin-top:14px}.enterprise-row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #edf0f2}.enterprise-row small{display:block;color:#71808d;margin-top:4px}.enterprise-row .void{color:#c24646}.enterprise-empty{text-align:center;padding:30px;color:#84909a}.enterprise-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.enterprise-toolbar input,.enterprise-toolbar select{padding:12px;border:1px solid #cbd6df;border-radius:12px;font-size:16px;background:#fff}.enterprise-toolbar .primary{background:#2698ed;color:#fff}.ticket-summary{align-self:center;font-weight:700}.enterprise-ticket-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.enterprise-ticket{padding:16px}.ticket-card-top{display:grid;grid-template-columns:92px 1fr auto;gap:12px;align-items:center}.ticket-card-top img{width:92px;height:70px;object-fit:contain;border-radius:12px;background:#f4f7f9}.ticket-title{width:100%;font-size:20px;font-weight:700;border:1px solid #d5dee5;border-radius:10px;padding:9px}.ticket-card-top small{display:block;color:#8b98a3;margin-top:5px}.ticket-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}.ticket-fields label{font-size:13px;color:#64717c}.ticket-fields input,.ticket-fields select,.ticket-fields textarea{box-sizing:border-box;width:100%;margin-top:5px;border:1px solid #d2dce4;border-radius:10px;padding:10px;font-size:16px;background:#fff}.ticket-fields .wide{grid-column:1/-1}.ticket-fields textarea{min-height:70px;resize:vertical}.ticket-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.ticket-actions button{border:0;border-radius:10px;padding:9px 12px;background:#e5edf3}.ticket-actions .danger{background:#ffe8e8;color:#b22}.switch input{width:24px;height:24px}.enterprise-toast{position:fixed;left:50%;bottom:24px;z-index:100002;transform:translate(-50%,20px);opacity:0;padding:13px 22px;border-radius:12px;color:#fff;pointer-events:none;transition:.2s}.enterprise-toast.show{opacity:1;transform:translate(-50%,0)}.enterprise-toast.success{background:#168553}.enterprise-toast.error{background:#c23d3d}
 @media(max-width:900px){.enterprise-shell{padding:10px}.enterprise-top h2{font-size:22px}.enterprise-grid{grid-template-columns:repeat(2,1fr)}.enterprise-analysis{grid-template-columns:1fr}.enterprise-ticket-list{grid-template-columns:1fr}.enterprise-stat b{font-size:22px}.enterprise-toolbar>*{flex:1 1 45%}.ticket-card-top{grid-template-columns:70px 1fr auto}.ticket-card-top img{width:70px;height:58px}}
 @media(max-width:520px){.enterprise-grid{grid-template-columns:1fr 1fr;gap:8px}.enterprise-stat{padding:12px}.enterprise-stat small{font-size:12px}.enterprise-stat b{font-size:18px}.enterprise-toolbar>*{flex:1 1 100%}.ticket-fields{grid-template-columns:1fr}.ticket-fields .wide{grid-column:auto}.enterprise-top{align-items:flex-start}.enterprise-close{padding:9px 13px}.ticket-card-top{grid-template-columns:58px 1fr auto}.ticket-card-top img{width:58px;height:50px}.ticket-title{font-size:17px}}
+
+/* V7.4.5 Mobile UX Update - iPhone / Android safe-area header */
+@media (max-width: 700px) {
+  .enterprise-overlay {
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    overscroll-behavior: contain;
+  }
+
+  .enterprise-shell {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 0 14px calc(30px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .enterprise-top {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    min-height: 74px;
+    box-sizing: border-box;
+    padding: 14px 0 12px;
+    gap: 12px;
+    align-items: center;
+    background: rgba(238, 243, 248, 0.98);
+  }
+
+  .enterprise-top h2 {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    font-size: clamp(24px, 6.8vw, 34px);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+
+  .enterprise-close {
+    position: relative;
+    flex: 0 0 auto;
+    min-width: 82px;
+    min-height: 56px;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 18px;
+    line-height: 1.15;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    box-shadow: 0 7px 18px rgba(20, 45, 65, 0.22);
+  }
+
+  .enterprise-close:active {
+    transform: scale(0.96);
+  }
+
+  .enterprise-period,
+  .enterprise-toolbar {
+    scroll-margin-top: 88px;
+  }
+}
+
+@media (max-width: 390px) {
+  .enterprise-shell {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .enterprise-top {
+    min-height: 82px;
+    align-items: flex-start;
+  }
+
+  .enterprise-top h2 {
+    padding-top: 5px;
+    font-size: 24px;
+  }
+
+  .enterprise-close {
+    min-width: 74px;
+    min-height: 58px;
+    padding: 9px 11px;
+    font-size: 17px;
+  }
+}

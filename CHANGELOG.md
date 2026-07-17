@@ -1,3 +1,10 @@
+# V7.4.5 Mobile UX Update
+
+- 修正 iPhone Dynamic Island／瀏海遮住票券管理與 Dashboard 標題。
+- 關閉按鈕移入安全區並放大觸控範圍。
+- 補上底部 Home Indicator 安全間距。
+- 更新 PWA 快取版本，避免手機繼續讀取舊版。
+
 # CHANGELOG
 
 ## V7.4.1 Enterprise Mobile Fix
