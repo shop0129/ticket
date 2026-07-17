@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="小怪獸 Staff">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#137a42">
+    <meta name="description" content="小怪獸放電所員工手機後台">
+
+    <title>小怪獸員工後台</title>
+
+    <link rel="manifest" href="staff.webmanifest?v=73f1">
+    <link rel="apple-touch-icon" href="images/pwa/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
+    <link
+        rel="stylesheet"
+        href="css/staff.css?v=73f1fix1">
+    <link rel="stylesheet" href="css/pwa.css?v=73f1">
+    <link rel="stylesheet" href="css/staff-enterprise.css?v=743">
+</head>
+
+<body data-pwa-app="staff">
+
+<section id="staffLoginPage" class="staff-login-page">
+
+    <div class="staff-login-card">
+<h1 class="staff-login-title">
+            小怪獸員工後台
+        </h1>
+
+        <div class="staff-login-subtitle">
+            員工／店長共用登入入口
+        </div>
+
+        <input
+            id="staffAccount"
+            type="text"
+            autocomplete="username"
+            placeholder="請輸入帳號（例如 staff）">
+
+        <input
+            id="staffPassword"
+            type="password"
+            autocomplete="current-password"
+            placeholder="請輸入密碼">
+
+        <button
+            id="staffLoginButton"
+            class="staff-login-button">
+            登入
+        </button>
+
+        <div
+            id="staffLoginMessage"
+            class="staff-login-message">
+        </div>
+
+        <div class="staff-login-hint">
+            使用員工管理中建立的帳號登入，系統會依角色自動套用權限。
+        </div>
+
+    </div>
+
+</section>
+
+<section id="staffHomePage" class="staff-home-page">
+
+    <div class="staff-shell">
+
+        <header class="staff-topbar">
+
+            <div>
+                <div class="staff-top-title">
+                    小怪獸員工後台
+                </div>
+
+                <div
+                    id="staffHomeSubtitle"
+                    class="staff-top-subtitle">
+                    日常店務操作
+                </div>
+            </div>
+
+            <div class="staff-top-actions">
+
+                <div
+                    id="staffCloudBadge"
+                    class="staff-cloud-badge staff-cloud-connecting">
+                    <span class="staff-cloud-dot"></span>
+                    <span>雲端連線中</span>
+                </div>
+
+                <div
+                    id="staffRoleBadge"
+                    class="staff-role-badge role-staff">
+                    👤 員工模式
+                </div>
+
+                <button
+                    id="staffLogoutButton"
+                    class="staff-logout-button">
+                    登出
+                </button>
+
+            </div>
+
+        </header>
+
+        <section class="staff-section">
+
+            <div class="staff-section-title">
+                📊 今日營運
+            </div>
+
+            <div
+                id="staffDashboardDate"
+                class="staff-dashboard-date">
+                雲端即時概況
+            </div>
+
+            <div class="staff-summary-grid">
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">💰</div>
+                    <div class="staff-summary-label">今日營收</div>
+                    <div id="staffTodayIncome" class="staff-summary-value">NT$0</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">🧾</div>
+                    <div class="staff-summary-label">正常訂單</div>
+                    <div id="staffTodayOrders" class="staff-summary-value">0 筆</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">🎫</div>
+                    <div class="staff-summary-label">售出票券</div>
+                    <div id="staffTodayTickets" class="staff-summary-value">0 張</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">✨</div>
+                    <div class="staff-summary-label">今日新會員</div>
+                    <div id="staffTodayMembers" class="staff-summary-value">0 人</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">👤</div>
+                    <div class="staff-summary-label">會員交易</div>
+                    <div id="staffMemberOrders" class="staff-summary-value">0 筆</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-icon">❌</div>
+                    <div class="staff-summary-label">作廢訂單</div>
+                    <div id="staffCancelledOrders" class="staff-summary-value">0 筆</div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="staff-section">
+
+            <div class="staff-section-title">
+                👤 會員中心
+            </div>
+
+            <div class="staff-member-search">
+
+                <input
+                    id="staffMemberSearchInput"
+                    type="search"
+                    inputmode="search"
+                    placeholder="輸入姓名、手機或會員編號">
+
+                <button id="staffMemberSearchButton">
+                    搜尋
+                </button>
+
+                <button
+                    id="staffQuickAddButton"
+                    class="staff-success-button">
+                    ＋ 快速新增
+                </button>
+
+            </div>
+
+            <div
+                id="staffMemberSearchStatus"
+                class="staff-inline-status">
+                請輸入會員姓名、手機或會員編號
+            </div>
+
+            <div id="staffMemberSearchResults"></div>
+
+        </section>
+
+        <section
+            id="staffMemberDetailSection"
+            class="staff-section"
+            style="display:none;">
+
+            <div class="staff-detail-heading">
+
+                <div>
+                    <div class="staff-section-title">
+                        👤 會員資料
+                    </div>
+
+                    <div
+                        id="staffMemberDetailSubtitle"
+                        class="staff-dashboard-date">
+                    </div>
+                </div>
+
+                <button
+                    id="staffCloseDetailButton"
+                    class="staff-secondary-button">
+                    關閉
+                </button>
+
+            </div>
+
+            <div id="staffMemberDetailContent"></div>
+
+        </section>
+
+        
+        <section class="staff-section">
+
+            <div class="staff-section-title">
+                🧾 訂單中心
+            </div>
+
+            <div class="staff-capacity-grid">
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">目前場內</div>
+                    <div id="staffVenueCurrent" class="staff-summary-value">0 / 40</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">剩餘名額</div>
+                    <div id="staffVenueRemaining" class="staff-summary-value">40 人</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">候位</div>
+                    <div id="staffVenueWaiting" class="staff-summary-value">0 組</div>
+                </div>
+
+                <div class="staff-summary-card">
+                    <div class="staff-summary-label">遊玩中</div>
+                    <div id="staffVenuePlaying" class="staff-summary-value">0 組</div>
+                </div>
+
+            </div>
+
+            <div class="staff-capacity-settings admin-only">
+
+                <label>
+                    場內人數上限
+                    <input
+                        id="staffMaxPlayersInput"
+                        type="number"
+                        min="1"
+                        value="40">
+                </label>
+
+                <label class="staff-check-label">
+                    <input
+                        id="staffCountGuardiansInput"
+                        type="checkbox">
+                    陪同者也計入容量
+                </label>
+
+                <button
+                    id="staffSaveCapacityButton"
+                    class="staff-primary-button">
+                    儲存容量設定
+                </button>
+
+            </div>
+
+            <div class="staff-order-toolbar">
+
+                <input
+                    id="staffOrderSearchInput"
+                    type="search"
+                    placeholder="搜尋叫號、訂單尾號、會員姓名或手機">
+
+                <select id="staffOrderStatusFilter">
+                    <option value="active">等待＋遊玩中</option>
+                    <option value="waiting">等待入場</option>
+                    <option value="playing">遊玩中</option>
+                    <option value="finished">已離場</option>
+                    <option value="all">全部訂單</option>
+                </select>
+
+                <button
+                    id="staffOrderRefreshButton"
+                    class="staff-secondary-button">
+                    重新整理
+                </button>
+
+            </div>
+
+            <div
+                id="staffOrderLiveStatus"
+                class="staff-order-live-status">
+                ● 等待 Firebase 即時訂單
+            </div>
+
+            <div id="staffOrderResults"></div>
+
+        </section>
+
+<section class="staff-section admin-only">
+
+            <div class="staff-section-title">
+                👑 店長功能
+            </div>
+
+            <div class="staff-menu-grid">
+
+                <button
+                    class="staff-menu-button admin-menu-button"
+                    data-enterprise-open="dashboard">
+                    <span class="staff-menu-icon">📊</span>
+                    <span class="staff-menu-title">完整 Dashboard</span>
+                    <span class="staff-menu-detail">本月與累積營運分析</span>
+                </button>
+
+                <button
+                    class="staff-menu-button admin-menu-button"
+                    data-enterprise-open="tickets">
+                    <span class="staff-menu-icon">🎫</span>
+                    <span class="staff-menu-title">票券管理</span>
+                    <span class="staff-menu-detail">新增、修改、排序與雲端同步</span>
+                </button>
+
+            </div>
+
+        </section>
+
+        <footer class="staff-footer">
+            小怪獸售票機・V7.4.3 Enterprise
+        </footer>
+
+    </div>
+
+</section>
+
+<!-- 快速新增會員 -->
+<div id="staffMemberModal" class="staff-modal" style="display:none;">
+
+    <div class="staff-modal-card">
+
+        <div class="staff-modal-header">
+
+            <div id="staffMemberModalTitle" class="staff-modal-title">
+                快速新增會員
+            </div>
+
+            <button
+                id="staffMemberModalClose"
+                class="staff-modal-close">
+                ×
+            </button>
+
+        </div>
+
+        <input type="hidden" id="staffEditMemberId">
+
+        <div class="staff-form-grid">
+
+            <label>
+                <span>姓名 *</span>
+                <input id="staffEditMemberName" placeholder="會員姓名">
+            </label>
+
+            <label>
+                <span>手機 *</span>
+                <input
+                    id="staffEditMemberPhone"
+                    inputmode="tel"
+                    placeholder="0912345678">
+            </label>
+
+            <label>
+                <span>生日</span>
+                <input id="staffEditMemberBirthday" type="date">
+            </label>
+
+            <label class="staff-form-full">
+                <span>備註</span>
+                <textarea
+                    id="staffEditMemberNote"
+                    placeholder="可不填"></textarea>
+            </label>
+
+        </div>
+
+        <div class="staff-modal-actions">
+
+            <button
+                id="staffMemberModalCancel"
+                class="staff-secondary-button">
+                取消
+            </button>
+
+            <button
+                id="staffMemberModalSave"
+                class="staff-primary-button">
+                儲存會員
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- 玩具點數操作 -->
+<div id="staffToyPointModal" class="staff-modal" style="display:none;">
+
+    <div class="staff-modal-card">
+
+        <div class="staff-modal-header">
+
+            <div class="staff-modal-title">
+                🎁 玩具點數操作
+            </div>
+
+            <button
+                id="staffToyPointModalClose"
+                class="staff-modal-close">
+                ×
+            </button>
+
+        </div>
+
+        <div id="staffToyPointMember" class="staff-modal-member"></div>
+
+        <div class="staff-point-balance">
+
+            目前玩具點數
+
+            <strong id="staffToyPointBalance">
+                0 點
+            </strong>
+
+        </div>
+
+        <div class="staff-point-mode">
+
+            <button
+                id="staffToyAddMode"
+                class="active">
+                ＋ 增加
+            </button>
+
+            <button id="staffToyDeductMode">
+                － 扣除／兌換
+            </button>
+
+        </div>
+
+        <div class="staff-quick-points">
+
+            <button data-points="1">1 點</button>
+            <button data-points="2">2 點</button>
+            <button data-points="5">5 點</button>
+            <button data-points="10">10 點</button>
+            <button data-points="20">20 點</button>
+
+        </div>
+
+        <div class="staff-form-grid">
+
+            <label>
+                <span>點數 *</span>
+                <input
+                    id="staffToyPointAmount"
+                    type="number"
+                    inputmode="numeric"
+                    min="1"
+                    value="1">
+            </label>
+
+            <label>
+                <span>原因 *</span>
+                <input
+                    id="staffToyPointReason"
+                    placeholder="例如：放棄紅標玩具">
+            </label>
+
+            <label class="staff-form-full">
+                <span>備註</span>
+                <textarea
+                    id="staffToyPointNote"
+                    placeholder="例如：兌換恐龍玩具"></textarea>
+            </label>
+
+        </div>
+
+        <div class="staff-modal-actions">
+
+            <button
+                id="staffToyPointCancel"
+                class="staff-secondary-button">
+                取消
+            </button>
+
+            <button
+                id="staffToyPointSave"
+                class="staff-success-button">
+                確認增加點數
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    id="staffOrderDetailModal"
+    class="staff-modal"
+    style="display:none;">
+
+    <div class="staff-modal-card staff-order-modal-card">
+
+        <div class="staff-modal-header">
+
+            <div class="staff-modal-title">
+                🧾 訂單資料
+            </div>
+
+            <button
+                id="staffOrderDetailClose"
+                class="staff-modal-close">
+                ×
+            </button>
+
+        </div>
+
+        <div id="staffOrderDetailContent"></div>
+
+    </div>
+
+</div>
+
+<div id="enterpriseOverlay" class="enterprise-overlay" style="display:none;">
+  <div class="enterprise-shell">
+    <div class="enterprise-top"><h2>小怪獸營運管理中心</h2><button id="enterpriseClose" class="enterprise-close">✕ 關閉</button></div>
+    <section id="enterpriseDashboardPanel" style="display:none;">
+      <div class="enterprise-period"><button data-period="today" class="active">今日</button><button data-period="month">本月</button><button data-period="all">累積</button><button id="dashRefresh">↻ 重新整理</button></div>
+      <div class="enterprise-grid">
+        <div class="enterprise-stat"><small>總收入</small><b id="dashRevenue">NT$0</b></div><div class="enterprise-stat"><small>售票張數</small><b id="dashTickets">0 張</b></div><div class="enterprise-stat"><small>正常訂單</small><b id="dashOrders">0 筆</b></div><div class="enterprise-stat"><small>平均客單</small><b id="dashAverage">NT$0</b></div>
+        <div class="enterprise-stat"><small>現金收入</small><b id="dashCash">NT$0</b></div><div class="enterprise-stat"><small>LINE Pay</small><b id="dashLine">NT$0</b></div><div class="enterprise-stat"><small>作廢訂單</small><b id="dashCancelled">0 筆</b></div><div class="enterprise-stat"><small>贈送代幣</small><b id="dashTokens">0 枚</b></div>
+      </div>
+      <div class="enterprise-analysis"><div class="enterprise-card"><h3>🎫 熱門票券</h3><div id="dashTicketRank"></div></div><div class="enterprise-card"><h3>🕐 時段營收</h3><div id="dashHourRank"></div></div><div class="enterprise-card"><h3>👤 員工銷售</h3><div id="dashStaffRank"></div></div></div>
+      <div class="enterprise-card enterprise-recent"><h3>🧾 最近訂單</h3><div id="dashRecent"></div></div>
+    </section>
+    <section id="enterpriseTicketPanel" style="display:none;">
+      <div class="enterprise-toolbar"><span id="ticketSummary" class="ticket-summary">共 0 張</span><input id="ticketSearch" type="search" placeholder="搜尋票券"><select id="ticketCategory"><option value="all">全部分類</option><option value="general">一般票</option><option value="special">限定票</option><option value="other">其他票</option></select><select id="ticketStatus"><option value="all">全部狀態</option><option value="on">啟用</option><option value="off">停用</option></select><button id="ticketAdd">＋ 新增票券</button><button id="ticketSave" class="primary">💾 儲存並同步</button></div>
+      <div id="enterpriseTicketList" class="enterprise-ticket-list"></div>
+    </section>
+  </div>
+</div>
+<div id="enterpriseToast" class="enterprise-toast"></div>
+<audio id="successSound" preload="auto"><source src="sounds/success.wav" type="audio/wav"></audio><audio id="clickSound" preload="auto"><source src="sounds/click.wav" type="audio/wav"></audio>
+
+<script src="js/core/enterprise-core.js?v=740"></script>
+<script src="js/core/enterprise-bridge.js?v=740"></script>
+<script src="js/core/enterprise-guards.js?v=740"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script src="js/cloud/firebase-config.js?v=72"></script>
+<script src="js/staff/staff-config.js?v=73e3"></script>
+<script src="js/modules/roleManager.js?v=73simple"></script>
+<script src="js/cloud/auth.js?v=73simple"></script>
+<script src="js/staff/staff-app.js?v=73e3"></script>
+<script src="js/staff/enterprise-manager.js?v=743"></script>
+<script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
+<script src="js/cloud/v71-migration.js?v=72"></script>
+<script src="js/staff/order-center.js?v=73f1fix1"></script>
+<script src="js/staff/order-tools.js?v=73e3"></script>
+<script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
+
+</body>
+</html>
