@@ -42,12 +42,12 @@ function resetPaymentLock() {
 // =========================================
 // 建立售票紀錄
 // =========================================
-function saveSalesRecord(paymentType, totalAmount) {
+function saveSalesRecord(paymentType, totalAmount, pointUse) {
     var now = new Date();
     var order = __assign(__assign({ orderNo: generateOrderNo(), date: now.toLocaleDateString("zh-TW"), time: now.toLocaleTimeString("zh-TW", {
             hour: "2-digit",
             minute: "2-digit"
-        }), payment: paymentType, amount: Number(totalAmount) || 0 }, (typeof getCurrentMemberOrderInfo === "function" ? getCurrentMemberOrderInfo() : {})), { items: cart.length > 0
+        }), payment: paymentType, amount: Number(totalAmount) || 0, originalAmount: Number(totalAmount) || 0, usedPoints: Number(pointUse && pointUse.points || 0), pointDiscount: Number(pointUse && pointUse.discount || 0), paidAmount: Math.max(0, (Number(totalAmount)||0) - Number(pointUse && pointUse.discount || 0)) }, (typeof getCurrentMemberOrderInfo === "function" ? getCurrentMemberOrderInfo() : {})), { items: cart.length > 0
             ? JSON.parse(JSON.stringify(cart))
             : [{
                     id: selectedTicket,
@@ -107,9 +107,12 @@ function paymentSuccess(paymentType) {
         totalAmount =
             Number(ticketData[selectedTicket].price || 0);
     }
-    saveSalesRecord(paymentType, totalAmount);
+    var pointUse = window.ConsumePoints ? ConsumePoints.current() : {points:0,discount:0};
+    if (pointUse.points > 0 && (!window.currentMember || Number(currentMember.points||0) < pointUse.points)) { alert("❌ 會員點數不足，請重新確認"); resetPaymentLock(); return; }
+    saveSalesRecord(paymentType, totalAmount, pointUse);
     if (typeof applyMemberPurchase === "function")
-        applyMemberPurchase(totalAmount);
+        applyMemberPurchase(Math.max(0,totalAmount-pointUse.discount), currentPrintOrder, pointUse);
+    if (window.ConsumePoints) ConsumePoints.reset();
     payItems.forEach(function (item) {
         var ticket = ticketData[item.id];
         if (!ticket)

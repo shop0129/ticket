@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "74-enterprise-747-global-order-reset-fix-20260717-1";
+var CACHE_NAME = CACHE_PREFIX + "74-enterprise-748-consume-points-20260717-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -68,6 +68,7 @@ var CORE_ASSETS = [
     "./js/modules/history.js",
     "./js/modules/imageManager.js",
     "./js/modules/member.js",
+    "./js/modules/consumePoints.js",
     "./js/modules/operation.js",
     "./js/modules/page.js",
     "./js/modules/payment.js",
@@ -84,6 +85,7 @@ var CORE_ASSETS = [
     "./js/staff/staff-app.js",
     "./js/staff/staff-config.js",
     "./js/staff/enterprise-manager.js",
+    "./js/staff/consume-points-manager.js",
     "./js/utils/helper.js",
     "./js/utils/legacy-polyfills.js",
     "./js/utils/sound.js",

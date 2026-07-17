@@ -52,7 +52,7 @@ global.Request = function (input) {
 global.Response = { error: function () { return response("error"); } };
 global.caches = {
     open: function () { return Promise.resolve(cache); },
-    keys: function () { return Promise.resolve(["monster-ticket-pwa-old", "monster-ticket-pwa-73f1-20260716-1", "monster-ticket-pwa-74-enterprise-747-global-order-reset-fix-20260717-1", "unrelated"]); },
+    keys: function () { return Promise.resolve(["monster-ticket-pwa-old", "monster-ticket-pwa-73f1-20260716-1", "monster-ticket-pwa-74-enterprise-748-consume-points-20260717-1", "unrelated"]); },
     delete: function (key) { deleted.push(key); return Promise.resolve(true); }
 };
 global.self = {
@@ -83,7 +83,7 @@ vm.runInThisContext(source, { filename: "service-worker.js" });
     listeners.activate[0]({ waitUntil: function (promise) { activatePromise = promise; } });
     await activatePromise;
     ok(deleted.indexOf("monster-ticket-pwa-old") !== -1, "activate 應移除舊 PWA cache");
-    ok(deleted.indexOf("monster-ticket-pwa-74-enterprise-747-global-order-reset-fix-20260717-1") === -1, "activate 不可刪除 V7.4 cache");
+    ok(deleted.indexOf("monster-ticket-pwa-74-enterprise-748-consume-points-20260717-1") === -1, "activate 不可刪除 V7.4 cache");
     ok(deleted.indexOf("unrelated") === -1, "activate 不可刪除其他 cache");
     ok(claimed, "activate 應 claim clients");
 

@@ -507,43 +507,28 @@ function getCurrentMemberOrderInfo() {
         };
 }
 function calculateConsumePoints(amount) {
-    return Math.floor(Number(amount || 0) /
-        CONSUME_POINT_RATE);
+    if (window.ConsumePoints) return ConsumePoints.earn(amount);
+    return Math.floor(Number(amount || 0) / CONSUME_POINT_RATE);
 }
-function applyMemberPurchase(amount, order) {
-    if (!currentMember)
-        return;
-    var member = memberData.find(function (item) {
-        return item.id === currentMember.id;
-    });
-    if (!member)
-        return;
+function applyMemberPurchase(amount, order, pointUse) {
+    if (!currentMember) return;
+    var member = memberData.find(function(item){ return item.id === currentMember.id; });
+    if (!member) return;
+    pointUse = pointUse || {points:0,discount:0};
     var spend = Number(amount || 0);
-    var earnedPoints = calculateConsumePoints(spend);
-    member.totalSpend =
-        Number(member.totalSpend || 0) +
-            spend;
-    member.points =
-        Number(member.points || 0) +
-            earnedPoints;
-    member.lastPurchaseDate =
-        new Date().toLocaleString("zh-TW");
-    member.pointHistory.unshift({
-        id: "point_" + Date.now(),
-        date: new Date().toLocaleString("zh-TW"),
-        amount: earnedPoints,
-        reason: "消費累積",
-        orderNo: (order === null || order === void 0 ? void 0 : order.orderNo) || "",
-        balance: member.points
-    });
-    if (order) {
-        order.earnedPoints =
-            earnedPoints;
-        order.memberLevel =
-            getMemberLevel(member).name;
-        saveSalesHistory();
+    var usedPoints = Math.max(0, Number(pointUse.points || 0));
+    if (usedPoints > Number(member.points || 0)) usedPoints = Number(member.points || 0);
+    if (usedPoints > 0) {
+        member.points = Number(member.points || 0) - usedPoints;
+        member.pointHistory.unshift({id:"point_"+Date.now()+"_use",date:new Date().toLocaleString("zh-TW"),amount:-usedPoints,reason:"消費折抵",orderNo:(order&&order.orderNo)||"",operator:memberOperatorName(),balance:member.points});
     }
-    saveMembers();
+    var earnedPoints = calculateConsumePoints(spend);
+    member.totalSpend = Number(member.totalSpend || 0) + spend;
+    member.points = Number(member.points || 0) + earnedPoints;
+    member.lastPurchaseDate = new Date().toLocaleString("zh-TW");
+    if (earnedPoints > 0) member.pointHistory.unshift({id:"point_"+Date.now()+"_earn",date:new Date().toLocaleString("zh-TW"),amount:earnedPoints,reason:"消費累積",orderNo:(order&&order.orderNo)||"",operator:memberOperatorName(),balance:member.points});
+    if (order) { order.earnedPoints=earnedPoints; order.usedPoints=usedPoints; order.pointDiscount=Number(pointUse.discount||0); order.paidAmount=spend; order.memberLevel=getMemberLevel(member).name; saveSalesHistory(); }
+    currentMember=member; saveMembers(); if(window.ConsumePoints) ConsumePoints.render();
 }
 function canRollbackMemberOrder(order) {
     var _a;
@@ -560,7 +545,7 @@ function canRollbackMemberOrder(order) {
     var earnedPoints = Number(order.earnedPoints || 0);
     var toyPoints = Number(((_a = order.toyPointConversion) === null || _a === void 0 ? void 0 : _a.points) ||
         0);
-    if (member.points < earnedPoints) {
+    if (Number(member.points || 0) + Number(order.usedPoints || 0) < earnedPoints) {
         alert("❌ 會員消費點數已被使用，無法直接作廢此訂單。請先由店長調整點數。");
         return false;
     }
@@ -586,13 +571,15 @@ function rollbackMemberPurchase(order) {
         0);
     member.totalSpend =
         Math.max(0, Number(member.totalSpend || 0) -
-            Number(order.amount || 0));
+            Number(order.paidAmount != null ? order.paidAmount : order.amount || 0));
     member.points =
-        Math.max(0, Number(member.points || 0) -
-            earnedPoints);
+        Math.max(0, Number(member.points || 0) - earnedPoints) + Number(order.usedPoints || 0);
     member.toyPoints =
         Math.max(0, Number(member.toyPoints || 0) -
             toyPoints);
+    if (Number(order.usedPoints || 0) > 0) {
+        member.pointHistory.unshift({id:"point_"+Date.now()+"_refund",date:new Date().toLocaleString("zh-TW"),amount:Number(order.usedPoints||0),reason:"訂單作廢退回折抵點數",orderNo:order.orderNo||"",operator:memberOperatorName(),balance:member.points});
+    }
     if (earnedPoints > 0) {
         member.pointHistory.unshift({
             id: "point_" + Date.now(),
