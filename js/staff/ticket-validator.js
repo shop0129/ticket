@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.6.2.5｜Order Identity Fix
+// 小怪獸售票機 V7.6.2.6｜QR Parser Load Fix
 (function(){
 'use strict';
 var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false;
@@ -7,7 +7,15 @@ function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){retur
 function money(v){return 'NT$'+Number(v||0).toLocaleString('zh-TW');}
 function actor(){try{return (window.MonsterAuth&&MonsterAuth.getActor&&MonsterAuth.getActor('staff'))||{};}catch(e){return {};}}
 function orders(){return window.MonsterOrderCenter&&MonsterOrderCenter.getOrders?MonsterOrderCenter.getOrders():{};}
-function parseQr(value){return window.MonsterTicketValidation&&MonsterTicketValidation.parse?MonsterTicketValidation.parse(value):null;}
+function parseQr(value){
+ var text=String(value||'').trim();
+ if(window.MonsterTicketValidation&&MonsterTicketValidation.parse){
+   var parsed=MonsterTicketValidation.parse(text);
+   if(parsed)return parsed;
+ }
+ var match=text.match(/^MGV1:([^:]+):([^:]+)$/i);
+ return match?{version:1,orderKey:match[1],token:match[2]}:null;
+}
 function normalizeOrderCode(value){return String(value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
 function candidateCodes(id,o){
  return [id,o.orderNo,o.shortCode,o.queueNumber,o.qrOrderNo,o.receiptNo,o.orderCode]

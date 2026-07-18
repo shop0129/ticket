@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "74-enterprise-7625-order-identity-20260718-1";
+var CACHE_NAME = CACHE_PREFIX + "74-enterprise-7626-qr-parser-load-20260718-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

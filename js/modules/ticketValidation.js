@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.6.2.5｜Order Identity Fix
+// 小怪獸售票機 V7.6.2.6｜QR Parser Load Fix
 (function(){
   'use strict';
   var PREFIX='MGV1';
