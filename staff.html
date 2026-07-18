@@ -21,7 +21,7 @@
     <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
     <link
         rel="stylesheet"
-        href="css/staff.css?v=761">
+        href="css/staff.css?v=762">
     <link rel="stylesheet" href="css/pwa.css?v=73f1">
     <link rel="stylesheet" href="css/staff-enterprise.css?v=761">
 </head>
@@ -237,7 +237,7 @@
         <section class="staff-section">
 
             <div class="staff-section-title">
-                ⚡ 驗票中心 2.0
+                ⚡ 驗票中心 2.1｜即時倒數
             </div>
 
             <div class="validation-hub-grid" id="validationHubGrid">
@@ -266,6 +266,8 @@
             </div>
 
             <div id="staffQuickValidationResult"></div>
+
+            <div id="validationTimerSummary" class="validation-timer-summary"><span class="safe">場內 0 筆</span><span class="soon">即將到時 0 筆</span><span class="over">已超時 0 筆</span></div>
 
             <div class="validation-live-panel">
                 <div class="validation-live-head">
@@ -628,6 +630,7 @@
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 <script src="js/core/ticket-status-engine.js?v=760"></script>
+<script src="js/core/live-timer-engine.js?v=762"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -641,8 +644,8 @@
 <script src="js/staff/consume-points-manager.js?v=749"></script>
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
-<script src="js/staff/order-center.js?v=761"></script>
-<script src="js/staff/ticket-validator.js?v=761"></script>
+<script src="js/staff/order-center.js?v=762"></script>
+<script src="js/staff/ticket-validator.js?v=762"></script>
 <script src="js/staff/order-tools.js?v=73e3"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 
