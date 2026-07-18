@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.6.2.4｜Order Lookup Sync Fix
+// 小怪獸售票機 V7.6.2.5｜Order Identity Fix
 (function(){
 'use strict';
 var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false;
@@ -22,14 +22,24 @@ function codeMatches(target,candidate){
 function findOrder(value){
  var raw=String(value||'').trim(), parsed=parseQr(raw), map=orders(), found=null;
  var target=normalizeOrderCode(parsed?parsed.orderKey:raw);
+ var incomingToken=parsed?String(parsed.token||'').trim():'';
+ // QR token 是每筆訂單唯一識別。舊版收據的短碼可能與後來的正式單號不同，
+ // 因此掃描 QR 時先用 token 找訂單，再以單號作為手動輸入與舊 QR 的備援。
+ if(incomingToken){
+   Object.keys(map||{}).some(function(id){
+     var o=map[id]||{}, expected=String(o.qrToken||'').trim();
+     if(expected&&expected===incomingToken){found={id:id,order:o,verified:true};return true;}
+     return false;
+   });
+   if(found)return found;
+ }
  Object.keys(map||{}).some(function(id){
    var o=map[id]||{}, codes=candidateCodes(id,o);
    var codeMatch=codes.some(function(code){return codeMatches(target,code);});
    if(!codeMatch)return false;
-   // 新版 QR 有 token 時才驗證；舊收據或手動單號不因缺少 token 被擋下。
-   var expected=String(o.qrToken||'').trim(), incoming=parsed?String(parsed.token||'').trim():'';
-   var tokenOk=!parsed||!expected||expected===incoming;
-   if(tokenOk){found={id:id,order:o,verified:parsed?(!expected||expected===incoming):true};return true;}
+   var expected=String(o.qrToken||'').trim();
+   var tokenOk=!parsed||!expected||expected===incomingToken;
+   if(tokenOk){found={id:id,order:o,verified:parsed?(!expected||expected===incomingToken):true};return true;}
    return false;
  });
  return found;
