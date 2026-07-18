@@ -1354,7 +1354,7 @@
                 true
             );
             waitFirebase();
-            return;
+            return Promise.resolve(false);
         }
 
         if(button){
@@ -1362,7 +1362,7 @@
             button.textContent = "同步中…";
         }
 
-        ordersRef
+        return ordersRef
         .once("value")
         .then(function(snapshot){
             applyOrdersSnapshot(snapshot);

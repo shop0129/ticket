@@ -1,21 +1,36 @@
-// 小怪獸售票機 V7.6.2.1｜Receipt & Mobile Scanner Hotfix
+// 小怪獸售票機 V7.6.2.4｜Order Lookup Sync Fix
 (function(){
 'use strict';
-var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='';
+var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false;
 function byId(id){return document.getElementById(id);} 
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function money(v){return 'NT$'+Number(v||0).toLocaleString('zh-TW');}
 function actor(){try{return (window.MonsterAuth&&MonsterAuth.getActor&&MonsterAuth.getActor('staff'))||{};}catch(e){return {};}}
 function orders(){return window.MonsterOrderCenter&&MonsterOrderCenter.getOrders?MonsterOrderCenter.getOrders():{};}
 function parseQr(value){return window.MonsterTicketValidation&&MonsterTicketValidation.parse?MonsterTicketValidation.parse(value):null;}
+function normalizeOrderCode(value){return String(value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+function candidateCodes(id,o){
+ return [id,o.orderNo,o.shortCode,o.queueNumber,o.qrOrderNo,o.receiptNo,o.orderCode]
+ .map(normalizeOrderCode).filter(Boolean);
+}
+function codeMatches(target,candidate){
+ if(!target||!candidate)return false;
+ if(target===candidate)return true;
+ // 收據常只顯示短單號；至少 5 碼才允許尾碼比對，避免誤抓其他訂單。
+ return target.length>=5&&candidate.length>=5&&(candidate.endsWith(target)||target.endsWith(candidate));
+}
 function findOrder(value){
- var raw=String(value||'').trim(), q=raw.toUpperCase(), parsed=parseQr(raw), map=orders(), found=null;
+ var raw=String(value||'').trim(), parsed=parseQr(raw), map=orders(), found=null;
+ var target=normalizeOrderCode(parsed?parsed.orderKey:raw);
  Object.keys(map||{}).some(function(id){
-   var o=map[id]||{};
-   var idMatch=parsed?String(id)===String(parsed.orderKey)||String(o.orderNo||'')===String(parsed.orderKey):false;
-   var tokenMatch=!parsed||String(o.qrToken||'')===String(parsed.token||'');
-   var textMatch=String(o.shortCode||'').toUpperCase()===q||String(o.orderNo||'').toUpperCase()===q||String(id).toUpperCase()===q;
-   if((idMatch&&tokenMatch)||textMatch){found={id:id,order:o,verified:parsed?tokenMatch:true};return true;}return false;
+   var o=map[id]||{}, codes=candidateCodes(id,o);
+   var codeMatch=codes.some(function(code){return codeMatches(target,code);});
+   if(!codeMatch)return false;
+   // 新版 QR 有 token 時才驗證；舊收據或手動單號不因缺少 token 被擋下。
+   var expected=String(o.qrToken||'').trim(), incoming=parsed?String(parsed.token||'').trim():'';
+   var tokenOk=!parsed||!expected||expected===incoming;
+   if(tokenOk){found={id:id,order:o,verified:parsed?(!expected||expected===incoming):true};return true;}
+   return false;
  });
  return found;
 }
@@ -112,9 +127,49 @@ function updateStatus(action){
  });
 }
 function message(text,ok){var b=byId('tvcMessage');if(!b)return;b.innerHTML='<div class="tv-alert '+(ok?'success':'error')+'">'+esc(text)+'</div>';}
-function lookup(value){var found=findOrder(value);showResult(found);if(found)openCenter(found);}
-function stopScan(){if(scanTimer){clearInterval(scanTimer);scanTimer=null;}if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}if(html5Scanner){try{var closing=html5Scanner;html5Scanner=null;Promise.resolve(closing.stop()).catch(function(){}).then(function(){try{closing.clear();}catch(e){}});}catch(e){html5Scanner=null;}}var m=byId('tvcScannerModal');if(m)m.remove();}
-function scannerFallback(){stopScan();var v=prompt('相機掃描無法啟動。請輸入收據上的訂單號碼（例如 A80188）：');if(v)lookup(v);}
+function normalizeScanValue(value){
+ var raw=String(value==null?'':value).trim();
+ try{raw=decodeURIComponent(raw);}catch(e){}
+ var match=raw.match(/MGV1:[^\s?#]+:[A-Za-z0-9]+/i);
+ if(match)raw=match[0];
+ return raw.replace(/[\r\n\t]/g,'').trim();
+}
+function lookup(value, options){
+ options=options||{};
+ var normalized=normalizeScanValue(value), found=findOrder(normalized);
+ if(found){showResult(found);openCenter(found);return Promise.resolve(true);}
+ // 訂單中心畫面可能已顯示舊快照，但快速驗票載入時機較早；先向 Firebase 重抓一次再判定。
+ var refresh=window.MonsterOrderCenter&&MonsterOrderCenter.refresh;
+ if(!options.skipRefresh&&typeof refresh==='function'){
+   return Promise.resolve(refresh()).catch(function(){}).then(function(){
+     var retry=findOrder(normalized);
+     showResult(retry);
+     if(retry)openCenter(retry);
+     return !!retry;
+   });
+ }
+ showResult(null);return Promise.resolve(false);
+}
+function releaseMediaTracks(){
+ try{if(stream){stream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});stream=null;}}catch(e){}
+ try{var video=byId('tvcVideo');if(video){if(video.srcObject&&video.srcObject.getTracks)video.srcObject.getTracks().forEach(function(t){try{t.stop();}catch(e){}});video.pause();video.srcObject=null;video.removeAttribute('src');video.load();}}catch(e){}
+}
+function stopScan(){
+ if(scanTimer){clearInterval(scanTimer);scanTimer=null;}
+ releaseMediaTracks();
+ var closing=html5Scanner;html5Scanner=null;
+ var finish=function(){try{if(closing&&closing.clear)closing.clear();}catch(e){}var m=byId('tvcScannerModal');if(m)m.remove();};
+ if(closing&&closing.stop){try{return Promise.resolve(closing.stop()).catch(function(){}).then(function(){releaseMediaTracks();finish();});}catch(e){finish();return Promise.resolve();}}
+ finish();return Promise.resolve();
+}
+function handleScanSuccess(raw){
+ if(scanLocked)return;scanLocked=true;
+ var value=normalizeScanValue(raw);
+ stopScan().then(function(){
+   return lookup(value).then(function(ok){if(!ok){setTimeout(function(){alert('QR Code 已讀取，但找不到對應訂單。請確認單號，或按重新整理後再試。');},50);}});
+ }).finally(function(){setTimeout(function(){scanLocked=false;},500);});
+}
+function scannerFallback(){stopScan().then(function(){scanLocked=false;var v=prompt('相機掃描無法啟動。請輸入收據上的訂單號碼（例如 A80188）：');if(v)lookup(v);});}
 function loadHtml5Qr(){
  if(window.Html5Qrcode)return Promise.resolve(window.Html5Qrcode);
  if(window.__monsterHtml5QrLoading)return window.__monsterHtml5QrLoading;
@@ -123,10 +178,11 @@ function loadHtml5Qr(){
  return window.__monsterHtml5QrLoading;
 }
 function createScannerShell(mode){var wrap=document.createElement('div');wrap.id='tvcScannerModal';wrap.className='staff-modal tvc-scanner';wrap.style.display='flex';wrap.innerHTML='<div class="staff-modal-card tvc-scanner-card"><div class="staff-modal-header"><div class="staff-modal-title">📷 掃描收據 QR Code</div><button id="tvcScanClose" class="staff-modal-close">×</button></div><div id="tvcScannerReader"></div>'+(mode==='native'?'<video id="tvcVideo" autoplay playsinline muted></video>':'')+'<p>將 QR Code 對準框內</p><div class="tvc-scan-help">請使用 Safari 或 Chrome，並允許相機權限。若從 LINE 開啟，請改用外部瀏覽器。</div><button id="tvcManualCode" class="staff-secondary-button" type="button">改用訂單號碼</button></div>';document.body.appendChild(wrap);byId('tvcScanClose').onclick=stopScan;byId('tvcManualCode').onclick=scannerFallback;return wrap;}
-function startNativeDetector(){var detector=new BarcodeDetector({formats:['qr_code']});createScannerShell('native');return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(s){stream=s;var video=byId('tvcVideo');video.srcObject=s;scanTimer=setInterval(function(){if(video.readyState<2)return;detector.detect(video).then(function(codes){if(codes&&codes[0]&&codes[0].rawValue){var raw=codes[0].rawValue;stopScan();lookup(raw);}}).catch(function(){});},300);});}
-function startHtml5Scanner(){createScannerShell('html5');return loadHtml5Qr().then(function(){html5Scanner=new Html5Qrcode('tvcScannerReader');return html5Scanner.start({facingMode:'environment'},{fps:10,qrbox:function(w,h){var s=Math.floor(Math.min(w,h)*0.72);return {width:s,height:s};},aspectRatio:1},function(raw){stopScan();lookup(raw);},function(){});});}
+function startNativeDetector(){var detector=new BarcodeDetector({formats:['qr_code']});createScannerShell('native');return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(s){stream=s;var video=byId('tvcVideo');video.srcObject=s;scanTimer=setInterval(function(){if(video.readyState<2)return;detector.detect(video).then(function(codes){if(codes&&codes[0]&&codes[0].rawValue){handleScanSuccess(codes[0].rawValue);}}).catch(function(){});},300);});}
+function startHtml5Scanner(){createScannerShell('html5');return loadHtml5Qr().then(function(){html5Scanner=new Html5Qrcode('tvcScannerReader');return html5Scanner.start({facingMode:'environment'},{fps:10,qrbox:function(w,h){var s=Math.floor(Math.min(w,h)*0.72);return {width:s,height:s};},aspectRatio:1},function(raw){handleScanSuccess(raw);},function(){});});}
 function startScan(){
  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('手機相機只能在 HTTPS 安全網址中使用。請確認網址以 https:// 開頭，並改用 Safari 或 Chrome 開啟。');scannerFallback();return;}
+ scanLocked=false;
  stopScan();
  var nativeSupported=('BarcodeDetector' in window);
  var task=nativeSupported?startNativeDetector():startHtml5Scanner();
