@@ -21,9 +21,9 @@
     <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
     <link
         rel="stylesheet"
-        href="css/staff.css?v=73f1fix1">
+        href="css/staff.css?v=761">
     <link rel="stylesheet" href="css/pwa.css?v=73f1">
-    <link rel="stylesheet" href="css/staff-enterprise.css?v=745">
+    <link rel="stylesheet" href="css/staff-enterprise.css?v=761">
 </head>
 
 <body data-pwa-app="staff">
@@ -237,7 +237,22 @@
         <section class="staff-section">
 
             <div class="staff-section-title">
-                ⚡ 快速驗票
+                ⚡ 驗票中心 2.0
+            </div>
+
+            <div class="validation-hub-grid" id="validationHubGrid">
+                <button type="button" class="validation-hub-card waiting" data-validation-filter="waiting">
+                    <span class="validation-hub-icon">🟡</span><span class="validation-hub-label">等待入場</span><strong id="validationWaitingCount">0</strong>
+                </button>
+                <button type="button" class="validation-hub-card playing" data-validation-filter="playing">
+                    <span class="validation-hub-icon">🟢</span><span class="validation-hub-label">遊玩中</span><strong id="validationPlayingCount">0</strong>
+                </button>
+                <button type="button" class="validation-hub-card overtime" data-validation-filter="overtime">
+                    <span class="validation-hub-icon">🔴</span><span class="validation-hub-label">已超時</span><strong id="validationOvertimeCount">0</strong>
+                </button>
+                <button type="button" class="validation-hub-card finished" data-validation-filter="finished">
+                    <span class="validation-hub-icon">⚪</span><span class="validation-hub-label">今日已離場</span><strong id="validationFinishedCount">0</strong>
+                </button>
             </div>
 
             <div class="staff-validation-actions">
@@ -251,6 +266,14 @@
             </div>
 
             <div id="staffQuickValidationResult"></div>
+
+            <div class="validation-live-panel">
+                <div class="validation-live-head">
+                    <div><strong id="validationLiveTitle">今日現場</strong><small id="validationLiveSubtitle">即時同步訂單狀態</small></div>
+                    <button type="button" id="validationLiveRefresh" class="staff-secondary-button">↻ 更新</button>
+                </div>
+                <div id="validationLiveList" class="validation-live-list"></div>
+            </div>
 
         </section>
 
@@ -618,8 +641,8 @@
 <script src="js/staff/consume-points-manager.js?v=749"></script>
 <script src="js/cloud/cloud-order-lifecycle.js?v=72"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
-<script src="js/staff/order-center.js?v=760"></script>
-<script src="js/staff/ticket-validator.js?v=760"></script>
+<script src="js/staff/order-center.js?v=761"></script>
+<script src="js/staff/ticket-validator.js?v=761"></script>
 <script src="js/staff/order-tools.js?v=73e3"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 
