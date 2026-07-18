@@ -312,4 +312,16 @@ for (var id in ticketData) {
     if (ticketData[id].reward === undefined || ticketData[id].reward === null) {
         ticketData[id].reward = "";
     }
+    if (ticketData[id].canEnter === undefined || ticketData[id].canEnter === null) {
+        ticketData[id].canEnter = ticketData[id].reward.indexOf("band") !== -1;
+        if (id === "token10" || id === "token25" || id === "powerbank") ticketData[id].canEnter = false;
+    }
+    ticketData[id].admissionRequired = ticketData[id].canEnter !== false;
+    if (ticketData[id].pickupItem === undefined || ticketData[id].pickupItem === null) {
+        ticketData[id].pickupItem = "none";
+    }
+    if (ticketData[id].sortOrder === undefined || ticketData[id].sortOrder === null) {
+        ticketData[id].sortOrder = Object.keys(ticketData).indexOf(id);
+    }
 }
+localStorage.setItem("ticketData", JSON.stringify(ticketData));

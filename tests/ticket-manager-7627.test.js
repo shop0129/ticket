@@ -1,0 +1,22 @@
+"use strict";
+var assert = require("assert");
+var fs = require("fs");
+var path = require("path");
+function read(file){ return fs.readFileSync(path.resolve(__dirname,"..",file),"utf8"); }
+var manager=read("js/modules/ticketManager.js");
+var catalog=read("js/modules/ticketCatalog.js");
+var cart=read("js/modules/cart.js");
+var validation=read("js/modules/ticketValidation.js");
+var lifecycle=read("js/cloud/cloud-order-lifecycle.js");
+var print=read("js/modules/print.js");
+assert.ok(manager.indexOf("sortOrder")>=0,"票券管理缺少 sortOrder");
+assert.ok(manager.indexOf("canEnter-")>=0,"缺少可否入場欄位");
+assert.ok(manager.indexOf("pickupItem-")>=0,"缺少櫃台領取欄位");
+assert.ok(manager.indexOf("至櫃台領取襪子")>=0,"缺少襪子選項");
+assert.ok(catalog.indexOf("orderedTicketIds")>=0,"前台未依排序欄位顯示");
+assert.ok(cart.indexOf("admissionRequired")>=0,"購物車未保存入場屬性");
+assert.ok(cart.indexOf("pickupItem")>=0,"購物車未保存領取商品");
+assert.ok(validation.indexOf("item.canEnter === false")>=0,"驗票未判斷可否入場");
+assert.ok(lifecycle.indexOf("item.admissionRequired === false")>=0,"生命週期未判斷入場設定");
+assert.ok(print.indexOf("至櫃台領取襪子")>=0,"完成頁未顯示襪子領取");
+console.log("PASS V7.6.2.7 ticket manager: 10 assertions");

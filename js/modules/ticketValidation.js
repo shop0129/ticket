@@ -15,6 +15,8 @@
   }
   function itemQty(item){return Math.max(1,Number(item&&item.qty||item&&item.quantity||1));}
   function isAdmission(item){
+    if(item && (item.canEnter === false || item.admissionRequired === false)) return false;
+    if(item && (item.canEnter === true || item.admissionRequired === true)) return true;
     var id=String(item&&item.id||'');var title=String(item&&item.title||'');
     return !(id==='token10'||id==='token25'||id==='powerbank'||title.indexOf('代幣')>=0||title.indexOf('行動電源')>=0);
   }

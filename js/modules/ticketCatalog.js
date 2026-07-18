@@ -36,19 +36,24 @@ function renderTicketCatalog() {
             container.innerHTML = "";
         }
     });
-    for (var id in ticketData) {
+    var orderedTicketIds = (typeof getSortedTicketIds === "function")
+        ? getSortedTicketIds()
+        : Object.keys(ticketData || {}).sort(function(a,b){
+            return Number(ticketData[a].sortOrder || 0) - Number(ticketData[b].sortOrder || 0);
+        });
+    orderedTicketIds.forEach(function(id) {
         var ticket = ticketData[id];
         if (!isTicketVisibleByBusinessMode(id, ticket)) {
-            continue;
+            return;
         }
         var category = ticket.category || "other";
         var containerId = ticketCategoryMap[category] ||
             ticketCategoryMap.other;
         var container = document.getElementById(containerId);
         if (!container)
-            continue;
+            return;
         container.insertAdjacentHTML("beforeend", createTicketCard(id, ticket));
-    }
+    });
     updateEmptyTicketCategories();
 }
 function updateEmptyTicketCategories() {

@@ -42,6 +42,13 @@
 
     function isNonAdmissionItem(item){
 
+        if(item && (item.canEnter === false || item.admissionRequired === false)){
+            return true;
+        }
+        if(item && (item.canEnter === true || item.admissionRequired === true)){
+            return false;
+        }
+
         var id = itemId(item);
         var title = itemTitle(item);
 

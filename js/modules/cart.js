@@ -27,7 +27,10 @@ function addCurrentTicketToCart() {
         price: ticket.price,
         token: ticket.token || 0,
         toy: ticket.toy || "none",
-        reward: ticket.reward || ""
+        reward: ticket.reward || "",
+        canEnter: ticket.canEnter !== false,
+        admissionRequired: ticket.canEnter !== false,
+        pickupItem: ticket.pickupItem || "none"
     });
     updateCartPanel();
     showPage("ticketPage");
