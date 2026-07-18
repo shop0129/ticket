@@ -321,7 +321,7 @@ function enhanceTicketManagerCards() {
         if (!card || card.querySelector('.ticket-quick-actions')) return;
         var actions = card.querySelector('.ticket-manager-actions'); if(!actions) return;
         var quick = document.createElement('div'); quick.className='ticket-quick-actions';
-        quick.innerHTML='<button type="button" onclick="duplicateTicket(\''+id+'\')">📄 複製</button><button type="button" onclick="moveTicket(\''+id+'\',-1)">⬆ 上移</button><button type="button" onclick="moveTicket(\''+id+'\',1)">⬇ 下移</button>';
+        quick.innerHTML='<button type="button" onclick="duplicateTicket(\''+id+'\')">📄 複製</button><button type="button" onclick="moveTicket(\''+id+'\',-1)">⬆ 上移</button><button type="button" onclick="moveTicket(\''+id+'\',1)">⬇ 下移</button><button type="button" onclick="moveTicketToBottom(\''+id+'\')">⏬ 移至最下面</button>';
         actions.insertBefore(quick, actions.firstChild);
         var enable=document.getElementById('enable-'+id);if(enable)enable.addEventListener('change',function(){ticketData[id].enable=enable.checked;renderTicketManagerSummary();applyTicketManagerFilters();});
     });
@@ -334,6 +334,15 @@ function duplicateTicket(id) {
     saveTicketData(); renderTicketManager(); updateTicketButtons();
     setTimeout(function(){var el=document.querySelector('[data-ticket-manager-id="'+newId+'"]');if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},50);
 }
+function moveTicketToBottom(id) {
+    if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以調整票券順序")) return;
+    var ids=getSortedTicketIds(); var index=ids.indexOf(id);
+    if(index<0||index===ids.length-1)return;
+    ids.splice(index,1); ids.push(id);
+    ids.forEach(function(key,order){ ticketData[key].sortOrder=order; });
+    saveTicketData();renderTicketManager();updateTicketButtons();
+}
+
 function moveTicket(id, direction) {
     if (window.MonsterPermission && !MonsterPermission.requirePermission("ticket.update", "❌ 只有店長可以調整票券順序")) return;
     var ids=getSortedTicketIds(); var index=ids.indexOf(id); var target=index+Number(direction||0);
