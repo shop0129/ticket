@@ -30,7 +30,11 @@ function addCurrentTicketToCart() {
         reward: ticket.reward || "",
         canEnter: ticket.canEnter !== false,
         admissionRequired: ticket.canEnter !== false,
-        pickupItem: ticket.pickupItem || "none"
+        pickupItem: ticket.pickupItem || "none",
+        timeMode: ticket.timeMode || (ticket.canEnter !== false ? "duration" : "none"),
+        playHours: Number(ticket.playHours || ticket.hour || 0),
+        playMinutes: Number(ticket.playMinutes || (ticket.hour ? ticket.hour * 60 : 0)),
+        fixedExitTime: ticket.fixedExitTime || ""
     });
     updateCartPanel();
     showPage("ticketPage");

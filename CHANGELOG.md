@@ -109,3 +109,10 @@
 - 修正手機員工後台未依 `sortOrder` 顯示，造成售票機順序已更新但手機位置不變。
 - 手機端調整順序後會持久化並同步 Firebase。
 - 新增或複製票券自動排至最下面。
+
+
+## V7.7.0 Ticket Rule Engine
+- 票券管理新增固定時數、指定時間、無限時、不設定時間。
+- 固定時數支援 1～99 小時。
+- 售票機及員工後台同步保存時間規則。
+- 訂單建立時保存 timeMode、playHours、playMinutes、fixedExitTime。

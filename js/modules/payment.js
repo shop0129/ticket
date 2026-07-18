@@ -58,7 +58,11 @@ function saveSalesRecord(paymentType, totalAmount, pointUse) {
                     reward: ticketData[selectedTicket].reward || "",
                     canEnter: ticketData[selectedTicket].canEnter !== false,
                     admissionRequired: ticketData[selectedTicket].canEnter !== false,
-                    pickupItem: ticketData[selectedTicket].pickupItem || "none"
+                    pickupItem: ticketData[selectedTicket].pickupItem || "none",
+                    timeMode: ticketData[selectedTicket].timeMode || (ticketData[selectedTicket].canEnter !== false ? "duration" : "none"),
+                    playHours: Number(ticketData[selectedTicket].playHours || ticketData[selectedTicket].hour || 0),
+                    playMinutes: Number(ticketData[selectedTicket].playMinutes || (ticketData[selectedTicket].hour ? ticketData[selectedTicket].hour * 60 : 0)),
+                    fixedExitTime: ticketData[selectedTicket].fixedExitTime || ""
                 }], status: "normal" });
     if (window.MonsterAuth) {
         order = MonsterAuth.decorateRecord(order, "kiosk");

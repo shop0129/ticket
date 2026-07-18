@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "74-enterprise-7628-ticket-order-bottom-sync-20260719-1";
+var CACHE_NAME = CACHE_PREFIX + "74-enterprise-v77-ticket-rule-engine-20260719-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

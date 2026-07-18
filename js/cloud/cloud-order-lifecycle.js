@@ -127,7 +127,7 @@
             }
 
             if(
-                item.timeMode === "fixed" &&
+                (item.timeMode === "fixed" || item.timeMode === "untilTime") &&
                 item.fixedExitTime
             ){
                 rule.mode = "fixed";
@@ -152,7 +152,7 @@
             }
 
             var minutes =
-            Number(item.playMinutes || 0);
+            Number(item.playMinutes || (Number(item.playHours || 0) * 60) || 0);
 
             if(!minutes && item.hour){
                 minutes =

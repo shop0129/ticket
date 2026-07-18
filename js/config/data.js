@@ -323,5 +323,30 @@ for (var id in ticketData) {
     if (ticketData[id].sortOrder === undefined || ticketData[id].sortOrder === null) {
         ticketData[id].sortOrder = Object.keys(ticketData).indexOf(id);
     }
+    // V7.7 Ticket Rule Engine：遊玩時間規則
+    if (!ticketData[id].timeMode) {
+        if (id === "early") {
+            ticketData[id].timeMode = "fixed";
+            ticketData[id].fixedExitTime = "18:00";
+        } else if (id === "summer") {
+            ticketData[id].timeMode = "fixed";
+            ticketData[id].fixedExitTime = "16:00";
+        } else if (ticketData[id].hour) {
+            ticketData[id].timeMode = "duration";
+        } else if (ticketData[id].canEnter !== false) {
+            ticketData[id].timeMode = "unlimited";
+        } else {
+            ticketData[id].timeMode = "none";
+        }
+    }
+    if (ticketData[id].playHours === undefined || ticketData[id].playHours === null) {
+        ticketData[id].playHours = Math.min(99, Math.max(1, Number(ticketData[id].hour || 2)));
+    }
+    if (ticketData[id].playMinutes === undefined || ticketData[id].playMinutes === null) {
+        ticketData[id].playMinutes = ticketData[id].timeMode === "duration" ? ticketData[id].playHours * 60 : 0;
+    }
+    if (!ticketData[id].fixedExitTime) {
+        ticketData[id].fixedExitTime = ticketData[id].timeMode === "fixed" ? "18:00" : "";
+    }
 }
 localStorage.setItem("ticketData", JSON.stringify(ticketData));
