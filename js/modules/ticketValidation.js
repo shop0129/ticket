@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.5.1｜訂單 QR 與短訂單號碼核心
+// 小怪獸售票機 V7.6.2.1｜收據排版 Hotfix
 (function(){
   'use strict';
   var PREFIX='MGV1';
@@ -41,7 +41,7 @@
     decorate(order);
     var rows=(order.items||[]).map(function(item){var q=itemQty(item);return '<div class="tv-receipt-row"><span>'+escapeHtml(item.title||item.id||'票券')+' × '+q+'</span><b>NT$'+Number(item.price||0)*q+'</b></div>';}).join('');
     var discount=Number(order.pointDiscount||0);
-    return '<section class="tv-receipt-preview"><h3>小怪獸放電所</h3><div class="tv-code">訂單號碼：<strong>'+escapeHtml(order.shortCode)+'</strong></div>'+rows+(discount?'<div class="tv-receipt-row"><span>點數折抵</span><b>-NT$'+discount+'</b></div>':'')+'<div class="tv-receipt-total"><span>實付金額</span><b>NT$'+Number(order.paidAmount!=null?order.paidAmount:order.amount||0)+'</b></div><div class="tv-qr">'+qrSvg(order.qrPayload,170)+'</div><p>入場時請出示此 QR Code</p><small>掃描失敗可提供訂單號碼 '+escapeHtml(order.shortCode)+'</small></section>';
+    return '<section class="tv-receipt-preview"><h3>小怪獸放電所</h3><div class="tv-code">訂單號碼：<strong>'+escapeHtml(order.shortCode)+'</strong></div>'+rows+(discount?'<div class="tv-receipt-row"><span>點數折抵</span><b>-NT$'+discount+'</b></div>':'')+'<div class="tv-receipt-total"><span>實付金額</span><b>NT$'+Number(order.paidAmount!=null?order.paidAmount:order.amount||0)+'</b></div><div class="tv-qr">'+qrSvg(order.qrPayload,170)+'</div><p>入場時請出示此 QR Code</p><small class="tv-receipt-help">掃描失敗請提供<br><b>單號 '+escapeHtml(order.shortCode)+'</b></small></section>';
   }
   function escapeHtml(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   window.MonsterTicketValidation={decorateOrder:decorate,makeShortCode:makeShortCode,receiptHtml:receiptHtml,qrSvg:qrSvg,parse:function(text){var p=String(text||'').split(':');return p.length===3&&p[0]===PREFIX?{version:1,orderKey:p[1],token:p[2]}:null;}};
