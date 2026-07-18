@@ -1,3 +1,13 @@
+# V7.6.0 Enterprise Core
+
+- 新增 Ticket Status Engine，統一 waiting / playing / finished / cancelled 狀態。
+- 修正驗票卡完成離場後，訂單查詢仍顯示遊玩中的問題。
+- 驗票入場與離場改用 Firebase Transaction，防止多裝置重複操作。
+- ticketInstances、playStatus、validationStatus、ticketStatus 會同步更新。
+- 訂單中心顯示狀態改由 Ticket Status Engine 推導。
+- 新增 Live Timer 基礎 API，供後續現場倒數畫面使用。
+- 更新 Service Worker 快取版本。
+
 # V7.4.5 Mobile UX Update
 
 - 修正 iPhone Dynamic Island／瀏海遮住票券管理與 Dashboard 標題。

@@ -178,10 +178,19 @@
         );
     }
 
+    function getOrderStatus(order){
+
+        if(window.MonsterTicketStatusEngine){
+            return MonsterTicketStatusEngine.getOrderStatus(order);
+        }
+
+        return (order && (order.playStatus || order.validationStatus)) || "waiting";
+    }
+
     function statusLabel(order){
 
         var status =
-        order.playStatus || "waiting";
+        getOrderStatus(order);
 
         if(status === "playing"){
             return "遊玩中";
@@ -212,7 +221,7 @@
                 !order ||
                 order.deleted ||
                 order.admissionRequired === false ||
-                order.playStatus === "not_required"
+                getOrderStatus(order) === "not_required"
             ){
                 return;
             }
@@ -245,7 +254,7 @@
         if(
             !order ||
             order.deleted ||
-            order.playStatus !== "playing"
+            getOrderStatus(order) !== "playing"
         ){
             return 0;
         }
@@ -292,13 +301,13 @@
         var waiting =
         listOrders().filter(function(order){
             return (
-                order.playStatus || "waiting"
+                getOrderStatus(order)
             ) === "waiting";
         }).length;
 
         var playing =
         listOrders().filter(function(order){
-            return order.playStatus === "playing";
+            return getOrderStatus(order) === "playing";
         }).length;
 
         var values = {
@@ -358,7 +367,7 @@
         listOrders().filter(function(order){
 
             var status =
-            order.playStatus || "waiting";
+            getOrderStatus(order);
 
             if(
                 filter === "active" &&
@@ -418,7 +427,7 @@
         rows.map(function(order){
 
             var status =
-            order.playStatus || "waiting";
+            getOrderStatus(order);
 
             var itemTitles =
             (
@@ -510,7 +519,7 @@
         }
 
         var status =
-        order.playStatus || "waiting";
+        getOrderStatus(order);
 
         var itemHtml =
         (
@@ -823,7 +832,7 @@
         };
 
         if(
-            (order.playStatus || "waiting") !==
+            (getOrderStatus(order)) !==
             "playing"
         ){
             updates.playerCount =
@@ -940,7 +949,7 @@
                 }
 
                 if(
-                    currentOrder.playStatus ===
+                    getOrderStatus(currentOrder) ===
                     "playing"
                 ){
                     return currentOrders;
@@ -957,7 +966,7 @@
                     if(
                         row &&
                         !row.deleted &&
-                        row.playStatus ===
+                        getOrderStatus(row) ===
                         "playing"
                     ){
                         currentPlayers +=
@@ -1010,8 +1019,20 @@
                     : now + minutes * 60000
                 );
 
-                currentOrder.playStatus =
-                "playing";
+                if(window.MonsterTicketStatusEngine){
+                    currentOrder = MonsterTicketStatusEngine.transitionOrder(
+                        currentOrder,
+                        "playing",
+                        {
+                            now:now,
+                            actor:operatorName(),
+                            expectedExitTime:expectedExit
+                        }
+                    );
+                }else{
+                    currentOrder.playStatus = "playing";
+                    currentOrder.validationStatus = "playing";
+                }
 
                 currentOrder.playerCount =
                 players;
@@ -1125,17 +1146,29 @@
                 if(
                     !current ||
                     current.deleted ||
-                    current.playStatus !==
+                    getOrderStatus(current) !==
                     "playing"
                 ){
                     return;
                 }
 
-                current.playStatus =
-                "finished";
+                var exitNow = Date.now();
 
-                current.exitTime =
-                Date.now();
+                if(window.MonsterTicketStatusEngine){
+                    current = MonsterTicketStatusEngine.transitionOrder(
+                        current,
+                        "finished",
+                        {
+                            now:exitNow,
+                            actor:operatorName(),
+                            exitTime:exitNow
+                        }
+                    );
+                }else{
+                    current.playStatus = "finished";
+                    current.validationStatus = "finished";
+                    current.exitTime = exitNow;
+                }
 
                 current.exitedBy =
                 operatorName();

@@ -19,8 +19,9 @@ function findOrder(value){
  });
  return found;
 }
-function statusText(o){var s=o.playStatus||o.validationStatus||'waiting';return s==='playing'?'遊玩中':s==='finished'?'已離場':s==='cancelled'||o.cancelled?'已作廢':'等待入場';}
-function statusClass(o){var s=o.playStatus||o.validationStatus||'waiting';return ['playing','finished','cancelled'].indexOf(s)>=0?s:'waiting';}
+function orderStatus(o){return window.MonsterTicketStatusEngine?MonsterTicketStatusEngine.getOrderStatus(o):(o.playStatus||o.validationStatus||'waiting');}
+function statusText(o){return window.MonsterTicketStatusEngine?MonsterTicketStatusEngine.label(o):(orderStatus(o)==='playing'?'遊玩中':orderStatus(o)==='finished'?'已離場':orderStatus(o)==='cancelled'||o.cancelled?'已作廢':'等待入場');}
+function statusClass(o){var s=orderStatus(o);return ['playing','finished','cancelled'].indexOf(s)>=0?s:'waiting';}
 function itemRows(o){return (o.items||[]).map(function(i){var q=Math.max(1,Number(i.qty||i.quantity||1));return '<div class="tvc-item"><span>'+esc(i.title||i.name||i.id||'票券')+(q>1?' × '+q:'')+'</span><b>'+money(Number(i.price||0)*q)+'</b></div>';}).join('')||'<div class="tvc-empty">沒有票券明細</div>';}
 function ticketRows(o){var a=Array.isArray(o.ticketInstances)?o.ticketInstances:[];if(!a.length)return '';
  return '<div class="tvc-subtitle">入場票券</div>'+a.map(function(t){return '<div class="tvc-ticket"><span>'+esc(t.title||'票券')+'</span><em class="'+esc(t.status||'waiting')+'">'+(t.status==='playing'?'遊玩中':t.status==='finished'?'已離場':'等待入場')+'</em></div>';}).join('');
@@ -48,7 +49,7 @@ function openFullOrder(id){
  var input=byId('staffOrderSearchInput');if(input){var o=orders()[id]||{};input.value=o.shortCode||o.orderNo||id;input.dispatchEvent(new Event('input',{bubbles:true}));}
  alert('訂單已帶入搜尋，請從訂單中心開啟。');
 }
-function actionButton(o){var s=o.playStatus||'waiting';if(s==='waiting')return '<button data-tvc-action="enter" class="staff-success-button">▶ 確認全部入場</button>';if(s==='playing')return '<button data-tvc-action="exit" class="staff-danger-button">完成全部離場</button>';if(s==='finished')return '<div class="tvc-done">此訂單已完成離場</div>';return '<div class="tv-alert error">此訂單不可驗票</div>';}
+function actionButton(o){var s=orderStatus(o);if(s==='waiting')return '<button data-tvc-action="enter" class="staff-success-button">▶ 確認全部入場</button>';if(s==='playing')return '<button data-tvc-action="exit" class="staff-danger-button">完成全部離場</button>';if(s==='finished')return '<div class="tvc-done">此訂單已完成離場</div>';return '<div class="tv-alert error">此訂單不可驗票</div>';}
 function openCenter(found){ensureModal();currentFound=found;renderCenter();byId('ticketValidationCenterModal').style.display='flex';document.body.classList.add('tvc-open');}
 function closeCenter(){var m=byId('ticketValidationCenterModal');if(m)m.style.display='none';document.body.classList.remove('tvc-open');}
 function renderCenter(){
@@ -62,14 +63,40 @@ function renderCenter(){
 function expectedExit(o,now){if(o.timeMode==='unlimited')return null;var mins=Math.max(10,Number(o.playMinutes||120));if(o.fixedExitTime){var p=String(o.fixedExitTime).split(':');var d=new Date(now);d.setHours(Number(p[0]||0),Number(p[1]||0),0,0);return d.getTime();}return now+mins*60000;}
 function updateTicketInstances(list,action,now,who){return (list||[]).map(function(t){var n=Object.assign({},t);if(action==='enter'&&(n.status||'waiting')==='waiting'){n.status='playing';n.checkedInAt=now;n.checkedInBy=who;}if(action==='exit'&&n.status==='playing'){n.status='finished';n.checkedOutAt=now;n.checkedOutBy=who;}return n;});}
 function updateStatus(action){
- var o=currentFound.order;if(o.cancelled||o.playStatus==='cancelled'){message('此訂單已作廢，不能操作',false);return;}
- var desired=action==='enter'?'playing':'finished', current=o.playStatus||'waiting';if(action==='enter'&&current!=='waiting'){message('此訂單不是等待入場狀態',false);return;}if(action==='exit'&&current!=='playing'){message('此訂單不是遊玩中狀態',false);return;}
+ var o=currentFound.order, current=orderStatus(o);
+ if(o.cancelled||current==='cancelled'){message('此訂單已作廢，不能操作',false);return;}
+ var desired=action==='enter'?'playing':'finished';
+ if(action==='enter'&&current!=='waiting'){message('此訂單不是等待入場狀態',false);return;}
+ if(action==='exit'&&current!=='playing'){message('此訂單不是遊玩中狀態',false);return;}
  if(!confirm(action==='enter'?'確認此訂單全部入場？':'確認此訂單全部離場？'))return;
- var now=Date.now(), a=actor(), who=a.name||a.displayName||a.account||'staff', ref=firebase.database().ref(ROOT+'/orders/'+currentFound.id);
- var updates={playStatus:desired,validationStatus:desired,updatedAt:now,ticketInstances:updateTicketInstances(o.ticketInstances,action,now,who)};
- if(action==='enter'){updates.entryTime=now;updates.expectedExitTime=expectedExit(o,now);updates.entryOperator=who;updates.checkedInAt=now;updates.checkedInBy=who;}else{updates.exitTime=now;updates.exitOperator=who;updates.checkedOutAt=now;updates.checkedOutBy=who;}
+
+ var now=Date.now(), a=actor(), who=a.name||a.displayName||a.account||'staff';
+ var ref=firebase.database().ref(ROOT+'/orders/'+currentFound.id), before=current;
  message('處理中…',true);
- ref.update(updates).then(function(){return firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?'ticket.checkIn':'ticket.checkOut',orderId:currentFound.id,shortCode:o.shortCode||'',operatorName:who,createdAt:now,fromStatus:current,toStatus:desired});}).then(function(){Object.assign(o,updates);message(action==='enter'?'已完成入場':'已完成離場',true);renderCenter();showResult(currentFound);}).catch(function(err){message('操作失敗：'+(err&&err.message?err.message:'請檢查網路'),false);});
+
+ ref.transaction(function(latest){
+   if(!latest||latest.deleted)return;
+   var latestStatus=orderStatus(latest);
+   if(action==='enter'&&latestStatus!=='waiting')return;
+   if(action==='exit'&&latestStatus!=='playing')return;
+   var opts={now:now,actor:who};
+   if(action==='enter')opts.expectedExitTime=expectedExit(latest,now);
+   var next=window.MonsterTicketStatusEngine?MonsterTicketStatusEngine.transitionOrder(latest,desired,opts):Object.assign({},latest,{playStatus:desired,validationStatus:desired,updatedAt:now,ticketInstances:updateTicketInstances(latest.ticketInstances,action,now,who)});
+   if(action==='enter'){
+     next.entryOperator=who;next.enteredBy=who;next.checkedInAt=now;next.checkedInBy=who;
+   }else{
+     next.exitOperator=who;next.exitedBy=who;next.checkedOutAt=now;next.checkedOutBy=who;
+   }
+   return next;
+ },function(error,committed,snapshot){
+   if(error){message('操作失敗：'+(error.message||'請檢查網路'),false);return;}
+   if(!committed){message('訂單狀態已被其他裝置更新，請重新查詢',false);return;}
+   var latest=snapshot&&snapshot.val?snapshot.val():null;
+   if(latest){currentFound.order=latest;}
+   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?'ticket.checkIn':'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,engineVersion:'7.6.0'}).catch(function(){});
+   message(action==='enter'?'已完成入場':'已完成離場',true);
+   renderCenter();showResult(currentFound);
+ });
 }
 function message(text,ok){var b=byId('tvcMessage');if(!b)return;b.innerHTML='<div class="tv-alert '+(ok?'success':'error')+'">'+esc(text)+'</div>';}
 function lookup(value){var found=findOrder(value);showResult(found);if(found)openCenter(found);}
