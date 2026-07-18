@@ -6930,3 +6930,120 @@ System Setting
 .consume-original-total,.consume-discount-total{display:block;font-size:18px;line-height:1.35}.consume-original-total{text-decoration:line-through;color:#888}.consume-discount-total{color:#2e7d32;font-weight:900}
 /* V7.5.1 收據 QR 預覽 */
 .tv-receipt-preview{width:min(100%,48mm);max-width:48mm;margin:18px auto;padding:4mm 3mm;background:#fff;color:#111;border:1px dashed #999;border-radius:2mm;text-align:center;font-family:Arial,"Noto Sans TC",sans-serif;box-sizing:border-box;overflow:hidden}.tv-receipt-preview *{box-sizing:border-box;max-width:100%}.tv-receipt-preview h3{margin:0 0 3mm;font-size:18px;line-height:1.25}.tv-code{font-size:14px;margin-bottom:3mm;white-space:normal;overflow-wrap:anywhere}.tv-code strong{font-size:16px;letter-spacing:1px}.tv-receipt-row,.tv-receipt-total{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:2mm;padding:1.5mm 0;text-align:left;font-size:14px;line-height:1.3}.tv-receipt-row span,.tv-receipt-total span{min-width:0;overflow-wrap:anywhere;word-break:break-word}.tv-receipt-row b,.tv-receipt-total b{white-space:nowrap}.tv-receipt-total{border-top:1px solid #222;margin-top:2mm;font-size:16px}.tv-qr{display:flex;justify-content:center;margin:3mm auto 1mm}.tv-qr svg{display:block;width:28mm!important;height:28mm!important;max-width:28mm}.tv-receipt-preview p{margin:1.5mm 0;font-size:14px;line-height:1.35;font-weight:bold;overflow-wrap:anywhere}.tv-receipt-preview small{display:block;font-size:12px;line-height:1.45;overflow-wrap:anywhere}.tv-receipt-help b{font-size:13px;letter-spacing:.5px}@media print{@page{size:58mm auto;margin:0}html,body{width:58mm!important;margin:0!important;padding:0!important;background:#fff!important}.tv-receipt-preview{width:48mm!important;max-width:48mm!important;margin:0 auto!important;padding:3mm 2mm!important;border:0!important;border-radius:0!important;overflow:hidden!important;break-inside:avoid;page-break-inside:avoid}.tv-qr svg{width:28mm!important;height:28mm!important}}
+
+/* V7.6.2.2 收據預覽排版緊急修正
+   成功頁舊規則 .success-items div 會套用到收據內所有 div，
+   造成 38px、nowrap、18px margin，導致文字重疊。 */
+.success-items .tv-receipt-preview{
+    display:block;
+    width:min(100%,54mm);
+    max-width:54mm;
+    margin:18px auto;
+    padding:4mm 3mm;
+    font-size:14px;
+    font-weight:400;
+    line-height:1.35;
+    white-space:normal;
+}
+.success-items .tv-receipt-preview div,
+.success-items .tv-receipt-preview span,
+.success-items .tv-receipt-preview b,
+.success-items .tv-receipt-preview p,
+.success-items .tv-receipt-preview small{
+    font-size:inherit;
+    line-height:inherit;
+    margin:0;
+    white-space:normal;
+    letter-spacing:normal;
+    text-shadow:none;
+}
+.success-items .tv-receipt-preview h3{
+    margin:0 0 3mm;
+    font-size:18px;
+    line-height:1.25;
+}
+.success-items .tv-receipt-preview .tv-code{
+    margin:0 0 3mm;
+    font-size:14px;
+    line-height:1.4;
+}
+.success-items .tv-receipt-preview .tv-code strong{
+    font-size:16px;
+    letter-spacing:1px;
+}
+.success-items .tv-receipt-preview .tv-receipt-row,
+.success-items .tv-receipt-preview .tv-receipt-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:2mm;
+    width:100%;
+    padding:1.5mm 0;
+    margin:0;
+    font-size:14px;
+    line-height:1.35;
+    text-align:left;
+    white-space:normal;
+}
+.success-items .tv-receipt-preview .tv-receipt-row span,
+.success-items .tv-receipt-preview .tv-receipt-total span{
+    flex:1 1 auto;
+    min-width:0;
+    overflow-wrap:anywhere;
+    word-break:break-word;
+}
+.success-items .tv-receipt-preview .tv-receipt-row b,
+.success-items .tv-receipt-preview .tv-receipt-total b{
+    flex:0 0 auto;
+    font-weight:700;
+    white-space:nowrap;
+}
+.success-items .tv-receipt-preview .tv-receipt-total{
+    border-top:1px solid #222;
+    margin-top:2mm;
+    padding-top:2mm;
+    font-size:16px;
+    font-weight:700;
+}
+.success-items .tv-receipt-preview .tv-qr{
+    display:flex;
+    justify-content:center;
+    width:100%;
+    margin:3mm auto 1mm;
+}
+.success-items .tv-receipt-preview .tv-qr svg{
+    display:block;
+    width:30mm!important;
+    height:30mm!important;
+    max-width:30mm!important;
+}
+.success-items .tv-receipt-preview p{
+    margin:1.5mm 0;
+    font-size:13px;
+    line-height:1.4;
+    font-weight:700;
+}
+.success-items .tv-receipt-preview small{
+    display:block;
+    font-size:11px;
+    line-height:1.45;
+}
+.success-items .tv-receipt-preview .tv-receipt-help b{
+    font-size:12px;
+    letter-spacing:.5px;
+}
+@media print{
+    .success-items .tv-receipt-preview{
+        width:54mm!important;
+        max-width:54mm!important;
+        margin:0 auto!important;
+        padding:3mm 2mm!important;
+        font-size:13px!important;
+        border:0!important;
+    }
+    .success-items .tv-receipt-preview .tv-qr svg{
+        width:30mm!important;
+        height:30mm!important;
+        max-width:30mm!important;
+    }
+}

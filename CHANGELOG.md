@@ -61,3 +61,14 @@
 - 超時訂單自動移入「已超時」並依超時程度排序。
 - 頁面進入背景時暫停重繪，回到前景後依實際時間校正。
 - 更新 PWA 快取版本。
+
+## V7.6.2.1 Receipt & Mobile Scanner Hotfix
+- 修正手機瀏覽器因缺少 BarcodeDetector 而直接判定不支援相機。
+- 新增 html5-qrcode 雙 CDN 備援與手動單號備援。
+- 修正 58mm 收據文字、金額與 QR Code 超出列印寬度。
+- 更新 Service Worker 快取版本。
+
+## V7.6.2.2 Receipt Layout Emergency Fix
+- 修正收據預覽文字放大、重疊與擠成一團。
+- 隔離成功頁舊版 CSS，避免影響收據內部元素。
+- 調整 58mm 收據文字、金額與 QR Code 安全寬度。
