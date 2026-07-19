@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "781-sale-rule-engine-20260719-1";
+var CACHE_NAME = CACHE_PREFIX + "782-reward-engine-20260719-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -57,6 +57,7 @@ var CORE_ASSETS = [
     "./js/core/enterprise-core.js",
     "./js/core/enterprise-bridge.js",
     "./js/core/enterprise-guards.js",
+    "./js/core/reward-engine.js",
     "./js/core/ticket-data-sync-engine.js",
     "./js/core/ticket-status-engine.js",
     "./js/core/live-timer-engine.js",

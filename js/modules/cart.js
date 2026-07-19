@@ -31,6 +31,9 @@ function addCurrentTicketToCart() {
         canEnter: ticket.canEnter !== false,
         admissionRequired: ticket.canEnter !== false,
         pickupItem: ticket.pickupItem || "none",
+        pickupItems: window.MonsterRewardEngine ? MonsterRewardEngine.normalizeTicket(ticket).pickupItems : (ticket.pickupItems || []),
+        pickupItemsText: ticket.pickupItemsText || "",
+        pickupNote: ticket.pickupNote || "",
         timeMode: ticket.timeMode || (ticket.canEnter !== false ? "duration" : "none"),
         playHours: Number(ticket.playHours || ticket.hour || 0),
         playMinutes: Number(ticket.playMinutes || (ticket.hour ? ticket.hour * 60 : 0)),
@@ -91,7 +94,17 @@ function changeQty(id, step) {
             price: ticket.price,
             token: ticket.token || 0,
             toy: ticket.toy || "none",
-            reward: ticket.reward || ""
+            reward: ticket.reward || "",
+            canEnter: ticket.canEnter !== false,
+            admissionRequired: ticket.canEnter !== false,
+            pickupItem: ticket.pickupItem || "none",
+            pickupItems: window.MonsterRewardEngine ? MonsterRewardEngine.normalizeTicket(ticket).pickupItems : (ticket.pickupItems || []),
+            pickupItemsText: ticket.pickupItemsText || "",
+            pickupNote: ticket.pickupNote || "",
+            timeMode: ticket.timeMode || (ticket.canEnter !== false ? "duration" : "none"),
+            playHours: Number(ticket.playHours || ticket.hour || 0),
+            playMinutes: Number(ticket.playMinutes || (ticket.hour ? ticket.hour * 60 : 0)),
+            fixedExitTime: ticket.fixedExitTime || ""
         });
     }
     else {

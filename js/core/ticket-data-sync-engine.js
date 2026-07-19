@@ -15,6 +15,7 @@
     }
     t.token=num(t.token);
     LEGACY_KEYS.forEach(function(k){delete t[k];});
+    if(global.MonsterRewardEngine)t=global.MonsterRewardEngine.normalizeTicket(t);
     return t;
   }
   function normalizeMap(map){
@@ -31,5 +32,5 @@
     try{localStorage.setItem('ticketData',JSON.stringify(clean));}catch(e){}
     return clean;
   }
-  global.MonsterTicketDataSync={version:'7.7.1',normalizeTicket:normalizeTicket,normalizeMap:normalizeMap,tokenOf:tokenOf,snapshot:snapshot,replaceGlobalTicketData:replaceGlobalTicketData};
+  global.MonsterTicketDataSync={version:'7.8.2',normalizeTicket:normalizeTicket,normalizeMap:normalizeMap,tokenOf:tokenOf,snapshot:snapshot,replaceGlobalTicketData:replaceGlobalTicketData};
 })(window);

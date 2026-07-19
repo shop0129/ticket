@@ -28,7 +28,6 @@ function updateSuccessItems() {
     var redToy = 0;
     var band = 0;
     var powerbank = 0;
-    var socks = 0;
     var items = currentPrintOrder.items || [];
     items.forEach(function (item) {
         if (!item)
@@ -52,9 +51,6 @@ function updateSuccessItems() {
         if (item.id === "powerbank") {
             powerbank++;
         }
-        if (item.pickupItem === "socks" || (ticket.reward && ticket.reward.includes("socks"))) {
-            socks++;
-        }
     });
     var html = "";
     if (band) {
@@ -77,10 +73,7 @@ function updateSuccessItems() {
         html +=
             "<div>\uD83D\uDD0B \u884C\u52D5\u96FB\u6E90 \u00D7 ".concat(powerbank, "</div>");
     }
-    if (socks) {
-        html +=
-            "<div>🧦 至櫃台領取襪子 × ".concat(socks, "</div>");
-    }
+    if (window.MonsterRewardEngine) html += MonsterRewardEngine.renderHtml(items);
     if (html === "") {
         html =
             "<div>無需領取物品</div>";

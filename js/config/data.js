@@ -319,9 +319,9 @@ for (var id in ticketData) {
         if (id === "token10" || id === "token25" || id === "powerbank") ticketData[id].canEnter = false;
     }
     ticketData[id].admissionRequired = ticketData[id].canEnter !== false;
-    if (ticketData[id].pickupItem === undefined || ticketData[id].pickupItem === null) {
-        ticketData[id].pickupItem = "none";
-    }
+    if (ticketData[id].pickupItem === undefined || ticketData[id].pickupItem === null) ticketData[id].pickupItem = "none";
+    if (window.MonsterRewardEngine) ticketData[id] = MonsterRewardEngine.normalizeTicket(ticketData[id]);
+    else { ticketData[id].pickupItems=Array.isArray(ticketData[id].pickupItems)?ticketData[id].pickupItems:[]; ticketData[id].pickupItemsText=ticketData[id].pickupItemsText||ticketData[id].pickupItems.join("\n"); ticketData[id].pickupNote=ticketData[id].pickupNote||""; }
     if (ticketData[id].sortOrder === undefined || ticketData[id].sortOrder === null) {
         ticketData[id].sortOrder = Object.keys(ticketData).indexOf(id);
     }
