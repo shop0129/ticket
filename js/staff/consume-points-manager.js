@@ -82,13 +82,26 @@
       members[memberId]=saved;
       selected=saved;
 
-      // 交易已成功，先立刻告知成功；後面的 UI 更新全部採容錯處理。
-      toast("✅ 點數已調整");
-
-      try{ if(byId("cpAdjustAmount"))byId("cpAdjustAmount").value=""; }catch(e){console.warn(e);}
-      try{ if(byId("cpAdjustReason"))byId("cpAdjustReason").value=""; }catch(e){console.warn(e);}
-      try{ if(byId("cpAdjustNote"))byId("cpAdjustNote").value=""; }catch(e){console.warn(e);}
+      // 交易成功後先重設輸入欄位，再更新會員顯示，最後顯示明確成功視窗。
+      // 使用獨立函式及下一個畫面週期再次清空，避免手機瀏覽器/PWA 保留 number input 的舊值。
+      function clearAdjustmentForm(){
+        var amountInput=byId("cpAdjustAmount");
+        var reasonInput=byId("cpAdjustReason");
+        var noteInput=byId("cpAdjustNote");
+        if(amountInput){ amountInput.value=""; amountInput.defaultValue=""; amountInput.blur(); }
+        if(reasonInput){ reasonInput.value=""; reasonInput.defaultValue=""; }
+        if(noteInput){ noteInput.value=""; noteInput.defaultValue=""; }
+      }
+      try{ clearAdjustmentForm(); }catch(e){console.warn("Point form reset failed",e);}
       try{ select(memberId); }catch(e){ console.warn("Point UI refresh failed",e); }
+      setTimeout(function(){
+        try{ clearAdjustmentForm(); }catch(e){console.warn("Point form delayed reset failed",e);}
+      },0);
+
+      // 手機版原本的 toast 可能被彈窗遮住，因此改用一定看得到的完成視窗。
+      setTimeout(function(){
+        alert("✅ 點數調整成功\n會員："+memberName+"\n本次調整："+(amount>0?"+":"")+amount+" 點\n目前點數："+n(saved.points,0)+" 點");
+      },30);
 
       try{
         if(window.MonsterAuth&&typeof MonsterAuth.audit==="function"){
