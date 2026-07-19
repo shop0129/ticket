@@ -99,6 +99,8 @@ function paymentSuccess(paymentType) {
     if (paymentInProgress) {
         return;
     }
+    var saleItems=cart.length>0?cart:[{id:selectedTicket}];
+    for(var si=0;si<saleItems.length;si++){var st=ticketData[saleItems[si].id];var ss=window.MonsterSaleRule?MonsterSaleRule.evaluate(saleItems[si].id,st):{available:true};if(!ss.available){alert("🚫 「"+((st&&st.title)||"票券")+"」"+(ss.label||"目前無法購買"));if(typeof renderTicketCatalog==="function")renderTicketCatalog();return;}}
     paymentInProgress = true;
     setPaymentButtonsDisabled(true);
     isReprint = false;

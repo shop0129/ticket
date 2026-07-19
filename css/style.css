@@ -7047,3 +7047,6 @@ System Setting
         max-width:30mm!important;
     }
 }
+
+/* V7.8.1 Sale Rule Engine */
+.ticket-item{position:relative}.ticket-sale-disabled .ticket-btn{filter:grayscale(1);opacity:.42}.ticket-sale-disabled{cursor:not-allowed}.ticket-sale-status,.ticket-sale-countdown,.ticket-sale-limit{position:absolute;left:8px;right:8px;text-align:center;border-radius:10px;padding:6px;font-weight:800;z-index:3}.ticket-sale-status{top:42%;background:rgba(40,40,40,.86);color:#fff}.ticket-sale-countdown{top:8px;background:rgba(255,245,210,.95);color:#7a4600}.ticket-sale-limit{bottom:48px;background:rgba(255,255,255,.94);color:#7a2500}.sale-weekdays{display:flex;flex-wrap:wrap;gap:7px}.sale-weekdays label{padding:6px;border:1px solid #ddd;border-radius:8px}.tm-help{font-size:12px;opacity:.7}

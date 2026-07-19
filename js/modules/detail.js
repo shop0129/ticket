@@ -92,6 +92,8 @@ document.addEventListener("click", function (event) {
     var ticket = event.target.closest(".ticket-btn,.ticket-btn-wide");
     if (!ticket)
         return;
+    var saleStatus=window.MonsterSaleRule?MonsterSaleRule.evaluate(ticket.dataset.id,ticketData[ticket.dataset.id]):{available:true};
+    if(!saleStatus.available){playClick();alert("🚫 "+(saleStatus.label||"目前無法購買"));if(typeof renderTicketCatalog==="function")renderTicketCatalog();return;}
     playClick();
     document
         .querySelectorAll(".ticket-btn,.ticket-btn-wide")
