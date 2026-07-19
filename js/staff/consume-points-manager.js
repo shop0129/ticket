@@ -34,6 +34,62 @@
   function esc(s){return String(s).replace(/[&<>\"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
   function select(id){selected=members[id]; if(!selected)return; selected.id=selected.id||id; byId("cpAdjustPanel").style.display="block";byId("cpSelectedMember").innerHTML='<b>'+esc(selected.name||"")+'</b><span>目前 '+n(selected.points,0)+' 點</span>'; renderHistory();}
   function renderHistory(){var h=(selected.pointHistory||[]).slice(0,20);byId("cpPointHistory").innerHTML='<h4>最近點數紀錄</h4>'+(h.length?h.map(function(x){return '<div><span>'+esc(x.date||"")+'<br>'+esc(x.reason||"")+'</span><b class="'+(n(x.amount,0)>=0?'plus':'minus')+'">'+(n(x.amount,0)>=0?'+':'')+n(x.amount,0)+' 點</b></div>';}).join(""):"<p>尚無紀錄</p>");}
-  function adjust(){ if(!manager()||!selected)return; var amount=Math.trunc(n(byId("cpAdjustAmount").value,0)),reason=(byId("cpAdjustReason").value||"").trim(); if(!amount){alert("請輸入非 0 整數");return;} if(!reason){alert("請填寫調整原因");return;} if(n(selected.points,0)+amount<0){alert("會員點數不足");return;} var next=n(selected.points,0)+amount, row={id:"point_"+Date.now(),date:new Date().toLocaleString("zh-TW"),amount:amount,reason:reason,note:(byId("cpAdjustNote").value||"").trim(),operator:actor(),balance:next}; selected.points=next;selected.pointHistory=selected.pointHistory||[];selected.pointHistory.unshift(row);selected.updatedAt=Date.now();selected.updatedBy=actor(); firebase.database().ref(root+"/members/"+selected.id).set(selected).then(function(){ if(window.MonsterAuth)MonsterAuth.audit("member.points.adjust","會員 "+selected.name+" 消費點數 "+(amount>0?"+":"")+amount,{source:"staff",targetType:"member",targetId:selected.id}); byId("cpAdjustAmount").value="";byId("cpAdjustReason").value="";byId("cpAdjustNote").value="";members[selected.id]=selected;select(selected.id);toast("✅ 點數已調整"); }).catch(function(){alert("調整失敗，請檢查網路");}); }
+  function adjust(){
+    if(!manager()||!selected)return;
+    var amount=Math.trunc(n(byId("cpAdjustAmount").value,0));
+    var reason=(byId("cpAdjustReason").value||"").trim();
+    var note=(byId("cpAdjustNote").value||"").trim();
+    if(!amount){alert("請輸入非 0 整數");return;}
+    if(!reason){alert("請填寫調整原因");return;}
+    if(n(selected.points,0)+amount<0){alert("會員點數不足");return;}
+    if(!(window.firebase&&firebase.database)){alert("無法連接資料庫，請檢查網路");return;}
+
+    var button=byId("cpAdjustSave");
+    if(button&&button.disabled)return;
+    if(button){button.disabled=true;button.textContent="調整中…";}
+
+    var memberId=selected.id;
+    var memberName=selected.name||"";
+    var rowId="point_"+Date.now()+"_"+Math.floor(Math.random()*10000);
+    var memberRef=firebase.database().ref(root+"/members/"+memberId);
+
+    memberRef.transaction(function(current){
+      if(!current)return current;
+      var currentPoints=n(current.points,0);
+      var next=currentPoints+amount;
+      if(next<0)return;
+      var row={id:rowId,date:new Date().toLocaleString("zh-TW"),amount:amount,reason:reason,note:note,operator:actor(),balance:next};
+      current.points=next;
+      current.pointHistory=Array.isArray(current.pointHistory)?current.pointHistory:[];
+      current.pointHistory.unshift(row);
+      current.updatedAt=Date.now();
+      current.updatedBy=actor();
+      return current;
+    }).then(function(result){
+      if(!result.committed)throw new Error("POINT_TRANSACTION_NOT_COMMITTED");
+      var saved=result.snapshot.val()||{};
+      saved.id=saved.id||memberId;
+      members[memberId]=saved;
+      selected=saved;
+      byId("cpAdjustAmount").value="";
+      byId("cpAdjustReason").value="";
+      byId("cpAdjustNote").value="";
+      select(memberId);
+      toast("✅ 點數已調整");
+
+      // 稽核紀錄屬於附加功能；即使寫入失敗，也不能把已完成的點數調整顯示成失敗。
+      try{
+        if(window.MonsterAuth&&typeof MonsterAuth.audit==="function"){
+          var auditResult=MonsterAuth.audit("member.points.adjust","會員 "+memberName+" 消費點數 "+(amount>0?"+":"")+amount,{source:"staff",targetType:"member",targetId:memberId});
+          if(auditResult&&typeof auditResult.catch==="function")auditResult.catch(function(e){console.warn("Point audit failed",e);});
+        }
+      }catch(e){console.warn("Point audit failed",e);}
+    }).catch(function(error){
+      console.error("Point adjustment failed",error);
+      alert(error&&error.message==="POINT_TRANSACTION_NOT_COMMITTED"?"調整未完成，請重新讀取會員資料後再試":"調整失敗，請檢查網路");
+    }).then(function(){
+      if(button){button.disabled=false;button.textContent="確認調整";}
+    });
+  }
   document.addEventListener("DOMContentLoaded",inject);
 })();
