@@ -35,14 +35,7 @@ function updateSuccessItems() {
             return;
         var ticket = item;
         // 一般票附贈代幣
-        totalToken += ticket.token || 0;
-        // 代幣商品
-        if (item.id === "token10") {
-            totalToken += 10;
-        }
-        if (item.id === "token25") {
-            totalToken += 25;
-        }
+        totalToken += window.MonsterTicketDataSync ? MonsterTicketDataSync.tokenOf(ticket) : Number(ticket.token || 0);
         // 入場手環
         if (ticket.reward &&
             ticket.reward.includes("band")) {

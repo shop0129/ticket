@@ -48,12 +48,12 @@ function saveSalesRecord(paymentType, totalAmount, pointUse) {
             hour: "2-digit",
             minute: "2-digit"
         }), payment: paymentType, amount: Math.max(0, (Number(totalAmount)||0) - Number(pointUse && pointUse.discount || 0)), originalAmount: Number(totalAmount) || 0, usedPoints: Number(pointUse && pointUse.points || 0), pointDiscount: Number(pointUse && pointUse.discount || 0), paidAmount: Math.max(0, (Number(totalAmount)||0) - Number(pointUse && pointUse.discount || 0)) }, (typeof getCurrentMemberOrderInfo === "function" ? getCurrentMemberOrderInfo() : {})), { items: cart.length > 0
-            ? JSON.parse(JSON.stringify(cart))
+            ? JSON.parse(JSON.stringify(cart.map(function(item){ return window.MonsterTicketDataSync ? MonsterTicketDataSync.snapshot(item.id, item) : item; })))
             : [{
                     id: selectedTicket,
                     title: ticketData[selectedTicket].title,
                     price: ticketData[selectedTicket].price,
-                    token: ticketData[selectedTicket].token || 0,
+                    token: window.MonsterTicketDataSync ? MonsterTicketDataSync.tokenOf(ticketData[selectedTicket]) : Number(ticketData[selectedTicket].token || 0),
                     toy: ticketData[selectedTicket].toy || "none",
                     reward: ticketData[selectedTicket].reward || "",
                     canEnter: ticketData[selectedTicket].canEnter !== false,

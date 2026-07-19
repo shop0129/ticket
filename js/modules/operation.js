@@ -58,14 +58,9 @@ function calculateShiftReport() {
         ticketCount +=
             items.length;
         items.forEach(function (item) {
-            tokenCount +=
-                Number(item.token || 0);
-            if (item.id === "token10") {
-                tokenCount += 10;
-            }
-            if (item.id === "token25") {
-                tokenCount += 25;
-            }
+            tokenCount += window.MonsterTicketDataSync
+                ? MonsterTicketDataSync.tokenOf(item)
+                : Number(item.token || 0);
             if (item.toy === "green") {
                 greenToy++;
             }

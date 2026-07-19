@@ -75,6 +75,7 @@ var ticketData = JSON.parse(localStorage.getItem("ticketData")) || {
     token10: {
         title: "10枚代幣",
         price: 100,
+        token: 10,
         reward: "token10",
         enable: true,
         image: "ticket-token10.png"
@@ -82,6 +83,7 @@ var ticketData = JSON.parse(localStorage.getItem("ticketData")) || {
     token25: {
         title: "25枚代幣",
         price: 200,
+        token: 25,
         reward: "token25",
         enable: true,
         image: "ticket-token25.png"
@@ -349,4 +351,5 @@ for (var id in ticketData) {
         ticketData[id].fixedExitTime = ticketData[id].timeMode === "fixed" ? "18:00" : "";
     }
 }
+if (window.MonsterTicketDataSync) { ticketData = MonsterTicketDataSync.normalizeMap(ticketData); }
 localStorage.setItem("ticketData", JSON.stringify(ticketData));

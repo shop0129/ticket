@@ -6,6 +6,7 @@
 
 function saveTicketData(){
 
+    if (window.MonsterTicketDataSync) { ticketData = MonsterTicketDataSync.normalizeMap(ticketData); }
     localStorage.setItem(
         "ticketData",
         JSON.stringify(ticketData)
