@@ -1,0 +1,10 @@
+const fs=require('fs');
+const assert=require('assert');
+const point=fs.readFileSync(__dirname+'/../js/staff/consume-points-manager.js','utf8');
+const staff=fs.readFileSync(__dirname+'/../js/staff/staff-app.js','utf8');
+assert(point.includes('Point transaction failed'));
+assert(point.includes('交易已成功，先立刻告知成功'));
+assert(!point.includes('Point adjustment failed'));
+assert(staff.includes('.remove()'));
+assert(staff.includes('會員刪除失敗，請檢查網路'));
+console.log('V7.8.3.2 member sync fix tests passed');

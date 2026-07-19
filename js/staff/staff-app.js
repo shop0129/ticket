@@ -944,19 +944,15 @@
             return;
         }
 
-        var update = {
-            deleted:true,
-            updatedAt:Date.now(),
-            updatedBy:operatorName()
-        };
-
+        // 直接刪除 Firebase 節點，確保點餐機與手機後台都會即時消失。
+        // 舊版只寫 deleted:true，點餐機會員頁未過濾此欄位，因此仍會顯示。
         firebase.database()
         .ref(
             (config.firebaseRoot ||
             "monsterTicket/v1") +
             "/members/" + member.id
         )
-        .update(update)
+        .remove()
         .then(function(){
 
             if(window.MonsterAuth){
@@ -973,6 +969,10 @@
             alert(
                 "會員已刪除"
             );
+        })
+        .catch(function(error){
+            console.error("Member delete failed",error);
+            alert("會員刪除失敗，請檢查網路");
         });
     }
 

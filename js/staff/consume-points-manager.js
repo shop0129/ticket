@@ -34,6 +34,9 @@
   function esc(s){return String(s).replace(/[&<>\"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
   function select(id){selected=members[id]; if(!selected)return; selected.id=selected.id||id; byId("cpAdjustPanel").style.display="block";byId("cpSelectedMember").innerHTML='<b>'+esc(selected.name||"")+'</b><span>目前 '+n(selected.points,0)+' 點</span>'; renderHistory();}
   function renderHistory(){var h=(selected.pointHistory||[]).slice(0,20);byId("cpPointHistory").innerHTML='<h4>最近點數紀錄</h4>'+(h.length?h.map(function(x){return '<div><span>'+esc(x.date||"")+'<br>'+esc(x.reason||"")+'</span><b class="'+(n(x.amount,0)>=0?'plus':'minus')+'">'+(n(x.amount,0)>=0?'+':'')+n(x.amount,0)+' 點</b></div>';}).join(""):"<p>尚無紀錄</p>");}
+  function resetAdjustButton(button){
+    if(button){button.disabled=false;button.textContent="確認調整";}
+  }
   function adjust(){
     if(!manager()||!selected)return;
     var amount=Math.trunc(n(byId("cpAdjustAmount").value,0));
@@ -53,6 +56,8 @@
     var rowId="point_"+Date.now()+"_"+Math.floor(Math.random()*10000);
     var memberRef=firebase.database().ref(root+"/members/"+memberId);
 
+    // 只把 Firebase transaction 本身視為成敗依據。
+    // 成功後的畫面重繪、提示、稽核若有任何例外，都不能反過來顯示「調整失敗」。
     memberRef.transaction(function(current){
       if(!current)return current;
       var currentPoints=n(current.points,0);
@@ -66,29 +71,40 @@
       current.updatedBy=actor();
       return current;
     }).then(function(result){
-      if(!result.committed)throw new Error("POINT_TRANSACTION_NOT_COMMITTED");
-      var saved=result.snapshot.val()||{};
+      if(!result||!result.committed){
+        var notCommitted=new Error("POINT_TRANSACTION_NOT_COMMITTED");
+        notCommitted.code="POINT_TRANSACTION_NOT_COMMITTED";
+        throw notCommitted;
+      }
+
+      var saved=(result.snapshot&&result.snapshot.val)?(result.snapshot.val()||{}):{};
       saved.id=saved.id||memberId;
       members[memberId]=saved;
       selected=saved;
-      byId("cpAdjustAmount").value="";
-      byId("cpAdjustReason").value="";
-      byId("cpAdjustNote").value="";
-      select(memberId);
+
+      // 交易已成功，先立刻告知成功；後面的 UI 更新全部採容錯處理。
       toast("✅ 點數已調整");
 
-      // 稽核紀錄屬於附加功能；即使寫入失敗，也不能把已完成的點數調整顯示成失敗。
+      try{ if(byId("cpAdjustAmount"))byId("cpAdjustAmount").value=""; }catch(e){console.warn(e);}
+      try{ if(byId("cpAdjustReason"))byId("cpAdjustReason").value=""; }catch(e){console.warn(e);}
+      try{ if(byId("cpAdjustNote"))byId("cpAdjustNote").value=""; }catch(e){console.warn(e);}
+      try{ select(memberId); }catch(e){ console.warn("Point UI refresh failed",e); }
+
       try{
         if(window.MonsterAuth&&typeof MonsterAuth.audit==="function"){
           var auditResult=MonsterAuth.audit("member.points.adjust","會員 "+memberName+" 消費點數 "+(amount>0?"+":"")+amount,{source:"staff",targetType:"member",targetId:memberId});
           if(auditResult&&typeof auditResult.catch==="function")auditResult.catch(function(e){console.warn("Point audit failed",e);});
         }
       }catch(e){console.warn("Point audit failed",e);}
-    }).catch(function(error){
-      console.error("Point adjustment failed",error);
-      alert(error&&error.message==="POINT_TRANSACTION_NOT_COMMITTED"?"調整未完成，請重新讀取會員資料後再試":"調整失敗，請檢查網路");
+    },function(error){
+      console.error("Point transaction failed",error);
+      alert(error&&(error.code==="POINT_TRANSACTION_NOT_COMMITTED"||error.message==="POINT_TRANSACTION_NOT_COMMITTED")?"調整未完成，請重新讀取會員資料後再試":"調整失敗，請檢查網路");
     }).then(function(){
-      if(button){button.disabled=false;button.textContent="確認調整";}
+      resetAdjustButton(button);
+    },function(error){
+      // 防止成功後的非必要 UI 程式錯誤造成按鈕永久鎖住；不再誤報網路失敗。
+      console.warn("Point adjustment post-process warning",error);
+      resetAdjustButton(button);
     });
   }
   document.addEventListener("DOMContentLoaded",inject);
