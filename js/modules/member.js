@@ -714,7 +714,7 @@ function renderToyPointOrderPanel(orderNo) {
         panel.innerHTML = "\n\n<div class=\"toy-order-card disabled\">\n    \u6B64\u8A02\u55AE\u6C92\u6709\u8D08\u9001\u73A9\u5177\n</div>\n\n";
         return;
     }
-    if (order.status === "cancel") {
+    if ((window.MonsterVoidProtection && MonsterVoidProtection.isVoided(order)) || order.status === "cancel") {
         panel.innerHTML = "\n\n<div class=\"toy-order-card disabled\">\n    \u5DF2\u4F5C\u5EE2\u8A02\u55AE\u4E0D\u53EF\u8F49\u63DB\u73A9\u5177\u9EDE\u6578\n</div>\n\n";
         return;
     }
@@ -775,6 +775,8 @@ function lateBindOrderMember(orderNo) {
     });
     if (!order)
         return;
+    if (window.MonsterVoidProtection && !MonsterVoidProtection.assertActive(order, "補綁會員"))
+        return;
     order.memberId =
         member.id;
     order.memberNo =
@@ -799,7 +801,8 @@ function convertOrderToysToPoints(orderNo) {
     });
     if (!order ||
         !order.memberId ||
-        order.status === "cancel") {
+        ((window.MonsterVoidProtection && MonsterVoidProtection.isVoided(order)) || order.status === "cancel")) {
+        alert("此訂單已作廢，無法轉換玩具點數");
         return;
     }
     var member = memberData.find(function (item) {

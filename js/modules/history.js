@@ -324,6 +324,10 @@ function cancelOrder(orderNo) {
         return;
     }
     order.status = "cancel";
+    order.playStatus = "cancelled";
+    order.validationStatus = "cancelled";
+    order.cancelled = true;
+    order.voided = true;
     if (window.MonsterAuth) {
         var cancelActor = MonsterAuth.getActor("admin");
         order.cancelledAt = Date.now();

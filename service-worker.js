@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "782-reward-engine-20260719-1";
+var CACHE_NAME = CACHE_PREFIX + "74-enterprise-783-void-protection-20260719-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -58,6 +58,7 @@ var CORE_ASSETS = [
     "./js/core/enterprise-bridge.js",
     "./js/core/enterprise-guards.js",
     "./js/core/reward-engine.js",
+    "./js/core/void-protection.js",
     "./js/core/ticket-data-sync-engine.js",
     "./js/core/ticket-status-engine.js",
     "./js/core/live-timer-engine.js",
@@ -123,7 +124,7 @@ self.addEventListener("activate", function (event) {
     event.waitUntil(
         caches.keys().then(function (keys) {
             return Promise.all(keys.map(function (key) {
-                if (key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME) {
+                if (key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME && key !== "monster-ticket-pwa-74-enterprise-7627-ticket-admission-pickup-order-20260719-1") {
                     return caches.delete(key);
                 }
                 return null;

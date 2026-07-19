@@ -116,3 +116,14 @@
 - 固定時數支援 1～99 小時。
 - 售票機及員工後台同步保存時間規則。
 - 訂單建立時保存 timeMode、playHours、playMinutes、fixedExitTime。
+
+## V7.8.0 Business Mode Engine
+- 完成日期自動切換、固定公休、寒暑假與特殊日期規則。
+- 加入午夜自動刷新、營業時間與 Firebase 跨裝置同步。
+- 票券目錄支援公休模式與 allowedBusinessModes。
+
+## V7.8.3 Void Protection
+- 已作廢訂單禁止領取玩具、轉玩具點數及設定等待領取。
+- 手機與電腦後台共用 `MonsterVoidProtection` 狀態判斷。
+- Firebase transaction 寫入前再次檢查作廢狀態，避免跨裝置競態。
+- 作廢時同步標記 status、playStatus、validationStatus、cancelled 與 voided。

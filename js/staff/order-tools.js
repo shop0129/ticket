@@ -293,7 +293,22 @@
         };
     }
 
+    function requireActiveOrder(actionLabel){
+        if(window.MonsterVoidProtection){
+            return MonsterVoidProtection.assertActive(selectedOrder, actionLabel);
+        }
+        if(selectedOrder && (selectedOrder.status === "cancel" || selectedOrder.playStatus === "cancelled" || selectedOrder.cancelled)){
+            alert("此訂單已作廢，無法" + actionLabel);
+            return false;
+        }
+        return true;
+    }
+
     function convertToyPoints(){
+
+        if(!requireActiveOrder("轉換玩具點數")){
+            return;
+        }
 
         if(!selectedOrder.memberId){
 
@@ -357,6 +372,10 @@
             function(order){
 
                 if(!order){
+                    return;
+                }
+
+                if(window.MonsterVoidProtection && MonsterVoidProtection.isVoided(order)){
                     return;
                 }
 
@@ -521,6 +540,10 @@
 
     function claimToy(){
 
+        if(!requireActiveOrder("領取玩具")){
+            return;
+        }
+
         var status =
         toyRewardStatus(selectedOrder);
 
@@ -569,6 +592,10 @@
             function(order){
 
                 if(!order){
+                    return;
+                }
+
+                if(window.MonsterVoidProtection && MonsterVoidProtection.isVoided(order)){
                     return;
                 }
 
@@ -634,6 +661,10 @@
     }
 
     function markToyPending(){
+
+        if(!requireActiveOrder("設定等待領取")){
+            return;
+        }
 
         var status =
         toyRewardStatus(selectedOrder);
@@ -971,18 +1002,11 @@
         )
         .then(function(){
 
-            return orderRef()
-            .update({
-                status:"cancel",
-                playStatus:"cancelled",
-                cancelReason:reason,
-                cancelledAt:Date.now(),
-                cancelledBy:
-                operatorName(),
-                cancelledById:currentActor().id || "",
-                cancelledByRole:currentActor().role || selectedRole,
-                updatedAt:Date.now()
-            });
+            var actor = currentActor();
+            var patch = window.MonsterVoidProtection
+                ? MonsterVoidProtection.stamp(reason,{name:operatorName(),id:actor.id || "",role:actor.role || selectedRole})
+                : {status:"cancel",playStatus:"cancelled",validationStatus:"cancelled",cancelled:true,voided:true,cancelReason:reason,cancelledAt:Date.now(),cancelledBy:operatorName(),cancelledById:actor.id || "",cancelledByRole:actor.role || selectedRole,updatedAt:Date.now()};
+            return orderRef().update(patch);
         })
         .then(function(){
 
@@ -1161,6 +1185,10 @@
         var rewardCounts =
         totalToyCounts(order);
 
+        var isVoidedOrder = window.MonsterVoidProtection
+            ? MonsterVoidProtection.isVoided(order)
+            : (order.status === "cancel" || order.playStatus === "cancelled" || order.cancelled);
+
         var tools =
         document.createElement("div");
 
@@ -1219,6 +1247,8 @@
 
 </div>
 
+${isVoidedOrder ? `<div class="staff-void-protection-banner">🚫 此訂單已作廢，玩具領取、玩具轉點與等待領取均已鎖定</div>` : ""}
+
 <div class="staff-order-tool-grid">
 
     <button id="orderToolCall" class="staff-primary-button">
@@ -1233,6 +1263,7 @@
         id="orderToolToyClaim"
         class="staff-primary-button"
         ${
+            isVoidedOrder ||
             rewardStatus === "converted" ||
             rewardStatus === "claimed"
             ? "disabled"
@@ -1246,6 +1277,7 @@
         id="orderToolToyPoint"
         class="staff-success-button"
         ${
+            isVoidedOrder ||
             rewardStatus === "converted" ||
             rewardStatus === "claimed"
             ? "disabled"
@@ -1259,6 +1291,7 @@
         id="orderToolToyPending"
         class="staff-secondary-button"
         ${
+            isVoidedOrder ||
             rewardStatus === "converted" ||
             rewardStatus === "claimed"
             ? "disabled"

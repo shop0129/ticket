@@ -1237,3 +1237,8 @@ input{
 
 /* V7.6.2.1 Mobile Scanner Hotfix */
 #tvcScannerReader{width:100%;min-height:260px;overflow:hidden;border-radius:14px;background:#111}#tvcScannerReader video{width:100%!important;max-height:58vh;object-fit:cover;border-radius:14px}.tvc-scan-help{margin:8px 0 12px;padding:9px 10px;border-radius:10px;background:#fff8df;color:#6d5200;font-size:13px;line-height:1.45}.tvc-scanner-card>#tvcVideo{width:100%;max-height:58vh;object-fit:cover;border-radius:14px;background:#111}
+
+
+/* V7.8.3 Void Protection */
+.staff-void-protection-banner{grid-column:1/-1;padding:14px 16px;border-radius:12px;background:#f3f4f6;border:1px solid #d1d5db;font-weight:800;color:#991b1b;margin-bottom:10px;}
+.staff-order-tool-grid button:disabled{opacity:.42;filter:grayscale(1);cursor:not-allowed;box-shadow:none;}
