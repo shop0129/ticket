@@ -12,12 +12,23 @@ function isTicketVisibleByBusinessMode(id, ticket) {
     if (!ticket || ticket.enable === false) {
         return false;
     }
-    switch (businessMode.mode) {
+    var activeMode = (window.MonsterBusinessMode && MonsterBusinessMode.getCurrentMode)
+        ? MonsterBusinessMode.getCurrentMode()
+        : ((window.businessMode && businessMode.mode) || "weekday");
+
+    // 新版票券可直接指定可販售模式；未設定則沿用舊票券相容規則。
+    if (Array.isArray(ticket.allowedBusinessModes) && ticket.allowedBusinessModes.length) {
+        return ticket.allowedBusinessModes.indexOf(activeMode) >= 0;
+    }
+    if (activeMode === "closed") {
+        // 公休時只保留非入場商品，例如代幣、襪子、行動電源。
+        return ticket.canEnter === false || ticket.admissionEnabled === false || ticket.timeMode === "none";
+    }
+    switch (activeMode) {
         case "weekday":
             return id !== "summer";
         case "holiday":
-            return id !== "early" &&
-                id !== "summer";
+            return id !== "early" && id !== "summer";
         case "summer":
             return id !== "early";
         default:
