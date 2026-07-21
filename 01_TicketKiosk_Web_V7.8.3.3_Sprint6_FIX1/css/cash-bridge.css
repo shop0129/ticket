@@ -1,0 +1,51 @@
+.hardware-cash-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+    background: rgba(16, 24, 40, .88);
+    font-family: Arial, "Noto Sans TC", sans-serif;
+}
+
+.hardware-cash-overlay.show { display: flex; }
+
+.hardware-cash-card {
+    width: min(720px, 94vw);
+    padding: 34px;
+    border-radius: 28px;
+    background: #fff;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .38);
+    text-align: center;
+}
+
+.hardware-cash-monster { font-size: 64px; line-height: 1; }
+.hardware-cash-card h2 { margin: 16px 0 24px; font-size: 34px; color: #263238; }
+
+.hardware-cash-amounts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+}
+
+.hardware-cash-amounts div {
+    padding: 18px 10px;
+    border-radius: 18px;
+    background: #f4f7fa;
+}
+
+.hardware-cash-amounts span { display: block; color: #667085; font-size: 18px; }
+.hardware-cash-amounts strong { display: block; margin-top: 6px; color: #e65100; font-size: 31px; }
+#hardwareCashMessage { margin: 26px 0 12px; color: #344054; font-size: 21px; line-height: 1.55; }
+#hardwareCashOrder { color: #667085; font-size: 15px; }
+#hardwareCashRetry { margin-top: 22px; padding: 13px 28px; border: 0; border-radius: 14px; background: #ff9800; color: #fff; font-size: 20px; font-weight: 700; }
+
+@media (max-width: 620px) {
+    .hardware-cash-card { padding: 24px 16px; }
+    .hardware-cash-card h2 { font-size: 27px; }
+    .hardware-cash-amounts { gap: 7px; }
+    .hardware-cash-amounts span { font-size: 15px; }
+    .hardware-cash-amounts strong { font-size: 23px; }
+}

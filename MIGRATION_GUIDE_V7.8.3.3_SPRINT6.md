@@ -1,4 +1,4 @@
-# V7.8.3.3 Sprint 6 更新指南
+# V7.8.3.3 Sprint 6 FIX1 更新指南
 
 ## 更新來源
 
@@ -9,12 +9,12 @@
 ## 部署步驟
 
 1. 備份目前 GitHub Pages 專案。
-2. 開啟 01_TicketKiosk_Web_V7.8.3.3_Sprint6。
+2. 開啟 01_TicketKiosk_Web_V7.8.3.3_Sprint6_FIX1。
 3. 將資料夾內全部檔案上傳至 GitHub Pages 專案的 /(root)。
 4. 確認 .nojekyll、index.html、service-worker.js、css、js、images、sounds、tests 都存在。
 5. 等 GitHub Pages 部署完成。
-6. 在點餐機開啟網站並接受 PWA 更新。
-7. 確認右下角顯示 V7.8.3.3 · SPRINT 6 CASH。
+6. 在點餐機完全關閉舊售票 PWA，再重新開啟；FIX1 會自動套用新版 Service Worker。
+7. 確認右下角只顯示一個 `V7.8.3.3 S6 FIX1 · ONLINE`。若仍顯示 V7.8.1 或 V7.4.0，不可測試付款。
 8. 依 README_先看這裡.md 執行單筆100元安全測試。
 
 ## 不需要做的事
@@ -29,4 +29,3 @@
 若網頁部署後尚未投入任何現金，且需要暫時回復，可重新部署原始 V7.8.3.3 完整包。
 
 若已投入現金或畫面顯示需要人工處理，不可直接回復或建立新訂單；先在 Android 控制器核對該筆付款並完成退款或記帳。
-
