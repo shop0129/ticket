@@ -132,6 +132,10 @@ function finishPrintAnimation() {
     printStatus.classList.add("print-finish");
     successTitle.style.display = "block";
     successItemsArea.style.display = "block";
+    if (window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.onTicketAnimationFinished === "function") {
+        window.MonsterCashBridge.onTicketAnimationFinished(currentPrintOrder);
+    }
     // 0.5 秒後開始倒數
     setTimeout(function () {
         startReturnCountdown();

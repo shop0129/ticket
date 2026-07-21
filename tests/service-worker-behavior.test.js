@@ -78,12 +78,13 @@ vm.runInThisContext(source, { filename: "service-worker.js" });
     await installPromise;
     ok(added.length > 70, "install 應快取完整 App Shell");
     ok(added.some(function (url) { return url.indexOf("offline.html") !== -1; }), "install 應快取離線頁");
+    ok(skipped, "FIX1 安裝後應立即呼叫 skipWaiting 接管舊 PWA");
 
     var activatePromise;
     listeners.activate[0]({ waitUntil: function (promise) { activatePromise = promise; } });
     await activatePromise;
     ok(deleted.indexOf("monster-ticket-pwa-old") !== -1, "activate 應移除舊 PWA cache");
-    ok(deleted.indexOf("monster-ticket-pwa-74-enterprise-7627-ticket-admission-pickup-order-20260719-1") === -1, "activate 不可刪除目前 V7.6.2.7 cache");
+    ok(deleted.indexOf("monster-ticket-pwa-74-enterprise-7627-ticket-admission-pickup-order-20260719-1") !== -1, "activate 應刪除舊 V7.6.2.7 cache");
     ok(deleted.indexOf("unrelated") === -1, "activate 不可刪除其他 cache");
     ok(claimed, "activate 應 claim clients");
 

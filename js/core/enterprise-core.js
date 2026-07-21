@@ -1,10 +1,10 @@
-// 小怪獸售票機 V7.4 Enterprise Core
+// 小怪獸售票機 V7.8.3.3 Sprint 6 FIX1 Enterprise Core
 // 集中版本、事件、日誌、權限與系統狀態。保持 ES5 / Android WebView 相容。
 (function (window, document) {
     "use strict";
 
-    var VERSION = "7.4.0";
-    var BUILD = "20260717-enterprise-1";
+    var VERSION = "7.8.3.3 S6 FIX1";
+    var BUILD = "20260722-cash-pairing-pwa-fix1";
     var listeners = {};
     var logs = [];
     var MAX_LOGS = 300;
@@ -109,6 +109,9 @@
         badge.style.background = state.online ? "rgba(24,35,52,.88)" : "rgba(170,54,54,.92)";
     }
     function boot() {
+        // 舊版首頁曾另外建立一個固定版本標籤；新版只保留本狀態標籤。
+        var legacyBadge = document.getElementById("v7-phase1-badge");
+        if (legacyBadge && legacyBadge.parentNode) { legacyBadge.parentNode.removeChild(legacyBadge); }
         try {
             var saved = sessionStorage.getItem("monsterEnterpriseLogsV74");
             if (saved) { logs = JSON.parse(saved) || []; }

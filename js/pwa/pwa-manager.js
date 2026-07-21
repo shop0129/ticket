@@ -6,7 +6,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "7.3-Phase3F-Part1-Fix1";
+    var VERSION = "7.8.3.3-Sprint6-FIX1";
     var deferredInstallPrompt = null;
     var registration = null;
     var refreshing = false;
@@ -229,9 +229,14 @@
         });
 
         navigator.serviceWorker.addEventListener("controllerchange", function () {
-            if (refreshing) {
-                location.reload();
+            if (refreshing) { return; }
+            // 收款中不可強制重載；其餘狀態立即套用新控制器與新版付款程式。
+            if (window.MonsterCashBridge && window.MonsterCashBridge.hasBlockingTransaction()) {
+                showUpdateButton();
+                return;
             }
+            refreshing = true;
+            location.reload();
         });
     }
 

@@ -1,9 +1,9 @@
-// 小怪獸售票機 V7.4 Enterprise
+// 小怪獸售票機 V7.8.3.3 Sprint 6 FIX1
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "74-enterprise-7833-point-form-reset-20260719-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-sprint6-fix1-cash-pairing-20260722-2";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -15,6 +15,7 @@ var CORE_ASSETS = [
     "./staff.webmanifest",
     "./display.webmanifest",
     "./css/admin-ui.css",
+    "./css/cash-bridge.css",
     "./css/display.css",
     "./css/pwa.css",
     "./css/staff.css",
@@ -64,6 +65,7 @@ var CORE_ASSETS = [
     "./js/core/live-timer-engine.js",
     "./js/core/sale-rule-engine.js",
     "./js/display.js",
+    "./js/hardware/cash-bridge.js",
     "./js/modules/businessMode.js",
     "./js/modules/cart.js",
     "./js/modules/dashboard.js",
@@ -116,6 +118,9 @@ self.addEventListener("install", function (event) {
             return Promise.all(CORE_ASSETS.map(function (asset) {
                 return cacheCoreAsset(cache, asset);
             }));
+        }).then(function () {
+            // 部署後立即接管，避免已安裝的點餐機 PWA 繼續執行舊付款程式。
+            return self.skipWaiting();
         })
     );
 });
@@ -124,7 +129,7 @@ self.addEventListener("activate", function (event) {
     event.waitUntil(
         caches.keys().then(function (keys) {
             return Promise.all(keys.map(function (key) {
-                if (key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME && key !== "monster-ticket-pwa-74-enterprise-7627-ticket-admission-pickup-order-20260719-1") {
+                if (key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME) {
                     return caches.delete(key);
                 }
                 return null;
