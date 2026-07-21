@@ -1,0 +1,26 @@
+MonsterHardwareSDK v0.2 實機測試
+
+1. 關閉原廠 App：
+adb shell am force-stop com.masterwork.kioskapp
+
+2. 取得 root：
+adb root
+adb wait-for-device
+
+3. SELinux 與權限：
+adb shell setenforce 0
+adb shell chmod 666 /dev/ttyS1
+adb shell chmod 666 /dev/ttyS3
+adb shell chmod 666 /dev/ttyUSB0
+
+4. 確認：
+adb shell ls -l /dev/ttyS1 /dev/ttyS3 /dev/ttyUSB0
+adb shell getenforce
+
+5. Android Studio 按 Run。
+6. 選 /dev/ttyS1 + 9600，按「連線」。
+7. 先測 RX、暫停、儲存與匯出 Log。
+8. 未確認協定前，不要勾選 TX 解鎖，也不要傳送任意 HEX。
+
+拉回 Log：
+adb pull /sdcard/Android/data/com.littlemonster.hardwareconsole/files/logs/

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- App-specific external storage used by v0.5+ session recorder. -->
+    <external-files-path name="hardware_sessions" path="sessions/" />
+    <external-files-path name="hardware_logs" path="logs/" />
+</paths>
