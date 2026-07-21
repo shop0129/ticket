@@ -251,7 +251,7 @@
             authorizationId: authorizationId,
             paymentId: payload.paymentId || "",
             paidAt: payload.paidAt || Date.now(),
-            bridgeVersion: payload.bridgeVersion || "1.0-sprint8",
+            bridgeVersion: payload.bridgeVersion || "1.0-sprint8-fix1",
             paidNtd: Number(payload.paidNtd || 0),
             coinCount: Number(payload.coinCount || 0),
             billCount: Number(payload.billCount || 0),

@@ -166,7 +166,7 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
         order.printAuthorizationId = hardware.authorizationId || "";
         order.hardwarePaidAt = Number(hardware.paidAt || Date.now());
         order.hardwareCashStatus = "authorized";
-        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint8";
+        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint8-fix1";
         order.hardwarePaidNtd = Number(hardware.paidNtd || context.amount || 0);
         order.hardwareCoinCount = Number(hardware.coinCount || 0);
         order.hardwareBillCount = Number(hardware.billCount || 0);

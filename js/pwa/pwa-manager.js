@@ -6,7 +6,7 @@
 (function () {
     "use strict";
 
-    var VERSION = "7.8.3.3-Sprint8";
+    var VERSION = "7.8.3.3-Sprint8-FIX1";
     var deferredInstallPrompt = null;
     var registration = null;
     var refreshing = false;

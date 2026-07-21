@@ -5,7 +5,7 @@ var fs = require("fs");
 var path = require("path");
 var vm = require("vm");
 var root = path.resolve(__dirname, "..");
-var android = path.resolve(root, "../02_HardwareController_Android_Sprint8");
+var android = path.resolve(root, "../02_HardwareController_Android_Sprint8_FIX1");
 var count = 0;
 
 function ok(value, message) { assert.ok(value, message); count += 1; }
@@ -89,6 +89,12 @@ var activity = fs.readFileSync(path.join(android, "app/src/main/java/com/littlem
 ok(activity.indexOf("ensureMdbAutoConnection") >= 0, "Android 應自動連線 ttyS1");
 ok(activity.indexOf("AUTO_RECONNECT_BASE_MS") >= 0, "Android 應具備漸進重連間隔");
 ok(activity.indexOf("FLAG_KEEP_SCREEN_ON") >= 0, "正式營運時應防止控制器休眠");
+ok(activity.indexOf("scheduleTicketKioskLaunchAfterSafeReady") >= 0, "ttyS1安全就緒後應自動開啟售票App");
+ok(activity.indexOf("getLaunchIntentForPackage") >= 0, "售票App應以實際package啟動");
+var bootstrap = fs.readFileSync(path.join(android, "app/src/main/java/com/littlemonster/hardwareconsole/ProductionDeviceBootstrap.kt"), "utf8");
+ok(bootstrap.indexOf("com.masterwork.kioskapp") >= 0, "開機保護應停止原廠App搶用序列埠");
+ok(bootstrap.indexOf("chmod 666") >= 0, "開機保護應恢復ttyS1讀寫權限");
+ok(bootstrap.indexOf("setenforce 0") >= 0, "只有錯誤-13修復流程才應套用既有SELinux實機設定");
 var bridge = fs.readFileSync(path.join(android, "app/src/main/java/com/littlemonster/hardwareconsole/LocalTicketBridge.kt"), "utf8");
 ok(bridge.indexOf("/v1/maintenance/purge-test-data") >= 0, "本機橋接應提供受配對保護的測試帳本清除入口");
 ok(bridge.indexOf("CLEAR_TEST_ONLY") >= 0, "本機清除入口應要求固定確認 token");
@@ -96,4 +102,4 @@ var storeSource = fs.readFileSync(path.join(android, "app/src/main/java/com/litt
 ok(storeSource.indexOf("MANAGER_TEST_DATA_PURGED") >= 0, "Android 應保留清除稽核記錄");
 ok(storeSource.indexOf("requiresReconciliation") >= 0, "Android 不得刪除待人工處理的現金證據");
 
-console.log("PASS Sprint 8 production go-live: " + count + " assertions");
+console.log("PASS Sprint 8 FIX1 production go-live: " + count + " assertions");

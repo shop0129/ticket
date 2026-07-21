@@ -460,7 +460,7 @@
     function exportJson() {
         if (!window.MonsterRole || !MonsterRole.isAdmin()) return alert("只有店長可以匯出對帳");
         var payload = {
-            version: "V7.8.3.3-Sprint8",
+            version: "V7.8.3.3-Sprint8-FIX1",
             exportedAt: new Date().toISOString(),
             summary: calculate(),
             hardware: clone(state.hardware)
