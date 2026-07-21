@@ -19,6 +19,7 @@
         "data.backup": true,
         "data.restore": true,
         "data.clear": true,
+        "data.clear_test": true,
         "stats.reset": true,
         "employee.manage": true,
         "hardware.manage": true,
@@ -212,6 +213,7 @@
             "business.update": "營業模式",
             "system.update": "系統設定",
             "data.backup": "資料備份"
+            ,"data.clear_test": "清除測試資料"
         };
         return labels[action] || action || "其他操作";
     }

@@ -1,4 +1,4 @@
-/* V7.8.3.3 Sprint 7｜現金營運保護與每日對帳 */
+/* V7.8.3.3 Sprint 8｜現金營運保護與每日對帳 */
 .dashboard-cash-operations-strip {
     display: grid;
     grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(130px, 1fr)) auto;

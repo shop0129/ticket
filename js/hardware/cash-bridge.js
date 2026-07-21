@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 7
+// 小怪獸售票機 V7.8.3.3 Sprint 8
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -251,7 +251,7 @@
             authorizationId: authorizationId,
             paymentId: payload.paymentId || "",
             paidAt: payload.paidAt || Date.now(),
-            bridgeVersion: payload.bridgeVersion || "1.0-sprint7",
+            bridgeVersion: payload.bridgeVersion || "1.0-sprint8",
             paidNtd: Number(payload.paidNtd || 0),
             coinCount: Number(payload.coinCount || 0),
             billCount: Number(payload.billCount || 0),
@@ -451,6 +451,15 @@
             return api("/payments/" + encodeURIComponent(orderNo) + "/reconcile", {
                 method: "POST",
                 body: { resolution: resolution, note: note }
+            });
+        },
+        purgeTestData: function (orderIds) {
+            return api("/maintenance/purge-test-data", {
+                method: "POST",
+                body: {
+                    orderIds: orderIds || [],
+                    confirmation: "CLEAR_TEST_ONLY"
+                }
             });
         },
         releaseAfterReconciliation: function (orderNo) {

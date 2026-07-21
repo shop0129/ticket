@@ -1,11 +1,11 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 7
-// 現金營運保護、每日對帳、異常同步與匯出（Android WebView 61 相容）
+// 小怪獸售票機 V7.8.3.3 Sprint 8
+// 現金營運保護、每日對帳、正式營運監控與測試帳本維護（Android WebView 61 相容）
 (function () {
     "use strict";
 
     var STORAGE_KEY = "monsterCashOperationsV1";
     var CLOUD_PATH = "monsterTicket/v1/cashOperations";
-    var POLL_MS = 10000;
+    var POLL_MS = 5000;
     var cloudRef = null;
     var uploading = false;
     var refreshPromise = null;
@@ -42,7 +42,7 @@
 
     function recordStamp(record) {
         return Number(record && (
-            record.resolvedAt || record.issuedAt || record.finishedAt ||
+            record.deletedAt || record.resolvedAt || record.issuedAt || record.finishedAt ||
             record.paidAt || record.createdAt || record.revision
         ) || 0);
     }
@@ -149,7 +149,7 @@
         var bounds = todayBounds();
         return Object.keys(state.records).map(function (key) { return state.records[key]; }).filter(function (record) {
             var timestamp = Number(record && record.createdAt || 0);
-            return timestamp >= bounds.start && timestamp < bounds.end;
+            return record && !record.deleted && timestamp >= bounds.start && timestamp < bounds.end;
         }).sort(function (a, b) { return recordStamp(b) - recordStamp(a); });
     }
 
@@ -229,7 +229,38 @@
             online: online,
             label: online ? "正常可收款" : (detail && detail.message) || (wrapper && wrapper.error) || "尚未取得控制器狀態",
             code: detail && detail.alertCode || (online ? "READY" : "OFFLINE"),
-            updatedAt: wrapper && wrapper.updatedAt || 0
+            updatedAt: wrapper && wrapper.updatedAt || 0,
+            heartbeatAge: wrapper ? Math.max(0, Date.now() - Number(wrapper.updatedAt || 0)) : 0,
+            autoStartEnabled: Boolean(detail && detail.autoStartEnabled),
+            autoReconnectEnabled: Boolean(detail && detail.autoReconnectEnabled),
+            reconnectAttempts: Number(detail && detail.reconnectAttempts || 0),
+            lastHealthyAt: Number(detail && detail.lastHealthyAt || 0),
+            currentPayment: clone(wrapper && wrapper.currentPayment || null)
+        };
+    }
+
+    function operationalReadiness() {
+        var summary = calculate();
+        var hardware = hardwareView();
+        var browserOnline = window.navigator && typeof window.navigator.onLine === "boolean" ? window.navigator.onLine : true;
+        var firebaseReady = Boolean(window.firebase && firebase.apps && firebase.apps.length);
+        var blockers = [];
+        var warnings = [];
+        if (!browserOnline) blockers.push("網路離線");
+        if (!hardware.online) blockers.push(hardware.label || "現金控制器離線");
+        if (summary.unresolved > 0) blockers.push("尚有 " + summary.unresolved + " 筆現金待人工處理");
+        if (!firebaseReady) warnings.push("Firebase 尚未就緒");
+        if (!hardware.autoStartEnabled) warnings.push("控制器開機自啟尚未回報");
+        if (!hardware.autoReconnectEnabled) warnings.push("ttyS1 自動重連尚未回報");
+        if (summary.difference !== 0) warnings.push("今日現金差額 " + money(summary.difference));
+        return {
+            ready: blockers.length === 0,
+            blockers: blockers,
+            warnings: warnings,
+            hardware: hardware,
+            summary: summary,
+            browserOnline: browserOnline,
+            firebaseReady: firebaseReady
         };
     }
 
@@ -246,8 +277,31 @@
         setText("dashboardPhysicalCash", money(summary.expectedDrawer));
         setText("dashboardCashDifference", (summary.difference > 0 ? "+" : "") + money(summary.difference));
         setText("dashboardCashExceptions", summary.unresolved + " 筆 / " + money(summary.unresolvedAmount));
+        setText("dashboardCashAutoRecovery", hardware.autoStartEnabled && hardware.autoReconnectEnabled ? "開機自啟／自動重連已啟用" : "等待點餐機回報自動復原狀態");
         var strip = document.getElementById("dashboardCashOperationsStrip");
         if (strip) strip.classList.toggle("has-alert", !hardware.online || summary.unresolved > 0 || summary.difference !== 0);
+    }
+
+    function renderProductionMonitor() {
+        var health = operationalReadiness();
+        var hardware = health.hardware;
+        var status = health.ready ? "可以正式收款" : "暫停現金收款";
+        var detail = health.ready
+            ? (health.warnings.length ? health.warnings.join("；") : "網路、Firebase、現金控制器與安全狀態皆正常")
+            : health.blockers.join("；");
+        setText("productionReadinessStatus", status);
+        setText("productionReadinessDetail", detail);
+        setText("productionAutoStart", hardware.autoStartEnabled ? "已啟用" : "未確認");
+        setText("productionAutoReconnect", hardware.autoReconnectEnabled ? "已啟用" : "未確認");
+        setText("productionHeartbeat", hardware.updatedAt ? Math.round(hardware.heartbeatAge / 1000) + " 秒前" : "尚未回報");
+        setText("productionAlertCode", hardware.code || "UNKNOWN");
+        var panel = document.getElementById("productionReadinessPanel");
+        if (panel) panel.classList.toggle("not-ready", !health.ready);
+        var banner = document.getElementById("productionMonitorBanner");
+        if (banner) {
+            if (banner.style) banner.style.display = health.ready ? "none" : "flex";
+            banner.textContent = "⚠️ 現金付款暫停：" + detail;
+        }
     }
 
     function statusLabel(record) {
@@ -296,6 +350,34 @@
     function renderAll() {
         renderDashboard();
         renderPage();
+        renderProductionMonitor();
+    }
+
+    function purgeRecords(orderIds) {
+        var ids = {};
+        var updates = {};
+        var now = Date.now();
+        (orderIds || []).forEach(function (orderId) {
+            var value = String(orderId || "").trim();
+            var key;
+            if (!value) return;
+            ids[value] = true;
+            key = safeKey(value);
+            updates[key] = {
+                orderId: value,
+                deleted: true,
+                deletedReason: "test-data-cleanup",
+                deletedAt: now,
+                revision: now
+            };
+            state.records[key] = clone(updates[key]);
+        });
+        saveState();
+        if (!Object.keys(updates).length) return Promise.resolve({ removed: 0 });
+        if (!cloudRef) return Promise.reject(new Error("現金對帳雲端同步尚未連線"));
+        return cloudRef.child("records").update(updates).then(function () {
+            return { removed: Object.keys(updates).length, orderIds: Object.keys(ids) };
+        });
     }
 
     function open() {
@@ -378,7 +460,7 @@
     function exportJson() {
         if (!window.MonsterRole || !MonsterRole.isAdmin()) return alert("只有店長可以匯出對帳");
         var payload = {
-            version: "V7.8.3.3-Sprint7",
+            version: "V7.8.3.3-Sprint8",
             exportedAt: new Date().toISOString(),
             summary: calculate(),
             hardware: clone(state.hardware)
@@ -394,6 +476,10 @@
         exportCsv: exportCsv,
         exportJson: exportJson,
         getSummary: calculate,
+        getOperationalReadiness: operationalReadiness,
+        canAcceptPayment: function () { return operationalReadiness().ready; },
+        getRecords: function () { return clone(state.records); },
+        purgeRecords: purgeRecords,
         _test: {
             setState: function (value) { state = clone(value); saveState(); },
             getState: function () { return clone(state); },

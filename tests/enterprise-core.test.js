@@ -23,12 +23,12 @@ const window = {
 };
 const context = { window, document, navigator:window.navigator, sessionStorage:window.sessionStorage, console:window.console, Date, JSON, setTimeout, clearTimeout };
 vm.runInNewContext(source, context);
-ok(window.MonsterEnterprise.version === '7.8.3.3 S7', '應載入目前正式版本');
+ok(window.MonsterEnterprise.version === '7.8.3.3 S8', '應載入目前正式版本');
 ok(window.MonsterEnterprise.can('system.settings') === true, '店長應擁有完整權限');
 window.currentUser = {name:'員工',role:'staff'};
 ok(window.MonsterEnterprise.can('order.create') === true, '員工應可售票');
 ok(window.MonsterEnterprise.can('system.settings') === false, '員工不可修改系統設定');
 ok(window.MonsterEnterprise.health().online === true, '健康狀態應回報網路');
 ok(!!elements.monsterEnterpriseStatus, '應建立版本狀態指示');
-ok(elements.monsterEnterpriseStatus.textContent === 'V7.8.3.3 S7 · ONLINE', '右下角應只顯示目前版本與網路狀態');
+ok(elements.monsterEnterpriseStatus.textContent === 'V7.8.3.3 S8 · ONLINE', '右下角應只顯示目前版本與網路狀態');
 console.log('PASS enterprise core: ' + count + ' assertions');

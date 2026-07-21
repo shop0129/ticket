@@ -1,0 +1,106 @@
+/* V7.8.3.3 Sprint 8｜正式營運監控與測試資料清理 */
+#productionMonitorBanner {
+    position: fixed;
+    left: 18px;
+    right: 18px;
+    top: 14px;
+    z-index: 100050;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 10px 18px;
+    border: 2px solid #b71c1c;
+    border-radius: 14px;
+    background: #ffebee;
+    color: #8e0000;
+    box-shadow: 0 8px 28px rgba(120, 0, 0, .22);
+    font-weight: 800;
+    text-align: center;
+}
+
+.production-readiness-panel {
+    margin: 16px 0;
+    padding: 16px;
+    border: 2px solid #2e7d32;
+    border-radius: 18px;
+    background: #f1f8e9;
+}
+
+.production-readiness-panel.not-ready {
+    border-color: #c62828;
+    background: #ffebee;
+}
+
+.production-readiness-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.production-readiness-title strong { font-size: 20px; }
+.production-readiness-title span { font-weight: 800; }
+.production-readiness-detail { margin: 0 0 12px; line-height: 1.6; }
+
+.production-readiness-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.production-readiness-grid div {
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.78);
+}
+
+.production-readiness-grid span,
+.production-readiness-grid strong { display: block; }
+.production-readiness-grid span { margin-bottom: 4px; color: #59636e; font-size: 13px; }
+
+.test-cleanup-panel {
+    margin-top: 20px;
+    padding: 18px;
+    border: 2px solid #ef6c00;
+    border-radius: 18px;
+    background: #fff8e1;
+}
+
+.test-cleanup-panel h2 { margin: 0 0 8px; }
+.test-cleanup-panel > p { margin: 0 0 14px; line-height: 1.55; color: #5d4037; }
+.test-cleanup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.test-cleanup-field { display: flex; flex-direction: column; gap: 6px; }
+.test-cleanup-field.full { grid-column: 1 / -1; }
+.test-cleanup-field label { font-weight: 800; }
+.test-cleanup-field textarea,
+.test-cleanup-field input {
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #b0bec5;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 16px;
+}
+.test-cleanup-field textarea { min-height: 90px; resize: vertical; }
+.test-cleanup-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+.test-cleanup-actions button { min-height: 44px; padding: 8px 18px; border: 0; border-radius: 10px; font-weight: 800; }
+.test-cleanup-preview-btn { background: #1565c0; color: #fff; }
+.test-cleanup-execute-btn { background: #b71c1c; color: #fff; }
+.test-cleanup-execute-btn:disabled { background: #bdbdbd; color: #616161; }
+.test-cleanup-preview { display: grid; gap: 8px; }
+.test-cleanup-row { padding: 11px; border-radius: 11px; background: #fff; border-left: 5px solid #43a047; }
+.test-cleanup-row.blocked { border-left-color: #c62828; background: #ffebee; }
+.test-cleanup-row.missing { border-left-color: #78909c; background: #eceff1; }
+.test-cleanup-row > div { display: flex; justify-content: space-between; gap: 10px; }
+.test-cleanup-row span,
+.test-cleanup-row small { display: block; margin-top: 5px; }
+.test-cleanup-status { margin-top: 12px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,.8); font-weight: 700; }
+.test-cleanup-audit-note { margin-top: 10px; color: #5d4037; font-size: 13px; }
+
+@media (max-width: 760px) {
+    .production-readiness-grid,
+    .test-cleanup-grid { grid-template-columns: 1fr; }
+    .test-cleanup-field.full { grid-column: auto; }
+}

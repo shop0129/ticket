@@ -624,6 +624,62 @@
         scheduleUpload(0);
     };
 
+    // Sprint 8：只清除店長明確選取的測試訂單。
+    // 雲端保留最小 tombstone，讓其他已開啟的裝置不會把舊測試單重新上傳。
+    window.MonsterOrderCloud.purgeTestOrders =
+    function(orderIds,metadata){
+
+        var ids = {};
+        var updates = {};
+        var now = Date.now();
+        var actor = metadata && metadata.actorName || "店長";
+
+        (orderIds || []).forEach(function(orderId){
+            var value = String(orderId || "").trim();
+            var key;
+            if(!value){ return; }
+            ids[value] = true;
+            key = safeKey(value);
+            updates[key] = {
+                cloudId:key,
+                orderNo:value,
+                deleted:true,
+                deletedReason:"test-data-cleanup",
+                deletedAt:now,
+                deletedBy:actor,
+                updatedAt:now,
+                updatedBy:(window.MonsterCloud && MonsterCloud.uid) || "kiosk"
+            };
+        });
+
+        if(!Object.keys(ids).length){
+            return Promise.resolve({removed:0,orderIds:[]});
+        }
+        if(!orderRef){
+            return Promise.reject(new Error("Firebase 訂單同步尚未連線"));
+        }
+
+        applyingCloud = true;
+        salesHistory = (Array.isArray(salesHistory) ? salesHistory : []).filter(function(order){
+            return !ids[String(order && order.orderNo || "")];
+        });
+        window.salesHistory = salesHistory;
+        localStorage.setItem("salesHistory",JSON.stringify(salesHistory));
+
+        Object.keys(updates).forEach(function(key){
+            lastOrderMap[key] = cloneValue(updates[key]);
+        });
+        applyingCloud = false;
+
+        return orderRef.update(updates).then(function(){
+            lastCloudUpdateAt = Date.now();
+            refreshOrderScreens();
+            notifyOrderUpdate("test-cleanup",lastOrderMap);
+            setSyncStatus("測試訂單已清除","已從所有後台移除 " + Object.keys(ids).length + " 筆測試訂單","online");
+            return {removed:Object.keys(ids).length,orderIds:Object.keys(ids)};
+        });
+    };
+
     window.MonsterOrderCloud.applyGlobalReset =
     function(resetAt){
         clearLocalAfterGlobalReset(resetAt || Date.now());

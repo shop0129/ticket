@@ -81,7 +81,7 @@ require("../js/cloud/cloud-order-sync.js");
 
     var workerSource = fs.readFileSync(path.resolve(__dirname, "../service-worker.js"), "utf8");
     ok(workerSource.indexOf("networkFirstCodeAsset") !== -1, "程式檔應採 network-first");
-    ok(workerSource.indexOf("7833-sprint7-cash-operations") !== -1, "應使用 Sprint 7 PWA cache");
+    ok(workerSource.indexOf("7833-sprint8-production-golive") !== -1, "應使用 Sprint 8 PWA cache");
 
     console.log("PASS realtime order fix: " + count + " assertions");
 }()).catch(function (error) {

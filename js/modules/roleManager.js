@@ -188,6 +188,29 @@ var currentUser = null;
         return null;
     }
 
+    // Sprint 8：破壞性資料維護必須再次驗證「目前登入的店長」密碼。
+    // 僅回傳驗證結果，不重新登入、不延長工作階段，也不暴露密碼資料。
+    function verifyCurrentAdminPassword(password) {
+        var list;
+        var pass = String(password || "");
+        var i;
+        if (!currentUser || currentUser.role !== ROLE_ADMIN || !currentUser.id || !pass) {
+            return false;
+        }
+        list = ensureDefaultAccounts();
+        for (i = 0; i < list.length; i += 1) {
+            if (
+                list[i].id === currentUser.id &&
+                list[i].role === ROLE_ADMIN &&
+                list[i].enabled !== false &&
+                String(list[i].password) === pass
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function login(account, password) {
         var employee = findLogin(account, password);
         if (!employee) {
@@ -249,6 +272,7 @@ var currentUser = null;
         isStaff: function () {
             return currentUserRole === ROLE_STAFF;
         },
+        verifyCurrentAdminPassword: verifyCurrentAdminPassword,
         login: login,
         logout: function () {
             currentUser = null;

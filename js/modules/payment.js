@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 7
+// 小怪獸售票機 V7.8.3.3 Sprint 8
 // 一般付款＋本機硬體現金授權共用交易核心
 // Android WebView 61 相容（ES5）
 var countdownNumber = document.getElementById("countdownNumber");
@@ -166,7 +166,7 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
         order.printAuthorizationId = hardware.authorizationId || "";
         order.hardwarePaidAt = Number(hardware.paidAt || Date.now());
         order.hardwareCashStatus = "authorized";
-        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint7";
+        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint8";
         order.hardwarePaidNtd = Number(hardware.paidNtd || context.amount || 0);
         order.hardwareCoinCount = Number(hardware.coinCount || 0);
         order.hardwareBillCount = Number(hardware.billCount || 0);
@@ -237,6 +237,17 @@ function finalizePaymentContext(paymentType, context, hardware) {
 function paymentSuccess(paymentType) {
     if (paymentInProgress) return;
     if (paymentType === "現金") {
+        if (
+            window.MonsterCashOperations &&
+            typeof MonsterCashOperations.canAcceptPayment === "function" &&
+            window.MonsterCashBridge &&
+            MonsterCashBridge.hasPairing() &&
+            !MonsterCashOperations.canAcceptPayment()
+        ) {
+            var health = MonsterCashOperations.getOperationalReadiness();
+            alert("目前暫停現金付款：" + ((health.blockers || []).join("；") || "控制器尚未安全就緒"));
+            return;
+        }
         if (window.MonsterCashBridge) {
             window.MonsterCashBridge.startCashPayment();
         } else {
