@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 Sprint 6 FIX1">
+<meta name="monster-app-version" content="V7.8.3.3 Sprint 7">
 
 <title>小怪獸放電所 售票機</title>
 
@@ -24,6 +24,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/admin-ui.css?v=73e3">
 <link rel="stylesheet" href="css/pwa.css?v=73f1">
 <link rel="stylesheet" href="css/cash-bridge.css?v=7833s6f1">
+<link rel="stylesheet" href="css/cash-operations.css?v=7833s7">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
@@ -355,6 +356,17 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             <div id="dashboardRealtimeStatus" class="dashboard-realtime-status">● 即時更新</div>
         </div>
 
+        <div id="dashboardCashOperationsStrip" class="dashboard-cash-operations-strip">
+            <div class="dashboard-cash-health">
+                <span id="dashboardCashHardware">● 讀取中</span>
+                <small id="dashboardCashHardwareDetail">正在取得現金控制器狀態</small>
+            </div>
+            <div><span>錢箱預估</span><strong id="dashboardPhysicalCash">NT$0</strong></div>
+            <div><span>現金差額</span><strong id="dashboardCashDifference">NT$0</strong></div>
+            <div><span>待人工處理</span><strong id="dashboardCashExceptions">0 筆 / NT$0</strong></div>
+            <button type="button" class="dashboard-small-btn admin-only-action" onclick="MonsterCashOperations.open()">開啟現金對帳</button>
+        </div>
+
         <div class="dashboard-summary-grid">
 
             <div class="dashboard-summary-card dashboard-income-card">
@@ -635,6 +647,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
                     <button
                         class="dashboard-action-btn admin-only-action"
+                        onclick="MonsterCashOperations.open()">
+                        💵 現金對帳
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
                         onclick="openSystemSetting()">
                         ⚙️ 系統設定
                     </button>
@@ -665,6 +683,40 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     </div>
 
+</section>
+
+<!-- Sprint 7 每日現金收款對帳 -->
+<section id="cashReconciliationPage" class="page">
+    <div class="tm-page cash-ops-page">
+        <div class="tm-top">
+            <button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button>
+            <h1 class="tm-title">💵 現金收款與每日對帳</h1>
+        </div>
+        <div class="cash-ops-toolbar">
+            <div>
+                <strong id="cashOpsDate">今日現金對帳</strong>
+                <span>硬體實收、售票訂單與人工處理會分開保存</span>
+            </div>
+            <button onclick="MonsterCashOperations.refresh()">🔄 重新讀取</button>
+            <button onclick="MonsterCashOperations.exportCsv()">📄 匯出 CSV</button>
+            <button onclick="MonsterCashOperations.exportJson()">📦 匯出 JSON</button>
+        </div>
+        <div class="cash-ops-summary-grid">
+            <div class="cash-ops-summary-card"><span>控制器狀態</span><strong id="cashOpsHardware">讀取中</strong><small id="cashOpsHardwareDetail"></small></div>
+            <div class="cash-ops-summary-card"><span>售票機現金訂單</span><strong id="cashOpsWebSales">NT$0</strong><small>正常、未作廢訂單</small></div>
+            <div class="cash-ops-summary-card"><span>硬體累積收進</span><strong id="cashOpsGross">NT$0</strong><small>退款前實收總額</small></div>
+            <div class="cash-ops-summary-card"><span>錢箱預估</span><strong id="cashOpsExpectedDrawer">NT$0</strong><small>硬體實收－已退款</small></div>
+            <div class="cash-ops-summary-card"><span>對帳差額</span><strong id="cashOpsDifference">NT$0</strong><small>錢箱預估－正常現金訂單</small></div>
+            <div class="cash-ops-summary-card"><span>待人工處理</span><strong id="cashOpsUnresolved">0 筆 / NT$0</strong><small>處理前禁止下一筆收款</small></div>
+        </div>
+        <div class="cash-ops-breakdown-panel">
+            <h2>紙鈔／硬幣面額明細</h2>
+            <strong id="cashOpsBreakdown">尚無面額資料</strong>
+            <small id="cashOpsDeviceCounts">紙鈔 0 張・硬幣 0 枚</small>
+        </div>
+        <div class="cash-ops-safety-note">異常訂單只能標記「已退款」或「人工入帳」；系統不會自動出幣、出鈔或出票。</div>
+        <div id="cashReconciliationList" class="cash-ops-record-list"></div>
+    </div>
 </section>
 
 
@@ -1572,8 +1624,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/vendor-qrcode.js?v=751"></script>
 <script src="js/modules/ticketValidation.js?v=7627"></script>
 <script src="js/modules/consumePoints.js?v=749"></script>
-<script src="js/modules/payment.js?v=7833s6f1"></script>
-<script src="js/hardware/cash-bridge.js?v=7833s6f1"></script>
+<script src="js/modules/payment.js?v=7833s7"></script>
+<script src="js/hardware/cash-bridge.js?v=7833s7"></script>
+<script src="js/hardware/cash-operations.js?v=7833s7"></script>
 <script src="js/modules/detail.js?v=72c"></script>
 <script src="js/modules/cart.js?v=7627"></script>
     

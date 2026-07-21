@@ -24,6 +24,7 @@
         href="css/staff.css?v=7621">
     <link rel="stylesheet" href="css/pwa.css?v=73f1">
     <link rel="stylesheet" href="css/staff-enterprise.css?v=761">
+    <link rel="stylesheet" href="css/cash-operations.css?v=7833s7">
 </head>
 
 <body data-pwa-app="staff">
@@ -165,6 +166,20 @@
 
             </div>
 
+        </section>
+
+        <section class="staff-section admin-only">
+            <div class="staff-section-title">💵 今日現金對帳</div>
+            <div id="dashboardCashOperationsStrip" class="dashboard-cash-operations-strip">
+                <div class="dashboard-cash-health">
+                    <span id="dashboardCashHardware">● 讀取中</span>
+                    <small id="dashboardCashHardwareDetail">等待點餐機同步控制器狀態</small>
+                </div>
+                <div><span>錢箱預估</span><strong id="dashboardPhysicalCash">NT$0</strong></div>
+                <div><span>現金差額</span><strong id="dashboardCashDifference">NT$0</strong></div>
+                <div><span>待人工處理</span><strong id="dashboardCashExceptions">0 筆 / NT$0</strong></div>
+            </div>
+            <div class="staff-inline-status">手機後台提供雲端即時查看；人工退款／入帳請到已配對控制器的點餐機操作。</div>
         </section>
 
         <section class="staff-section">
@@ -397,7 +412,7 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7.5.2 QR Order Core
+            小怪獸售票機・V7.8.3.3 Sprint 7
         </footer>
 
     </div>
@@ -651,6 +666,7 @@
 <script src="js/modules/ticketValidation.js?v=7626"></script>
 <script src="js/staff/ticket-validator.js?v=7626"></script>
 <script src="js/staff/order-tools.js?v=73e3"></script>
+<script src="js/hardware/cash-operations.js?v=7833s7"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 
 </body>

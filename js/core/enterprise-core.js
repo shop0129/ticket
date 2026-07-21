@@ -1,10 +1,10 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 6 FIX1 Enterprise Core
+// 小怪獸售票機 V7.8.3.3 Sprint 7 Enterprise Core
 // 集中版本、事件、日誌、權限與系統狀態。保持 ES5 / Android WebView 相容。
 (function (window, document) {
     "use strict";
 
-    var VERSION = "7.8.3.3 S6 FIX1";
-    var BUILD = "20260722-cash-pairing-pwa-fix1";
+    var VERSION = "7.8.3.3 S7";
+    var BUILD = "20260722-cash-operations-reconciliation";
     var listeners = {};
     var logs = [];
     var MAX_LOGS = 300;

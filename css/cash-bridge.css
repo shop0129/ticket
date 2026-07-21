@@ -40,7 +40,9 @@
 .hardware-cash-amounts strong { display: block; margin-top: 6px; color: #e65100; font-size: 31px; }
 #hardwareCashMessage { margin: 26px 0 12px; color: #344054; font-size: 21px; line-height: 1.55; }
 #hardwareCashOrder { color: #667085; font-size: 15px; }
-#hardwareCashRetry { margin-top: 22px; padding: 13px 28px; border: 0; border-radius: 14px; background: #ff9800; color: #fff; font-size: 20px; font-weight: 700; }
+#hardwareCashRetry,
+#hardwareCashManage { margin-top: 22px; padding: 13px 28px; border: 0; border-radius: 14px; background: #ff9800; color: #fff; font-size: 20px; font-weight: 700; }
+#hardwareCashManage { margin-left: 10px; background: #c62828; }
 
 @media (max-width: 620px) {
     .hardware-cash-card { padding: 24px 16px; }

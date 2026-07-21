@@ -54,6 +54,13 @@ service cloud.firestore {
       allow write: if isManager();
     }
 
+    match /cashReconciliations/{recordId} {
+      allow read: if isStaff();
+      allow create: if isKiosk() || isManager();
+      allow update: if isManager();
+      allow delete: if false;
+    }
+
     match /auditLogs/{logId} {
       allow read: if isManager();
       allow create: if isStaff();

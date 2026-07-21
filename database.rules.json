@@ -12,6 +12,7 @@
         "venue": { ".write": "auth != null" },
         "logs": { ".write": "auth != null" },
         "auditLogs": { ".write": "auth != null" },
+        "cashOperations": { ".write": "auth != null" },
         "system": { ".write": "auth != null" }
       }
     }

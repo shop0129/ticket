@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 6
+// 小怪獸售票機 V7.8.3.3 Sprint 7
 // 一般付款＋本機硬體現金授權共用交易核心
 // Android WebView 61 相容（ES5）
 var countdownNumber = document.getElementById("countdownNumber");
@@ -166,7 +166,11 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
         order.printAuthorizationId = hardware.authorizationId || "";
         order.hardwarePaidAt = Number(hardware.paidAt || Date.now());
         order.hardwareCashStatus = "authorized";
-        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint6";
+        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint7";
+        order.hardwarePaidNtd = Number(hardware.paidNtd || context.amount || 0);
+        order.hardwareCoinCount = Number(hardware.coinCount || 0);
+        order.hardwareBillCount = Number(hardware.billCount || 0);
+        order.hardwareCashBreakdown = clonePaymentValue(hardware.counts || {});
     }
     if (window.MonsterAuth) {
         order = MonsterAuth.decorateRecord(order, "kiosk");

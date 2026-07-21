@@ -1,0 +1,115 @@
+/* V7.8.3.3 Sprint 7｜現金營運保護與每日對帳 */
+.dashboard-cash-operations-strip {
+    display: grid;
+    grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(130px, 1fr)) auto;
+    gap: 12px;
+    align-items: stretch;
+    margin: 14px 0;
+    padding: 14px;
+    border: 2px solid #b7e4c7;
+    border-radius: 18px;
+    background: #f1fff6;
+}
+.dashboard-cash-operations-strip.has-alert { border-color: #ffb74d; background: #fff8e8; }
+.dashboard-cash-operations-strip > div { display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.dashboard-cash-operations-strip span { color: #5f6b65; font-size: 13px; font-weight: 800; }
+.dashboard-cash-operations-strip strong { color: #16251d; font-size: 20px; }
+.dashboard-cash-health small { color: #53615a; line-height: 1.35; }
+.cash-ops-page { max-width: 1320px; }
+.cash-ops-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0;
+    padding: 14px;
+    border-radius: 16px;
+    background: #fff7e6;
+}
+.cash-ops-toolbar > div { flex: 1 1 330px; display: flex; flex-direction: column; gap: 4px; }
+.cash-ops-toolbar strong { font-size: 19px; }
+.cash-ops-toolbar span { color: #6e6252; }
+.cash-ops-toolbar button,
+.cash-ops-actions button {
+    border: 0;
+    border-radius: 12px;
+    padding: 11px 15px;
+    background: #ff9818;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+}
+.cash-ops-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 12px;
+}
+.cash-ops-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-height: 112px;
+    padding: 16px;
+    border: 1px solid #e4e8e5;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 5px 16px rgba(34, 53, 43, .07);
+}
+.cash-ops-summary-card span { color: #627168; font-size: 14px; font-weight: 800; }
+.cash-ops-summary-card strong { color: #18261e; font-size: 26px; }
+.cash-ops-summary-card small { color: #7a867f; line-height: 1.35; }
+.cash-ops-breakdown-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 14px;
+    padding: 17px;
+    border-radius: 16px;
+    background: #edf8ff;
+}
+.cash-ops-breakdown-panel h2 { margin: 0; font-size: 18px; }
+.cash-ops-breakdown-panel strong { color: #16517a; font-size: 18px; }
+.cash-ops-safety-note {
+    margin: 14px 0;
+    padding: 13px 15px;
+    border-left: 5px solid #f57c00;
+    border-radius: 10px;
+    background: #fff3e0;
+    color: #71420a;
+    font-weight: 800;
+}
+.cash-ops-record-list { display: grid; gap: 12px; }
+.cash-ops-record {
+    padding: 16px;
+    border: 1px solid #dfe5e1;
+    border-radius: 16px;
+    background: #fff;
+}
+.cash-ops-record.unresolved { border: 2px solid #ef5350; background: #fff5f4; }
+.cash-ops-record > div:first-child,
+.cash-ops-record-money { display: flex; justify-content: space-between; gap: 10px; align-items: center; }
+.cash-ops-record > div:first-child strong { font-size: 18px; }
+.cash-ops-record > div:first-child span {
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #eef3ef;
+    font-size: 13px;
+    font-weight: 900;
+}
+.cash-ops-record-money { margin: 12px 0 8px; }
+.cash-ops-record p { margin: 6px 0; color: #385246; font-weight: 800; }
+.cash-ops-record small { display: block; color: #6c756f; line-height: 1.5; }
+.cash-ops-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+.cash-ops-actions button:first-child { background: #546e7a; }
+.cash-ops-local-note { margin-top: 10px; color: #c62828; font-weight: 900; text-align: right; }
+.cash-ops-empty { padding: 30px; border-radius: 16px; background: #f4f6f5; text-align: center; color: #657169; }
+@media (max-width: 900px) {
+    .dashboard-cash-operations-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .cash-ops-summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 580px) {
+    .dashboard-cash-operations-strip,
+    .cash-ops-summary-grid { grid-template-columns: 1fr; }
+    .cash-ops-record-money { align-items: flex-start; flex-direction: column; }
+}

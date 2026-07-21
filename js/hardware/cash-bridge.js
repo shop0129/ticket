@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 6
+// 小怪獸售票機 V7.8.3.3 Sprint 7
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -91,12 +91,22 @@
             '  <p id="hardwareCashMessage">請稍候…</p>',
             '  <small id="hardwareCashOrder"></small>',
             '  <button id="hardwareCashRetry" type="button" style="display:none;">重新連線</button>',
+            '  <button id="hardwareCashManage" type="button" style="display:none;">店長人工處理</button>',
             '</div>'
         ].join("");
         document.body.appendChild(overlay);
         document.getElementById("hardwareCashRetry").addEventListener("click", function () {
             this.style.display = "none";
             if (active) pollPayment(active.order.orderNo);
+        });
+        document.getElementById("hardwareCashManage").addEventListener("click", function () {
+            hideOverlay();
+            if (window.MonsterCashOperations && MonsterCashOperations.open) {
+                MonsterCashOperations.open();
+            } else if (typeof showPage === "function") {
+                showPage("adminLoginPage");
+                alert("請由店長登入後開啟『現金對帳』");
+            }
         });
         return overlay;
     }
@@ -110,6 +120,7 @@
         document.getElementById("hardwareCashMessage").textContent = data.message || "請依控制器畫面投入現金";
         document.getElementById("hardwareCashOrder").textContent = data.orderNo ? ("訂單 " + data.orderNo) : "";
         document.getElementById("hardwareCashRetry").style.display = data.retry ? "inline-block" : "none";
+        document.getElementById("hardwareCashManage").style.display = data.manage ? "inline-block" : "none";
     }
 
     function hideOverlay() {
@@ -152,6 +163,24 @@
             }
             if (payload.status === "CANCELED") {
                 stopPolling();
+                if (Number(payload.paidNtd || 0) > 0 && /人工處理完成/.test(String(payload.message || ""))) {
+                    setOverlay({
+                        title: "人工處理已完成",
+                        amount: payload.amountNtd,
+                        paid: payload.paidNtd,
+                        remaining: payload.remainingNtd,
+                        orderNo: orderNo,
+                        message: payload.message || "本筆已關閉，不會出票。"
+                    });
+                    setTimeout(function () {
+                        active = null;
+                        saveActive();
+                        hideOverlay();
+                        setLocked(false);
+                        if (window.MonsterCashOperations) MonsterCashOperations.refresh();
+                    }, 1800);
+                    return;
+                }
                 setOverlay({
                     title: "付款已取消",
                     amount: payload.amountNtd,
@@ -172,14 +201,20 @@
             }
             if (payload.status === "RECONCILIATION_REQUIRED") {
                 stopPolling();
+                active.state = "RECONCILIATION_REQUIRED";
+                active.lastPaidNtd = Number(payload.paidNtd || 0);
+                active.updatedAt = Date.now();
+                saveActive();
                 setOverlay({
                     title: "需要員工人工處理",
                     amount: payload.amountNtd,
                     paid: payload.paidNtd,
                     remaining: payload.remainingNtd,
                     orderNo: orderNo,
-                    message: payload.message || "已收現金但交易未完成，系統已禁止出票。"
+                    message: payload.message || "已收現金但交易未完成，系統已禁止出票。",
+                    manage: true
                 });
+                if (window.MonsterCashOperations) MonsterCashOperations.refresh();
                 return;
             }
             setOverlay({
@@ -216,7 +251,11 @@
             authorizationId: authorizationId,
             paymentId: payload.paymentId || "",
             paidAt: payload.paidAt || Date.now(),
-            bridgeVersion: "1.0-sprint6"
+            bridgeVersion: payload.bridgeVersion || "1.0-sprint7",
+            paidNtd: Number(payload.paidNtd || 0),
+            coinCount: Number(payload.coinCount || 0),
+            billCount: Number(payload.billCount || 0),
+            counts: payload.counts || {}
         };
         active.updatedAt = Date.now();
         saveActive();
@@ -261,6 +300,7 @@
                 saveSalesHistory();
             }
             finishLocalTransaction();
+            if (window.MonsterCashOperations) MonsterCashOperations.refresh();
             return true;
         }).catch(function () {
             active.state = "ACK_PENDING";
@@ -397,6 +437,29 @@
         },
         clearPairing: function () {
             localStorage.removeItem(PAIRING_KEY);
+        },
+        hasPairing: function () {
+            return /^\d{8}$/.test(pairingKey());
+        },
+        getOperationalStatus: function () {
+            return api("/status");
+        },
+        getTodayReconciliation: function () {
+            return api("/reconciliation/today");
+        },
+        resolveReconciliation: function (orderNo, resolution, note) {
+            return api("/payments/" + encodeURIComponent(orderNo) + "/reconcile", {
+                method: "POST",
+                body: { resolution: resolution, note: note }
+            });
+        },
+        releaseAfterReconciliation: function (orderNo) {
+            if (active && active.order && active.order.orderNo === orderNo) {
+                active = null;
+                saveActive();
+                hideOverlay();
+                setLocked(false);
+            }
         },
         _test: {
             getActive: function () { return active; },

@@ -1,9 +1,9 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 6 FIX1
+// 小怪獸售票機 V7.8.3.3 Sprint 7
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-sprint6-fix1-cash-pairing-20260722-2";
+var CACHE_NAME = CACHE_PREFIX + "7833-sprint7-cash-operations-20260722-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -16,6 +16,7 @@ var CORE_ASSETS = [
     "./display.webmanifest",
     "./css/admin-ui.css",
     "./css/cash-bridge.css",
+    "./css/cash-operations.css",
     "./css/display.css",
     "./css/pwa.css",
     "./css/staff.css",
@@ -66,6 +67,7 @@ var CORE_ASSETS = [
     "./js/core/sale-rule-engine.js",
     "./js/display.js",
     "./js/hardware/cash-bridge.js",
+    "./js/hardware/cash-operations.js",
     "./js/modules/businessMode.js",
     "./js/modules/cart.js",
     "./js/modules/dashboard.js",
