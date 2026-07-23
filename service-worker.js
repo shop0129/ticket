@@ -3,7 +3,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-sprint9-receipt-20260723-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-sprint9-qr-scanner-fix1-20260724-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
