@@ -1235,69 +1235,8 @@ input{
 /* V7.6.2 Live Timer Dashboard */
 .validation-timer-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0}.validation-timer-summary span{display:flex;align-items:center;justify-content:center;min-height:46px;padding:9px 12px;border-radius:14px;font-weight:900;text-align:center}.validation-timer-summary .safe{background:#e6f7ee;color:#117746}.validation-timer-summary .soon{background:#fff4d7;color:#9a6300}.validation-timer-summary .over{background:#ffe5e5;color:#aa2929}.validation-live-order .time{font-variant-numeric:tabular-nums;min-width:128px;text-align:right}.tvc-timer-box strong{font-variant-numeric:tabular-nums}.validation-hub-card.overtime strong{animation:monsterOvertimePulse 1.3s ease-in-out infinite}@keyframes monsterOvertimePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}@media(max-width:600px){.validation-timer-summary{grid-template-columns:1fr}.validation-live-order .time{min-width:0;font-size:14px}}
 
-/* V7.8.3.3 Sprint9 QR Scanner FIX1 */
-.tvc-scanner-card{
-    max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 20px);
-    overflow-y:auto;
-    overscroll-behavior:contain;
-}
-.tvc-scanner-viewport{
-    position:relative;
-    width:100%;
-    height:min(52dvh,480px);
-    min-height:300px;
-    overflow:hidden;
-    border-radius:16px;
-    background:#111;
-    isolation:isolate;
-}
-#tvcScannerReader{
-    position:relative;
-    width:100%!important;
-    height:100%!important;
-    min-height:0!important;
-    overflow:hidden;
-    border:0!important;
-    border-radius:16px;
-    background:#111;
-}
-#tvcScannerReader video,
-.tvc-scanner-native>#tvcVideo{
-    display:block;
-    width:100%!important;
-    height:100%!important;
-    max-height:none!important;
-    margin:0!important;
-    object-fit:cover!important;
-    border-radius:0!important;
-    background:#111;
-}
-.tvc-native-scan-frame{
-    pointer-events:none;
-    position:absolute;
-    z-index:3;
-    width:min(68%,300px);
-    aspect-ratio:1;
-    left:50%;
-    top:50%;
-    transform:translate(-50%,-50%);
-    border:4px solid #fff;
-    border-radius:16px;
-    box-shadow:0 0 0 999px rgba(0,0,0,.22);
-}
-.tvc-scan-help{
-    margin:8px 0 12px;
-    padding:9px 10px;
-    border-radius:10px;
-    background:#fff8df;
-    color:#6d5200;
-    font-size:13px;
-    line-height:1.45;
-}
-@media(max-width:600px){
-    .tvc-scanner-card{width:calc(100vw - 20px);padding:18px}
-    .tvc-scanner-viewport{height:min(50dvh,440px);min-height:280px}
-}
+/* V7.6.2.1 Mobile Scanner Hotfix */
+#tvcScannerReader{width:100%;min-height:260px;overflow:hidden;border-radius:14px;background:#111}#tvcScannerReader video{width:100%!important;max-height:58vh;object-fit:cover;border-radius:14px}.tvc-scan-help{margin:8px 0 12px;padding:9px 10px;border-radius:10px;background:#fff8df;color:#6d5200;font-size:13px;line-height:1.45}.tvc-scanner-card>#tvcVideo{width:100%;max-height:58vh;object-fit:cover;border-radius:14px;background:#111}
 
 
 /* V7.8.3 Void Protection */
