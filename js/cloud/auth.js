@@ -198,6 +198,8 @@
             "order.create": "建立訂單",
             "order.cancel": "作廢訂單",
             "order.reprint": "補印訂單",
+            "order.receipt_print": "列印實體收據",
+            "order.receipt_reprint": "補印實體收據",
             "order.enter": "確認入場",
             "order.exit": "完成離場",
             "member.create": "新增會員",

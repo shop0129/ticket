@@ -261,7 +261,7 @@ function openOrderDetail(index) {
         ? "disabled"
         : "onclick=\"reprintOrder('".concat(order.orderNo, "')\""), ">\n\n            ").concat(isCancelled
         ? "🚫 已作廢不可補印"
-        : "🖨️ 補印票券", "\n\n        </button>\n\n        <button\n            type=\"button\"\n            class=\"big-btn cancelBtn\"\n            ").concat(isCancelled
+        : "🖨️ 補印收據", "\n\n        </button>\n\n        <button\n            type=\"button\"\n            class=\"big-btn cancelBtn\"\n            ").concat(isCancelled
         ? "disabled"
         : "onclick=\"cancelOrder('".concat(order.orderNo, "')\""), ">\n\n            ").concat(isCancelled
         ? "✅ 已作廢"
@@ -278,15 +278,27 @@ function openOrderDetail(index) {
 // =========================================
 // 補印票券
 // =========================================
-function reprintOrder(orderNo) {
+function reprintOrder(orderNo, alreadyConfirmed) {
     playClick();
+    if (window.MonsterPermission &&
+        !MonsterPermission.requirePermission("order.reprint", "❌ 請先由店長或員工登入再補印收據")) {
+        return;
+    }
     var order = salesHistory.find(function (item) {
         return item.orderNo === orderNo;
     });
     if (!order)
         return;
+    if (!alreadyConfirmed && !confirm(
+        "確定要補印這筆實體收據？\n\n訂單：" + orderNo +
+        "\n補印後會留下操作紀錄，請先確認出紙口沒有同一張收據。"
+    )) {
+        return;
+    }
     isReprint = true;
     currentPrintOrder = order;
+    window.isReprint = true;
+    window.currentPrintOrder = order;
     if (window.MonsterAuth) {
         MonsterAuth.audit(
             "order.reprint",

@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 Sprint 8 FIX1">
+<meta name="monster-app-version" content="V7.8.3.3 Sprint 9 Receipt">
 
 <title>小怪獸放電所 售票機</title>
 
@@ -26,6 +26,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/cash-bridge.css?v=7833s6f1">
 <link rel="stylesheet" href="css/cash-operations.css?v=7833s7">
 <link rel="stylesheet" href="css/operations-s8.css?v=7833s8">
+<link rel="stylesheet" href="css/receipt-printer.css?v=7833s9r1">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
@@ -274,6 +275,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
         <div class="success-items" id="successItems">
 
+        </div>
+
+        <div id="receiptPrintRecovery" class="receipt-print-recovery" role="alert">
+            <strong>請通知員工處理收據</strong>
+            <span id="receiptPrintRecoveryMessage">請檢查紙張與印表機，再從訂單明細執行補印。</span>
+            <button type="button" onclick="openReceiptPrintRecovery()">員工登入／開啟售票紀錄</button>
         </div>
 
         <div class="countdown">
@@ -1653,10 +1660,10 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/sound.js?v=72c"></script>
     
 <script src="js/modules/page.js?v=72c"></script>  
-<script src="js/modules/history.js?v=72c"></script>
+<script src="js/modules/history.js?v=7833s9r1"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
-<script src="js/modules/print.js?v=782"></script>
+<script src="js/modules/print.js?v=7833s9r1"></script>
 <script src="js/modules/stats.js?v=72c"></script>
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/core/sale-rule-engine.js?v=781"></script>
@@ -1674,16 +1681,17 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/vendor-qrcode.js?v=751"></script>
 <script src="js/modules/ticketValidation.js?v=7627"></script>
 <script src="js/modules/consumePoints.js?v=749"></script>
-<script src="js/modules/payment.js?v=7833s8"></script>
-<script src="js/hardware/cash-bridge.js?v=7833s8"></script>
+<script src="js/hardware/receipt-printer.js?v=7833s9r1"></script>
+<script src="js/modules/payment.js?v=7833s9r1"></script>
+<script src="js/hardware/cash-bridge.js?v=7833s9r1"></script>
 <script src="js/hardware/cash-operations.js?v=7833s8"></script>
 <script src="js/modules/detail.js?v=72c"></script>
 <script src="js/modules/cart.js?v=7627"></script>
     
-<script src="js/modules/operation.js?v=771"></script>
+<script src="js/modules/operation.js?v=7833s9r1"></script>
 <script src="js/modules/dashboard.js?v=73f2"></script>
 <script src="js/modules/roleManager.js?v=73simple"></script>
-<script src="js/cloud/auth.js?v=73simple"></script>
+<script src="js/cloud/auth.js?v=7833s9r1"></script>
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
@@ -1692,4 +1700,3 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/pwa/pwa-manager.js?v=7833s8"></script>
 </body>
 </html>
-

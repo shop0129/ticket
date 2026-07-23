@@ -325,18 +325,20 @@
         }, 500);
     }
 
-    function startCashPayment() {
+    function startCashPayment(printerReady, preparedContext) {
         if (active && active.state !== "COMPLETED") {
             setLocked(true);
             pollPayment(active.order.orderNo);
             return;
         }
-        var context;
-        try {
-            context = window.MonsterPayment.buildContext();
-        } catch (error) {
-            alert("無法建立現金訂單：" + (error.message || error));
-            return;
+        var context = preparedContext;
+        if (!context) {
+            try {
+                context = window.MonsterPayment.buildContext();
+            } catch (error) {
+                alert("無法建立現金訂單：" + (error.message || error));
+                return;
+            }
         }
         // 全額點數折抵時不啟動收鈔／收幣，直接走同一套防重複訂單流程。
         if (Number(context.amount || 0) === 0) {
@@ -344,6 +346,37 @@
             return;
         }
         if (!requestPairingKey()) return;
+        if (!printerReady) {
+            if (!window.MonsterReceiptPrinter || typeof MonsterReceiptPrinter.getStatus !== "function") {
+                alert("實體收據列印模組尚未載入，已停止現金付款");
+                return;
+            }
+            setLocked(true);
+            setOverlay({
+                title: "正在檢查收據機",
+                amount: context.amount,
+                paid: 0,
+                remaining: context.amount,
+                orderNo: context.orderNo,
+                message: "確認 ttyS4／9600 可使用後才會開放投入現金。"
+            });
+            MonsterReceiptPrinter.getStatus().then(function () {
+                startCashPayment(true, context);
+            }).catch(function (error) {
+                setLocked(false);
+                setOverlay({
+                    title: "收據機尚未就緒",
+                    amount: context.amount,
+                    paid: 0,
+                    remaining: context.amount,
+                    orderNo: context.orderNo,
+                    message: (error.message || "無法開啟收據機") + "。本次尚未開始收款，請先通知員工。",
+                    retry: false
+                });
+                setTimeout(hideOverlay, 4500);
+            });
+            return;
+        }
         active = {
             version: 1,
             state: "REQUESTING",
@@ -401,10 +434,10 @@
         setLocked(true);
         if (active.state === "ISSUE_STARTED" || active.state === "ACK_PENDING") {
             var authorizationId = active.authorization && active.authorization.authorizationId;
-            var saved = salesHistory.some(function (order) {
+            var savedOrder = salesHistory.find(function (order) {
                 return order && order.printAuthorizationId === authorizationId;
             });
-            if (saved) {
+            if (savedOrder && savedOrder.receiptPrintStatus === "printed") {
                 acknowledgeIssued();
                 return;
             }
