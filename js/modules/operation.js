@@ -137,7 +137,7 @@ function reprintLatestOrder() {
     var confirmed = confirm("\u78BA\u5B9A\u88DC\u5370\u6700\u8FD1\u4E00\u7B46\u8A02\u55AE\uFF1F\n\n\u8A02\u55AE\u7DE8\u865F\uFF1A".concat(latestOrder.orderNo, "\n\u91D1\u984D\uFF1ANT$").concat(formatOperationAmount(latestOrder.amount)));
     if (!confirmed)
         return;
-    reprintOrder(latestOrder.orderNo);
+    reprintOrder(latestOrder.orderNo, true);
 }
 // =========================================
 // 售票紀錄搜尋
