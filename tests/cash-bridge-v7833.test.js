@@ -17,12 +17,7 @@ function equal(actual, expected, message) {
 }
 
 function button() {
-    var listeners = {};
-    return {
-        disabled: false,
-        addEventListener: function (name, handler) { listeners[name] = handler; },
-        click: function () { if (listeners.click) listeners.click(); }
-    };
+    return { disabled: false, addEventListener: function () {} };
 }
 
 var elements = {
@@ -106,15 +101,6 @@ global.alert = function () {};
 var paymentSource = fs.readFileSync(path.resolve(__dirname, "../js/modules/payment.js"), "utf8");
 vm.runInThisContext(paymentSource, { filename: "payment.js" });
 
-var cashStartCalls = 0;
-global.MonsterCashBridge = {
-    startCashPayment: function () { cashStartCalls += 1; },
-    hasBlockingTransaction: function () { return false; }
-};
-elements.cashBtn.click();
-equal(cashStartCalls, 1, "按現金付款必須進入本機配對／收款橋接");
-equal(salesHistory.length, 0, "按現金付款時不得直接建立成功訂單");
-
 var context = MonsterPayment.buildContext();
 equal(context.orderNo, "S6-7833-TEST-01", "付款前應建立固定訂單編號");
 equal(context.originalAmount, 110, "應保留票券原價");
@@ -126,11 +112,7 @@ var authorization = {
     authorizationId: "PRINT-S6-7833-ABC",
     paymentId: "PAY-S6-7833-ABC",
     paidAt: 123456789,
-    bridgeVersion: "1.0-sprint8-fix1",
-    paidNtd: 100,
-    coinCount: 0,
-    billCount: 1,
-    counts: { "100": 1 }
+    bridgeVersion: "1.0-sprint6"
 };
 
 MonsterPayment.finalizeAuthorizedCash(transaction, authorization);
@@ -143,9 +125,6 @@ equal(salesHistory[0].printAuthorizationId, "PRINT-S6-7833-ABC", "訂單應保�
 equal(salesHistory[0].originalAmount, 110, "訂單應保存原價");
 equal(salesHistory[0].amount, 100, "訂單應保存實付金額");
 equal(salesHistory[0].usedPoints, 10, "訂單應保存使用點數");
-equal(salesHistory[0].hardwareBillCount, 1, "訂單應保存紙鈔張數");
-equal(salesHistory[0].hardwareCoinCount, 0, "訂單應保存硬幣枚數");
-equal(salesHistory[0].hardwareCashBreakdown["100"], 1, "訂單應保存100元面額明細");
 ok(salesHistory[0].validationDecorated, "現金訂單仍須經過V7.8.3.3票券驗證");
 equal(memberCalls, 1, "重送授權不得重複累積會員消費");
 equal(statCalls, 3, "一張票只可更新今日／本月／累積統計一次");
@@ -164,24 +143,14 @@ ok(bridgeSource.indexOf("finalizePointOnly") !== -1, "全額點數折抵不得�
 var indexSource = fs.readFileSync(path.resolve(__dirname, "../index.html"), "utf8");
 ok(indexSource.indexOf("css/cash-bridge.css") !== -1, "首頁應載入現金付款畫面");
 ok(indexSource.indexOf("js/hardware/cash-bridge.js") !== -1, "首頁應在付款模組後載入本機橋接");
-ok(indexSource.indexOf('content="V7.8.3.3 Sprint 8 FIX1"') !== -1, "首頁應帶有可核對的Sprint 8 FIX1版本");
-ok(indexSource.indexOf('id="v7-phase1-badge"') === -1, "首頁不得再建立第二個固定版本標籤");
-
-var enterpriseSource = fs.readFileSync(path.resolve(__dirname, "../js/core/enterprise-core.js"), "utf8");
-ok(enterpriseSource.indexOf('VERSION = "7.8.3.3 S8 FIX1"') !== -1, "唯一狀態標籤應顯示目前正式版本");
+ok(indexSource.indexOf("V7.8.3.3 · SPRINT 10 LINE PAY SCAN") !== -1, "畫面版本標記應更新");
 
 var printSource = fs.readFileSync(path.resolve(__dirname, "../js/modules/print.js"), "utf8");
 ok(printSource.indexOf("onTicketAnimationFinished") !== -1, "出票動畫完成後才可確認出票");
 
 var workerSource = fs.readFileSync(path.resolve(__dirname, "../service-worker.js"), "utf8");
-ok(workerSource.indexOf("7833-sprint8-fix1-autoboot-serial") !== -1, "PWA快取版本應更新");
-ok(workerSource.indexOf("self.skipWaiting()") !== -1, "新版Service Worker應立即接管舊PWA");
+ok(workerSource.indexOf("7833-sprint10-linepay-scan") !== -1, "PWA快取版本應更新");
 ok(workerSource.indexOf("./js/hardware/cash-bridge.js") !== -1, "PWA應快取現金橋接");
 ok(workerSource.indexOf("./css/cash-bridge.css") !== -1, "PWA應快取現金付款樣式");
-ok(workerSource.indexOf("./js/hardware/cash-operations.js") !== -1, "PWA應快取每日對帳模組");
-ok(workerSource.indexOf("./css/cash-operations.css") !== -1, "PWA應快取每日對帳樣式");
 
-var pwaSource = fs.readFileSync(path.resolve(__dirname, "../js/pwa/pwa-manager.js"), "utf8");
-ok(pwaSource.indexOf("location.reload()") !== -1, "新控制器接管後應自動重新載入新版首頁");
-
-console.log("PASS V7.8.3.3 Sprint 8 FIX1 cash integration: " + count + " assertions");
+console.log("PASS V7.8.3.3 Sprint 6 cash integration: " + count + " assertions");

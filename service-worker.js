@@ -1,9 +1,9 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 9 Receipt
+// 小怪獸售票機 V7.8.3.3 Sprint 11A
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-sprint9-qr-scanner-fix1-20260724-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-sprint11a-coin-manager-20260725-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -11,19 +11,18 @@ var CORE_ASSETS = [
     "./lobby-display.html",
     "./play-display.html",
     "./offline.html",
+    "./linepay-scanner-test.html",
     "./manifest.webmanifest",
     "./staff.webmanifest",
     "./display.webmanifest",
     "./css/admin-ui.css",
     "./css/cash-bridge.css",
-    "./css/cash-operations.css",
-    "./css/operations-s8.css",
-    "./css/receipt-printer.css",
+    "./css/coin-manager.css",
+    "./css/linepay-scanner.css",
     "./css/display.css",
     "./css/pwa.css",
     "./css/staff.css",
     "./css/staff-enterprise.css",
-    "./css/staff-feedback.css",
     "./css/style.css",
     "./css/mobile-enterprise.css",
     "./images/btn-buy-default.png",
@@ -42,11 +41,9 @@ var CORE_ASSETS = [
     "./images/ticket-3h-red.png",
     "./images/ticket-baby.png",
     "./images/ticket-bg.png",
-    "./images/ticket-big.png",
     "./images/ticket-early.png",
     "./images/ticket-parent.png",
     "./images/ticket-powerbank.png",
-    "./images/ticket-small.png",
     "./images/ticket-summer.png",
     "./images/ticket-token10.png",
     "./images/ticket-token25.png",
@@ -58,6 +55,7 @@ var CORE_ASSETS = [
     "./js/cloud/cloud-ticket-sync.js",
     "./js/cloud/firebase-config.js",
     "./js/cloud/firebase-connect.js",
+    "./js/cloud/linepay-scanner.js",
     "./js/cloud/v71-migration.js",
     "./js/config/data.js",
     "./js/config/state.js",
@@ -72,8 +70,7 @@ var CORE_ASSETS = [
     "./js/core/sale-rule-engine.js",
     "./js/display.js",
     "./js/hardware/cash-bridge.js",
-    "./js/hardware/cash-operations.js",
-    "./js/hardware/receipt-printer.js",
+    "./js/hardware/coin-manager.js",
     "./js/modules/businessMode.js",
     "./js/modules/cart.js",
     "./js/modules/dashboard.js",
@@ -86,7 +83,6 @@ var CORE_ASSETS = [
     "./js/modules/member.js",
     "./js/modules/consumePoints.js",
     "./js/modules/operation.js",
-    "./js/modules/testDataCleanup.js",
     "./js/modules/page.js",
     "./js/modules/payment.js",
     "./js/modules/print.js",
@@ -101,7 +97,6 @@ var CORE_ASSETS = [
     "./js/staff/order-tools.js",
     "./js/staff/staff-app.js",
     "./js/staff/staff-config.js",
-    "./js/staff/staff-feedback.js",
     "./js/staff/enterprise-manager.js",
     "./js/staff/consume-points-manager.js",
     "./js/utils/helper.js",
@@ -128,9 +123,6 @@ self.addEventListener("install", function (event) {
             return Promise.all(CORE_ASSETS.map(function (asset) {
                 return cacheCoreAsset(cache, asset);
             }));
-        }).then(function () {
-            // 部署後立即接管，避免已安裝的點餐機 PWA 繼續執行舊付款程式。
-            return self.skipWaiting();
         })
     );
 });
@@ -139,7 +131,7 @@ self.addEventListener("activate", function (event) {
     event.waitUntil(
         caches.keys().then(function (keys) {
             return Promise.all(keys.map(function (key) {
-                if (key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME) {
+                if (key.indexOf(CACHE_PREFIX) === 0 && key !== CACHE_NAME && key !== "monster-ticket-pwa-74-enterprise-7627-ticket-admission-pickup-order-20260719-1") {
                     return caches.delete(key);
                 }
                 return null;

@@ -13,27 +13,23 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 Sprint 9 Receipt">
 
 <title>小怪獸放電所 售票機</title>
 
 <link rel="manifest" href="manifest.webmanifest?v=73f1">
 <link rel="apple-touch-icon" href="images/pwa/apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
-<link rel="stylesheet" href="css/style.css?v=7833s8h1">
+<link rel="stylesheet" href="css/style.css?v=7621">
 <link rel="stylesheet" href="css/admin-ui.css?v=73e3">
 <link rel="stylesheet" href="css/pwa.css?v=73f1">
-<link rel="stylesheet" href="css/cash-bridge.css?v=7833s6f1">
-<link rel="stylesheet" href="css/cash-operations.css?v=7833s7">
-<link rel="stylesheet" href="css/operations-s8.css?v=7833s8">
-<link rel="stylesheet" href="css/receipt-printer.css?v=7833s9r1">
+<link rel="stylesheet" href="css/cash-bridge.css?v=7833s6">
+<link rel="stylesheet" href="css/linepay-scanner.css?v=7833s10">
+<link rel="stylesheet" href="css/coin-manager.css?v=7833s11a">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
 
 <body data-pwa-app="kiosk">
-
-<div id="productionMonitorBanner" role="alert" aria-live="assertive"></div>
 
 <!-- ==========================
 首頁
@@ -277,12 +273,6 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
         </div>
 
-        <div id="receiptPrintRecovery" class="receipt-print-recovery" role="alert">
-            <strong>請通知員工處理收據</strong>
-            <span id="receiptPrintRecoveryMessage">請檢查紙張與印表機，再從訂單明細執行補印。</span>
-            <button type="button" onclick="openReceiptPrintRecovery()">員工登入／開啟售票紀錄</button>
-        </div>
-
         <div class="countdown">
 
            <span id="countdownNumber"></span>
@@ -364,17 +354,6 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                 <button id="dashboardPeriodAll" class="dashboard-period-btn" onclick="setDashboardPeriod('all')">累積</button>
             </div>
             <div id="dashboardRealtimeStatus" class="dashboard-realtime-status">● 即時更新</div>
-        </div>
-
-        <div id="dashboardCashOperationsStrip" class="dashboard-cash-operations-strip">
-            <div class="dashboard-cash-health">
-                <span id="dashboardCashHardware">● 讀取中</span>
-                <small id="dashboardCashHardwareDetail">正在取得現金控制器狀態</small>
-            </div>
-            <div><span>錢箱預估</span><strong id="dashboardPhysicalCash">NT$0</strong></div>
-            <div><span>現金差額</span><strong id="dashboardCashDifference">NT$0</strong></div>
-            <div><span>待人工處理</span><strong id="dashboardCashExceptions">0 筆 / NT$0</strong></div>
-            <button type="button" class="dashboard-small-btn admin-only-action" onclick="MonsterCashOperations.open()">開啟現金對帳</button>
         </div>
 
         <div class="dashboard-summary-grid">
@@ -657,12 +636,6 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
                     <button
                         class="dashboard-action-btn admin-only-action"
-                        onclick="MonsterCashOperations.open()">
-                        💵 現金對帳
-                    </button>
-
-                    <button
-                        class="dashboard-action-btn admin-only-action"
                         onclick="openSystemSetting()">
                         ⚙️ 系統設定
                     </button>
@@ -679,6 +652,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                         🖨️ 硬體測試
                     </button>
 
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openCoinManager()">
+                        🪙 零錢／補幣管理
+                    </button>
+
                 </div>
 
             </div>
@@ -693,53 +672,6 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     </div>
 
-</section>
-
-<!-- Sprint 8 正式營運監控與每日現金收款對帳 -->
-<section id="cashReconciliationPage" class="page">
-    <div class="tm-page cash-ops-page">
-        <div class="tm-top">
-            <button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button>
-            <h1 class="tm-title">💵 現金收款與每日對帳</h1>
-        </div>
-        <div id="productionReadinessPanel" class="production-readiness-panel">
-            <div class="production-readiness-title">
-                <strong>🛡️ 正式營運狀態</strong>
-                <span id="productionReadinessStatus">檢查中</span>
-            </div>
-            <p id="productionReadinessDetail" class="production-readiness-detail">正在檢查網路、Firebase與現金控制器</p>
-            <div class="production-readiness-grid">
-                <div><span>開機自啟</span><strong id="productionAutoStart">未確認</strong></div>
-                <div><span>ttyS1自動重連</span><strong id="productionAutoReconnect">未確認</strong></div>
-                <div><span>最後心跳</span><strong id="productionHeartbeat">尚未回報</strong></div>
-                <div><span>警示代碼</span><strong id="productionAlertCode">UNKNOWN</strong></div>
-            </div>
-        </div>
-        <div class="cash-ops-toolbar">
-            <div>
-                <strong id="cashOpsDate">今日現金對帳</strong>
-                <span>硬體實收、售票訂單與人工處理會分開保存</span>
-            </div>
-            <button onclick="MonsterCashOperations.refresh()">🔄 重新讀取</button>
-            <button onclick="MonsterCashOperations.exportCsv()">📄 匯出 CSV</button>
-            <button onclick="MonsterCashOperations.exportJson()">📦 匯出 JSON</button>
-        </div>
-        <div class="cash-ops-summary-grid">
-            <div class="cash-ops-summary-card"><span>控制器狀態</span><strong id="cashOpsHardware">讀取中</strong><small id="cashOpsHardwareDetail"></small></div>
-            <div class="cash-ops-summary-card"><span>售票機現金訂單</span><strong id="cashOpsWebSales">NT$0</strong><small>正常、未作廢訂單</small></div>
-            <div class="cash-ops-summary-card"><span>硬體累積收進</span><strong id="cashOpsGross">NT$0</strong><small>退款前實收總額</small></div>
-            <div class="cash-ops-summary-card"><span>錢箱預估</span><strong id="cashOpsExpectedDrawer">NT$0</strong><small>硬體實收－已退款</small></div>
-            <div class="cash-ops-summary-card"><span>對帳差額</span><strong id="cashOpsDifference">NT$0</strong><small>錢箱預估－正常現金訂單</small></div>
-            <div class="cash-ops-summary-card"><span>待人工處理</span><strong id="cashOpsUnresolved">0 筆 / NT$0</strong><small>處理前禁止下一筆收款</small></div>
-        </div>
-        <div class="cash-ops-breakdown-panel">
-            <h2>紙鈔／硬幣面額明細</h2>
-            <strong id="cashOpsBreakdown">尚無面額資料</strong>
-            <small id="cashOpsDeviceCounts">紙鈔 0 張・硬幣 0 枚</small>
-        </div>
-        <div class="cash-ops-safety-note">異常訂單只能標記「已退款」或「人工入帳」；系統不會自動出幣、出鈔或出票。</div>
-        <div id="cashReconciliationList" class="cash-ops-record-list"></div>
-    </div>
 </section>
 
 
@@ -1254,6 +1186,93 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 
 <!-- ==========================
+MDB 零錢／補幣管理 Sprint 11A
+========================== -->
+
+<section id="coinManagerPage" class="page">
+    <div class="tm-page coin-manager-page">
+        <div class="tm-top">
+            <button class="back-btn" onclick="closeCoinManager()">← 返回</button>
+            <h1 class="tm-title">🪙 零錢／補幣管理</h1>
+        </div>
+
+        <div class="coin-safety-banner">
+            Sprint 11A 僅讀取庫存、執行安全補幣與模擬找零；不會出幣，也不會啟動 TOP XC100 出鈔。
+        </div>
+
+        <div id="coinManagerStatus" class="coin-manager-status">
+            正在連接 Controller 96…
+        </div>
+
+        <div class="coin-section-card">
+            <div class="coin-section-header">
+                <div>
+                    <h2>MDB 硬幣庫存</h2>
+                    <p id="coinInventoryMeta">尚未讀取 Tube Info</p>
+                </div>
+                <button id="coinRefreshButton" class="coin-primary-btn" onclick="refreshCoinInventory()">
+                    重新讀取 MDB
+                </button>
+            </div>
+            <div id="coinInventoryGrid" class="coin-inventory-grid"></div>
+            <div id="coinInventoryTotal" class="coin-inventory-total">硬幣總額：NT$0</div>
+        </div>
+
+        <div class="coin-section-card">
+            <h2>安全補幣</h2>
+            <p>開始後只開放收幣60秒；停止、逾時、離線或切換付款時會自動關閉。</p>
+            <div id="coinRefillLive" class="coin-refill-live">目前沒有補幣工作</div>
+            <div class="coin-action-row">
+                <button id="coinRefillStartButton" class="coin-success-btn" onclick="startCoinRefill()">
+                    開始補幣（60秒）
+                </button>
+                <button id="coinRefillStopButton" class="coin-danger-btn" onclick="stopCoinRefill()">
+                    立即停止補幣
+                </button>
+            </div>
+        </div>
+
+        <div class="coin-section-card">
+            <h2>硬幣安全庫存</h2>
+            <p>模擬找零會優先保留這些數量；低於或等於設定值時顯示紅色警示。</p>
+            <div class="coin-threshold-grid">
+                <label>NT$1<input id="coinThreshold1" type="number" min="0" max="250" inputmode="numeric"></label>
+                <label>NT$5<input id="coinThreshold5" type="number" min="0" max="250" inputmode="numeric"></label>
+                <label>NT$10<input id="coinThreshold10" type="number" min="0" max="250" inputmode="numeric"></label>
+                <label>NT$50<input id="coinThreshold50" type="number" min="0" max="250" inputmode="numeric"></label>
+            </div>
+            <button class="coin-primary-btn" onclick="saveCoinThresholds()">儲存安全庫存</button>
+        </div>
+
+        <div class="coin-section-card">
+            <h2>百元出鈔庫存（手動登記）</h2>
+            <p>TOP XC100 通訊協定尚未開放，所以這裡只記錄店長實際放入的百元鈔數量。</p>
+            <div class="coin-note-grid">
+                <label>現有百元鈔<input id="note100Count" type="number" min="0" max="500" inputmode="numeric"></label>
+                <label>保留安全張數<input id="note100Reserve" type="number" min="0" max="500" inputmode="numeric"></label>
+            </div>
+            <button class="coin-primary-btn" onclick="saveNote100Inventory()">儲存百元鈔庫存</button>
+            <div id="note100Meta" class="coin-note-meta"></div>
+        </div>
+
+        <div class="coin-section-card">
+            <h2>模擬找零（不出錢）</h2>
+            <p>輸入應找金額，系統只依目前庫存計算百元鈔與硬幣組合。</p>
+            <div class="coin-simulator-row">
+                <label>應找金額 NT$<input id="changeSimulationAmount" type="number" min="0" max="9999" inputmode="numeric" value="250"></label>
+                <button class="coin-primary-btn" onclick="simulateChange()">計算找零</button>
+            </div>
+            <div id="changeSimulationResult" class="change-simulation-result">尚未計算</div>
+        </div>
+
+        <div class="coin-section-card">
+            <h2>最近補幣紀錄</h2>
+            <div id="coinRefillHistory" class="coin-refill-history">尚無補幣紀錄</div>
+        </div>
+    </div>
+</section>
+
+<!-- ==========================
 硬體測試中心 V5.9
 ========================== -->
 
@@ -1401,6 +1420,26 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
             </div>
 
+            <div class="hardware-test-card">
+
+                <div class="hardware-test-icon">▣</div>
+
+                <div class="hardware-test-title">
+                    LINE Pay 掃描器
+                </div>
+
+                <div class="hardware-test-text">
+                    只測試 USB 掃描輸入，不連接 LINE Pay、不建立訂單、不扣款。
+                </div>
+
+                <button
+                    class="hardware-test-btn"
+                    onclick="location.href='linepay-scanner-test.html'">
+                    開啟零扣款測試
+                </button>
+
+            </div>
+
         </div>
 
         <div class="hardware-device-card">
@@ -1505,13 +1544,6 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             </div>
 
             <div class="backup-card">
-                <div class="backup-card-icon">🧹</div>
-                <div class="backup-card-title">安全清除測試資料</div>
-                <div class="backup-card-text">只清除明確輸入並通過預覽的測試訂單、票券與現金對帳；保留正式資料及操作紀錄。</div>
-                <button class="backup-action-btn backup-history-btn" onclick="document.getElementById('testCleanupPanel').scrollIntoView({behavior:'smooth'})">前往安全清除</button>
-            </div>
-
-            <div class="backup-card">
 
                 <div class="backup-card-icon">
                     📥
@@ -1585,32 +1617,6 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
         </div>
 
-        <div id="testCleanupPanel" class="test-cleanup-panel">
-            <h2>🧹 店長限定－清除測試資料</h2>
-            <p>先預覽，再驗證目前店長密碼及指定確認文字。會員／點數訂單、進行中交易與尚未人工結案的部分收款會自動封鎖。</p>
-            <div class="test-cleanup-grid">
-                <div class="test-cleanup-field full">
-                    <label for="testCleanupIds">測試訂單編號（每行一筆，最多20筆）</label>
-                    <textarea id="testCleanupIds" spellcheck="false" placeholder="M202607220021&#10;M202607220022"></textarea>
-                </div>
-                <div class="test-cleanup-field">
-                    <label for="testCleanupPassword">目前店長密碼</label>
-                    <input id="testCleanupPassword" type="password" autocomplete="current-password" placeholder="請再次輸入店長密碼">
-                </div>
-                <div class="test-cleanup-field">
-                    <label for="testCleanupPhrase">確認文字</label>
-                    <input id="testCleanupPhrase" type="text" autocomplete="off" placeholder="請輸入：清除測試資料">
-                </div>
-            </div>
-            <div class="test-cleanup-actions">
-                <button class="test-cleanup-preview-btn" onclick="MonsterTestDataCleanup.preview()">1. 預覽即將清除的資料</button>
-                <button id="testCleanupExecute" class="test-cleanup-execute-btn" disabled onclick="MonsterTestDataCleanup.execute()">2. 驗證並同步清除</button>
-            </div>
-            <div id="testCleanupPreview" class="test-cleanup-preview"></div>
-            <div id="testCleanupStatus" class="test-cleanup-status">尚未預覽；目前不會刪除任何資料。</div>
-            <div class="test-cleanup-audit-note">清除成功後會重新計算今日、本月與累積統計，並永久保留一筆店長操作紀錄。Android Session 原始稽核檔不會刪除。</div>
-        </div>
-
         <div
             id="backupStatus"
             class="backup-status">
@@ -1639,7 +1645,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 </audio>
 
 <script src="js/utils/legacy-polyfills.js?v=72c"></script>
-<script src="js/core/enterprise-core.js?v=7833s8"></script>
+<script src="js/core/enterprise-core.js?v=740"></script>
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 
@@ -1647,6 +1653,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="js/cloud/firebase-config.js?v=72c"></script>
 <script src="js/cloud/firebase-connect.js?v=72c"></script>
 <script src="js/config/state.js?v=72c"></script>
@@ -1660,10 +1667,10 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/sound.js?v=72c"></script>
     
 <script src="js/modules/page.js?v=72c"></script>  
-<script src="js/modules/history.js?v=7833s9r1"></script>
+<script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
-<script src="js/modules/print.js?v=7833s9r1"></script>
+<script src="js/modules/print.js?v=782"></script>
 <script src="js/modules/stats.js?v=72c"></script>
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/core/sale-rule-engine.js?v=781"></script>
@@ -1675,28 +1682,29 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     
 <script src="js/modules/hardwareTest.js?v=72c"></script>
 <script src="js/modules/dataManager.js?v=72c"></script>
-<script src="js/modules/testDataCleanup.js?v=7833s8"></script>
 <script src="js/modules/member.js?v=72c"></script>
 <script src="js/cloud/cloud-member-sync.js?v=72c"></script>
 <script src="js/vendor-qrcode.js?v=751"></script>
 <script src="js/modules/ticketValidation.js?v=7627"></script>
 <script src="js/modules/consumePoints.js?v=749"></script>
-<script src="js/hardware/receipt-printer.js?v=7833s9r1"></script>
-<script src="js/modules/payment.js?v=7833s9r1"></script>
-<script src="js/hardware/cash-bridge.js?v=7833s9r1"></script>
-<script src="js/hardware/cash-operations.js?v=7833s8"></script>
+<script src="js/modules/payment.js?v=7833s10"></script>
+<script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
+<script src="js/hardware/cash-bridge.js?v=7833s6"></script>
+<script src="js/hardware/coin-manager.js?v=7833s11a"></script>
 <script src="js/modules/detail.js?v=72c"></script>
 <script src="js/modules/cart.js?v=7627"></script>
     
-<script src="js/modules/operation.js?v=7833s9r1"></script>
+<script src="js/modules/operation.js?v=771"></script>
 <script src="js/modules/dashboard.js?v=73f2"></script>
 <script src="js/modules/roleManager.js?v=73simple"></script>
-<script src="js/cloud/auth.js?v=7833s9r1"></script>
+<script src="js/cloud/auth.js?v=73simple"></script>
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · SPRINT 11A COIN MANAGER</div>
+
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
-<script src="js/pwa/pwa-manager.js?v=7833s8"></script>
+<script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 </body>
 </html>

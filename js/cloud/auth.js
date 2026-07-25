@@ -19,10 +19,10 @@
         "data.backup": true,
         "data.restore": true,
         "data.clear": true,
-        "data.clear_test": true,
         "stats.reset": true,
         "employee.manage": true,
         "hardware.manage": true,
+        "coin.manage": true,
         "audit.read": true
     };
 
@@ -198,8 +198,6 @@
             "order.create": "建立訂單",
             "order.cancel": "作廢訂單",
             "order.reprint": "補印訂單",
-            "order.receipt_print": "列印實體收據",
-            "order.receipt_reprint": "補印實體收據",
             "order.enter": "確認入場",
             "order.exit": "完成離場",
             "member.create": "新增會員",
@@ -215,7 +213,12 @@
             "business.update": "營業模式",
             "system.update": "系統設定",
             "data.backup": "資料備份"
-            ,"data.clear_test": "清除測試資料"
+            ,"coin.inventory_refresh": "讀取硬幣庫存"
+            ,"coin.refill_start": "開始補幣"
+            ,"coin.refill_stop": "停止補幣"
+            ,"coin.threshold_update": "修改硬幣安全庫存"
+            ,"note.inventory_update": "修改百元鈔庫存"
+            ,"change.simulate": "模擬找零"
         };
         return labels[action] || action || "其他操作";
     }

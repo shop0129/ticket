@@ -1,5 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 8
-// 一般付款＋本機硬體現金授權共用交易核心
+// 小怪獸售票機 V7.8.3.3 Sprint 10
+// LINE Pay Offline API 掃碼＋本機硬體現金授權共用交易核心
 // Android WebView 61 相容（ES5）
 var countdownNumber = document.getElementById("countdownNumber");
 var successTip = document.getElementById("successTip");
@@ -24,6 +24,9 @@ function setPaymentButtonsDisabled(disabled) {
 
 function resetPaymentLock() {
     if (window.MonsterCashBridge && window.MonsterCashBridge.hasBlockingTransaction()) {
+        return;
+    }
+    if (window.MonsterLinePayScanner && window.MonsterLinePayScanner.hasBlockingTransaction()) {
         return;
     }
     paymentInProgress = false;
@@ -116,9 +119,13 @@ function buildPaymentContext() {
 
 function findExistingAuthorizedOrder(context, hardware) {
     var authorizationId = hardware && hardware.authorizationId;
+    var transactionId = hardware && hardware.transactionId;
+    var paymentId = hardware && hardware.paymentId;
     return salesHistory.find(function (order) {
         return order && (
             (authorizationId && order.printAuthorizationId === authorizationId) ||
+            (transactionId && order.linePayTransactionId === transactionId) ||
+            (paymentId && order.linePayPaymentId === paymentId) ||
             order.orderNo === context.orderNo
         );
     }) || null;
@@ -161,16 +168,21 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
         createdAt: context.createdAt || Date.now(),
         updatedAt: Date.now()
     });
-    if (hardware) {
+    if (hardware && paymentType === "現金") {
         order.paymentId = hardware.paymentId || "";
         order.printAuthorizationId = hardware.authorizationId || "";
         order.hardwarePaidAt = Number(hardware.paidAt || Date.now());
         order.hardwareCashStatus = "authorized";
-        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint8-fix1";
-        order.hardwarePaidNtd = Number(hardware.paidNtd || context.amount || 0);
-        order.hardwareCoinCount = Number(hardware.coinCount || 0);
-        order.hardwareBillCount = Number(hardware.billCount || 0);
-        order.hardwareCashBreakdown = clonePaymentValue(hardware.counts || {});
+        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint6";
+    } else if (hardware && paymentType === "LINE Pay") {
+        order.paymentId = hardware.paymentId || "";
+        order.linePayPaymentId = hardware.paymentId || "";
+        order.linePayTransactionId = String(hardware.transactionId || "");
+        order.linePayProviderOrderId = hardware.providerOrderId || "";
+        order.linePayPaidAt = Number(hardware.paidAt || Date.now());
+        order.linePayStatus = "paid";
+        order.linePayEnvironment = hardware.environment || "sandbox";
+        order.linePayApiVersion = hardware.apiVersion || "offline-v4";
     }
     if (window.MonsterAuth) {
         order = MonsterAuth.decorateRecord(order, "kiosk");
@@ -237,17 +249,6 @@ function finalizePaymentContext(paymentType, context, hardware) {
 function paymentSuccess(paymentType) {
     if (paymentInProgress) return;
     if (paymentType === "現金") {
-        if (
-            window.MonsterCashOperations &&
-            typeof MonsterCashOperations.canAcceptPayment === "function" &&
-            window.MonsterCashBridge &&
-            MonsterCashBridge.hasPairing() &&
-            !MonsterCashOperations.canAcceptPayment()
-        ) {
-            var health = MonsterCashOperations.getOperationalReadiness();
-            alert("目前暫停現金付款：" + ((health.blockers || []).join("；") || "控制器尚未安全就緒"));
-            return;
-        }
         if (window.MonsterCashBridge) {
             window.MonsterCashBridge.startCashPayment();
         } else {
@@ -255,10 +256,22 @@ function paymentSuccess(paymentType) {
         }
         return;
     }
-    paymentInProgress = true;
-    setPaymentButtonsDisabled(true);
     try {
-        finalizePaymentContext(paymentType, buildPaymentContext(), null);
+        var context = buildPaymentContext();
+        if (paymentType === "LINE Pay") {
+            if (Number(context.amount || 0) === 0) {
+                finalizePointOnlyPayment(context);
+                return;
+            }
+            if (!window.MonsterLinePayScanner) {
+                throw new Error("LINE Pay 掃描器付款模組尚未載入");
+            }
+            window.MonsterLinePayScanner.start(context);
+            return;
+        }
+        paymentInProgress = true;
+        setPaymentButtonsDisabled(true);
+        finalizePaymentContext(paymentType, context, null);
     } catch (error) {
         resetPaymentLock();
         alert("付款無法建立：" + (error.message || error));
@@ -271,6 +284,19 @@ function finalizeAuthorizedCashPayment(transaction, authorization) {
     return finalizePaymentContext("現金", transaction.order, authorization).order;
 }
 
+function finalizeAuthorizedLinePayPayment(context, authorization) {
+    var transactionId = String(authorization && authorization.transactionId || "");
+    if (!transactionId) {
+        throw new Error("LINE Pay 缺少交易編號，禁止建立訂單");
+    }
+    if (Number(authorization.amount) !== Number(context.amount)) {
+        throw new Error("LINE Pay 授權金額與訂單不一致，禁止出票");
+    }
+    paymentInProgress = true;
+    setPaymentButtonsDisabled(true);
+    return finalizePaymentContext("LINE Pay", context, authorization).order;
+}
+
 function finalizePointOnlyPayment(context) {
     paymentInProgress = true;
     setPaymentButtonsDisabled(true);
@@ -280,6 +306,7 @@ function finalizePointOnlyPayment(context) {
 window.MonsterPayment = {
     buildContext: buildPaymentContext,
     finalizeAuthorizedCash: finalizeAuthorizedCashPayment,
+    finalizeAuthorizedLinePay: finalizeAuthorizedLinePayPayment,
     finalizePointOnly: finalizePointOnlyPayment,
     setLocked: function (locked) {
         paymentInProgress = !!locked;

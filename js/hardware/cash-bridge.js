@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 8
+// 小怪獸售票機 V7.8.3.3 Sprint 6
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -91,22 +91,12 @@
             '  <p id="hardwareCashMessage">請稍候…</p>',
             '  <small id="hardwareCashOrder"></small>',
             '  <button id="hardwareCashRetry" type="button" style="display:none;">重新連線</button>',
-            '  <button id="hardwareCashManage" type="button" style="display:none;">店長人工處理</button>',
             '</div>'
         ].join("");
         document.body.appendChild(overlay);
         document.getElementById("hardwareCashRetry").addEventListener("click", function () {
             this.style.display = "none";
             if (active) pollPayment(active.order.orderNo);
-        });
-        document.getElementById("hardwareCashManage").addEventListener("click", function () {
-            hideOverlay();
-            if (window.MonsterCashOperations && MonsterCashOperations.open) {
-                MonsterCashOperations.open();
-            } else if (typeof showPage === "function") {
-                showPage("adminLoginPage");
-                alert("請由店長登入後開啟『現金對帳』");
-            }
         });
         return overlay;
     }
@@ -120,7 +110,6 @@
         document.getElementById("hardwareCashMessage").textContent = data.message || "請依控制器畫面投入現金";
         document.getElementById("hardwareCashOrder").textContent = data.orderNo ? ("訂單 " + data.orderNo) : "";
         document.getElementById("hardwareCashRetry").style.display = data.retry ? "inline-block" : "none";
-        document.getElementById("hardwareCashManage").style.display = data.manage ? "inline-block" : "none";
     }
 
     function hideOverlay() {
@@ -163,24 +152,6 @@
             }
             if (payload.status === "CANCELED") {
                 stopPolling();
-                if (Number(payload.paidNtd || 0) > 0 && /人工處理完成/.test(String(payload.message || ""))) {
-                    setOverlay({
-                        title: "人工處理已完成",
-                        amount: payload.amountNtd,
-                        paid: payload.paidNtd,
-                        remaining: payload.remainingNtd,
-                        orderNo: orderNo,
-                        message: payload.message || "本筆已關閉，不會出票。"
-                    });
-                    setTimeout(function () {
-                        active = null;
-                        saveActive();
-                        hideOverlay();
-                        setLocked(false);
-                        if (window.MonsterCashOperations) MonsterCashOperations.refresh();
-                    }, 1800);
-                    return;
-                }
                 setOverlay({
                     title: "付款已取消",
                     amount: payload.amountNtd,
@@ -201,20 +172,14 @@
             }
             if (payload.status === "RECONCILIATION_REQUIRED") {
                 stopPolling();
-                active.state = "RECONCILIATION_REQUIRED";
-                active.lastPaidNtd = Number(payload.paidNtd || 0);
-                active.updatedAt = Date.now();
-                saveActive();
                 setOverlay({
                     title: "需要員工人工處理",
                     amount: payload.amountNtd,
                     paid: payload.paidNtd,
                     remaining: payload.remainingNtd,
                     orderNo: orderNo,
-                    message: payload.message || "已收現金但交易未完成，系統已禁止出票。",
-                    manage: true
+                    message: payload.message || "已收現金但交易未完成，系統已禁止出票。"
                 });
-                if (window.MonsterCashOperations) MonsterCashOperations.refresh();
                 return;
             }
             setOverlay({
@@ -251,11 +216,7 @@
             authorizationId: authorizationId,
             paymentId: payload.paymentId || "",
             paidAt: payload.paidAt || Date.now(),
-            bridgeVersion: payload.bridgeVersion || "1.0-sprint8-fix1",
-            paidNtd: Number(payload.paidNtd || 0),
-            coinCount: Number(payload.coinCount || 0),
-            billCount: Number(payload.billCount || 0),
-            counts: payload.counts || {}
+            bridgeVersion: "1.0-sprint6"
         };
         active.updatedAt = Date.now();
         saveActive();
@@ -300,7 +261,6 @@
                 saveSalesHistory();
             }
             finishLocalTransaction();
-            if (window.MonsterCashOperations) MonsterCashOperations.refresh();
             return true;
         }).catch(function () {
             active.state = "ACK_PENDING";
@@ -325,20 +285,18 @@
         }, 500);
     }
 
-    function startCashPayment(printerReady, preparedContext) {
+    function startCashPayment() {
         if (active && active.state !== "COMPLETED") {
             setLocked(true);
             pollPayment(active.order.orderNo);
             return;
         }
-        var context = preparedContext;
-        if (!context) {
-            try {
-                context = window.MonsterPayment.buildContext();
-            } catch (error) {
-                alert("無法建立現金訂單：" + (error.message || error));
-                return;
-            }
+        var context;
+        try {
+            context = window.MonsterPayment.buildContext();
+        } catch (error) {
+            alert("無法建立現金訂單：" + (error.message || error));
+            return;
         }
         // 全額點數折抵時不啟動收鈔／收幣，直接走同一套防重複訂單流程。
         if (Number(context.amount || 0) === 0) {
@@ -346,37 +304,6 @@
             return;
         }
         if (!requestPairingKey()) return;
-        if (!printerReady) {
-            if (!window.MonsterReceiptPrinter || typeof MonsterReceiptPrinter.getStatus !== "function") {
-                alert("實體收據列印模組尚未載入，已停止現金付款");
-                return;
-            }
-            setLocked(true);
-            setOverlay({
-                title: "正在檢查收據機",
-                amount: context.amount,
-                paid: 0,
-                remaining: context.amount,
-                orderNo: context.orderNo,
-                message: "確認 ttyS4／9600 可使用後才會開放投入現金。"
-            });
-            MonsterReceiptPrinter.getStatus().then(function () {
-                startCashPayment(true, context);
-            }).catch(function (error) {
-                setLocked(false);
-                setOverlay({
-                    title: "收據機尚未就緒",
-                    amount: context.amount,
-                    paid: 0,
-                    remaining: context.amount,
-                    orderNo: context.orderNo,
-                    message: (error.message || "無法開啟收據機") + "。本次尚未開始收款，請先通知員工。",
-                    retry: false
-                });
-                setTimeout(hideOverlay, 4500);
-            });
-            return;
-        }
         active = {
             version: 1,
             state: "REQUESTING",
@@ -434,10 +361,10 @@
         setLocked(true);
         if (active.state === "ISSUE_STARTED" || active.state === "ACK_PENDING") {
             var authorizationId = active.authorization && active.authorization.authorizationId;
-            var savedOrder = salesHistory.find(function (order) {
+            var saved = salesHistory.some(function (order) {
                 return order && order.printAuthorizationId === authorizationId;
             });
-            if (savedOrder && savedOrder.receiptPrintStatus === "printed") {
+            if (saved) {
                 acknowledgeIssued();
                 return;
             }
@@ -470,38 +397,6 @@
         },
         clearPairing: function () {
             localStorage.removeItem(PAIRING_KEY);
-        },
-        hasPairing: function () {
-            return /^\d{8}$/.test(pairingKey());
-        },
-        getOperationalStatus: function () {
-            return api("/status");
-        },
-        getTodayReconciliation: function () {
-            return api("/reconciliation/today");
-        },
-        resolveReconciliation: function (orderNo, resolution, note) {
-            return api("/payments/" + encodeURIComponent(orderNo) + "/reconcile", {
-                method: "POST",
-                body: { resolution: resolution, note: note }
-            });
-        },
-        purgeTestData: function (orderIds) {
-            return api("/maintenance/purge-test-data", {
-                method: "POST",
-                body: {
-                    orderIds: orderIds || [],
-                    confirmation: "CLEAR_TEST_ONLY"
-                }
-            });
-        },
-        releaseAfterReconciliation: function (orderNo) {
-            if (active && active.order && active.order.orderNo === orderNo) {
-                active = null;
-                saveActive();
-                hideOverlay();
-                setLocked(false);
-            }
         },
         _test: {
             getActive: function () { return active; },

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>LINE Pay 掃描器零扣款測試</title>
+<style>
+html,body{height:100%;margin:0;font-family:Arial,"Noto Sans TC",sans-serif;background:#102027;color:#fff}
+body{display:flex;align-items:center;justify-content:center}
+.card{width:min(760px,90vw);padding:38px;border-radius:28px;background:#fff;color:#172b34;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.4);outline:0}
+.logo{display:inline-block;padding:12px 26px;border-radius:16px;background:#06c755;color:#fff;font-size:30px;font-weight:800}
+h1{font-size:34px;margin:24px 0 12px}.safe{color:#067a38;font-size:20px;font-weight:700}
+#result{margin:26px 0;padding:24px;border-radius:18px;background:#eef8f2;font-size:24px;line-height:1.6}
+#count{font-size:48px;font-weight:800;color:#06a847}.hint{color:#667085;font-size:17px;line-height:1.7}
+button{margin-top:18px;padding:13px 24px;border:0;border-radius:13px;background:#edf2f4;color:#344054;font-size:18px;font-weight:700}
+</style>
+</head>
+<body>
+<main id="card" class="card" tabindex="-1">
+  <div class="logo">LINE Pay</div>
+  <h1>掃描器零扣款測試</h1>
+  <p class="safe">此頁不連接 Firebase、不呼叫 LINE Pay，也不會扣款。</p>
+  <div id="result">
+    <div id="count">0／18</div>
+    <div id="status">請掃描 LINE Pay Sandbox 測試付款碼</div>
+  </div>
+  <p class="hint">成功時只顯示「18位付款碼已讀取」，不顯示或保存完整內容。<br>掃描器應設定為 USB HID 鍵盤模式，並在資料末尾送出 Enter。</p>
+  <button id="reset" type="button">清除並重測</button>
+  <button type="button" onclick="location.href='index.html'">返回售票機</button>
+</main>
+<script>
+(function(){
+  "use strict";
+  var buffer="",last=0,timer=null;
+  var status=document.getElementById("status"),count=document.getElementById("count");
+  function digits(v){return (String(v||"").match(/[0-9]/g)||[]).length}
+  function extract(v){
+    v=String(v||"").trim();
+    if(/^[0-9]{18}$/.test(v))return v;
+    var q=v.match(/[?&]oneTimeKey=([0-9]{18})(?:&|$)/i);
+    if(q)return q[1];
+    var m=v.match(/(?:^|[^0-9])([0-9]{18})(?:[^0-9]|$)/g)||[];
+    if(m.length!==1)return"";
+    var d=m[0].replace(/[^0-9]/g,"");
+    return d.length===18?d:"";
+  }
+  function render(text){
+    count.textContent=Math.min(18,extract(buffer)?18:digits(buffer))+"／18";
+    status.textContent=text||"正在讀取掃描器輸入…";
+  }
+  function clear(text){buffer="";last=0;if(timer)clearTimeout(timer);timer=null;render(text||"請掃描 LINE Pay Sandbox 測試付款碼")}
+  function success(){
+    var key=extract(buffer);
+    buffer="";
+    if(!key){clear("不是有效的18位 LINE Pay 付款碼，請重掃");return}
+    key="";
+    count.textContent="18／18";
+    status.textContent="✅ 掃描器正常：18位付款碼已讀取（未送出、未扣款）";
+  }
+  window.addEventListener("keydown",function(e){
+    var code=e.which||e.keyCode||0;
+    if(code===13||e.key==="Enter"){e.preventDefault();success();return}
+    var key=e.key&&e.key.length===1?e.key:"";
+    if(!key&&code>=48&&code<=90)key=String.fromCharCode(code);
+    if(!key&&code>=96&&code<=105)key=String(code-96);
+    if(!key)return;
+    var now=Date.now();if(last&&now-last>700)buffer="";last=now;
+    buffer+=key;if(buffer.length>512){clear("內容過長，請確認掃描的是 LINE Pay 付款碼");return}
+    e.preventDefault();render();
+    if(extract(buffer)&&/^[0-9]{18}$/.test(buffer)){
+      if(timer)clearTimeout(timer);
+      timer=setTimeout(success,180);
+    }
+  },true);
+  document.getElementById("reset").addEventListener("click",function(){clear()});
+  document.getElementById("card").focus();
+}());
+</script>
+</body>
+</html>

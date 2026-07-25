@@ -21,11 +21,9 @@
     <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
     <link
         rel="stylesheet"
-        href="css/staff.css?v=7833s9qrf1">
+        href="css/staff.css?v=7621">
     <link rel="stylesheet" href="css/pwa.css?v=73f1">
     <link rel="stylesheet" href="css/staff-enterprise.css?v=761">
-    <link rel="stylesheet" href="css/cash-operations.css?v=7833s7">
-    <link rel="stylesheet" href="css/operations-s8.css?v=7833s8">
 </head>
 
 <body data-pwa-app="staff">
@@ -167,21 +165,6 @@
 
             </div>
 
-        </section>
-
-        <section class="staff-section admin-only">
-            <div class="staff-section-title">💵 今日現金對帳</div>
-            <div id="dashboardCashOperationsStrip" class="dashboard-cash-operations-strip">
-                <div class="dashboard-cash-health">
-                    <span id="dashboardCashHardware">● 讀取中</span>
-                    <small id="dashboardCashHardwareDetail">等待點餐機同步控制器狀態</small>
-                    <small id="dashboardCashAutoRecovery">等待點餐機回報自動復原狀態</small>
-                </div>
-                <div><span>錢箱預估</span><strong id="dashboardPhysicalCash">NT$0</strong></div>
-                <div><span>現金差額</span><strong id="dashboardCashDifference">NT$0</strong></div>
-                <div><span>待人工處理</span><strong id="dashboardCashExceptions">0 筆 / NT$0</strong></div>
-            </div>
-            <div class="staff-inline-status">手機後台提供雲端即時查看；人工退款／入帳請到已配對控制器的點餐機操作。</div>
         </section>
 
         <section class="staff-section">
@@ -414,7 +397,7 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7.8.3.3 Sprint 8 FIX1
+            小怪獸售票機・V7.5.2 QR Order Core
         </footer>
 
     </div>
@@ -643,7 +626,7 @@
 <div id="enterpriseToast" class="enterprise-toast"></div>
 <audio id="successSound" preload="auto"><source src="sounds/success.wav" type="audio/wav"></audio><audio id="clickSound" preload="auto"><source src="sounds/click.wav" type="audio/wav"></audio>
 
-<script src="js/core/enterprise-core.js?v=7833s8"></script>
+<script src="js/core/enterprise-core.js?v=740"></script>
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 <script src="js/core/ticket-status-engine.js?v=760"></script>
@@ -666,10 +649,9 @@
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/staff/order-center.js?v=7626"></script>
 <script src="js/modules/ticketValidation.js?v=7626"></script>
-<script src="js/staff/ticket-validator.js?v=7833s9qrf1"></script>
+<script src="js/staff/ticket-validator.js?v=7626"></script>
 <script src="js/staff/order-tools.js?v=73e3"></script>
-<script src="js/hardware/cash-operations.js?v=7833s8"></script>
-<script src="js/pwa/pwa-manager.js?v=7833s8"></script>
+<script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 
 </body>
 </html>

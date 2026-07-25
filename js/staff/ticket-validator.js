@@ -1,7 +1,7 @@
-// 小怪獸售票機 V7.8.3.3 Sprint9｜QR Scanner FIX1
+// 小怪獸售票機 V7.6.2.6｜QR Parser Load Fix
 (function(){
 'use strict';
-var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false, scanAudioContext=null;
+var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false;
 function byId(id){return document.getElementById(id);} 
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function money(v){return 'NT$'+Number(v||0).toLocaleString('zh-TW');}
@@ -168,50 +168,6 @@ function lookup(value, options){
  }
  showResult(null);return Promise.resolve(false);
 }
-function prepareScanFeedback(){
- try{
-   var AudioContextClass=window.AudioContext||window.webkitAudioContext;
-   if(!AudioContextClass)return;
-   if(!scanAudioContext)scanAudioContext=new AudioContextClass();
-   if(scanAudioContext.state==='suspended'){
-     var resumePromise=scanAudioContext.resume();
-     if(resumePromise&&resumePromise.catch)resumePromise.catch(function(){});
-   }
-   // iPhone 必須在使用者按下「掃描」時先解鎖聲音，之後辨識成功才能正常播放。
-   var oscillator=scanAudioContext.createOscillator(), gain=scanAudioContext.createGain(), now=scanAudioContext.currentTime;
-   gain.gain.setValueAtTime(0,now);
-   oscillator.connect(gain);gain.connect(scanAudioContext.destination);
-   oscillator.start(now);oscillator.stop(now+0.01);
- }catch(e){}
-}
-function playScanSuccessFeedback(){
- try{if(navigator.vibrate)navigator.vibrate(55);}catch(e){}
- function playTone(){
-   try{
-     if(!scanAudioContext||scanAudioContext.state!=='running')throw new Error('audio-context-not-ready');
-     var now=scanAudioContext.currentTime;
-     [[880,0,0.075],[1320,0.085,0.11]].forEach(function(note){
-       var oscillator=scanAudioContext.createOscillator(), gain=scanAudioContext.createGain(), start=now+note[1], end=start+note[2];
-       oscillator.type='sine';oscillator.frequency.setValueAtTime(note[0],start);
-       gain.gain.setValueAtTime(0.0001,start);
-       gain.gain.exponentialRampToValueAtTime(0.28,start+0.012);
-       gain.gain.exponentialRampToValueAtTime(0.0001,end);
-       oscillator.connect(gain);gain.connect(scanAudioContext.destination);
-       oscillator.start(start);oscillator.stop(end+0.015);
-     });
-     return true;
-   }catch(e){return false;}
- }
- if(playTone())return;
- try{
-   if(scanAudioContext&&scanAudioContext.state==='suspended'){
-     scanAudioContext.resume().then(playTone).catch(function(){});
-     return;
-   }
- }catch(e){}
- // 不支援 Web Audio 時沿用後台既有的成功音效。
- try{var sound=byId('successSound');if(sound){sound.currentTime=0;sound.play().catch(function(){});}}catch(e){}
-}
 function releaseMediaTracks(){
  try{if(stream){stream.getTracks().forEach(function(t){try{t.stop();}catch(e){}});stream=null;}}catch(e){}
  try{var video=byId('tvcVideo');if(video){if(video.srcObject&&video.srcObject.getTracks)video.srcObject.getTracks().forEach(function(t){try{t.stop();}catch(e){}});video.pause();video.srcObject=null;video.removeAttribute('src');video.load();}}catch(e){}
@@ -227,8 +183,6 @@ function stopScan(){
 function handleScanSuccess(raw){
  if(scanLocked)return;scanLocked=true;
  var value=normalizeScanValue(raw);
- if(!value){scanLocked=false;return;}
- playScanSuccessFeedback();
  stopScan().then(function(){
    return lookup(value).then(function(ok){if(!ok){setTimeout(function(){alert('QR Code 已讀取，但找不到對應訂單。請確認單號，或按重新整理後再試。');},50);}});
  }).finally(function(){setTimeout(function(){scanLocked=false;},500);});
@@ -241,20 +195,12 @@ function loadHtml5Qr(){
  window.__monsterHtml5QrLoading=new Promise(function(resolve,reject){var n=0;function next(){if(n>=urls.length){reject(new Error('scanner-library-unavailable'));return;}var sc=document.createElement('script');sc.src=urls[n++];sc.async=true;sc.onload=function(){if(window.Html5Qrcode)resolve(window.Html5Qrcode);else next();};sc.onerror=next;document.head.appendChild(sc);}next();});
  return window.__monsterHtml5QrLoading;
 }
-function createScannerShell(mode){
- var cameraView=mode==='native'
-   ?'<div class="tvc-scanner-viewport tvc-scanner-native"><video id="tvcVideo" autoplay playsinline muted></video><div class="tvc-native-scan-frame" aria-hidden="true"></div></div>'
-   :'<div class="tvc-scanner-viewport tvc-scanner-html5"><div id="tvcScannerReader"></div></div>';
- var wrap=document.createElement('div');wrap.id='tvcScannerModal';wrap.className='staff-modal tvc-scanner';wrap.style.display='flex';
- wrap.innerHTML='<div class="staff-modal-card tvc-scanner-card"><div class="staff-modal-header"><div class="staff-modal-title">📷 掃描收據 QR Code</div><button id="tvcScanClose" class="staff-modal-close">×</button></div>'+cameraView+'<p>將 QR Code 對準框內</p><div class="tvc-scan-help">請使用 Safari 或 Chrome，並允許相機權限。若從 LINE 開啟，請改用外部瀏覽器。</div><button id="tvcManualCode" class="staff-secondary-button" type="button">改用訂單號碼</button></div>';
- document.body.appendChild(wrap);byId('tvcScanClose').onclick=stopScan;byId('tvcManualCode').onclick=scannerFallback;return wrap;
-}
+function createScannerShell(mode){var wrap=document.createElement('div');wrap.id='tvcScannerModal';wrap.className='staff-modal tvc-scanner';wrap.style.display='flex';wrap.innerHTML='<div class="staff-modal-card tvc-scanner-card"><div class="staff-modal-header"><div class="staff-modal-title">📷 掃描收據 QR Code</div><button id="tvcScanClose" class="staff-modal-close">×</button></div><div id="tvcScannerReader"></div>'+(mode==='native'?'<video id="tvcVideo" autoplay playsinline muted></video>':'')+'<p>將 QR Code 對準框內</p><div class="tvc-scan-help">請使用 Safari 或 Chrome，並允許相機權限。若從 LINE 開啟，請改用外部瀏覽器。</div><button id="tvcManualCode" class="staff-secondary-button" type="button">改用訂單號碼</button></div>';document.body.appendChild(wrap);byId('tvcScanClose').onclick=stopScan;byId('tvcManualCode').onclick=scannerFallback;return wrap;}
 function startNativeDetector(){var detector=new BarcodeDetector({formats:['qr_code']});createScannerShell('native');return navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}}).then(function(s){stream=s;var video=byId('tvcVideo');video.srcObject=s;scanTimer=setInterval(function(){if(video.readyState<2)return;detector.detect(video).then(function(codes){if(codes&&codes[0]&&codes[0].rawValue){handleScanSuccess(codes[0].rawValue);}}).catch(function(){});},300);});}
-function startHtml5Scanner(){createScannerShell('html5');return loadHtml5Qr().then(function(){html5Scanner=new Html5Qrcode('tvcScannerReader');return html5Scanner.start({facingMode:'environment'},{fps:10,qrbox:function(w,h){var s=Math.floor(Math.min(w,h)*0.72);return {width:s,height:s};}},function(raw){handleScanSuccess(raw);},function(){});});}
+function startHtml5Scanner(){createScannerShell('html5');return loadHtml5Qr().then(function(){html5Scanner=new Html5Qrcode('tvcScannerReader');return html5Scanner.start({facingMode:'environment'},{fps:10,qrbox:function(w,h){var s=Math.floor(Math.min(w,h)*0.72);return {width:s,height:s};},aspectRatio:1},function(raw){handleScanSuccess(raw);},function(){});});}
 function startScan(){
  if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){alert('手機相機只能在 HTTPS 安全網址中使用。請確認網址以 https:// 開頭，並改用 Safari 或 Chrome 開啟。');scannerFallback();return;}
  scanLocked=false;
- prepareScanFeedback();
  stopScan();
  var nativeSupported=('BarcodeDetector' in window);
  var task=nativeSupported?startNativeDetector():startHtml5Scanner();
