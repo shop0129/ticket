@@ -12,7 +12,7 @@
 
 ## 未變更
 
-- Controller 111。
+- Controller 112。
 - 現金收款與自動找零狀態機。
 - 收據內容、QR Code 內容與列印通訊。
 - Firebase 資料結構與權限。

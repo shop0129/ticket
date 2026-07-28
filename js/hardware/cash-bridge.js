@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX7
+// 小怪獸售票機 V7.8.3.3 FIX9
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -10,6 +10,7 @@
     var POLL_MS = 700;
     var pollTimer = null;
     var active = loadJson(TRANSACTION_KEY);
+    var pendingPurchasePage = null;
 
     function loadJson(key) {
         try {
@@ -111,7 +112,28 @@
         return overlay;
     }
 
+    function purchasePage() {
+        var requested = active && active.order
+            ? active.order.purchasePage
+            : pendingPurchasePage;
+        return requested === "detailPage"
+            ? "detailPage"
+            : "ticketPage";
+    }
+
+    function keepPurchasePageVisible() {
+        var target = purchasePage();
+        var current = document.querySelector(".page.active");
+        if (
+            typeof showPage === "function" &&
+            (!current || current.id !== target)
+        ) {
+            showPage(target);
+        }
+    }
+
     function setOverlay(data) {
+        keepPurchasePageVisible();
         ensureOverlay().classList.add("show");
         document.getElementById("hardwareCashTitle").textContent = data.title || "現金付款中";
         document.getElementById("hardwareCashAmount").textContent = "NT$" + Number(data.amount || 0);
@@ -193,10 +215,18 @@
                 });
                 if (Number(payload.paidNtd || 0) === 0) {
                     setTimeout(function () {
+                        var checkout = active && active.order;
                         active = null;
+                        pendingPurchasePage = null;
                         saveActive();
                         hideOverlay();
                         setLocked(false);
+                        if (
+                            window.MonsterPayment &&
+                            typeof window.MonsterPayment.restoreFailedCashCheckout === "function"
+                        ) {
+                            window.MonsterPayment.restoreFailedCashCheckout(checkout);
+                        }
                     }, 1800);
                 }
                 return;
@@ -346,6 +376,9 @@
                 return;
             }
         }
+        pendingPurchasePage = context.purchasePage === "detailPage"
+            ? "detailPage"
+            : "ticketPage";
         // 全額點數折抵時不啟動收鈔／收幣，直接走同一套防重複訂單流程。
         if (Number(context.amount || 0) === 0) {
             window.MonsterPayment.finalizePointOnly(context);
@@ -391,6 +424,7 @@
             createdAt: Date.now(),
             updatedAt: Date.now()
         };
+        pendingPurchasePage = null;
         saveActive();
         setLocked(true);
         setOverlay({
@@ -416,6 +450,7 @@
         }).catch(function (error) {
             if (error.code === "PAIRING_REQUIRED") localStorage.removeItem(PAIRING_KEY);
             active = null;
+            pendingPurchasePage = null;
             saveActive();
             setLocked(false);
             setOverlay({
@@ -434,6 +469,7 @@
     function recover() {
         if (!active || active.state === "COMPLETED") {
             active = null;
+            pendingPurchasePage = null;
             saveActive();
             return;
         }
@@ -469,6 +505,7 @@
         hasBlockingTransaction: function () {
             return !!(active && active.state !== "COMPLETED");
         },
+        getPurchasePage: purchasePage,
         onTicketAnimationFinished: function (order) {
             if (!active || !active.authorization || !order) return;
             if (order.printAuthorizationId !== active.authorization.authorizationId) return;

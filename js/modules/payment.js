@@ -104,6 +104,12 @@ function buildPaymentContext() {
     validatePointUse(pointUse);
     pointUse.discount = Math.min(Math.round(originalAmount), Math.round(pointUse.discount));
     var paidAmount = Math.max(0, Math.round(originalAmount) - pointUse.discount);
+    var activePage = document.querySelector
+        ? document.querySelector(".page.active")
+        : null;
+    var purchasePage = activePage && activePage.id === "detailPage"
+        ? "detailPage"
+        : "ticketPage";
     return {
         orderNo: generateOrderNo(),
         amount: paidAmount,
@@ -113,8 +119,20 @@ function buildPaymentContext() {
         memberInfo: typeof getCurrentMemberOrderInfo === "function"
             ? clonePaymentValue(getCurrentMemberOrderInfo())
             : {},
+        purchasePage: purchasePage,
         createdAt: Date.now()
     };
+}
+
+function restoreFailedCashCheckout(context) {
+    var target = context && context.purchasePage === "detailPage"
+        ? "detailPage"
+        : "ticketPage";
+    if (typeof updateCartPanel === "function") updateCartPanel();
+    if (window.ConsumePoints && typeof window.ConsumePoints.render === "function") {
+        window.ConsumePoints.render();
+    }
+    if (typeof showPage === "function") showPage(target);
 }
 
 function findExistingAuthorizedOrder(context, hardware) {
@@ -316,6 +334,7 @@ window.MonsterPayment = {
     finalizeAuthorizedCash: finalizeAuthorizedCashPayment,
     finalizeAuthorizedLinePay: finalizeAuthorizedLinePayPayment,
     finalizePointOnly: finalizePointOnlyPayment,
+    restoreFailedCashCheckout: restoreFailedCashCheckout,
     setLocked: function (locked) {
         paymentInProgress = !!locked;
         setPaymentButtonsDisabled(!!locked);

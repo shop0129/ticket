@@ -31,15 +31,21 @@
   }
   function reset(){ redemption={points:0,discount:0}; render(); }
   function current(){ return {points:redemption.points,discount:redemption.discount}; }
-  function totalAmount(){
+  function selectedAmount(){
     try{
       if(window.cart && cart.length) return cart.reduce(function(s,i){return s+num(i.price,0);},0);
       if(window.selectedTicket && window.ticketData && ticketData[selectedTicket]) return num(ticketData[selectedTicket].price,0);
     }catch(e){}
     return 0;
   }
+  function cartAmount(){
+    try{
+      if(window.cart && cart.length) return cart.reduce(function(s,i){return s+num(i.price,0);},0);
+    }catch(e){}
+    return 0;
+  }
   function render(){
-    var member=window.currentMember||null, total=totalAmount(), s=load();
+    var member=window.currentMember||null, total=selectedAmount(), cartTotal=cartAmount(), s=load();
     document.querySelectorAll(".consume-point-box").forEach(function(box){
       if(!member || !s.enabled){ box.style.display="none"; return; }
       box.style.display="block";
@@ -51,17 +57,19 @@
     });
     var cartPrice=document.querySelector("#cartAmount .cartTotalPrice");
     if(cartPrice){
-      var paidTotal=Math.max(0,total-redemption.discount);
-      cartPrice.innerHTML=redemption.discount>0 ? '<small class="consume-original-total">原價 NT$'+total+'</small>NT$'+paidTotal+'<small class="consume-discount-total">點數折抵 -NT$'+redemption.discount+'</small>' : 'NT$'+total;
+      var cartDiscount=Math.min(cartTotal,redemption.discount);
+      var paidTotal=Math.max(0,cartTotal-cartDiscount);
+      cartPrice.innerHTML=cartDiscount>0 ? '<small class="consume-original-total">原價 NT$'+cartTotal+'</small>NT$'+paidTotal+'<small class="consume-discount-total">點數折抵 -NT$'+cartDiscount+'</small>' : 'NT$'+cartTotal;
     }
-    [["cartLineBtn","LINE Pay"],["cartCashBtn","現金付款"],["linePayBtn","LINE Pay"],["cashBtn","現金付款"]].forEach(function(row){
+    [["cartLineBtn","LINE Pay",cartTotal],["cartCashBtn","現金付款",cartTotal],["linePayBtn","LINE Pay",total],["cashBtn","現金付款",total]].forEach(function(row){
       var b=document.getElementById(row[0]); if(!b)return;
-      b.textContent=redemption.discount>0 ? row[1]+" NT$"+Math.max(0,total-redemption.discount) : row[1];
+      var discount=Math.min(row[2],redemption.discount);
+      b.textContent=discount>0 ? row[1]+" NT$"+Math.max(0,row[2]-discount) : row[1];
     });
     window.dispatchEvent(new CustomEvent("consume-points-changed",{detail:{originalAmount:total,usedPoints:redemption.points,discount:redemption.discount,paidAmount:Math.max(0,total-redemption.discount)}}));
   }
   function applyInput(input){
-    var r=calc(input.value,totalAmount(),window.currentMember||null); redemption=r; input.value=r.points||""; render();
+    var r=calc(input.value,selectedAmount(),window.currentMember||null); redemption=r; input.value=r.points||""; render();
   }
   function inject(){
     document.querySelectorAll(".selected-member-display").forEach(function(display){
@@ -71,7 +79,7 @@
       display.insertAdjacentElement("afterend",box);
       var input=box.querySelector("[data-point-input]");
       input.addEventListener("input",function(){applyInput(input);});
-      box.querySelector("[data-point-all]").addEventListener("click",function(){ var s=load(), cap=maxRedeem(totalAmount(),window.currentMember||null); input.value=Math.floor(cap/Math.max(.01,num(s.pointValue,1))); applyInput(input); });
+      box.querySelector("[data-point-all]").addEventListener("click",function(){ var s=load(), cap=maxRedeem(selectedAmount(),window.currentMember||null); input.value=Math.floor(cap/Math.max(.01,num(s.pointValue,1))); applyInput(input); });
       box.querySelector("[data-point-clear]").addEventListener("click",function(){reset();});
     });
     render();

@@ -62,6 +62,6 @@ test("staff and manager roles use the same FIX8 scanner assets", () => {
     );
     assert.match(
         serviceWorker,
-        /7833-fix8-print-sync-manager-qr-20260728-1/
+        /7833-fix9-payment-page-cart-reset-20260728-1/
     );
 });
