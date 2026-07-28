@@ -124,10 +124,14 @@ function buildPaymentContext() {
     };
 }
 
-function restoreFailedCashCheckout(context) {
-    var target = context && context.purchasePage === "detailPage"
-        ? "detailPage"
-        : "ticketPage";
+function restoreFailedCashCheckout(context, requestedPage) {
+    var target = requestedPage === "homePage" ||
+        requestedPage === "ticketPage" ||
+        requestedPage === "detailPage"
+        ? requestedPage
+        : context && context.purchasePage === "detailPage"
+            ? "detailPage"
+            : "ticketPage";
     if (typeof updateCartPanel === "function") updateCartPanel();
     if (window.ConsumePoints && typeof window.ConsumePoints.render === "function") {
         window.ConsumePoints.render();
@@ -273,7 +277,27 @@ function finalizePaymentContext(paymentType, context, hardware) {
 }
 
 function paymentSuccess(paymentType) {
-    if (paymentInProgress) return;
+    if (paymentInProgress) {
+        if (
+            paymentType === "現金" &&
+            window.MonsterCashBridge &&
+            typeof window.MonsterCashBridge.hasBlockingTransaction === "function" &&
+            window.MonsterCashBridge.hasBlockingTransaction() &&
+            typeof window.MonsterCashBridge.resumeActivePayment === "function"
+        ) {
+            window.MonsterCashBridge.resumeActivePayment();
+            return;
+        }
+        if (
+            window.MonsterLinePayScanner &&
+            typeof window.MonsterLinePayScanner.hasBlockingTransaction === "function" &&
+            window.MonsterLinePayScanner.hasBlockingTransaction()
+        ) {
+            return;
+        }
+        // 沒有任何付款模組持有交易時，解除上一筆中斷留下的假鎖定。
+        resetPaymentLock();
+    }
     if (paymentType === "現金") {
         if (window.MonsterCashBridge) {
             window.MonsterCashBridge.startCashPayment();

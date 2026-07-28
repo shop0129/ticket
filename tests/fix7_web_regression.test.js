@@ -22,18 +22,18 @@ function equal(actual, expected, message) {
 }
 
 var index = read("index.html");
-ok(index.indexOf("V7.8.3.3 · FIX11 CASH DISPLAY + SMOOTH PRINT") >= 0, "index exposes current FIX11 version");
+ok(index.indexOf("V7.8.3.3 · FIX12 CASH BUTTON + BACK RECOVERY") >= 0, "index exposes current FIX12 version");
 ok(index.indexOf('id="receiptPrintRecovery"') >= 0, "receipt recovery panel exists");
 ok(index.indexOf("css/receipt-printer.css?v=7833fix7") >= 0, "receipt CSS is loaded");
 ok(index.indexOf("js/hardware/receipt-printer.js?v=7833fix7") >= 0, "receipt bridge is loaded");
 ok(
     index.indexOf("js/hardware/receipt-printer.js?v=7833fix7") <
-        index.indexOf("js/hardware/cash-bridge.js?v=7833fix11"),
+        index.indexOf("js/hardware/cash-bridge.js?v=7833fix12"),
     "receipt bridge loads before the cash bridge"
 );
 
 var serviceWorker = read("service-worker.js");
-ok(serviceWorker.indexOf("7833-fix11-cash-display-smooth-print-20260728-1") >= 0, "PWA cache is bumped");
+ok(serviceWorker.indexOf("7833-fix12-cash-button-back-recovery-20260729-1") >= 0, "PWA cache is bumped");
 ok(serviceWorker.indexOf('"./css/receipt-printer.css"') >= 0, "PWA caches receipt CSS");
 ok(serviceWorker.indexOf('"./js/hardware/receipt-printer.js"') >= 0, "PWA caches receipt bridge");
 ok(serviceWorker.indexOf("self.skipWaiting()") >= 0, "new worker takes over immediately");

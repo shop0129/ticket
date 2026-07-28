@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX11
+// 小怪獸售票機 V7.8.3.3 FIX12
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -8,12 +8,13 @@
     var PAIRING_KEY = "monsterCashBridgePairingKeyV1";
     var TRANSACTION_KEY = "monsterCashBridgeTransactionV1";
     var POLL_MS = 700;
+    var API_TIMEOUT_MS = 5000;
     var pollTimer = null;
     var active = loadJson(TRANSACTION_KEY);
     var pendingPurchasePage = null;
     var pendingContext = null;
     var pendingStartToken = 0;
-    var OVERLAY_FIX_VERSION = "fix11";
+    var OVERLAY_FIX_VERSION = "fix12";
 
     function loadJson(key) {
         try {
@@ -62,17 +63,38 @@
             }
         };
         if (options.body !== undefined) request.body = JSON.stringify(options.body);
-        return fetch(BASE_URL + path, request).then(function (response) {
-            return response.text().then(function (text) {
-                var data;
-                try { data = text ? JSON.parse(text) : {}; }
-                catch (error) { data = { ok: false, message: "控制器回覆格式錯誤" }; }
-                if (!response.ok) {
-                    var failure = new Error(data.message || ("控制器錯誤 HTTP " + response.status));
-                    failure.code = data.code || "HTTP_" + response.status;
-                    throw failure;
-                }
-                return data;
+        return new Promise(function (resolve, reject) {
+            var finished = false;
+            var timer = setTimeout(function () {
+                var timeout;
+                if (finished) return;
+                finished = true;
+                timeout = new Error("控制器連線逾時，請確認 Controller 113 正在背景執行");
+                timeout.code = "CONTROLLER_TIMEOUT";
+                reject(timeout);
+            }, API_TIMEOUT_MS);
+            fetch(BASE_URL + path, request).then(function (response) {
+                return response.text().then(function (text) {
+                    var data;
+                    try { data = text ? JSON.parse(text) : {}; }
+                    catch (error) { data = { ok: false, message: "控制器回覆格式錯誤" }; }
+                    if (!response.ok) {
+                        var failure = new Error(data.message || ("控制器錯誤 HTTP " + response.status));
+                        failure.code = data.code || "HTTP_" + response.status;
+                        throw failure;
+                    }
+                    return data;
+                });
+            }).then(function (data) {
+                if (finished) return;
+                finished = true;
+                clearTimeout(timer);
+                resolve(data);
+            }).catch(function (error) {
+                if (finished) return;
+                finished = true;
+                clearTimeout(timer);
+                reject(error);
             });
         });
     }
@@ -256,7 +278,21 @@
         else paymentInProgress = !!locked;
     }
 
-    function restoreCheckout(context) {
+    function normalizeReturnPage(returnPage, context) {
+        if (
+            returnPage === "homePage" ||
+            returnPage === "ticketPage" ||
+            returnPage === "detailPage"
+        ) {
+            return returnPage;
+        }
+        return context && context.purchasePage === "detailPage"
+            ? "detailPage"
+            : "ticketPage";
+    }
+
+    function restoreCheckout(context, returnPage) {
+        var target = normalizeReturnPage(returnPage, context);
         pendingContext = null;
         pendingPurchasePage = null;
         hideOverlay();
@@ -265,22 +301,24 @@
             window.MonsterPayment &&
             typeof window.MonsterPayment.restoreFailedCashCheckout === "function"
         ) {
-            window.MonsterPayment.restoreFailedCashCheckout(context);
+            window.MonsterPayment.restoreFailedCashCheckout(context, target);
+        } else if (typeof showPage === "function") {
+            showPage(target);
         }
     }
 
-    function cancelPreflight() {
+    function cancelPreflight(returnPage) {
         var checkout = pendingContext;
         pendingStartToken += 1;
-        restoreCheckout(checkout);
+        restoreCheckout(checkout, returnPage);
         return Promise.resolve(true);
     }
 
-    function requestCancelAndReturn() {
+    function requestCancelAndReturn(returnPage) {
         if (!active) {
             if (!pendingContext) return Promise.resolve(false);
             if (!confirm("確定取消這次現金付款並返回嗎？")) return Promise.resolve(false);
-            return cancelPreflight();
+            return cancelPreflight(returnPage);
         }
         if (Number(active.lastPaidNtd || 0) > 0) {
             alert("已投入現金，為避免帳款不一致，不能直接返回。請完成付款或通知員工處理。");
@@ -297,6 +335,7 @@
         }
         if (!confirm("確定取消這次現金付款並返回嗎？")) return Promise.resolve(false);
         stopPolling();
+        active.cancelReturnPage = normalizeReturnPage(returnPage, active.order);
         setOverlay({
             title: "正在取消付款",
             amount: active.order.amount,
@@ -399,6 +438,7 @@
                 if (Number(payload.paidNtd || 0) === 0) {
                     setTimeout(function () {
                         var checkout = active && active.order;
+                        var returnPage = active && active.cancelReturnPage;
                         active = null;
                         pendingPurchasePage = null;
                         saveActive();
@@ -408,7 +448,10 @@
                             window.MonsterPayment &&
                             typeof window.MonsterPayment.restoreFailedCashCheckout === "function"
                         ) {
-                            window.MonsterPayment.restoreFailedCashCheckout(checkout);
+                            window.MonsterPayment.restoreFailedCashCheckout(
+                                checkout,
+                                normalizeReturnPage(returnPage, checkout)
+                            );
                         }
                     }, 1800);
                 }
@@ -559,8 +602,7 @@
 
     function startCashPayment(printerReady, preparedContext) {
         if (active && active.state !== "COMPLETED") {
-            setLocked(true);
-            pollPayment(active.order.orderNo);
+            resumeActivePayment();
             return;
         }
         var context = preparedContext;
@@ -702,7 +744,38 @@
             });
             return;
         }
-        pollPayment(active.order.orderNo);
+        resumeActivePayment();
+    }
+
+    function resumeActivePayment() {
+        var context = active && active.order ? active.order : pendingContext;
+        var amount;
+        var paid;
+        var state;
+        if (!context) {
+            setLocked(false);
+            return false;
+        }
+        amount = Math.max(0, Number(context.amount || 0));
+        paid = Math.max(0, Number(active && active.lastPaidNtd || 0));
+        state = active && active.state || "PREFLIGHT";
+        setLocked(true);
+        setOverlay({
+            title: state === "PREFLIGHT" ? "正在檢查收據機" : "正在恢復現金付款",
+            amount: amount,
+            paid: paid,
+            remaining: Math.max(0, amount - paid),
+            orderNo: context.orderNo,
+            message: "正在連接 Controller 113；畫面會自動更新投入金額與數量。",
+            coinCount: active && active.lastCoinCount,
+            billCount: active && active.lastBillCount,
+            counts: active && active.lastCounts,
+            cancelAllowed: paid === 0
+        });
+        if (active && active.order && active.order.orderNo) {
+            pollPayment(active.order.orderNo);
+        }
+        return true;
     }
 
     window.MonsterCashBridge = {
@@ -712,6 +785,7 @@
         },
         getPurchasePage: purchasePage,
         requestCancelAndReturn: requestCancelAndReturn,
+        resumeActivePayment: resumeActivePayment,
         onTicketAnimationFinished: function (order) {
             if (!active || !active.authorization || !order) return;
             if (order.printAuthorizationId !== active.authorization.authorizationId) return;

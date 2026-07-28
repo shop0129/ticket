@@ -17,7 +17,7 @@ if (detailBackBtn) {
             window.MonsterCashBridge.hasBlockingTransaction() &&
             typeof window.MonsterCashBridge.requestCancelAndReturn === "function"
         ) {
-            window.MonsterCashBridge.requestCancelAndReturn();
+            window.MonsterCashBridge.requestCancelAndReturn("ticketPage");
             return;
         }
         setTimeout(function () {

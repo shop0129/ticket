@@ -34,7 +34,7 @@ ok(payment.indexOf("restoreFailedCashCheckout") >= 0, "failed cash payment resto
 var bridge = read("js/hardware/cash-bridge.js");
 ok(bridge.indexOf("keepPurchasePageVisible") >= 0, "cash overlay keeps the purchase page visible");
 ok(bridge.indexOf("getPurchasePage: purchasePage") >= 0, "page guard can resolve the active purchase page");
-ok(bridge.indexOf("restoreFailedCashCheckout(checkout)") >= 0, "canceled zero-cash order refreshes checkout");
+ok(bridge.indexOf("restoreFailedCashCheckout(") >= 0, "canceled zero-cash order refreshes checkout");
 
 var index = read("index.html");
 ok(index.indexOf("V7.8.3.3 FIX9 Payment Page + Cart Reset") >= 0, "FIX9 version is exposed");
