@@ -32,7 +32,7 @@ const checks = [
     ["cash cancellation is blocked after paid amount", cashBridge.includes("Number(active.lastPaidNtd || 0) > 0")],
     ["cancel API error resumes controller polling", /取消付款尚未完成[\s\S]*?pollPayment\(active\.order\.orderNo\)/.test(cashBridge)],
     ["preflight can be safely canceled", cashBridge.includes("function cancelPreflight(returnPage)")],
-    ["ticket-page back requests safe cancel", pageModule.includes("requestCancelAndReturn")],
+    ["ticket-page back requests safe Home reconciliation", pageModule.includes("requestKioskHome") && cashBridge.includes("requestHomeIfSafe")],
     ["detail-page back requests safe cancel", detailModule.includes("requestCancelAndReturn")],
     ["cancel button is styled", cashCss.includes("#hardwareCashCancel")]
 ];

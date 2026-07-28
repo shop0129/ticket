@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX14
+// 小怪獸售票機 V7.8.3.3 FIX15
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -17,7 +17,7 @@
     var pendingStartToken = 0;
     var bootRecoveryResolved = !active;
     var bootRecoveryPromise = null;
-    var OVERLAY_FIX_VERSION = "fix14";
+    var OVERLAY_FIX_VERSION = "fix15";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
 
@@ -1031,6 +1031,68 @@
         });
     }
 
+    function showHomeAfterSafeRelease() {
+        hideOverlay();
+        setLocked(false);
+        if (
+            window.MonsterHomeGuard &&
+            typeof window.MonsterHomeGuard.forceHomeIfSafe === "function"
+        ) {
+            return !!window.MonsterHomeGuard.forceHomeIfSafe();
+        }
+        if (typeof showPage === "function") {
+            showPage("homePage");
+            return true;
+        }
+        return false;
+    }
+
+    // Kiosk 115 與票種頁返回鍵共用的安全首頁交握：
+    // 沒有投入現金可向 Controller 113 對帳後取消；已有投入則保留交易與明細。
+    function requestHomeIfSafe(options) {
+        options = options || {};
+        if (pendingContext && !active) {
+            pendingStartToken += 1;
+            pendingContext = null;
+            pendingPurchasePage = null;
+            return Promise.resolve(showHomeAfterSafeRelease());
+        }
+        if (!active || active.state === "COMPLETED") {
+            clearStoredTransaction();
+            return Promise.resolve(showHomeAfterSafeRelease());
+        }
+        if (hasAcceptedCashEvidence(active)) {
+            bootRecoveryResolved = true;
+            resumeActivePayment();
+            return Promise.resolve(false);
+        }
+        setLocked(true);
+        setOverlay({
+            title: "正在安全返回首頁",
+            amount: active.order && active.order.amount,
+            paid: 0,
+            remaining: active.order && active.order.amount,
+            orderNo: active.order && active.order.orderNo,
+            message: "正在通知 Controller 113 停止上一筆未投入現金的付款，完成後會自動回首頁。",
+            cancelAllowed: false
+        });
+        return verifyStoredTransaction().then(function (result) {
+            if (!active || result === "cleared") {
+                return showHomeAfterSafeRelease();
+            }
+            if (hasAcceptedCashEvidence(active)) {
+                resumeActivePayment();
+                return false;
+            }
+            // 控制器尚未確認取消時持續顯示零元交易明細，不能假裝已可開始新交易。
+            resumeActivePayment();
+            return false;
+        }, function (error) {
+            showRecoveryBlocked(error);
+            return false;
+        });
+    }
+
     function resumeActivePayment() {
         var context = active && active.order ? active.order : pendingContext;
         var amount;
@@ -1073,6 +1135,7 @@
         },
         getPurchasePage: purchasePage,
         requestCancelAndReturn: requestCancelAndReturn,
+        requestHomeIfSafe: requestHomeIfSafe,
         resumeActivePayment: resumeActivePayment,
         onTicketAnimationFinished: function (order) {
             if (!active || !active.authorization || !order) return;

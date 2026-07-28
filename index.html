@@ -263,8 +263,19 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
             </div>
 
-            <div class="progress-text" id="progressText">
-                0%
+            <div class="progress-text" id="progressText" aria-live="polite">
+                <span id="progressTextValue">0%</span>
+                <span class="receipt-progress-steps" id="receiptProgressSteps" aria-hidden="true">
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:0s;animation-delay:0s;">0%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:.40s;animation-delay:.40s;">12%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:.80s;animation-delay:.80s;">25%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:1.20s;animation-delay:1.20s;">38%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:1.60s;animation-delay:1.60s;">51%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:2.00s;animation-delay:2.00s;">64%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:2.40s;animation-delay:2.40s;">76%</span>
+                    <span class="receipt-progress-step" style="-webkit-animation-delay:2.80s;animation-delay:2.80s;">86%</span>
+                    <span class="receipt-progress-step receipt-progress-step-last" style="-webkit-animation-delay:3.20s;animation-delay:3.20s;">94%</span>
+                </span>
             </div>
 
         </div>
@@ -1684,11 +1695,11 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix14"></script>  
+<script src="js/modules/page.js?v=7833fix15"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
-<script src="js/modules/print.js?v=7833fix11"></script>
+<script src="js/modules/print.js?v=7833fix15"></script>
 <script src="js/modules/stats.js?v=72c"></script>
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/core/sale-rule-engine.js?v=781"></script>
@@ -1706,9 +1717,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/ticketValidation.js?v=7627"></script>
 <script src="js/modules/consumePoints.js?v=7833fix9"></script>
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
-<script src="js/modules/payment.js?v=7833fix14"></script>
+<script src="js/modules/payment.js?v=7833fix15"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
-<script src="js/hardware/cash-bridge.js?v=7833fix14"></script>
+<script src="js/hardware/cash-bridge.js?v=7833fix15"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
 <!-- Regression markers retained for the previously verified FIX9 loading contract:
@@ -1718,6 +1729,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
      V7.8.3.3 · FIX13 STARTUP + CASH + BACK RECOVERY
      js/modules/payment.js?v=7833fix13
      js/hardware/cash-bridge.js?v=7833fix13 -->
+<!-- Regression markers retained for the completed FIX14 contract:
+     V7.8.3.3 · FIX14 STARTUP HOME + BACK GUARD
+     data-fix14-back-guard -->
 <script src="js/modules/cart.js?v=7627"></script>
     
 <script src="js/modules/operation.js?v=771"></script>
@@ -1727,13 +1741,13 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX14 STARTUP HOME + BACK GUARD</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 <script>
-// FIX14 critical home guard is kept inline so a slow Android WebView cannot mix
+// FIX15 critical home guard is kept inline so a slow Android WebView cannot mix
 // the new index with an older cached page.js and lose the Home/Back behavior.
 (function () {
     "use strict";
@@ -1756,6 +1770,11 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     }
 
     function forceHomeIfSafe() {
+        if (window.MonsterKioskRouting &&
+            typeof window.MonsterKioskRouting.requestHome === "function") {
+            window.MonsterKioskRouting.requestHome("inline-guard");
+            return !cashBlocking() && !linePayBlocking();
+        }
         if (window.MonsterHomeGuard &&
             typeof window.MonsterHomeGuard.forceHomeIfSafe === "function") {
             return window.MonsterHomeGuard.forceHomeIfSafe();
@@ -1775,19 +1794,16 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
     function installBackGuard() {
         var back = document.getElementById("backBtn");
-        if (!back || back.getAttribute("data-fix14-back-guard") === "1") return;
-        back.setAttribute("data-fix14-back-guard", "1");
+        if (!back || back.getAttribute("data-fix15-back-guard") === "1") return;
+        back.setAttribute("data-fix15-back-guard", "1");
         back.addEventListener("click", function (event) {
-            if (linePayBlocking()) return;
             event.preventDefault();
             event.stopImmediatePropagation();
             if (typeof window.playClick === "function") window.playClick();
-            if (cashBlocking() &&
-                window.MonsterCashBridge &&
-                typeof window.MonsterCashBridge.requestCancelAndReturn === "function") {
-                window.MonsterCashBridge.requestCancelAndReturn("homePage").then(function (canceled) {
-                    if (canceled) setTimeout(forceHomeIfSafe, 120);
-                });
+            if (linePayBlocking()) return;
+            if (window.MonsterKioskRouting &&
+                typeof window.MonsterKioskRouting.requestHome === "function") {
+                window.MonsterKioskRouting.requestHome("ticket-back");
                 return;
             }
             forceHomeIfSafe();
@@ -1819,8 +1835,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.addEventListener("controllerchange", function () {
             if (reloadRequested && paymentSafeForUpdate() &&
-                sessionStorage.getItem("monsterFix14SwReloaded") !== "1") {
-                sessionStorage.setItem("monsterFix14SwReloaded", "1");
+                sessionStorage.getItem("monsterFix15SwReloaded") !== "1") {
+                sessionStorage.setItem("monsterFix15SwReloaded", "1");
                 location.reload();
             }
         });

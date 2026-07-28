@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX11 | Smooth Receipt Progress
+// 小怪獸售票機 V7.8.3.3 FIX15 | WebView-visible receipt progress
 // =========================================
 // 小怪獸售票機 V5.6.3
 // 列印模組
@@ -9,6 +9,7 @@
 var successItemsBox = document.getElementById("successItems");
 var progressFill = document.getElementById("progressFill");
 var progressText = document.getElementById("progressText");
+var progressTextValue = document.getElementById("progressTextValue");
 var printStatus = document.getElementById("printStatus");
 var successTitle = document.querySelector(".success-title");
 var successItemsArea = document.querySelector(".success-items");
@@ -16,8 +17,15 @@ var activeReceiptProgressTimer = null;
 var activeReceiptProgressFrame = null;
 var activeReceiptPrintToken = 0;
 var RECEIPT_PROGRESS_LIMIT = 94;
-var RECEIPT_PROGRESS_RAMP_MS = 1050;
+var RECEIPT_PROGRESS_RAMP_MS = 3600;
 var RECEIPT_PROGRESS_MIN_VISIBLE_MS = 1150;
+
+function setReceiptProgressText(value) {
+    var text = String(value);
+    if (progressTextValue) progressTextValue.textContent = text;
+    else progressText.textContent = text;
+    progressText.setAttribute("aria-label", text);
+}
 // =========================================
 // 成功頁領取項目
 // =========================================
@@ -111,10 +119,16 @@ function resetPrintDisplay() {
     printStatus.classList.remove("print-warning");
     progressFill.style.width = "0%";
     progressFill.style.transition = "none";
+    progressFill.style.animation = "none";
+    progressFill.style.webkitAnimation = "none";
+    progressFill.style.transform = "scaleX(1)";
+    progressFill.style.webkitTransform = "scaleX(1)";
+    progressFill.classList.remove("receipt-progress-running");
+    progressText.classList.remove("receipt-progress-text-running");
     progressFill.style.borderRadius = "";
     progressFill.style.background =
         "linear-gradient(90deg,#FFD54F,#FF9800)";
-    progressText.innerHTML = "0%";
+    setReceiptProgressText("0%");
     successTitle.style.display = "none";
     successItemsArea.style.display = "none";
     var recovery = document.getElementById("receiptPrintRecovery");
@@ -154,7 +168,7 @@ function calculateReceiptProgress(elapsedMs) {
 function renderReceiptProgress(percent) {
     var value = Math.max(0, Math.min(RECEIPT_PROGRESS_LIMIT, Number(percent || 0)));
     progressFill.style.width = value + "%";
-    progressText.innerHTML = value + "%";
+    setReceiptProgressText(value + "%");
     updatePrintMessage(value);
 }
 
@@ -181,11 +195,28 @@ function startSmoothReceiptProgress(startedAt, token) {
     var forcedLayout;
     stopReceiptProgressFrame();
     renderReceiptProgress(0);
+    clearInterval(activeReceiptProgressTimer);
+    activeReceiptProgressTimer = null;
+    progressFill.classList.remove("receipt-progress-running");
+    progressText.classList.remove("receipt-progress-text-running");
+    progressFill.style.animation = "";
+    progressFill.style.webkitAnimation = "";
+    progressFill.style.transform = "";
+    progressFill.style.webkitTransform = "";
     forcedLayout = progressFill.offsetWidth;
     if (forcedLayout < 0) progressFill.style.opacity = "1";
-    progressFill.style.transition =
-        "width " + RECEIPT_PROGRESS_RAMP_MS + "ms cubic-bezier(.18,.74,.22,1)";
-    progressFill.style.width = RECEIPT_PROGRESS_LIMIT + "%";
+    progressFill.style.transition = "none";
+    progressFill.classList.add("receipt-progress-running");
+    progressText.classList.add("receipt-progress-text-running");
+
+    // 舊版 Android WebView 偶爾不執行 requestAnimationFrame；
+    // interval 與 CSS 合成層動畫並行，任一可用就會有連續可見進度。
+    activeReceiptProgressTimer = setInterval(function () {
+        if (token !== activeReceiptPrintToken) return;
+        setReceiptProgressText(
+            calculateReceiptProgress(Date.now() - startedAt) + "%"
+        );
+    }, 120);
 
     function tick() {
         var value;
@@ -194,7 +225,7 @@ function startSmoothReceiptProgress(startedAt, token) {
             return;
         }
         value = calculateReceiptProgress(Date.now() - startedAt);
-        progressText.innerHTML = value + "%";
+        setReceiptProgressText(value + "%");
         updatePrintMessage(value);
         if (value < RECEIPT_PROGRESS_LIMIT) {
             activeReceiptProgressFrame = scheduleReceiptProgressFrame(tick);
@@ -205,6 +236,16 @@ function startSmoothReceiptProgress(startedAt, token) {
     activeReceiptProgressFrame = scheduleReceiptProgressFrame(tick);
 }
 
+function waitForReceiptProgressPaint() {
+    return new Promise(function (resolve) {
+        scheduleReceiptProgressFrame(function () {
+            scheduleReceiptProgressFrame(function () {
+                setTimeout(resolve, 60);
+            });
+        });
+    });
+}
+
 function finishPhysicalPrintAfterVisibleProgress(token, startedAt, targetOrder, result) {
     var waitMs = Math.max(
         0,
@@ -213,9 +254,18 @@ function finishPhysicalPrintAfterVisibleProgress(token, startedAt, targetOrder, 
     return new Promise(function (resolve) {
         setTimeout(function () {
             if (token === activeReceiptPrintToken) {
+                clearInterval(activeReceiptProgressTimer);
+                activeReceiptProgressTimer = null;
                 stopReceiptProgressFrame();
+                progressFill.classList.remove("receipt-progress-running");
+                progressText.classList.remove("receipt-progress-text-running");
+                progressFill.style.animation = "none";
+                progressFill.style.webkitAnimation = "none";
+                progressFill.style.transform = "scaleX(1)";
+                progressFill.style.webkitTransform = "scaleX(1)";
                 progressFill.style.transition = "width 120ms linear";
-                progressText.innerHTML = RECEIPT_PROGRESS_LIMIT + "%";
+                progressFill.style.width = RECEIPT_PROGRESS_LIMIT + "%";
+                setReceiptProgressText(RECEIPT_PROGRESS_LIMIT + "%");
                 finishPrintAnimation(targetOrder, true);
             }
             resolve(result);
@@ -226,10 +276,18 @@ function finishPhysicalPrintAfterVisibleProgress(token, startedAt, targetOrder, 
 // 完成列印
 // =========================================
 function finishPrintAnimation(order, physicalPrinted) {
+    clearInterval(activeReceiptProgressTimer);
+    activeReceiptProgressTimer = null;
     stopReceiptProgressFrame();
+    progressFill.classList.remove("receipt-progress-running");
+    progressText.classList.remove("receipt-progress-text-running");
+    progressFill.style.animation = "none";
+    progressFill.style.webkitAnimation = "none";
+    progressFill.style.transform = "scaleX(1)";
+    progressFill.style.webkitTransform = "scaleX(1)";
     progressFill.style.width = "100%";
     progressFill.style.borderRadius = "40px";
-    progressText.innerHTML = "100%";
+    setReceiptProgressText("100%");
     printStatus.innerHTML =
         physicalPrinted ? "✅ 收據已列印完成" : "✅ 訂單已完成";
     successTip.innerHTML =
@@ -253,9 +311,15 @@ function showReceiptPrintRecovery(error) {
     clearInterval(activeReceiptProgressTimer);
     activeReceiptProgressTimer = null;
     stopReceiptProgressFrame();
+    progressFill.classList.remove("receipt-progress-running");
+    progressText.classList.remove("receipt-progress-text-running");
+    progressFill.style.animation = "none";
+    progressFill.style.webkitAnimation = "none";
+    progressFill.style.transform = "scaleX(1)";
+    progressFill.style.webkitTransform = "scaleX(1)";
     progressFill.style.width = "100%";
     progressFill.style.background = "#ef5350";
-    progressText.innerHTML = "需要處理";
+    setReceiptProgressText("需要處理");
     printStatus.innerHTML = "⚠️ 收據未確認列印";
     printStatus.classList.add("print-warning");
     successTip.innerHTML = "現金與訂單資料已保留，為避免重複出紙，系統不會自行重印。";
@@ -354,7 +418,10 @@ function startPrintAnimation() {
         });
     }
 
-    return MonsterReceiptPrinter.printOrder(targetOrder, { reprint: targetIsReprint })
+    return waitForReceiptProgressPaint()
+        .then(function () {
+            return MonsterReceiptPrinter.printOrder(targetOrder, { reprint: targetIsReprint });
+        })
         .then(function (result) {
             if (token !== activeReceiptPrintToken) return result;
             return finishPhysicalPrintAfterVisibleProgress(

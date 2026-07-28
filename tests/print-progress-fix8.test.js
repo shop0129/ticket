@@ -45,15 +45,15 @@ vm.runInNewContext(source, context, { filename: "print.js" });
 
 assert.strictEqual(context.calculateReceiptProgress(0), 0);
 assert.ok(
-    context.calculateReceiptProgress(600) >= 80,
-    "600ms 時畫面應已追上快速列印"
+    context.calculateReceiptProgress(600) >= 35,
+    "600ms 時畫面應已有清楚可見的進度"
 );
 assert.ok(
-    context.calculateReceiptProgress(900) >= 92,
-    "實體收據約 0.9 秒完成時，畫面應接近完成"
+    context.calculateReceiptProgress(1800) >= 80,
+    "列印中段時畫面應持續推進"
 );
 assert.strictEqual(
-    context.calculateReceiptProgress(1200),
+    context.calculateReceiptProgress(3600),
     94,
     "控制器確認前最多只能顯示 94%"
 );

@@ -781,7 +781,26 @@ cursor:pointer;
     border-radius:40px 0 0 40px;
 
     transition:width .2s ease;
+    transform-origin:left center;
+    -webkit-transform-origin:left center;
+    will-change:transform,width;
 
+}
+
+@-webkit-keyframes monsterReceiptProgressRamp{
+    from{-webkit-transform:scaleX(0);transform:scaleX(0)}
+    to{-webkit-transform:scaleX(1);transform:scaleX(1)}
+}
+
+@keyframes monsterReceiptProgressRamp{
+    from{-webkit-transform:scaleX(0);transform:scaleX(0)}
+    to{-webkit-transform:scaleX(1);transform:scaleX(1)}
+}
+
+.progress-fill.receipt-progress-running{
+    width:94% !important;
+    -webkit-animation:monsterReceiptProgressRamp 3.6s linear forwards;
+    animation:monsterReceiptProgressRamp 3.6s linear forwards;
 }
 
 .progress-text{
@@ -799,7 +818,74 @@ cursor:pointer;
     letter-spacing:3px;
 
     text-shadow:0 2px 6px rgba(0,0,0,.12);
+    position:relative;
+    min-height:78px;
 
+}
+
+.receipt-progress-steps{
+    display:none;
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+    color:#FF9800;
+}
+
+.receipt-progress-step{
+    position:absolute;
+    top:0;
+    right:0;
+    bottom:0;
+    left:0;
+    opacity:0;
+}
+
+@-webkit-keyframes monsterReceiptProgressStep{
+    0%{opacity:0}
+    8%{opacity:1}
+    92%{opacity:1}
+    100%{opacity:0}
+}
+
+@keyframes monsterReceiptProgressStep{
+    0%{opacity:0}
+    8%{opacity:1}
+    92%{opacity:1}
+    100%{opacity:0}
+}
+
+@-webkit-keyframes monsterReceiptProgressStepLast{
+    0%{opacity:0}
+    8%{opacity:1}
+    100%{opacity:1}
+}
+
+@keyframes monsterReceiptProgressStepLast{
+    0%{opacity:0}
+    8%{opacity:1}
+    100%{opacity:1}
+}
+
+.progress-text.receipt-progress-text-running > #progressTextValue{
+    opacity:0;
+}
+
+.progress-text.receipt-progress-text-running .receipt-progress-steps{
+    display:block;
+}
+
+.progress-text.receipt-progress-text-running .receipt-progress-step{
+    -webkit-animation:monsterReceiptProgressStep .46s linear both;
+    animation:monsterReceiptProgressStep .46s linear both;
+}
+
+.progress-text.receipt-progress-text-running .receipt-progress-step-last{
+    -webkit-animation-name:monsterReceiptProgressStepLast;
+    animation-name:monsterReceiptProgressStepLast;
+    -webkit-animation-duration:1.2s;
+    animation-duration:1.2s;
 }
 /*==========================
 等待出票

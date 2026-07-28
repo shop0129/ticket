@@ -1,4 +1,6 @@
-// V7.8.3.3 FIX14 | deterministic home navigation with hardware-payment safety
+// V7.8.3.3 FIX15 | kiosk home handshake with hardware-payment safety
+var activeKioskHomeRequest = null;
+
 function hasCashBridgeTransaction() {
     return !!(
         window.MonsterCashBridge &&
@@ -45,6 +47,30 @@ function forceHomePageIfSafe() {
     homePage.classList.add("active");
     resetIdleTimer();
     return true;
+}
+
+function requestKioskHome(reason) {
+    if (hasLinePayBridgeTransaction()) {
+        return Promise.resolve(false);
+    }
+    if (activeKioskHomeRequest) return activeKioskHomeRequest;
+    if (
+        window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.requestHomeIfSafe === "function"
+    ) {
+        activeKioskHomeRequest = window.MonsterCashBridge
+            .requestHomeIfSafe({ source: reason || "kiosk" })
+            .then(function (released) {
+                if (released) forceHomePageIfSafe();
+                activeKioskHomeRequest = null;
+                return !!released;
+            }, function () {
+                activeKioskHomeRequest = null;
+                return false;
+            });
+        return activeKioskHomeRequest;
+    }
+    return Promise.resolve(forceHomePageIfSafe());
 }
 
 function showPage(pageId) {
@@ -102,24 +128,20 @@ document
         event.preventDefault();
     }
     playClick();
-    if (
-        hasCashBridgeTransaction() &&
-        typeof window.MonsterCashBridge.requestCancelAndReturn === "function"
-    ) {
-        window.MonsterCashBridge.requestCancelAndReturn("homePage").then(function (canceled) {
-            if (canceled) {
-                setTimeout(forceHomePageIfSafe, 120);
-            }
-        });
-        return;
-    }
-    setTimeout(function () {
-        forceHomePageIfSafe();
-    }, 80);
+    requestKioskHome("ticket-back");
 });
 
 window.MonsterHomeGuard = {
-    version: "fix14",
+    version: "fix15",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
+};
+
+window.MonsterKioskRouting = {
+    version: "fix15",
+    requestHome: requestKioskHome,
+    isHome: function () {
+        var home = document.getElementById("homePage");
+        return !!(home && home.classList.contains("active"));
+    }
 };

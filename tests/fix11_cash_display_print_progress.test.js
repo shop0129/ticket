@@ -161,9 +161,10 @@ var printSource = fs.readFileSync(
     "utf8"
 );
 assert.ok(printSource.indexOf("requestAnimationFrame") >= 0);
-assert.ok(printSource.indexOf("cubic-bezier(.18,.74,.22,1)") >= 0);
+assert.ok(printSource.indexOf("activeReceiptProgressTimer = setInterval") >= 0);
 assert.ok(printSource.indexOf("RECEIPT_PROGRESS_MIN_VISIBLE_MS = 1150") >= 0);
 assert.ok(printSource.indexOf("finishPhysicalPrintAfterVisibleProgress") >= 0);
+assert.ok(printSource.indexOf("waitForReceiptProgressPaint") >= 0);
 assert.ok(printSource.indexOf("setInterval(function () {\n        percent") < 0);
 
-console.log("PASS FIX11 cash display and smooth print progress: 17 assertions");
+console.log("PASS FIX11/FIX15 cash display and WebView-visible print progress: 18 assertions");
