@@ -12,6 +12,8 @@ var progressText = document.getElementById("progressText");
 var printStatus = document.getElementById("printStatus");
 var successTitle = document.querySelector(".success-title");
 var successItemsArea = document.querySelector(".success-items");
+var activeReceiptProgressTimer = null;
+var activeReceiptPrintToken = 0;
 // =========================================
 // 成功頁領取項目
 // =========================================
@@ -90,8 +92,11 @@ function updateSuccessItems() {
 // =========================================
 function resetPrintDisplay() {
     clearInterval(countdownTimer);
+    clearInterval(activeReceiptProgressTimer);
+    activeReceiptProgressTimer = null;
     countdownNumber.innerHTML = "";
     printStatus.classList.remove("print-finish");
+    printStatus.classList.remove("print-warning");
     progressFill.style.width = "0%";
     progressFill.style.borderRadius = "";
     progressFill.style.background =
@@ -99,6 +104,8 @@ function resetPrintDisplay() {
     progressText.innerHTML = "0%";
     successTitle.style.display = "none";
     successItemsArea.style.display = "none";
+    var recovery = document.getElementById("receiptPrintRecovery");
+    if (recovery) recovery.classList.remove("show");
 }
 // =========================================
 // 更新列印提示文字
@@ -120,26 +127,59 @@ function updatePrintMessage(percent) {
 // =========================================
 // 完成列印
 // =========================================
-function finishPrintAnimation() {
+function finishPrintAnimation(order, physicalPrinted) {
     progressFill.style.width = "100%";
     progressFill.style.borderRadius = "40px";
     progressText.innerHTML = "100%";
     printStatus.innerHTML =
-        "✅ 票券已列印完成";
+        physicalPrinted ? "✅ 收據已列印完成" : "✅ 訂單已完成";
     successTip.innerHTML =
         "🎉 歡迎來到小怪獸放電所，祝您玩得開心！";
     playSuccess();
     printStatus.classList.add("print-finish");
     successTitle.style.display = "block";
     successItemsArea.style.display = "block";
-    if (window.MonsterCashBridge &&
+    if (physicalPrinted &&
+        window.MonsterCashBridge &&
         typeof window.MonsterCashBridge.onTicketAnimationFinished === "function") {
-        window.MonsterCashBridge.onTicketAnimationFinished(currentPrintOrder);
+        window.MonsterCashBridge.onTicketAnimationFinished(order || currentPrintOrder);
     }
     // 0.5 秒後開始倒數
     setTimeout(function () {
         startReturnCountdown();
     }, 500);
+}
+
+function showReceiptPrintRecovery(error) {
+    clearInterval(activeReceiptProgressTimer);
+    activeReceiptProgressTimer = null;
+    progressFill.style.width = "100%";
+    progressFill.style.background = "#ef5350";
+    progressText.innerHTML = "需要處理";
+    printStatus.innerHTML = "⚠️ 收據未確認列印";
+    printStatus.classList.add("print-warning");
+    successTip.innerHTML = "現金與訂單資料已保留，為避免重複出紙，系統不會自行重印。";
+    successTitle.style.display = "block";
+    successItemsArea.style.display = "block";
+    var recovery = document.getElementById("receiptPrintRecovery");
+    var message = document.getElementById("receiptPrintRecoveryMessage");
+    if (message) {
+        message.textContent = (error && error.message)
+            ? error.message
+            : "請通知員工檢查紙張與印表機，再從訂單明細執行補印。";
+    }
+    if (recovery) recovery.classList.add("show");
+    countdownNumber.innerHTML = "";
+}
+
+function openReceiptPrintRecovery() {
+    playClick();
+    if (window.MonsterAuth && MonsterAuth.getCurrentUser && MonsterAuth.getCurrentUser()) {
+        if (typeof openSalesHistory === "function") openSalesHistory();
+        return;
+    }
+    showPage("adminLoginPage");
+    alert("請由店長或員工登入，進入售票紀錄後補印這筆訂單。");
 }
 // =========================================
 // 列印完成倒數
@@ -187,21 +227,51 @@ function startReturnCountdown() {
 // =========================================
 function startPrintAnimation() {
     resetPrintDisplay();
+    var targetOrder = currentPrintOrder;
+    var targetIsReprint = !!isReprint;
+    var token = ++activeReceiptPrintToken;
     var percent = 0;
-    var timer = setInterval(function () {
+    var hasPhysicalPrinter = window.MonsterReceiptPrinter &&
+        typeof MonsterReceiptPrinter.printOrder === "function" &&
+        MonsterReceiptPrinter.hasPairing();
+
+    activeReceiptProgressTimer = setInterval(function () {
         percent +=
-            Math.floor(Math.random() * 5) + 5;
-        if (percent > 100) {
-            percent = 100;
-        }
+            Math.floor(Math.random() * 4) + 3;
+        if (percent > 82) percent = 82;
         progressFill.style.width =
             percent + "%";
         progressText.innerHTML =
             percent + "%";
         updatePrintMessage(percent);
-        if (percent >= 100) {
-            clearInterval(timer);
-            finishPrintAnimation();
-        }
     }, 220);
+
+    if (!hasPhysicalPrinter) {
+        if (targetOrder && targetOrder.printAuthorizationId) {
+            showReceiptPrintRecovery(new Error("實體收據機尚未連線；現金訂單不會直接標記完成"));
+            return Promise.resolve(false);
+        }
+        return new Promise(function (resolve) {
+            setTimeout(function () {
+                if (token !== activeReceiptPrintToken) return resolve(false);
+                clearInterval(activeReceiptProgressTimer);
+                activeReceiptProgressTimer = null;
+                finishPrintAnimation(targetOrder, false);
+                resolve(false);
+            }, 1800);
+        });
+    }
+
+    return MonsterReceiptPrinter.printOrder(targetOrder, { reprint: targetIsReprint })
+        .then(function (result) {
+            if (token !== activeReceiptPrintToken) return result;
+            clearInterval(activeReceiptProgressTimer);
+            activeReceiptProgressTimer = null;
+            finishPrintAnimation(targetOrder, true);
+            return result;
+        })
+        .catch(function (error) {
+            if (token === activeReceiptPrintToken) showReceiptPrintRecovery(error);
+            return { ok: false, error: error };
+        });
 }

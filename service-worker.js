@@ -1,9 +1,9 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 11A
+// 小怪獸售票機 V7.8.3.3 FIX7 Receipt + Auto Change
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-sprint11a-coin-manager-20260725-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix7-receipt-auto-change-20260728-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -19,6 +19,7 @@ var CORE_ASSETS = [
     "./css/cash-bridge.css",
     "./css/coin-manager.css",
     "./css/linepay-scanner.css",
+    "./css/receipt-printer.css",
     "./css/display.css",
     "./css/pwa.css",
     "./css/staff.css",
@@ -71,6 +72,7 @@ var CORE_ASSETS = [
     "./js/display.js",
     "./js/hardware/cash-bridge.js",
     "./js/hardware/coin-manager.js",
+    "./js/hardware/receipt-printer.js",
     "./js/modules/businessMode.js",
     "./js/modules/cart.js",
     "./js/modules/dashboard.js",
@@ -123,6 +125,8 @@ self.addEventListener("install", function (event) {
             return Promise.all(CORE_ASSETS.map(function (asset) {
                 return cacheCoreAsset(cache, asset);
             }));
+        }).then(function () {
+            return self.skipWaiting();
         })
     );
 });

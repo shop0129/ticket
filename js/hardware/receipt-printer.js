@@ -1,5 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 9
-// 80mm 實體收據列印橋接（/dev/ttyS4 · 9600 · GB18030）
+// 小怪獸售票機 V7.8.3.3 FIX7
+// 55mm 實體收據列印橋接（/dev/ttyS4 · 9600 · GB18030）
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
@@ -188,7 +188,7 @@
     }
 
     window.MonsterReceiptPrinter = {
-        version: "1.0-sprint9-receipt",
+        version: "1.1-fix7-controller110-receipt",
         hasPairing: function () { return /^\d{8}$/.test(pairingKey()); },
         getStatus: function () { return api("/printer/status"); },
         printOrder: printOrder,

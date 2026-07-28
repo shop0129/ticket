@@ -173,7 +173,15 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
         order.printAuthorizationId = hardware.authorizationId || "";
         order.hardwarePaidAt = Number(hardware.paidAt || Date.now());
         order.hardwareCashStatus = "authorized";
-        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.0-sprint6";
+        order.hardwareBridgeVersion = hardware.bridgeVersion || "1.8-sprint11k-controller110-production-auto-change";
+        order.hardwarePaidNtd = Number(hardware.paidNtd || context.amount || 0);
+        order.hardwareCoinCount = Number(hardware.coinCount || 0);
+        order.hardwareBillCount = Number(hardware.billCount || 0);
+        order.hardwareCashBreakdown = clonePaymentValue(hardware.counts || {});
+        order.changeAmount = Math.max(
+            0,
+            order.hardwarePaidNtd - Number(context.amount || 0)
+        );
     } else if (hardware && paymentType === "LINE Pay") {
         order.paymentId = hardware.paymentId || "";
         order.linePayPaymentId = hardware.paymentId || "";
