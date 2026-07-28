@@ -143,13 +143,13 @@ ok(bridgeSource.indexOf("finalizePointOnly") !== -1, "全額點數折抵不得�
 var indexSource = fs.readFileSync(path.resolve(__dirname, "../index.html"), "utf8");
 ok(indexSource.indexOf("css/cash-bridge.css") !== -1, "首頁應載入現金付款畫面");
 ok(indexSource.indexOf("js/hardware/cash-bridge.js") !== -1, "首頁應在付款模組後載入本機橋接");
-ok(indexSource.indexOf("V7.8.3.3 · FIX7 RECEIPT + AUTO CHANGE") !== -1, "畫面版本標記應更新");
+ok(indexSource.indexOf("V7.8.3.3 · FIX8 PRINT SYNC + MANAGER QR") !== -1, "畫面版本標記應更新");
 
 var printSource = fs.readFileSync(path.resolve(__dirname, "../js/modules/print.js"), "utf8");
 ok(printSource.indexOf("onTicketAnimationFinished") !== -1, "出票動畫完成後才可確認出票");
 
 var workerSource = fs.readFileSync(path.resolve(__dirname, "../service-worker.js"), "utf8");
-ok(workerSource.indexOf("7833-fix7-receipt-auto-change-20260728-1") !== -1, "PWA快取版本應更新");
+ok(workerSource.indexOf("7833-fix8-print-sync-manager-qr-20260728-1") !== -1, "PWA快取版本應更新");
 ok(workerSource.indexOf("./js/hardware/cash-bridge.js") !== -1, "PWA應快取現金橋接");
 ok(workerSource.indexOf("./css/cash-bridge.css") !== -1, "PWA應快取現金付款樣式");
 

@@ -1,9 +1,9 @@
-// 小怪獸售票機 V7.8.3.3 FIX7 Receipt + Auto Change
+// 小怪獸售票機 V7.8.3.3 FIX8 Print Sync + Manager QR
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix7-receipt-auto-change-20260728-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix8-print-sync-manager-qr-20260728-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

@@ -1,4 +1,4 @@
-// V7 Phase 1 Legacy Build | js/modules/print.js
+// 小怪獸售票機 V7.8.3.3 FIX8 | Receipt Progress Sync
 // =========================================
 // 小怪獸售票機 V5.6.3
 // 列印模組
@@ -14,6 +14,8 @@ var successTitle = document.querySelector(".success-title");
 var successItemsArea = document.querySelector(".success-items");
 var activeReceiptProgressTimer = null;
 var activeReceiptPrintToken = 0;
+var RECEIPT_PROGRESS_LIMIT = 94;
+var RECEIPT_PROGRESS_RAMP_MS = 1200;
 // =========================================
 // 成功頁領取項目
 // =========================================
@@ -115,7 +117,7 @@ function updatePrintMessage(percent) {
         successTip.innerHTML =
             "👾 小怪獸正在準備您的票券...";
     }
-    else if (percent < 70) {
+    else if (percent < 90) {
         successTip.innerHTML =
             "🖨️ 正在列印票券...";
     }
@@ -123,6 +125,26 @@ function updatePrintMessage(percent) {
         successTip.innerHTML =
             "✨ 即將完成...";
     }
+}
+// =========================================
+// 實體收據進度
+// =========================================
+function calculateReceiptProgress(elapsedMs) {
+    var elapsed = Math.max(0, Number(elapsedMs || 0));
+    var ratio = Math.min(1, elapsed / RECEIPT_PROGRESS_RAMP_MS);
+    // 收據機通常約 1 秒完成。使用快速漸進曲線先追上實體列印，
+    // 但在控制器回覆 PRINTED 前最多只顯示 94%，避免誤報完成。
+    var eased = 1 - Math.pow(1 - ratio, 3);
+    return Math.min(
+        RECEIPT_PROGRESS_LIMIT,
+        Math.round(RECEIPT_PROGRESS_LIMIT * eased)
+    );
+}
+function renderReceiptProgress(percent) {
+    var value = Math.max(0, Math.min(RECEIPT_PROGRESS_LIMIT, Number(percent || 0)));
+    progressFill.style.width = value + "%";
+    progressText.innerHTML = value + "%";
+    updatePrintMessage(value);
 }
 // =========================================
 // 完成列印
@@ -231,20 +253,18 @@ function startPrintAnimation() {
     var targetIsReprint = !!isReprint;
     var token = ++activeReceiptPrintToken;
     var percent = 0;
+    var progressStartedAt = Date.now();
     var hasPhysicalPrinter = window.MonsterReceiptPrinter &&
         typeof MonsterReceiptPrinter.printOrder === "function" &&
         MonsterReceiptPrinter.hasPairing();
 
     activeReceiptProgressTimer = setInterval(function () {
-        percent +=
-            Math.floor(Math.random() * 4) + 3;
-        if (percent > 82) percent = 82;
-        progressFill.style.width =
-            percent + "%";
-        progressText.innerHTML =
-            percent + "%";
-        updatePrintMessage(percent);
-    }, 220);
+        percent = Math.max(
+            percent,
+            calculateReceiptProgress(Date.now() - progressStartedAt)
+        );
+        renderReceiptProgress(percent);
+    }, 80);
 
     if (!hasPhysicalPrinter) {
         if (targetOrder && targetOrder.printAuthorizationId) {
