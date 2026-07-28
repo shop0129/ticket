@@ -1,10 +1,10 @@
-// 小怪獸售票機 V7.8.3.3 FIX13 Startup + Cash + Back Recovery
-// Preserved base cache: 7833-fix12-cash-button-back-recovery-20260729-1
+// 小怪獸售票機 V7.8.3.3 FIX14 Startup Home + Back Guard
+// Preserved base cache: 7833-fix13-startup-cash-back-recovery-20260729-1
 // 離線啟動與同源靜態資源快取；不攔截 Firebase 或其他外部 API。
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix13-startup-cash-back-recovery-20260729-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix14-startup-home-back-guard-20260729-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

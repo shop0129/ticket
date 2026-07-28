@@ -1,4 +1,4 @@
-// V7.8.3.3 FIX13 | verify stored cash state before blocking startup/back navigation
+// V7.8.3.3 FIX14 | deterministic home navigation with hardware-payment safety
 function hasCashBridgeTransaction() {
     return !!(
         window.MonsterCashBridge &&
@@ -21,18 +21,37 @@ function hasBlockingCheckoutTransaction() {
     return typeof paymentInProgress !== "undefined" && !!paymentInProgress;
 }
 
-function showPage(pageId) {
-    clearInterval(countdownTimer);
+function releaseWebOnlyPaymentLock() {
     if (
-        pageId === "homePage" &&
         !hasCashBridgeTransaction() &&
         !hasLinePayBridgeTransaction() &&
         typeof paymentInProgress !== "undefined" &&
         paymentInProgress &&
         typeof resetPaymentLock === "function"
     ) {
-        // 上一筆失敗交易只留下網頁鎖定時，返回首頁必須能自動恢復。
         resetPaymentLock();
+    }
+}
+
+function forceHomePageIfSafe() {
+    releaseWebOnlyPaymentLock();
+    if (hasBlockingCheckoutTransaction()) return false;
+    clearInterval(countdownTimer);
+    document.querySelectorAll(".page").forEach(function (page) {
+        page.classList.remove("active");
+    });
+    var homePage = document.getElementById("homePage");
+    if (!homePage) return false;
+    homePage.classList.add("active");
+    resetIdleTimer();
+    return true;
+}
+
+function showPage(pageId) {
+    clearInterval(countdownTimer);
+    if (pageId === "homePage") {
+        // 上一筆失敗交易只留下網頁鎖定時，返回首頁必須能自動恢復。
+        releaseWebOnlyPaymentLock();
     }
     // 收款、找零或列印授權尚未結束時，不允許閒置計時器把畫面送回首頁。
     if (pageId === "homePage" && hasBlockingCheckoutTransaction()) {
@@ -78,16 +97,29 @@ document
 });
 document
     .getElementById("backBtn")
-    .addEventListener("click", function () {
+    .addEventListener("click", function (event) {
+    if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+    }
     playClick();
     if (
         hasCashBridgeTransaction() &&
         typeof window.MonsterCashBridge.requestCancelAndReturn === "function"
     ) {
-        window.MonsterCashBridge.requestCancelAndReturn("homePage");
+        window.MonsterCashBridge.requestCancelAndReturn("homePage").then(function (canceled) {
+            if (canceled) {
+                setTimeout(forceHomePageIfSafe, 120);
+            }
+        });
         return;
     }
     setTimeout(function () {
-        showPage("homePage");
+        forceHomePageIfSafe();
     }, 80);
 });
+
+window.MonsterHomeGuard = {
+    version: "fix14",
+    forceHomeIfSafe: forceHomePageIfSafe,
+    hasBlockingCheckout: hasBlockingCheckoutTransaction
+};

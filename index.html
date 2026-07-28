@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX13 Startup + Cash + Back Recovery">
+<meta name="monster-app-version" content="V7.8.3.3 FIX14 Startup Home + Back Guard">
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
 
@@ -1684,7 +1684,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix13"></script>  
+<script src="js/modules/page.js?v=7833fix14"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
@@ -1706,14 +1706,18 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/ticketValidation.js?v=7627"></script>
 <script src="js/modules/consumePoints.js?v=7833fix9"></script>
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
-<script src="js/modules/payment.js?v=7833fix13"></script>
+<script src="js/modules/payment.js?v=7833fix14"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
-<script src="js/hardware/cash-bridge.js?v=7833fix13"></script>
+<script src="js/hardware/cash-bridge.js?v=7833fix14"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
 <!-- Regression markers retained for the previously verified FIX9 loading contract:
      js/modules/page.js?v=7833fix9
      js/hardware/cash-bridge.js?v=7833fix9 -->
+<!-- Regression markers retained for the completed FIX13 contract:
+     V7.8.3.3 · FIX13 STARTUP + CASH + BACK RECOVERY
+     js/modules/payment.js?v=7833fix13
+     js/hardware/cash-bridge.js?v=7833fix13 -->
 <script src="js/modules/cart.js?v=7627"></script>
     
 <script src="js/modules/operation.js?v=771"></script>
@@ -1723,10 +1727,114 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX13 STARTUP + CASH + BACK RECOVERY</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX14 STARTUP HOME + BACK GUARD</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
+<script>
+// FIX14 critical home guard is kept inline so a slow Android WebView cannot mix
+// the new index with an older cached page.js and lose the Home/Back behavior.
+(function () {
+    "use strict";
+    var reloadRequested = false;
+
+    function cashBlocking() {
+        return !!(
+            window.MonsterCashBridge &&
+            typeof window.MonsterCashBridge.hasBlockingTransaction === "function" &&
+            window.MonsterCashBridge.hasBlockingTransaction()
+        );
+    }
+
+    function linePayBlocking() {
+        return !!(
+            window.MonsterLinePayScanner &&
+            typeof window.MonsterLinePayScanner.hasBlockingTransaction === "function" &&
+            window.MonsterLinePayScanner.hasBlockingTransaction()
+        );
+    }
+
+    function forceHomeIfSafe() {
+        if (window.MonsterHomeGuard &&
+            typeof window.MonsterHomeGuard.forceHomeIfSafe === "function") {
+            return window.MonsterHomeGuard.forceHomeIfSafe();
+        }
+        if (cashBlocking() || linePayBlocking() ||
+            (typeof window.paymentInProgress !== "undefined" && window.paymentInProgress)) {
+            return false;
+        }
+        document.querySelectorAll(".page").forEach(function (page) {
+            page.classList.remove("active");
+        });
+        var home = document.getElementById("homePage");
+        if (!home) return false;
+        home.classList.add("active");
+        return true;
+    }
+
+    function installBackGuard() {
+        var back = document.getElementById("backBtn");
+        if (!back || back.getAttribute("data-fix14-back-guard") === "1") return;
+        back.setAttribute("data-fix14-back-guard", "1");
+        back.addEventListener("click", function (event) {
+            if (linePayBlocking()) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            if (typeof window.playClick === "function") window.playClick();
+            if (cashBlocking() &&
+                window.MonsterCashBridge &&
+                typeof window.MonsterCashBridge.requestCancelAndReturn === "function") {
+                window.MonsterCashBridge.requestCancelAndReturn("homePage").then(function (canceled) {
+                    if (canceled) setTimeout(forceHomeIfSafe, 120);
+                });
+                return;
+            }
+            forceHomeIfSafe();
+        }, true);
+    }
+
+    function paymentSafeForUpdate() {
+        return !cashBlocking() && !linePayBlocking() &&
+            !(typeof window.paymentInProgress !== "undefined" && window.paymentInProgress);
+    }
+
+    function activateWaitingWorker(registration) {
+        if (!registration || !registration.waiting || !paymentSafeForUpdate()) return;
+        reloadRequested = true;
+        registration.waiting.postMessage({ type: "SKIP_WAITING" });
+    }
+
+    installBackGuard();
+    forceHomeIfSafe();
+    setTimeout(function () {
+        installBackGuard();
+        forceHomeIfSafe();
+    }, 250);
+    setTimeout(forceHomeIfSafe, 1200);
+    window.addEventListener("pageshow", function () {
+        setTimeout(forceHomeIfSafe, 0);
+    });
+
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener("controllerchange", function () {
+            if (reloadRequested && paymentSafeForUpdate() &&
+                sessionStorage.getItem("monsterFix14SwReloaded") !== "1") {
+                sessionStorage.setItem("monsterFix14SwReloaded", "1");
+                location.reload();
+            }
+        });
+        navigator.serviceWorker.getRegistration("./").then(function (registration) {
+            if (!registration) return;
+            activateWaitingWorker(registration);
+            registration.update().then(function () {
+                setTimeout(function () {
+                    activateWaitingWorker(registration);
+                }, 800);
+            }).catch(function () {});
+        }).catch(function () {});
+    }
+}());
+</script>
 </body>
 </html>

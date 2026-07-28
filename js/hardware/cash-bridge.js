@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX13
+// 小怪獸售票機 V7.8.3.3 FIX14
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -17,7 +17,9 @@
     var pendingStartToken = 0;
     var bootRecoveryResolved = !active;
     var bootRecoveryPromise = null;
-    var OVERLAY_FIX_VERSION = "fix13";
+    var OVERLAY_FIX_VERSION = "fix14";
+    var BOOT_CANCEL_POLL_MS = 500;
+    var BOOT_CANCEL_MAX_POLLS = 20;
 
     function loadJson(key) {
         try {
@@ -312,6 +314,18 @@
         return status === "CANCELED" || status === "TICKET_ISSUED";
     }
 
+    function isZeroCashCancelableStatus(payload) {
+        return !!(
+            payload &&
+            Number(payload.paidNtd || 0) === 0 &&
+            (
+                payload.status === "QUEUED" ||
+                payload.status === "PAYMENT_PENDING" ||
+                payload.status === "CANCEL_REQUESTED"
+            )
+        );
+    }
+
     function updateActiveFromController(payload) {
         if (!active || !payload) return;
         active.lastControllerStatus = payload.status;
@@ -343,6 +357,75 @@
         } else if (typeof showPage === "function") {
             showPage(returnPage);
         }
+    }
+
+    function waitForBootCancel(orderNo, checkout, pollCount) {
+        return new Promise(function (resolve) {
+            setTimeout(resolve, BOOT_CANCEL_POLL_MS);
+        }).then(function () {
+            return api("/payments/" + encodeURIComponent(orderNo));
+        }).then(function (payload) {
+            updateActiveFromController(payload);
+            if (isTerminalControllerStatus(payload.status)) {
+                clearStoredTransaction("homePage", checkout);
+                return "cleared";
+            }
+            // Controller 113 會在競態中以實際收款狀態為準；一旦已有投入就停止自動取消。
+            if (!isZeroCashCancelableStatus(payload)) {
+                bootRecoveryResolved = true;
+                return "live";
+            }
+            if (pollCount >= BOOT_CANCEL_MAX_POLLS) {
+                bootRecoveryResolved = true;
+                return "live";
+            }
+            return waitForBootCancel(orderNo, checkout, pollCount + 1);
+        }).catch(function (error) {
+            if (error.code === "ORDER_NOT_FOUND") {
+                clearStoredTransaction("homePage", checkout);
+                return "cleared";
+            }
+            bootRecoveryResolved = true;
+            return "live";
+        });
+    }
+
+    function cancelStoredZeroCashAtBoot(payload) {
+        var checkout = active && active.order;
+        var orderNo = checkout && checkout.orderNo;
+        var cancelRequest;
+        if (!active || !orderNo || !isZeroCashCancelableStatus(payload)) {
+            bootRecoveryResolved = true;
+            return Promise.resolve("live");
+        }
+        active.cancelReturnPage = "homePage";
+        active.state = "CANCEL_REQUESTED";
+        active.updatedAt = Date.now();
+        saveActive();
+        if (payload.status === "CANCEL_REQUESTED") {
+            cancelRequest = Promise.resolve({ ok: true, status: "CANCEL_REQUESTED" });
+        } else {
+            cancelRequest = api("/payments/" + encodeURIComponent(orderNo) + "/cancel", {
+                method: "POST",
+                body: {
+                    requestId: (
+                        "BOOT-CANCEL-" + String(active.requestId || orderNo)
+                    ).slice(0, 160),
+                    reason: "點餐機重新開啟，取消尚未投入現金的舊付款"
+                }
+            });
+        }
+        return cancelRequest.then(function () {
+            return waitForBootCancel(orderNo, checkout, 0);
+        }).catch(function (error) {
+            if (error.code === "ORDER_NOT_FOUND") {
+                clearStoredTransaction("homePage", checkout);
+                return "cleared";
+            }
+            // CASH_ALREADY_ACCEPTED 等拒絕必須保留交易，由原本恢復流程接手。
+            bootRecoveryResolved = true;
+            return "live";
+        });
     }
 
     function showRecoveryBlocked(error) {
@@ -398,6 +481,9 @@
             if (payload.status === "PRINT_AUTHORIZED") {
                 handleAuthorization(payload);
                 return "handled";
+            }
+            if (isZeroCashCancelableStatus(payload)) {
+                return cancelStoredZeroCashAtBoot(payload);
             }
             return "live";
         }).catch(function (error) {
@@ -911,8 +997,8 @@
             clearStoredTransaction();
             return;
         }
-        // FIX13：開機先留在首頁，向 Controller 113 確認本機紀錄仍有效後才恢復付款畫面。
-        // 這可清除上一筆零元／失敗交易留下的假鎖定，但不會放掉已收現金的交易。
+        // FIX14：開機先留在首頁；零投入舊付款會先請 Controller 113 安全取消。
+        // Controller 端會再次檢查實際投入金額，若已有現金就拒絕取消並恢復原交易。
         verifyStoredTransaction().then(function (result) {
             var authorizationId;
             var savedOrder;
@@ -1037,6 +1123,8 @@
                 saveActive();
             },
             verifyStoredTransaction: verifyStoredTransaction,
+            isZeroCashCancelableStatus: isZeroCashCancelableStatus,
+            cancelStoredZeroCashAtBoot: cancelStoredZeroCashAtBoot,
             isRecoveryResolved: function () { return bootRecoveryResolved; },
             showOverlay: setOverlay,
             hideOverlay: hideOverlay,
