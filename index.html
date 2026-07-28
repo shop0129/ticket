@@ -24,7 +24,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/pwa.css?v=73f1">
 <link rel="stylesheet" href="css/cash-bridge.css?v=7833s6">
 <link rel="stylesheet" href="css/linepay-scanner.css?v=7833s10">
-<link rel="stylesheet" href="css/coin-manager.css?v=7833s11j-note-status">
+<link rel="stylesheet" href="css/coin-manager.css?v=7833s11k-auto-change">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
@@ -1186,7 +1186,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 
 <!-- ==========================
-零錢／補幣／補鈔管理 Controller 109
+零錢／補幣／補鈔管理 Controller 110
 ========================== -->
 
 <section id="coinManagerPage" class="page">
@@ -1201,7 +1201,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         </div>
 
         <div id="coinManagerStatus" class="coin-manager-status">
-            正在連接 Controller 96…
+            正在連接 Controller 110…
         </div>
 
         <div class="coin-section-card">
@@ -1260,6 +1260,16 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             </div>
             <div class="coin-note-meta">
                 若 XC100 回報缺鈔或故障，百元找零會保持停用；不會因按下按鍵而假設鈔票可用。
+            </div>
+        </div>
+
+        <div class="coin-section-card">
+            <h2>正式自動找零狀態</h2>
+            <div id="productionChangeLive" class="coin-refill-live">
+                目前沒有進行中的自動找零
+            </div>
+            <div class="coin-note-meta">
+                找零完成後才會出票；任何缺鈔、斷線或結果不確定都會停止新交易，且不會自動重送。
             </div>
         </div>
 
@@ -1688,7 +1698,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/payment.js?v=7833s10"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
 <script src="js/hardware/cash-bridge.js?v=7833s6"></script>
-<script src="js/hardware/coin-manager.js?v=7833s11j-note-status"></script>
+<script src="js/hardware/coin-manager.js?v=7833s11k-auto-change"></script>
 <script src="js/modules/detail.js?v=72c"></script>
 <script src="js/modules/cart.js?v=7627"></script>
     

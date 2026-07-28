@@ -1,5 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 11J
-// Controller 109 coin inventory / safe refill / XC100 hardware availability
+// 小怪獸售票機 V7.8.3.3 Sprint 11K
+// Controller 110 coin inventory / safe refill / production automatic change
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
@@ -104,7 +104,9 @@
         var noteStartButton = document.getElementById("note100RefillStartButton");
         var noteFinishButton = document.getElementById("note100RefillFinishButton");
         var noteLive = document.getElementById("note100AvailabilityLive");
+        var productionLive = document.getElementById("productionChangeLive");
         var noteAvailability = data.note100Availability || {};
+        var productionChange = data.productionChange || null;
         var noteState = String(noteAvailability.state || "UNKNOWN");
         var noteBusy = !!noteAvailability.active;
         var entries;
@@ -165,7 +167,7 @@
                 noteLive.className = "coin-refill-live available";
                 noteLive.textContent = data.note100DispenseEnabled
                     ? "🟢 百元找零可用｜以 XC100 硬體狀態為準，不限制或估算張數"
-                    : "🟢 XC100 已就緒｜本版正式購票找零尚未啟用";
+                    : "🟡 XC100 已就緒，但百元找零目前維持停用";
             } else if (noteState === "EMPTY") {
                 noteLive.className = "coin-refill-live unavailable";
                 noteLive.textContent = "🔴 XC100 缺鈔｜百元找零已自動停止，請先補鈔";
@@ -178,6 +180,25 @@
                 noteLive.textContent = String(
                     noteAvailability.message || "尚未檢查 XC100；百元找零維持停用"
                 );
+            }
+        }
+
+        if (productionLive) {
+            if (productionChange && !productionChange.terminal) {
+                productionLive.className = "coin-refill-live active";
+                productionLive.textContent = "自動找零中｜訂單 " +
+                    String(productionChange.orderId || "") +
+                    "｜應找 NT$" + Number(productionChange.amountNtd || 0) +
+                    "｜已找 NT$" + Number(productionChange.dispensedNtd || 0) +
+                    "｜尚欠 NT$" + Number(productionChange.outstandingNtd || 0);
+            } else if (productionChange &&
+                (productionChange.state === "FAILED" || productionChange.state === "UNCERTAIN")) {
+                productionLive.className = "coin-refill-live unavailable";
+                productionLive.textContent = "🔴 上一筆找零需人工處理｜" +
+                    String(productionChange.message || "");
+            } else {
+                productionLive.className = "coin-refill-live available";
+                productionLive.textContent = "🟢 目前沒有進行中的自動找零";
             }
         }
 
@@ -378,7 +399,7 @@
         if (!confirm(
             "請確認100元鈔已實際放入 XC100 並鎖好鈔匣。\n\n" +
             "接下來只會查詢 XC100 狀態，不會出鈔。\n" +
-            "只有硬體回報 READY 才會顯示 XC100 已就緒；本版不會直接啟用正式購票找零。"
+            "只有硬體回報 READY 才會恢復百元正式找零；不會因按下按鍵而直接出鈔。"
         )) return;
         who = actor();
         api("/notes/refills/recheck", {
