@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX12
+// 小怪獸售票機 V7.8.3.3 FIX13
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -9,12 +9,15 @@
     var TRANSACTION_KEY = "monsterCashBridgeTransactionV1";
     var POLL_MS = 700;
     var API_TIMEOUT_MS = 5000;
+    var STALE_ZERO_CASH_MS = 5 * 60 * 1000;
     var pollTimer = null;
     var active = loadJson(TRANSACTION_KEY);
     var pendingPurchasePage = null;
     var pendingContext = null;
     var pendingStartToken = 0;
-    var OVERLAY_FIX_VERSION = "fix12";
+    var bootRecoveryResolved = !active;
+    var bootRecoveryPromise = null;
+    var OVERLAY_FIX_VERSION = "fix13";
 
     function loadJson(key) {
         try {
@@ -278,6 +281,149 @@
         else paymentInProgress = !!locked;
     }
 
+    function hasAcceptedCashEvidence(transaction) {
+        return !!(
+            transaction &&
+            (
+                Number(transaction.lastPaidNtd || 0) > 0 ||
+                transaction.authorization ||
+                transaction.state === "CLAIMED" ||
+                transaction.state === "ISSUE_STARTED" ||
+                transaction.state === "ACK_PENDING" ||
+                transaction.state === "RECOVERY_REQUIRED" ||
+                transaction.state === "RECONCILIATION_REQUIRED"
+            )
+        );
+    }
+
+    function isStaleZeroCashTransaction(transaction) {
+        var timestamp;
+        if (!transaction || hasAcceptedCashEvidence(transaction)) return false;
+        timestamp = Number(
+            transaction.updatedAt ||
+            transaction.createdAt ||
+            transaction.order && transaction.order.createdAt ||
+            0
+        );
+        return timestamp > 0 && Date.now() - timestamp >= STALE_ZERO_CASH_MS;
+    }
+
+    function isTerminalControllerStatus(status) {
+        return status === "CANCELED" || status === "TICKET_ISSUED";
+    }
+
+    function updateActiveFromController(payload) {
+        if (!active || !payload) return;
+        active.lastControllerStatus = payload.status;
+        active.lastPaidNtd = Number(payload.paidNtd || 0);
+        active.lastCoinCount = Number(payload.coinCount || 0);
+        active.lastBillCount = Number(payload.billCount || 0);
+        active.lastCounts = payload.counts || {};
+        active.updatedAt = Date.now();
+        saveActive();
+    }
+
+    function clearStoredTransaction(returnPage, context) {
+        var checkout = context || active && active.order || pendingContext;
+        stopPolling();
+        pendingStartToken += 1;
+        active = null;
+        pendingContext = null;
+        pendingPurchasePage = null;
+        bootRecoveryResolved = true;
+        saveActive();
+        hideOverlay();
+        setLocked(false);
+        if (!returnPage) return;
+        if (
+            window.MonsterPayment &&
+            typeof window.MonsterPayment.restoreFailedCashCheckout === "function"
+        ) {
+            window.MonsterPayment.restoreFailedCashCheckout(checkout, returnPage);
+        } else if (typeof showPage === "function") {
+            showPage(returnPage);
+        }
+    }
+
+    function showRecoveryBlocked(error) {
+        var checkout = active && active.order;
+        var paid = Number(active && active.lastPaidNtd || 0);
+        bootRecoveryResolved = true;
+        setLocked(true);
+        setOverlay({
+            title: hasAcceptedCashEvidence(active)
+                ? "需要員工確認上一筆交易"
+                : "正在確認上一筆付款",
+            amount: checkout && checkout.amount,
+            paid: paid,
+            remaining: checkout ? Math.max(0, checkout.amount - paid) : 0,
+            orderNo: checkout && checkout.orderNo,
+            message: (error && error.message || "無法確認上一筆付款狀態") +
+                "。系統已保留交易，避免重複收款。",
+            retry: true,
+            manage: hasAcceptedCashEvidence(active),
+            cancelAllowed: !hasAcceptedCashEvidence(active)
+        });
+    }
+
+    function verifyStoredTransaction() {
+        var checking;
+        var orderNo;
+        if (!active || active.state === "COMPLETED") {
+            clearStoredTransaction();
+            return Promise.resolve("cleared");
+        }
+        if (bootRecoveryPromise) return bootRecoveryPromise;
+        orderNo = active.order && active.order.orderNo;
+        if (!orderNo) {
+            if (!hasAcceptedCashEvidence(active)) {
+                clearStoredTransaction();
+                return Promise.resolve("cleared");
+            }
+            bootRecoveryResolved = true;
+            showRecoveryBlocked(new Error("上一筆交易資料不完整"));
+            return Promise.resolve("blocked");
+        }
+        checking = active;
+        bootRecoveryPromise = api(
+            "/payments/" + encodeURIComponent(orderNo)
+        ).then(function (payload) {
+            if (active !== checking) return active ? "changed" : "cleared";
+            updateActiveFromController(payload);
+            if (isTerminalControllerStatus(payload.status)) {
+                clearStoredTransaction();
+                return "cleared";
+            }
+            bootRecoveryResolved = true;
+            if (payload.status === "PRINT_AUTHORIZED") {
+                handleAuthorization(payload);
+                return "handled";
+            }
+            return "live";
+        }).catch(function (error) {
+            if (active !== checking) return active ? "changed" : "cleared";
+            if (
+                !hasAcceptedCashEvidence(active) &&
+                (
+                    error.code === "ORDER_NOT_FOUND" ||
+                    isStaleZeroCashTransaction(active)
+                )
+            ) {
+                clearStoredTransaction();
+                return "cleared";
+            }
+            showRecoveryBlocked(error);
+            return "blocked";
+        }).then(function (result) {
+            bootRecoveryPromise = null;
+            return result;
+        }, function (error) {
+            bootRecoveryPromise = null;
+            throw error;
+        });
+        return bootRecoveryPromise;
+    }
+
     function normalizeReturnPage(returnPage, context) {
         if (
             returnPage === "homePage" ||
@@ -315,11 +461,13 @@
     }
 
     function requestCancelAndReturn(returnPage) {
+        var checkout;
         if (!active) {
             if (!pendingContext) return Promise.resolve(false);
             if (!confirm("確定取消這次現金付款並返回嗎？")) return Promise.resolve(false);
             return cancelPreflight(returnPage);
         }
+        checkout = active.order;
         if (Number(active.lastPaidNtd || 0) > 0) {
             alert("已投入現金，為避免帳款不一致，不能直接返回。請完成付款或通知員工處理。");
             return Promise.resolve(false);
@@ -359,6 +507,17 @@
             pollPayment(active.order.orderNo);
             return true;
         }).catch(function (error) {
+            if (
+                error.code === "ORDER_NOT_FOUND" &&
+                active &&
+                Number(active.lastPaidNtd || 0) === 0
+            ) {
+                clearStoredTransaction(
+                    normalizeReturnPage(returnPage, checkout),
+                    checkout
+                );
+                return true;
+            }
             setOverlay({
                 title: "取消付款尚未完成",
                 amount: active && active.order.amount,
@@ -505,6 +664,14 @@
             if (error.code === "PAIRING_REQUIRED") {
                 localStorage.removeItem(PAIRING_KEY);
             }
+            if (
+                error.code === "ORDER_NOT_FOUND" &&
+                active &&
+                Number(active.lastPaidNtd || 0) === 0
+            ) {
+                clearStoredTransaction(purchasePage(), active.order);
+                return;
+            }
             setOverlay({
                 title: "暫時無法連接控制器",
                 amount: active && active.order.amount,
@@ -601,9 +768,34 @@
     }
 
     function startCashPayment(printerReady, preparedContext) {
-        if (active && active.state !== "COMPLETED") {
+        if (pendingContext && !active) {
+            // 購物車按鈕可能同時有舊版與新版事件；同一個收據機預檢只能執行一次。
             resumeActivePayment();
             return;
+        }
+        if (active && active.state !== "COMPLETED") {
+            setOverlay({
+                title: "正在確認上一筆付款",
+                amount: active.order && active.order.amount,
+                paid: active.lastPaidNtd,
+                remaining: active.order
+                    ? Math.max(0, active.order.amount - Number(active.lastPaidNtd || 0))
+                    : 0,
+                orderNo: active.order && active.order.orderNo,
+                message: "正在向 Controller 113 對帳，請稍候。",
+                cancelAllowed: Number(active.lastPaidNtd || 0) === 0
+            });
+            verifyStoredTransaction().then(function (result) {
+                if (result === "cleared") {
+                    startCashPayment(printerReady, preparedContext);
+                } else if (result === "live") {
+                    resumeActivePayment();
+                }
+            });
+            return;
+        }
+        if (active && active.state === "COMPLETED") {
+            clearStoredTransaction();
         }
         var context = preparedContext;
         if (!context) {
@@ -670,6 +862,7 @@
             createdAt: Date.now(),
             updatedAt: Date.now()
         };
+        bootRecoveryResolved = true;
         pendingPurchasePage = null;
         saveActive();
         setLocked(true);
@@ -715,36 +908,41 @@
 
     function recover() {
         if (!active || active.state === "COMPLETED") {
-            active = null;
-            pendingPurchasePage = null;
-            saveActive();
+            clearStoredTransaction();
             return;
         }
-        setLocked(true);
-        if (active.state === "ISSUE_STARTED" || active.state === "ACK_PENDING") {
-            var authorizationId = active.authorization && active.authorization.authorizationId;
-            var savedOrder = salesHistory.find(function (order) {
-                return order && order.printAuthorizationId === authorizationId;
-            });
-            if (savedOrder && savedOrder.receiptPrintStatus === "printed") {
-                acknowledgeIssued();
+        // FIX13：開機先留在首頁，向 Controller 113 確認本機紀錄仍有效後才恢復付款畫面。
+        // 這可清除上一筆零元／失敗交易留下的假鎖定，但不會放掉已收現金的交易。
+        verifyStoredTransaction().then(function (result) {
+            var authorizationId;
+            var savedOrder;
+            if (result !== "live" || !active) return;
+            if (active.state === "ISSUE_STARTED" || active.state === "ACK_PENDING") {
+                authorizationId = active.authorization && active.authorization.authorizationId;
+                savedOrder = salesHistory.find(function (order) {
+                    return order && order.printAuthorizationId === authorizationId;
+                });
+                if (savedOrder && savedOrder.receiptPrintStatus === "printed") {
+                    acknowledgeIssued();
+                    return;
+                }
+                active.state = "RECOVERY_REQUIRED";
+                saveActive();
+            }
+            if (active.state === "CLAIMED" || active.state === "RECOVERY_REQUIRED") {
+                setLocked(true);
+                setOverlay({
+                    title: "需要員工確認",
+                    amount: active.order.amount,
+                    paid: active.order.amount,
+                    remaining: 0,
+                    orderNo: active.order.orderNo,
+                    message: "偵測到付款完成後曾中斷。為避免重複出票，請由員工核對售票紀錄與控制器。"
+                });
                 return;
             }
-            active.state = "RECOVERY_REQUIRED";
-            saveActive();
-        }
-        if (active.state === "CLAIMED" || active.state === "RECOVERY_REQUIRED") {
-            setOverlay({
-                title: "需要員工確認",
-                amount: active.order.amount,
-                paid: active.order.amount,
-                remaining: 0,
-                orderNo: active.order.orderNo,
-                message: "偵測到付款完成後曾中斷。為避免重複出票，請由員工核對售票紀錄與控制器。"
-            });
-            return;
-        }
-        resumeActivePayment();
+            resumeActivePayment();
+        });
     }
 
     function resumeActivePayment() {
@@ -781,7 +979,11 @@
     window.MonsterCashBridge = {
         startCashPayment: startCashPayment,
         hasBlockingTransaction: function () {
-            return !!pendingContext || !!(active && active.state !== "COMPLETED");
+            return !!pendingContext || !!(
+                bootRecoveryResolved &&
+                active &&
+                active.state !== "COMPLETED"
+            );
         },
         getPurchasePage: purchasePage,
         requestCancelAndReturn: requestCancelAndReturn,
@@ -821,6 +1023,7 @@
         releaseAfterReconciliation: function (orderNo) {
             if (active && active.order && active.order.orderNo === orderNo) {
                 active = null;
+                bootRecoveryResolved = true;
                 saveActive();
                 hideOverlay();
                 setLocked(false);
@@ -828,7 +1031,13 @@
         },
         _test: {
             getActive: function () { return active; },
-            setActive: function (value) { active = value; saveActive(); },
+            setActive: function (value) {
+                active = value;
+                bootRecoveryResolved = true;
+                saveActive();
+            },
+            verifyStoredTransaction: verifyStoredTransaction,
+            isRecoveryResolved: function () { return bootRecoveryResolved; },
             showOverlay: setOverlay,
             hideOverlay: hideOverlay,
             formatCashBreakdown: formatCashBreakdown

@@ -1,4 +1,4 @@
-// V7.8.3.3 FIX12 | keep active payments visible and recover stale checkout locks
+// V7.8.3.3 FIX13 | verify stored cash state before blocking startup/back navigation
 function hasCashBridgeTransaction() {
     return !!(
         window.MonsterCashBridge &&

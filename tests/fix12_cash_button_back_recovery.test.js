@@ -79,8 +79,16 @@ function testStalePaymentLockRecovery() {
     blocking = true;
     sandbox.MonsterPayment.setLocked(true);
     sandbox.paymentSuccess("現金");
-    assert.strictEqual(resumed, 1, "a real cash transaction should reopen its payment display");
-    assert.strictEqual(started, 1, "a real transaction must not start a duplicate payment");
+    assert.strictEqual(
+        started,
+        2,
+        "a real cash transaction should enter the FIX13 verify-or-resume path"
+    );
+    assert.strictEqual(
+        resumed,
+        0,
+        "payment.js must not bypass FIX13 controller reconciliation"
+    );
 }
 
 function classList(initial) {
@@ -287,10 +295,10 @@ function testResumeShowsDetailsBeforeControllerReply() {
     var index = read("index.html");
     var worker = read("service-worker.js");
     var bridge = read("js/hardware/cash-bridge.js");
-    assert.ok(index.indexOf("V7.8.3.3 · FIX12 CASH BUTTON + BACK RECOVERY") >= 0);
-    assert.ok(index.indexOf("js/modules/payment.js?v=7833fix12") >= 0);
-    assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix12") >= 0);
-    assert.ok(worker.indexOf("7833-fix12-cash-button-back-recovery-20260729-1") >= 0);
+    assert.ok(index.indexOf("V7.8.3.3 · FIX13 STARTUP + CASH + BACK RECOVERY") >= 0);
+    assert.ok(index.indexOf("js/modules/payment.js?v=7833fix13") >= 0);
+    assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix13") >= 0);
+    assert.ok(worker.indexOf("7833-fix13-startup-cash-back-recovery-20260729-1") >= 0);
     assert.ok(bridge.indexOf("API_TIMEOUT_MS = 5000") >= 0);
     assert.ok(bridge.indexOf("active.cancelReturnPage") >= 0);
 

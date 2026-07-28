@@ -62,6 +62,6 @@ test("staff and manager roles use the same FIX8 scanner assets", () => {
     );
     assert.match(
         serviceWorker,
-        /7833-fix12-cash-button-back-recovery-20260729-1/
+        /7833-fix13-startup-cash-back-recovery-20260729-1/
     );
 });

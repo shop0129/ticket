@@ -283,9 +283,10 @@ function paymentSuccess(paymentType) {
             window.MonsterCashBridge &&
             typeof window.MonsterCashBridge.hasBlockingTransaction === "function" &&
             window.MonsterCashBridge.hasBlockingTransaction() &&
-            typeof window.MonsterCashBridge.resumeActivePayment === "function"
+            typeof window.MonsterCashBridge.startCashPayment === "function"
         ) {
-            window.MonsterCashBridge.resumeActivePayment();
+            // FIX13：先和 Controller 113 對帳；舊的零元交易失效時可直接建立新付款。
+            window.MonsterCashBridge.startCashPayment();
             return;
         }
         if (
