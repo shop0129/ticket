@@ -203,6 +203,27 @@
     border-color: #66bb6a;
 }
 
+.coin-refill-live.available {
+    background: #e8f5e9;
+    border-color: #43a047;
+    color: #1b5e20;
+    font-weight: 800;
+}
+
+.coin-refill-live.checking {
+    background: #e3f2fd;
+    border-color: #42a5f5;
+    color: #0d47a1;
+    font-weight: 800;
+}
+
+.coin-refill-live.unavailable {
+    background: #ffebee;
+    border-color: #ef5350;
+    color: #8b1d1d;
+    font-weight: 800;
+}
+
 .change-simulation-result {
     margin-top: 16px;
     background: #f4f7fa;

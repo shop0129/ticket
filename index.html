@@ -24,7 +24,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/pwa.css?v=73f1">
 <link rel="stylesheet" href="css/cash-bridge.css?v=7833s6">
 <link rel="stylesheet" href="css/linepay-scanner.css?v=7833s10">
-<link rel="stylesheet" href="css/coin-manager.css?v=7833s11a">
+<link rel="stylesheet" href="css/coin-manager.css?v=7833s11j-note-status">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
@@ -1186,18 +1186,18 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 
 <!-- ==========================
-MDB 零錢／補幣管理 Sprint 11A
+零錢／補幣／補鈔管理 Controller 109
 ========================== -->
 
 <section id="coinManagerPage" class="page">
     <div class="tm-page coin-manager-page">
         <div class="tm-top">
             <button class="back-btn" onclick="closeCoinManager()">← 返回</button>
-            <h1 class="tm-title">🪙 零錢／補幣管理</h1>
+            <h1 class="tm-title">🪙 零錢／補幣／補鈔管理</h1>
         </div>
 
         <div class="coin-safety-banner">
-            Sprint 11A 僅讀取庫存、執行安全補幣與模擬找零；不會出幣，也不會啟動 TOP XC100 出鈔。
+            硬幣保留實際庫存；百元鈔改由 XC100 硬體狀態管理，不必輸入或限制鈔票張數。
         </div>
 
         <div id="coinManagerStatus" class="coin-manager-status">
@@ -1245,24 +1245,22 @@ MDB 零錢／補幣管理 Sprint 11A
         </div>
 
         <div class="coin-section-card">
-            <h2>百元出鈔庫存（手動登記）</h2>
-            <p>TOP XC100 通訊協定尚未開放，所以這裡只記錄店長實際放入的百元鈔數量。</p>
-            <div class="coin-note-grid">
-                <label>現有百元鈔<input id="note100Count" type="number" min="0" max="500" inputmode="numeric"></label>
-                <label>保留安全張數<input id="note100Reserve" type="number" min="0" max="500" inputmode="numeric"></label>
+            <h2>百元鈔補鈔</h2>
+            <p>不必輸入張數。按「開始補鈔」後將100元鈔放入 XC100；完成後由 Controller 唯讀檢查可用狀態，不會出鈔。</p>
+            <div id="note100AvailabilityLive" class="coin-refill-live">
+                尚未檢查 XC100；百元找零維持停用
             </div>
-            <button class="coin-primary-btn" onclick="saveNote100Inventory()">儲存百元鈔庫存</button>
-            <div id="note100Meta" class="coin-note-meta"></div>
-        </div>
-
-        <div class="coin-section-card">
-            <h2>模擬找零（不出錢）</h2>
-            <p>輸入應找金額，系統只依目前庫存計算百元鈔與硬幣組合。</p>
-            <div class="coin-simulator-row">
-                <label>應找金額 NT$<input id="changeSimulationAmount" type="number" min="0" max="9999" inputmode="numeric" value="250"></label>
-                <button class="coin-primary-btn" onclick="simulateChange()">計算找零</button>
+            <div class="coin-action-row">
+                <button id="note100RefillStartButton" class="coin-success-btn" onclick="startNote100Refill()">
+                    開始補鈔
+                </button>
+                <button id="note100RefillFinishButton" class="coin-primary-btn" onclick="finishNote100Refill()" disabled>
+                    補鈔完成，檢查並恢復
+                </button>
             </div>
-            <div id="changeSimulationResult" class="change-simulation-result">尚未計算</div>
+            <div class="coin-note-meta">
+                若 XC100 回報缺鈔或故障，百元找零會保持停用；不會因按下按鍵而假設鈔票可用。
+            </div>
         </div>
 
         <div class="coin-section-card">
@@ -1690,7 +1688,7 @@ MDB 零錢／補幣管理 Sprint 11A
 <script src="js/modules/payment.js?v=7833s10"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
 <script src="js/hardware/cash-bridge.js?v=7833s6"></script>
-<script src="js/hardware/coin-manager.js?v=7833s11a"></script>
+<script src="js/hardware/coin-manager.js?v=7833s11j-note-status"></script>
 <script src="js/modules/detail.js?v=72c"></script>
 <script src="js/modules/cart.js?v=7627"></script>
     
@@ -1701,7 +1699,7 @@ MDB 零錢／補幣管理 Sprint 11A
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · SPRINT 11A COIN MANAGER</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · SPRINT 11I COIN / NOTE REFILL</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>

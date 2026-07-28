@@ -1,5 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 11A
-// Controller 96 MDB coin inventory / safe refill / change simulation
+// 小怪獸售票機 V7.8.3.3 Sprint 11J
+// Controller 109 coin inventory / safe refill / XC100 hardware availability
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
@@ -8,6 +8,7 @@
     var PAIRING_KEY = "monsterCashBridgePairingKeyV1";
     var pollTimer = null;
     var latestStatus = null;
+    var noteRefillUiActive = false;
 
     function pairingKey() {
         return String(localStorage.getItem(PAIRING_KEY) || "").replace(/\s/g, "");
@@ -100,20 +101,25 @@
         var startButton = document.getElementById("coinRefillStartButton");
         var stopButton = document.getElementById("coinRefillStopButton");
         var refreshButton = document.getElementById("coinRefreshButton");
-        var note = data.note100 || {};
+        var noteStartButton = document.getElementById("note100RefillStartButton");
+        var noteFinishButton = document.getElementById("note100RefillFinishButton");
+        var noteLive = document.getElementById("note100AvailabilityLive");
+        var noteAvailability = data.note100Availability || {};
+        var noteState = String(noteAvailability.state || "UNKNOWN");
+        var noteBusy = !!noteAvailability.active;
         var entries;
         var html = "";
         var i;
 
         latestStatus = data;
         if (!data.controllerOnline) {
-            setStatus("Controller 96 未連線或狀態逾時；補幣操作已停用。", "error");
+            setStatus("Controller 未連線或狀態逾時；補幣與補鈔操作已停用。", "error");
         } else if (data.maintenance && data.maintenance.error) {
             setStatus(data.maintenance.message + "：" + data.maintenance.error, "error");
         } else if (data.pendingRequest) {
             setStatus("操作已送出，等待MDB控制器處理：" + data.pendingRequest.type, "");
         } else {
-            setStatus((data.maintenance && data.maintenance.message) || "Controller 96 已連線", "success");
+            setStatus((data.maintenance && data.maintenance.message) || "Controller 已連線", "success");
         }
 
         entries = inventory && inventory.entries ? inventory.entries.slice() : [];
@@ -146,16 +152,34 @@
             }
         });
 
-        if (document.activeElement !== document.getElementById("note100Count")) {
-            document.getElementById("note100Count").value = Number(note.count || 0);
+        if (noteLive) {
+            if (noteBusy) {
+                noteLive.className = "coin-refill-live checking";
+                noteLive.textContent = "正在檢查 XC100｜" +
+                    String(noteAvailability.message || "等待硬體回覆") +
+                    "｜不會出鈔";
+            } else if (noteRefillUiActive) {
+                noteLive.className = "coin-refill-live active";
+                noteLive.textContent = "補鈔中｜請放入平整的100元鈔；完成後按「補鈔完成，檢查並恢復」";
+            } else if (noteState === "AVAILABLE") {
+                noteLive.className = "coin-refill-live available";
+                noteLive.textContent = data.note100DispenseEnabled
+                    ? "🟢 百元找零可用｜以 XC100 硬體狀態為準，不限制或估算張數"
+                    : "🟢 XC100 已就緒｜本版正式購票找零尚未啟用";
+            } else if (noteState === "EMPTY") {
+                noteLive.className = "coin-refill-live unavailable";
+                noteLive.textContent = "🔴 XC100 缺鈔｜百元找零已自動停止，請先補鈔";
+            } else if (noteState === "FAULT" || noteState === "UNCERTAIN") {
+                noteLive.className = "coin-refill-live unavailable";
+                noteLive.textContent = "🔴 百元找零停用｜" +
+                    String(noteAvailability.message || "XC100 狀態異常");
+            } else {
+                noteLive.className = "coin-refill-live";
+                noteLive.textContent = String(
+                    noteAvailability.message || "尚未檢查 XC100；百元找零維持停用"
+                );
+            }
         }
-        if (document.activeElement !== document.getElementById("note100Reserve")) {
-            document.getElementById("note100Reserve").value = Number(note.reserveCount || 0);
-        }
-        document.getElementById("note100Meta").textContent =
-            "最後登記：" + formatTime(note.updatedAt) +
-            (note.operatorName ? ("｜" + note.operatorName) : "") +
-            "｜此數量尚未由TOP XC100自動確認";
 
         if (data.activeRefill) {
             refill.className = "coin-refill-live active";
@@ -172,6 +196,14 @@
         startButton.disabled = !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill;
         stopButton.disabled = !data.controllerOnline || !!data.pendingRequest || !data.activeRefill;
         refreshButton.disabled = !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill;
+        if (noteStartButton && noteFinishButton) {
+            noteStartButton.disabled = noteRefillUiActive || noteBusy ||
+                !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill ||
+                data.note100RefillEnabled === false;
+            noteFinishButton.disabled = !noteRefillUiActive || noteBusy ||
+                !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill ||
+                data.note100RefillEnabled === false;
+        }
     }
 
     function renderRefills(data) {
@@ -242,7 +274,7 @@
         if (!requireManager()) return;
         if (!requestPairingKey()) return;
         showPage("coinManagerPage");
-        setStatus("正在連接 Controller 96…", "");
+        setStatus("正在連接 Controller…", "");
         loadStatus(true).catch(function () { return null; }).then(schedulePoll);
     };
 
@@ -315,61 +347,62 @@
         }).catch(function (error) { setStatus(error.message, "error"); });
     };
 
-    window.saveNote100Inventory = function () {
-        var who;
-        var count = Number(document.getElementById("note100Count").value);
-        var reserve = Number(document.getElementById("note100Reserve").value);
+    window.startNote100Refill = function () {
         if (!requireManager()) return;
-        if (!isFinite(count) || !isFinite(reserve) || count < 0 || count > 500 ||
-            reserve < 0 || reserve > 500 || Math.floor(count) !== count || Math.floor(reserve) !== reserve) {
-            alert("百元鈔庫存與安全張數必須是0～500的整數");
+        if (!latestStatus || !latestStatus.controllerOnline) {
+            alert("Controller 尚未連線，不能開始補鈔");
             return;
         }
-        who = actor();
-        api("/change/note-inventory", {
-            method: "POST",
-            body: {
-                confirmation: "SET_NOTE_100_INVENTORY",
-                operatorId: who.operatorId,
-                operatorName: who.operatorName,
-                count: count,
-                reserveCount: reserve
-            }
-        }).then(function (data) {
-            if (window.MonsterAuth && MonsterAuth.audit) {
-                MonsterAuth.audit("note.inventory_update", "百元鈔庫存" + count + "張／安全" + reserve + "張", { source: "manager" });
-            }
-            setStatus(data.message, "success");
-            loadStatus(false);
-        }).catch(function (error) { setStatus(error.message, "error"); });
+        if (!confirm(
+            "確定開始補鈔？\n\n" +
+            "這一步只會開啟後台補鈔畫面，不會出鈔，也不會假設鈔票已補入。"
+        )) return;
+        noteRefillUiActive = true;
+        if (window.MonsterAuth && MonsterAuth.audit) {
+            MonsterAuth.audit(
+                "note.refill_start",
+                "開始XC100百元鈔補鈔；不登記精確張數",
+                { source: "manager" }
+            );
+        }
+        renderStatus(latestStatus);
     };
 
-    window.simulateChange = function () {
-        var amount = Number(document.getElementById("changeSimulationAmount").value);
-        var box = document.getElementById("changeSimulationResult");
+    window.finishNote100Refill = function () {
+        var who;
         if (!requireManager()) return;
-        if (!isFinite(amount) || amount < 0 || amount > 9999 || Math.floor(amount) !== amount) {
-            alert("找零金額必須是0～9999的整數");
+        if (!noteRefillUiActive) {
+            alert("請先按「開始補鈔」");
             return;
         }
-        api("/change/simulate", {
+        if (!confirm(
+            "請確認100元鈔已實際放入 XC100 並鎖好鈔匣。\n\n" +
+            "接下來只會查詢 XC100 狀態，不會出鈔。\n" +
+            "只有硬體回報 READY 才會顯示 XC100 已就緒；本版不會直接啟用正式購票找零。"
+        )) return;
+        who = actor();
+        api("/notes/refills/recheck", {
             method: "POST",
-            body: { amountNtd: amount }
-        }).then(function (data) {
-            var plan = data.status === "SAFE" ? data.safePlan : data.allStockPlan;
-            var css = data.status === "SAFE" ? "safe" : (data.status === "LOW_STOCK_ONLY" ? "warning" : "impossible");
-            box.className = "change-simulation-result " + css;
-            box.innerHTML = "<strong>" + data.message + "</strong><br>" +
-                (plan.success
-                    ? ("建議組合：" + formatCounts(plan.counts) + "｜共 " + Number(plan.pieceCount) + " 張／枚")
-                    : ("仍差 NT$" + Number(plan.remainingNtd) + "，禁止接受需要找零的付款")) +
-                "<br><small>本次只計算，實際出鈔／出幣為0。</small>";
-            if (window.MonsterAuth && MonsterAuth.audit) {
-                MonsterAuth.audit("change.simulate", "模擬找零 NT$" + amount + "：" + data.status, { source: "manager" });
+            body: {
+                requestId: "WEB-NOTE100-RECHECK-" + Date.now() + "-" +
+                    Math.floor(Math.random() * 100000),
+                confirmation: "RECHECK_XC100_AFTER_REFILL",
+                operatorId: who.operatorId,
+                operatorName: who.operatorName
             }
+        }).then(function (data) {
+            noteRefillUiActive = false;
+            if (window.MonsterAuth && MonsterAuth.audit) {
+                MonsterAuth.audit(
+                    "note.refill_recheck",
+                    "補鈔完成，開始XC100唯讀狀態檢查",
+                    { source: "manager" }
+                );
+            }
+            setStatus(data.message, "success");
+            setTimeout(function () { loadStatus(false); }, 300);
         }).catch(function (error) {
-            box.className = "change-simulation-result impossible";
-            box.textContent = error.message || String(error);
+            setStatus(error.message || String(error), "error");
         });
     };
 }());
