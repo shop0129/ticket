@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX10
+// 小怪獸售票機 V7.8.3.3 FIX11
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -13,6 +13,7 @@
     var pendingPurchasePage = null;
     var pendingContext = null;
     var pendingStartToken = 0;
+    var OVERLAY_FIX_VERSION = "fix11";
 
     function loadJson(key) {
         try {
@@ -76,45 +77,107 @@
         });
     }
 
+    function ensureCriticalOverlayStyle() {
+        var style = document.getElementById("hardwareCashCriticalStyle");
+        if (style) return;
+        style = document.createElement("style");
+        style.id = "hardwareCashCriticalStyle";
+        style.type = "text/css";
+        style.textContent = [
+            ".hardware-cash-overlay{position:fixed!important;left:0!important;top:0!important;right:0!important;bottom:0!important;z-index:2147483000!important;display:none;align-items:center!important;justify-content:center!important;padding:28px!important;box-sizing:border-box!important;background:rgba(16,24,40,.90)!important;font-family:Arial,'Noto Sans TC',sans-serif!important;}",
+            ".hardware-cash-overlay.show{display:flex!important;}",
+            ".hardware-cash-card{width:94vw!important;max-width:720px!important;max-height:92vh!important;overflow:auto!important;box-sizing:border-box!important;padding:30px!important;border-radius:28px!important;background:#fff!important;box-shadow:0 24px 80px rgba(0,0,0,.38)!important;text-align:center!important;}",
+            ".hardware-cash-monster{font-size:58px!important;line-height:1!important;}",
+            ".hardware-cash-card h2{margin:12px 0 20px!important;font-size:34px!important;color:#263238!important;}",
+            ".hardware-cash-amounts{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:12px!important;}",
+            ".hardware-cash-amounts div{padding:16px 8px!important;border-radius:18px!important;background:#f4f7fa!important;}",
+            ".hardware-cash-amounts span,.hardware-cash-meta span{display:block!important;color:#667085!important;font-size:17px!important;}",
+            ".hardware-cash-amounts strong{display:block!important;margin-top:5px!important;color:#e65100!important;font-size:31px!important;}",
+            ".hardware-cash-meta{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:10px!important;margin-top:12px!important;}",
+            ".hardware-cash-meta div{padding:11px 7px!important;border:2px solid #e8edf3!important;border-radius:14px!important;background:#fff!important;}",
+            ".hardware-cash-meta strong{display:block!important;margin-top:4px!important;color:#263238!important;font-size:23px!important;}",
+            "#hardwareCashBreakdown{margin:12px 0 0!important;padding:10px 12px!important;border-radius:12px!important;background:#fff7e6!important;color:#8a4b00!important;font-size:17px!important;font-weight:700!important;line-height:1.45!important;}",
+            "#hardwareCashMessage{margin:18px 0 8px!important;color:#344054!important;font-size:20px!important;line-height:1.5!important;}",
+            "#hardwareCashOrder{display:block!important;color:#667085!important;font-size:14px!important;}",
+            "#hardwareCashRetry,#hardwareCashCancel,#hardwareCashManage{margin:16px 5px 0!important;padding:12px 24px!important;border:0!important;border-radius:14px!important;color:#fff!important;font-size:19px!important;font-weight:700!important;}",
+            "#hardwareCashRetry{background:#ff9800!important;}#hardwareCashCancel{background:#607d8b!important;}#hardwareCashManage{background:#b3261e!important;}",
+            "@media(max-width:620px){.hardware-cash-overlay{padding:12px!important}.hardware-cash-card{padding:20px 12px!important}.hardware-cash-card h2{font-size:27px!important}.hardware-cash-amounts,.hardware-cash-meta{gap:6px!important}.hardware-cash-amounts strong{font-size:23px!important}.hardware-cash-meta strong{font-size:19px!important}}"
+        ].join("");
+        (document.head || document.documentElement).appendChild(style);
+    }
+
+    function ticketCountFromContext(context) {
+        return (context && context.items || []).reduce(function (total, item) {
+            return total + Math.max(1, Math.round(Number(item && (item.qty || item.quantity) || 1)));
+        }, 0);
+    }
+
+    function formatCashBreakdown(counts) {
+        var entries = [];
+        Object.keys(counts || {}).sort(function (a, b) {
+            return Number(b) - Number(a);
+        }).forEach(function (value) {
+            var count = Math.max(0, Math.round(Number(counts[value] || 0)));
+            var denomination = Math.max(0, Math.round(Number(value || 0)));
+            if (!count || !denomination) return;
+            entries.push(denomination + "元 × " + count + (denomination >= 100 ? "張" : "枚"));
+        });
+        return entries.length ? ("投入明細：" + entries.join("、")) : "尚未投入現金";
+    }
+
     function ensureOverlay() {
         var overlay = document.getElementById("hardwareCashOverlay");
-        if (overlay) return overlay;
-        overlay = document.createElement("div");
-        overlay.id = "hardwareCashOverlay";
-        overlay.className = "hardware-cash-overlay";
-        overlay.innerHTML = [
+        ensureCriticalOverlayStyle();
+        if (!overlay) {
+            overlay = document.createElement("div");
+            overlay.id = "hardwareCashOverlay";
+            overlay.className = "hardware-cash-overlay";
+            document.body.appendChild(overlay);
+        }
+        if (overlay.getAttribute("data-overlay-version") !== OVERLAY_FIX_VERSION) {
+            overlay.setAttribute("data-overlay-version", OVERLAY_FIX_VERSION);
+            overlay.setAttribute("role", "dialog");
+            overlay.setAttribute("aria-modal", "true");
+            overlay.setAttribute("aria-live", "polite");
+            overlay.innerHTML = [
             '<div class="hardware-cash-card">',
             '  <div class="hardware-cash-monster">👾</div>',
             '  <h2 id="hardwareCashTitle">正在連接現金控制器</h2>',
             '  <div class="hardware-cash-amounts">',
             '    <div><span>應付</span><strong id="hardwareCashAmount">NT$0</strong></div>',
-            '    <div><span>已付</span><strong id="hardwareCashPaid">NT$0</strong></div>',
+            '    <div><span>已投入</span><strong id="hardwareCashPaid">NT$0</strong></div>',
             '    <div><span>尚差</span><strong id="hardwareCashRemaining">NT$0</strong></div>',
             '  </div>',
+            '  <div class="hardware-cash-meta">',
+            '    <div><span>票券數量</span><strong id="hardwareCashTicketCount">0 張</strong></div>',
+            '    <div><span>紙鈔數量</span><strong id="hardwareCashBillCount">0 張</strong></div>',
+            '    <div><span>硬幣數量</span><strong id="hardwareCashCoinCount">0 枚</strong></div>',
+            '  </div>',
+            '  <div id="hardwareCashBreakdown">尚未投入現金</div>',
             '  <p id="hardwareCashMessage">請稍候…</p>',
             '  <small id="hardwareCashOrder"></small>',
             '  <button id="hardwareCashRetry" type="button" style="display:none;">重新連線</button>',
             '  <button id="hardwareCashCancel" type="button" style="display:none;">取消付款並返回</button>',
             '  <button id="hardwareCashManage" type="button" style="display:none;">店長人工處理</button>',
             '</div>'
-        ].join("");
-        document.body.appendChild(overlay);
-        document.getElementById("hardwareCashRetry").addEventListener("click", function () {
-            this.style.display = "none";
-            if (active) pollPayment(active.order.orderNo);
-        });
-        document.getElementById("hardwareCashCancel").addEventListener("click", function () {
-            requestCancelAndReturn();
-        });
-        document.getElementById("hardwareCashManage").addEventListener("click", function () {
-            hideOverlay();
-            if (window.MonsterCashOperations && MonsterCashOperations.open) {
-                MonsterCashOperations.open();
-            } else if (typeof showPage === "function") {
-                showPage("adminLoginPage");
-                alert("請由店長登入後開啟『現金對帳』");
-            }
-        });
+            ].join("");
+            document.getElementById("hardwareCashRetry").addEventListener("click", function () {
+                this.style.display = "none";
+                if (active) pollPayment(active.order.orderNo);
+            });
+            document.getElementById("hardwareCashCancel").addEventListener("click", function () {
+                requestCancelAndReturn();
+            });
+            document.getElementById("hardwareCashManage").addEventListener("click", function () {
+                hideOverlay();
+                if (window.MonsterCashOperations && MonsterCashOperations.open) {
+                    MonsterCashOperations.open();
+                } else if (typeof showPage === "function") {
+                    showPage("adminLoginPage");
+                    alert("請由店長登入後開啟『現金對帳』");
+                }
+            });
+        }
         return overlay;
     }
 
@@ -139,12 +202,34 @@
     }
 
     function setOverlay(data) {
+        var context = active && active.order ? active.order : pendingContext;
+        var counts = data.counts || (active && active.lastCounts) || {};
+        var billCount = data.billCount;
+        var coinCount = data.coinCount;
+        var overlay;
+        if (billCount === undefined || billCount === null) {
+            billCount = active && active.lastBillCount || 0;
+        }
+        if (coinCount === undefined || coinCount === null) {
+            coinCount = active && active.lastCoinCount || 0;
+        }
         keepPurchasePageVisible();
-        ensureOverlay().classList.add("show");
+        overlay = ensureOverlay();
+        overlay.classList.add("show");
+        // FIX11：即使外部 CSS 尚在舊 PWA 快取，也強制顯示現金付款資訊。
+        overlay.style.display = "flex";
         document.getElementById("hardwareCashTitle").textContent = data.title || "現金付款中";
         document.getElementById("hardwareCashAmount").textContent = "NT$" + Number(data.amount || 0);
         document.getElementById("hardwareCashPaid").textContent = "NT$" + Number(data.paid || 0);
         document.getElementById("hardwareCashRemaining").textContent = "NT$" + Number(data.remaining || 0);
+        document.getElementById("hardwareCashTicketCount").textContent =
+            ticketCountFromContext(context) + " 張";
+        document.getElementById("hardwareCashBillCount").textContent =
+            Math.max(0, Number(billCount || 0)) + " 張";
+        document.getElementById("hardwareCashCoinCount").textContent =
+            Math.max(0, Number(coinCount || 0)) + " 枚";
+        document.getElementById("hardwareCashBreakdown").textContent =
+            formatCashBreakdown(counts);
         document.getElementById("hardwareCashMessage").textContent = data.message || "請依控制器畫面投入現金";
         document.getElementById("hardwareCashOrder").textContent = data.orderNo ? ("訂單 " + data.orderNo) : "";
         document.getElementById("hardwareCashRetry").style.display = data.retry ? "inline-block" : "none";
@@ -155,7 +240,10 @@
 
     function hideOverlay() {
         var overlay = document.getElementById("hardwareCashOverlay");
-        if (overlay) overlay.classList.remove("show");
+        if (overlay) {
+            overlay.classList.remove("show");
+            overlay.style.display = "none";
+        }
     }
 
     function stopPolling() {
@@ -267,6 +355,9 @@
             if (!active || active.order.orderNo !== orderNo) return;
             active.lastControllerStatus = payload.status;
             active.lastPaidNtd = Number(payload.paidNtd || 0);
+            active.lastCoinCount = Number(payload.coinCount || 0);
+            active.lastBillCount = Number(payload.billCount || 0);
+            active.lastCounts = payload.counts || {};
             active.updatedAt = Date.now();
             saveActive();
             if (payload.status === "PRINT_AUTHORIZED") {
@@ -360,6 +451,9 @@
                 remaining: payload.remainingNtd,
                 orderNo: orderNo,
                 message: statusCopy(payload.status, payload),
+                coinCount: payload.coinCount,
+                billCount: payload.billCount,
+                counts: payload.counts,
                 cancelAllowed: cancelAllowed,
                 cancelPending: payload.status === "CANCEL_REQUESTED"
             });
@@ -660,7 +754,10 @@
         },
         _test: {
             getActive: function () { return active; },
-            setActive: function (value) { active = value; saveActive(); }
+            setActive: function (value) { active = value; saveActive(); },
+            showOverlay: setOverlay,
+            hideOverlay: hideOverlay,
+            formatCashBreakdown: formatCashBreakdown
         }
     };
 

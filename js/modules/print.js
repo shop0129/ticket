@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX8 | Receipt Progress Sync
+// 小怪獸售票機 V7.8.3.3 FIX11 | Smooth Receipt Progress
 // =========================================
 // 小怪獸售票機 V5.6.3
 // 列印模組
@@ -13,9 +13,11 @@ var printStatus = document.getElementById("printStatus");
 var successTitle = document.querySelector(".success-title");
 var successItemsArea = document.querySelector(".success-items");
 var activeReceiptProgressTimer = null;
+var activeReceiptProgressFrame = null;
 var activeReceiptPrintToken = 0;
 var RECEIPT_PROGRESS_LIMIT = 94;
-var RECEIPT_PROGRESS_RAMP_MS = 1200;
+var RECEIPT_PROGRESS_RAMP_MS = 1050;
+var RECEIPT_PROGRESS_MIN_VISIBLE_MS = 1150;
 // =========================================
 // 成功頁領取項目
 // =========================================
@@ -96,10 +98,19 @@ function resetPrintDisplay() {
     clearInterval(countdownTimer);
     clearInterval(activeReceiptProgressTimer);
     activeReceiptProgressTimer = null;
+    if (activeReceiptProgressFrame !== null) {
+        if (window.cancelAnimationFrame) {
+            window.cancelAnimationFrame(activeReceiptProgressFrame);
+        } else {
+            clearTimeout(activeReceiptProgressFrame);
+        }
+        activeReceiptProgressFrame = null;
+    }
     countdownNumber.innerHTML = "";
     printStatus.classList.remove("print-finish");
     printStatus.classList.remove("print-warning");
     progressFill.style.width = "0%";
+    progressFill.style.transition = "none";
     progressFill.style.borderRadius = "";
     progressFill.style.background =
         "linear-gradient(90deg,#FFD54F,#FF9800)";
@@ -146,10 +157,76 @@ function renderReceiptProgress(percent) {
     progressText.innerHTML = value + "%";
     updatePrintMessage(value);
 }
+
+function scheduleReceiptProgressFrame(callback) {
+    if (window.requestAnimationFrame) {
+        return window.requestAnimationFrame(callback);
+    }
+    return setTimeout(callback, 16);
+}
+
+function stopReceiptProgressFrame() {
+    if (activeReceiptProgressFrame === null) return;
+    if (window.cancelAnimationFrame) {
+        window.cancelAnimationFrame(activeReceiptProgressFrame);
+    } else {
+        clearTimeout(activeReceiptProgressFrame);
+    }
+    activeReceiptProgressFrame = null;
+}
+
+// 進度條用 CSS transition 保證平順移動；百分比文字用 animation frame 更新。
+// 即使 Android WebView 將一般計時器降頻，也不會再只看到 0% 直接跳 94%。
+function startSmoothReceiptProgress(startedAt, token) {
+    var forcedLayout;
+    stopReceiptProgressFrame();
+    renderReceiptProgress(0);
+    forcedLayout = progressFill.offsetWidth;
+    if (forcedLayout < 0) progressFill.style.opacity = "1";
+    progressFill.style.transition =
+        "width " + RECEIPT_PROGRESS_RAMP_MS + "ms cubic-bezier(.18,.74,.22,1)";
+    progressFill.style.width = RECEIPT_PROGRESS_LIMIT + "%";
+
+    function tick() {
+        var value;
+        if (token !== activeReceiptPrintToken) {
+            activeReceiptProgressFrame = null;
+            return;
+        }
+        value = calculateReceiptProgress(Date.now() - startedAt);
+        progressText.innerHTML = value + "%";
+        updatePrintMessage(value);
+        if (value < RECEIPT_PROGRESS_LIMIT) {
+            activeReceiptProgressFrame = scheduleReceiptProgressFrame(tick);
+        } else {
+            activeReceiptProgressFrame = null;
+        }
+    }
+    activeReceiptProgressFrame = scheduleReceiptProgressFrame(tick);
+}
+
+function finishPhysicalPrintAfterVisibleProgress(token, startedAt, targetOrder, result) {
+    var waitMs = Math.max(
+        0,
+        RECEIPT_PROGRESS_MIN_VISIBLE_MS - (Date.now() - startedAt)
+    );
+    return new Promise(function (resolve) {
+        setTimeout(function () {
+            if (token === activeReceiptPrintToken) {
+                stopReceiptProgressFrame();
+                progressFill.style.transition = "width 120ms linear";
+                progressText.innerHTML = RECEIPT_PROGRESS_LIMIT + "%";
+                finishPrintAnimation(targetOrder, true);
+            }
+            resolve(result);
+        }, waitMs);
+    });
+}
 // =========================================
 // 完成列印
 // =========================================
 function finishPrintAnimation(order, physicalPrinted) {
+    stopReceiptProgressFrame();
     progressFill.style.width = "100%";
     progressFill.style.borderRadius = "40px";
     progressText.innerHTML = "100%";
@@ -175,6 +252,7 @@ function finishPrintAnimation(order, physicalPrinted) {
 function showReceiptPrintRecovery(error) {
     clearInterval(activeReceiptProgressTimer);
     activeReceiptProgressTimer = null;
+    stopReceiptProgressFrame();
     progressFill.style.width = "100%";
     progressFill.style.background = "#ef5350";
     progressText.innerHTML = "需要處理";
@@ -258,13 +336,7 @@ function startPrintAnimation() {
         typeof MonsterReceiptPrinter.printOrder === "function" &&
         MonsterReceiptPrinter.hasPairing();
 
-    activeReceiptProgressTimer = setInterval(function () {
-        percent = Math.max(
-            percent,
-            calculateReceiptProgress(Date.now() - progressStartedAt)
-        );
-        renderReceiptProgress(percent);
-    }, 80);
+    startSmoothReceiptProgress(progressStartedAt, token);
 
     if (!hasPhysicalPrinter) {
         if (targetOrder && targetOrder.printAuthorizationId) {
@@ -285,10 +357,12 @@ function startPrintAnimation() {
     return MonsterReceiptPrinter.printOrder(targetOrder, { reprint: targetIsReprint })
         .then(function (result) {
             if (token !== activeReceiptPrintToken) return result;
-            clearInterval(activeReceiptProgressTimer);
-            activeReceiptProgressTimer = null;
-            finishPrintAnimation(targetOrder, true);
-            return result;
+            return finishPhysicalPrintAfterVisibleProgress(
+                token,
+                progressStartedAt,
+                targetOrder,
+                result
+            );
         })
         .catch(function (error) {
             if (token === activeReceiptPrintToken) showReceiptPrintRecovery(error);
