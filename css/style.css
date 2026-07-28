@@ -7050,3 +7050,39 @@ System Setting
 
 /* V7.8.1 Sale Rule Engine */
 .ticket-item{position:relative}.ticket-sale-disabled .ticket-btn{filter:grayscale(1);opacity:.42}.ticket-sale-disabled{cursor:not-allowed}.ticket-sale-status,.ticket-sale-countdown,.ticket-sale-limit{position:absolute;left:8px;right:8px;text-align:center;border-radius:10px;padding:6px;font-weight:800;z-index:3}.ticket-sale-status{top:42%;background:rgba(40,40,40,.86);color:#fff}.ticket-sale-countdown{top:8px;background:rgba(255,245,210,.95);color:#7a4600}.ticket-sale-limit{bottom:48px;background:rgba(255,255,255,.94);color:#7a2500}.sale-weekdays{display:flex;flex-wrap:wrap;gap:7px}.sale-weekdays label{padding:6px;border:1px solid #ddd;border-radius:8px}.tm-help{font-size:12px;opacity:.7}
+
+/*====================================================
+  V7.8.3.3 FIX10 - Kiosk ticket header safe area
+  Keep 返回／請選擇票種 visible in Android WebView.
+====================================================*/
+#ticketPage,
+#detailPage{
+    --ticket-kiosk-safe-top:max(20px, env(safe-area-inset-top, 0px));
+}
+
+#ticketPage > .ticket-header,
+#detailPage > .ticket-header{
+    -webkit-flex:0 0 calc(80px + var(--ticket-kiosk-safe-top)) !important;
+    flex:0 0 calc(80px + var(--ticket-kiosk-safe-top)) !important;
+    -webkit-flex-shrink:0 !important;
+    flex-shrink:0 !important;
+    position:sticky !important;
+    top:0 !important;
+    width:100% !important;
+    min-height:calc(80px + var(--ticket-kiosk-safe-top)) !important;
+    height:calc(80px + var(--ticket-kiosk-safe-top)) !important;
+    padding-top:var(--ticket-kiosk-safe-top) !important;
+    overflow:visible !important;
+    box-sizing:border-box !important;
+}
+
+#ticketPage > .ticket-header h1,
+#detailPage > .ticket-header h1{
+    margin:0 !important;
+    line-height:1.2 !important;
+}
+
+#ticketPage > .ticket-header #backBtn,
+#detailPage > .ticket-header #detailBackBtn{
+    top:calc(var(--ticket-kiosk-safe-top) + 15px) !important;
+}

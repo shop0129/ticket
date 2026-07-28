@@ -11,6 +11,15 @@ var detailBackBtn = document.getElementById("detailBackBtn");
 if (detailBackBtn) {
     detailBackBtn.addEventListener("click", function () {
         playClick();
+        if (
+            window.MonsterCashBridge &&
+            typeof window.MonsterCashBridge.hasBlockingTransaction === "function" &&
+            window.MonsterCashBridge.hasBlockingTransaction() &&
+            typeof window.MonsterCashBridge.requestCancelAndReturn === "function"
+        ) {
+            window.MonsterCashBridge.requestCancelAndReturn();
+            return;
+        }
         setTimeout(function () {
             showPage("ticketPage");
         }, 80);

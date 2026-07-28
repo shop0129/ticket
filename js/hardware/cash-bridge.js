@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX9
+// 小怪獸售票機 V7.8.3.3 FIX10
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -11,6 +11,8 @@
     var pollTimer = null;
     var active = loadJson(TRANSACTION_KEY);
     var pendingPurchasePage = null;
+    var pendingContext = null;
+    var pendingStartToken = 0;
 
     function loadJson(key) {
         try {
@@ -92,6 +94,7 @@
             '  <p id="hardwareCashMessage">請稍候…</p>',
             '  <small id="hardwareCashOrder"></small>',
             '  <button id="hardwareCashRetry" type="button" style="display:none;">重新連線</button>',
+            '  <button id="hardwareCashCancel" type="button" style="display:none;">取消付款並返回</button>',
             '  <button id="hardwareCashManage" type="button" style="display:none;">店長人工處理</button>',
             '</div>'
         ].join("");
@@ -99,6 +102,9 @@
         document.getElementById("hardwareCashRetry").addEventListener("click", function () {
             this.style.display = "none";
             if (active) pollPayment(active.order.orderNo);
+        });
+        document.getElementById("hardwareCashCancel").addEventListener("click", function () {
+            requestCancelAndReturn();
         });
         document.getElementById("hardwareCashManage").addEventListener("click", function () {
             hideOverlay();
@@ -142,6 +148,8 @@
         document.getElementById("hardwareCashMessage").textContent = data.message || "請依控制器畫面投入現金";
         document.getElementById("hardwareCashOrder").textContent = data.orderNo ? ("訂單 " + data.orderNo) : "";
         document.getElementById("hardwareCashRetry").style.display = data.retry ? "inline-block" : "none";
+        document.getElementById("hardwareCashCancel").style.display = data.cancelAllowed ? "inline-block" : "none";
+        document.getElementById("hardwareCashCancel").disabled = !!data.cancelPending;
         document.getElementById("hardwareCashManage").style.display = data.manage ? "inline-block" : "none";
     }
 
@@ -158,6 +166,90 @@
     function setLocked(locked) {
         if (window.MonsterPayment) window.MonsterPayment.setLocked(locked);
         else paymentInProgress = !!locked;
+    }
+
+    function restoreCheckout(context) {
+        pendingContext = null;
+        pendingPurchasePage = null;
+        hideOverlay();
+        setLocked(false);
+        if (
+            window.MonsterPayment &&
+            typeof window.MonsterPayment.restoreFailedCashCheckout === "function"
+        ) {
+            window.MonsterPayment.restoreFailedCashCheckout(context);
+        }
+    }
+
+    function cancelPreflight() {
+        var checkout = pendingContext;
+        pendingStartToken += 1;
+        restoreCheckout(checkout);
+        return Promise.resolve(true);
+    }
+
+    function requestCancelAndReturn() {
+        if (!active) {
+            if (!pendingContext) return Promise.resolve(false);
+            if (!confirm("確定取消這次現金付款並返回嗎？")) return Promise.resolve(false);
+            return cancelPreflight();
+        }
+        if (Number(active.lastPaidNtd || 0) > 0) {
+            alert("已投入現金，為避免帳款不一致，不能直接返回。請完成付款或通知員工處理。");
+            return Promise.resolve(false);
+        }
+        if (
+            active.state === "CLAIMED" ||
+            active.state === "ISSUE_STARTED" ||
+            active.state === "ACK_PENDING" ||
+            active.state === "RECOVERY_REQUIRED"
+        ) {
+            alert("付款或出票處理已開始，目前不能返回。");
+            return Promise.resolve(false);
+        }
+        if (!confirm("確定取消這次現金付款並返回嗎？")) return Promise.resolve(false);
+        stopPolling();
+        setOverlay({
+            title: "正在取消付款",
+            amount: active.order.amount,
+            paid: 0,
+            remaining: active.order.amount,
+            orderNo: active.order.orderNo,
+            message: "正在通知控制器停止收鈔與收幣，完成前請勿投入現金。",
+            cancelAllowed: true,
+            cancelPending: true
+        });
+        active.state = "CANCEL_REQUESTED";
+        active.updatedAt = Date.now();
+        saveActive();
+        return api("/payments/" + encodeURIComponent(active.order.orderNo) + "/cancel", {
+            method: "POST",
+            body: {
+                requestId: "CANCEL-" + active.requestId,
+                reason: "售票頁使用者取消付款"
+            }
+        }).then(function () {
+            pollPayment(active.order.orderNo);
+            return true;
+        }).catch(function (error) {
+            setOverlay({
+                title: "取消付款尚未完成",
+                amount: active && active.order.amount,
+                paid: active && active.lastPaidNtd,
+                remaining: active
+                    ? Math.max(0, active.order.amount - Number(active.lastPaidNtd || 0))
+                    : 0,
+                orderNo: active && active.order.orderNo,
+                message: error.message || "控制器未確認取消，請勿投入現金並通知員工。",
+                retry: true
+            });
+            if (active && active.order && active.order.orderNo) {
+                pollTimer = setTimeout(function () {
+                    pollPayment(active.order.orderNo);
+                }, 700);
+            }
+            return false;
+        });
     }
 
     function statusCopy(status, payload) {
@@ -207,9 +299,9 @@
                 }
                 setOverlay({
                     title: "付款已取消",
-                    amount: payload.amountNtd,
+                    amount: Number(payload.amountNtd || active.order.amount || 0),
                     paid: payload.paidNtd,
-                    remaining: payload.remainingNtd,
+                    remaining: Number(payload.remainingNtd || active.order.amount || 0),
                     orderNo: orderNo,
                     message: payload.message || "本筆未出票"
                 });
@@ -249,8 +341,16 @@
                 if (window.MonsterCashOperations) MonsterCashOperations.refresh();
                 return;
             }
+            var cancelAllowed =
+                Number(payload.paidNtd || 0) === 0 &&
+                (
+                    payload.status === "QUEUED" ||
+                    payload.status === "PAYMENT_PENDING"
+                );
             setOverlay({
-                title: payload.status === "PAYMENT_PENDING"
+                title: payload.status === "CANCEL_REQUESTED"
+                    ? "正在取消付款"
+                    : payload.status === "PAYMENT_PENDING"
                     ? "請投入現金"
                     : (payload.status === "CHANGE_PENDING" || payload.status === "CHANGE_DISPENSING")
                         ? "正在自動找零"
@@ -259,7 +359,9 @@
                 paid: payload.paidNtd,
                 remaining: payload.remainingNtd,
                 orderNo: orderNo,
-                message: statusCopy(payload.status, payload)
+                message: statusCopy(payload.status, payload),
+                cancelAllowed: cancelAllowed,
+                cancelPending: payload.status === "CANCEL_REQUESTED"
             });
             pollTimer = setTimeout(function () { pollPayment(orderNo); }, POLL_MS);
         }).catch(function (error) {
@@ -390,6 +492,8 @@
                 alert("實體收據列印模組尚未載入，已停止現金付款");
                 return;
             }
+            var preflightToken = ++pendingStartToken;
+            pendingContext = context;
             setLocked(true);
             setOverlay({
                 title: "正在檢查收據機",
@@ -397,11 +501,16 @@
                 paid: 0,
                 remaining: context.amount,
                 orderNo: context.orderNo,
-                message: "確認 ttyS4／9600 可使用後才會開放投入現金。"
+                message: "確認 ttyS4／9600 可使用後才會開放投入現金。",
+                cancelAllowed: true
             });
             MonsterReceiptPrinter.getStatus().then(function () {
+                if (preflightToken !== pendingStartToken || pendingContext !== context) return;
+                pendingContext = null;
                 startCashPayment(true, context);
             }).catch(function (error) {
+                if (preflightToken !== pendingStartToken || pendingContext !== context) return;
+                pendingContext = null;
                 setLocked(false);
                 setOverlay({
                     title: "收據機尚未就緒",
@@ -416,6 +525,7 @@
             });
             return;
         }
+        pendingContext = null;
         active = {
             version: 1,
             state: "REQUESTING",
@@ -433,7 +543,8 @@
             paid: 0,
             remaining: context.amount,
             orderNo: context.orderNo,
-            message: "請稍候，控制器會自動開啟。"
+            message: "請稍候，控制器會自動開啟。",
+            cancelAllowed: true
         });
         api("/payments", {
             method: "POST",
@@ -503,9 +614,10 @@
     window.MonsterCashBridge = {
         startCashPayment: startCashPayment,
         hasBlockingTransaction: function () {
-            return !!(active && active.state !== "COMPLETED");
+            return !!pendingContext || !!(active && active.state !== "COMPLETED");
         },
         getPurchasePage: purchasePage,
+        requestCancelAndReturn: requestCancelAndReturn,
         onTicketAnimationFinished: function (order) {
             if (!active || !active.authorization || !order) return;
             if (order.printAuthorizationId !== active.authorization.authorizationId) return;

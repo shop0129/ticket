@@ -1,4 +1,4 @@
-// V7.8.3.3 FIX9 | keep active payments on the purchase page
+// V7.8.3.3 FIX10 | keep active payments visible and allow safe zero-paid cancellation
 function hasBlockingCheckoutTransaction() {
     if (
         window.MonsterCashBridge &&
@@ -65,6 +65,15 @@ document
     .getElementById("backBtn")
     .addEventListener("click", function () {
     playClick();
+    if (
+        window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.hasBlockingTransaction === "function" &&
+        window.MonsterCashBridge.hasBlockingTransaction() &&
+        typeof window.MonsterCashBridge.requestCancelAndReturn === "function"
+    ) {
+        window.MonsterCashBridge.requestCancelAndReturn();
+        return;
+    }
     setTimeout(function () {
         showPage("homePage");
     }, 80);
