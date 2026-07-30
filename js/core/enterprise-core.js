@@ -4,7 +4,7 @@
     "use strict";
 
     var VERSION = "7.8.3.3";
-    var BUILD = "FIX22";
+    var BUILD = "FIX23";
     var listeners = {};
     var logs = [];
     var MAX_LOGS = 300;

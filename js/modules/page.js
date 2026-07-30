@@ -1,7 +1,7 @@
-// V7.8.3.3 FIX22 | Instant native Start + single version badge
-// FIX22 opens the complete fallback catalog synchronously. Remote ticket
-// images continue warming in the background and can never hold the native
-// Home panel above an already-open ticket page.
+// V7.8.3.3 FIX23 | One tap = one route
+// FIX23 gives browser Start, native Start, and Admin one synchronous routing
+// path. No delayed catalog promise or startup timer may change the destination
+// after the user's action has already been accepted.
 // Preserved FIX21 contract: native ticket-back channel + Android home gate
 // Preserved FIX20 contract: Android native home gate + background ticket warm-up
 // Preserved FIX19 contract: WebView cache reset + boot recovery stays over home
@@ -9,13 +9,12 @@
 // Preserved FIX17 contract: background zero-cash recovery + ticket-image readiness gate
 // Preserved FIX16 contract: home-first handshake with controller-startup retry safety
 var activeKioskHomeRequest = null;
+var activeKioskHomeRequestId = 0;
 var activeTicketPageRequest = 0;
 var trustedTicketPageRequest = 0;
 var ticketEntryPermit = 0;
 var homeStableSince = Date.now();
 var nativeHomeReadyAt = 0;
-var HOME_START_GUARD_MS = 1200;
-var NATIVE_START_GUARD_MS = 600;
 var KIOSK_ROUTE_TRACE_KEY = "monsterKioskRouteTraceV1";
 var lastTicketBackRequestAt = 0;
 
@@ -111,21 +110,12 @@ function markNativeHomeReady(source) {
 }
 
 function isTrustedManualStart(event) {
-    var now = Date.now();
     if (!event || event.isTrusted !== true) {
         recordKioskRoute("START_REJECTED", "untrusted");
         return false;
     }
     if (!isHomePageActive()) {
         recordKioskRoute("START_REJECTED", "home-not-active");
-        return false;
-    }
-    if (now - homeStableSince < HOME_START_GUARD_MS) {
-        recordKioskRoute("START_REJECTED", "home-not-stable");
-        return false;
-    }
-    if (nativeHomeReadyAt && now - nativeHomeReadyAt < NATIVE_START_GUARD_MS) {
-        recordKioskRoute("START_REJECTED", "native-overlay-release");
         return false;
     }
     return true;
@@ -195,6 +185,66 @@ function waitForTicketCatalogReady() {
     return Promise.resolve(true);
 }
 
+function clearStartButtonState() {
+    var startButton = document.getElementById("startBtn");
+    if (!startButton) return;
+    startButton.style.pointerEvents = "";
+    startButton.removeAttribute("aria-busy");
+    startButton.removeAttribute("data-ticket-request");
+}
+
+function cancelTicketEntryRequest(reason) {
+    activeTicketPageRequest += 1;
+    trustedTicketPageRequest = 0;
+    ticketEntryPermit = 0;
+    clearStartButtonState();
+    recordKioskRoute("TICKET_REQUEST_CANCELLED", reason || "route-change");
+}
+
+function cancelPendingHomeRoute(reason) {
+    activeKioskHomeRequestId += 1;
+    activeKioskHomeRequest = null;
+    recordKioskRoute("HOME_REQUEST_CANCELLED", reason || "new-destination");
+}
+
+function openTicketsNow(source) {
+    var requestId;
+    var startButton = document.getElementById("startBtn");
+    if (!isHomePageActive()) {
+        recordKioskRoute("START_REJECTED", "home-not-active");
+        notifyNativeStartBlocked("home-not-active");
+        return "BLOCKED";
+    }
+    if (isCheckoutStartBlocked()) {
+        recordKioskRoute("START_REJECTED", "checkout");
+        notifyNativeStartBlocked("checkout");
+        return "BLOCKED";
+    }
+    cancelPendingHomeRoute("start");
+    requestId = ++activeTicketPageRequest;
+    trustedTicketPageRequest = requestId;
+    if (startButton) {
+        startButton.style.pointerEvents = "none";
+        startButton.setAttribute("aria-busy", "true");
+        startButton.setAttribute("data-ticket-request", String(requestId));
+    }
+    if (!permitTicketPageForManualStart(requestId) || !showPage("ticketPage")) {
+        clearStartButtonState();
+        notifyNativeStartBlocked("route");
+        return "BLOCKED";
+    }
+    playClick();
+    clearStartButtonState();
+    notifyNativeTicketReady(source || "web");
+    recordKioskRoute("TICKET_VISIBLE", source || "web");
+    // The local fallback catalog is already complete. Remote/custom images may
+    // continue warming, but their promise is never allowed to route a page.
+    waitForTicketCatalogReady().catch(function () {
+        recordKioskRoute("CATALOG_WARM_FAILED", source || "web");
+    });
+    return "TICKET_READY";
+}
+
 function releaseWebOnlyPaymentLock() {
     if (
         !hasCashBridgeTransaction() &&
@@ -227,6 +277,8 @@ function forceHomePageIfSafe() {
 }
 
 function requestKioskHome(reason) {
+    var requestId;
+    var request;
     if (hasLinePayBridgeTransaction()) {
         return Promise.resolve(false);
     }
@@ -235,16 +287,19 @@ function requestKioskHome(reason) {
         window.MonsterCashBridge &&
         typeof window.MonsterCashBridge.requestHomeIfSafe === "function"
     ) {
-        activeKioskHomeRequest = window.MonsterCashBridge
+        requestId = ++activeKioskHomeRequestId;
+        request = window.MonsterCashBridge
             .requestHomeIfSafe({ source: reason || "kiosk" })
             .then(function (released) {
+                if (requestId !== activeKioskHomeRequestId) return false;
                 if (released) forceHomePageIfSafe();
-                activeKioskHomeRequest = null;
+                if (activeKioskHomeRequest === request) activeKioskHomeRequest = null;
                 return !!released;
             }, function () {
-                activeKioskHomeRequest = null;
+                if (activeKioskHomeRequest === request) activeKioskHomeRequest = null;
                 return false;
             });
+        activeKioskHomeRequest = request;
         return activeKioskHomeRequest;
     }
     return Promise.resolve(forceHomePageIfSafe());
@@ -253,6 +308,12 @@ function requestKioskHome(reason) {
 function showPage(pageId) {
     var previousPage = activePageId();
     clearInterval(countdownTimer);
+    if (previousPage === "homePage" && pageId !== "homePage") {
+        cancelPendingHomeRoute("route-" + pageId);
+    }
+    if (previousPage === "homePage" && pageId !== "ticketPage" && pageId !== "homePage") {
+        cancelTicketEntryRequest("route-" + pageId);
+    }
     if (pageId === "homePage") {
         // 上一筆失敗交易只留下網頁鎖定時，返回首頁必須能自動恢復。
         releaseWebOnlyPaymentLock();
@@ -303,8 +364,6 @@ function showPage(pageId) {
 }
 
 function openTicketsFromNative(source) {
-    var requestId;
-    var startButton = document.getElementById("startBtn");
     var home;
     if (!isHomePageActive()) {
         releaseWebOnlyPaymentLock();
@@ -330,37 +389,8 @@ function openTicketsFromNative(source) {
         notifyNativeStartBlocked("checkout");
         return "BLOCKED";
     }
-    requestId = ++activeTicketPageRequest;
-    trustedTicketPageRequest = requestId;
-    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk122");
-    if (startButton) {
-        startButton.style.pointerEvents = "none";
-        startButton.setAttribute("aria-busy", "true");
-        startButton.setAttribute("data-ticket-request", String(requestId));
-    }
-    if (!permitTicketPageForManualStart(requestId)) {
-        notifyNativeStartBlocked("permit");
-        return "BLOCKED";
-    }
-    if (!showPage("ticketPage")) {
-        notifyNativeStartBlocked("route");
-        return "BLOCKED";
-    }
-    // Notify Android before any asynchronous image/Firebase work. This makes
-    // the native panel disappear during the same accepted touch transaction.
-    notifyNativeTicketReady(source || "kiosk122");
-    recordKioskRoute("NATIVE_TICKET_VISIBLE", source || "kiosk122");
-    if (startButton) {
-        startButton.style.pointerEvents = "";
-        startButton.removeAttribute("aria-busy");
-        startButton.removeAttribute("data-ticket-request");
-    }
-    // The catalog already contains a full local fallback image for every card.
-    // Keep warming custom images without delaying navigation.
-    waitForTicketCatalogReady().catch(function () {
-        recordKioskRoute("CATALOG_WARM_FAILED", source || "kiosk122");
-    });
-    return "TICKET_READY";
+    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk123");
+    return openTicketsNow(source || "kiosk123");
 }
 function resetIdleTimer() {
     clearTimeout(idleTimer);
@@ -380,50 +410,21 @@ document.addEventListener("touchstart", resetIdleTimer);
 document
     .getElementById("startBtn")
     .addEventListener("click", function (event) {
-    var requestId;
-    var startButton = document.getElementById("startBtn");
     if (event && typeof event.preventDefault === "function") {
         event.preventDefault();
     }
     if (!isTrustedManualStart(event)) return;
-    if (isCheckoutStartBlocked()) {
+    if (openTicketsNow("browser-start") !== "TICKET_READY") {
         alert("系統正在確認上一筆交易，請稍候幾秒後再按「開始購票」。");
-        return;
     }
-    requestId = ++activeTicketPageRequest;
-    trustedTicketPageRequest = requestId;
-    playClick();
-    recordKioskRoute("START_ACCEPTED", "waiting-catalog");
-    if (startButton) {
-        startButton.style.pointerEvents = "none";
-        startButton.setAttribute("aria-busy", "true");
-        startButton.setAttribute("data-ticket-request", String(requestId));
-    }
-    waitForTicketCatalogReady().then(function () {
-        if (requestId !== activeTicketPageRequest) return;
-        if (isCheckoutStartBlocked()) return;
-        if (!permitTicketPageForManualStart(requestId)) return;
-        showPage("ticketPage");
-    }).catch(function () {
-        if (requestId !== activeTicketPageRequest) return;
-        if (
-            !isCheckoutStartBlocked() &&
-            permitTicketPageForManualStart(requestId)
-        ) {
-            showPage("ticketPage");
-        }
-    }).then(function () {
-        if (
-            !startButton ||
-            startButton.getAttribute("data-ticket-request") !== String(requestId)
-        ) {
-            return;
-        }
-        startButton.style.pointerEvents = "";
-        startButton.removeAttribute("aria-busy");
-        startButton.removeAttribute("data-ticket-request");
-    });
 });
+
+function openAdminLoginFromHome(event) {
+    if (event && typeof event.preventDefault === "function") event.preventDefault();
+    cancelTicketEntryRequest("admin");
+    playClick();
+    return showPage("adminLoginPage");
+}
 function handleTicketBack(event) {
     var now = Date.now();
     if (event && typeof event.preventDefault === "function") {
@@ -438,7 +439,7 @@ function handleTicketBack(event) {
     lastTicketBackRequestAt = now;
     playClick();
     recordKioskRoute("TICKET_BACK", event && event.type ? event.type : "unknown");
-    // Kiosk 122 shows the native Home immediately. The web transaction release
+    // Kiosk 123 shows the native Home immediately. The web transaction release
     // continues below, so a zero-cash stale transaction cannot make Back look dead.
     notifyNativeTicketBack("ticket-page");
     requestKioskHome("ticket-back");
@@ -449,13 +450,13 @@ ticketBackButton.addEventListener("touchend", handleTicketBack, true);
 ticketBackButton.addEventListener("click", handleTicketBack, true);
 
 window.MonsterHomeGuard = {
-    version: "fix22",
+    version: "fix23",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix22",
+    version: "fix23",
     requestHome: requestKioskHome,
     markNativeHomeReady: markNativeHomeReady,
     openTicketsFromNative: openTicketsFromNative,

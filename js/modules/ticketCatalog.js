@@ -1,6 +1,6 @@
-// V7.8.3.3 FIX22 | complete fallback catalog is ready synchronously
+// V7.8.3.3 FIX23 | complete fallback catalog is ready synchronously
 // Preserved FIX17 behavior: custom ticket images are preloaded before replacing
-// the fallback images. FIX22 no longer blocks Start while remote images warm.
+// the fallback images. FIX23 never lets image warming route the page.
 // =========================================
 // 小怪獸售票機 V6.3.1
 // 動態票券目錄
@@ -224,7 +224,7 @@ function updateEmptyTicketCategories() {
 }
 
 window.MonsterTicketCatalog = {
-    version: "fix22",
+    version: "fix23",
     render: renderTicketCatalog,
     whenReady: whenTicketCatalogReady,
     whenImagesReady: function () { return ticketCatalogWarmPromise; },
