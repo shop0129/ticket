@@ -1,4 +1,5 @@
-// V7.8.3.3 FIX18 | manual Start-only ticket entry + stable home routing
+// V7.8.3.3 FIX19 | WebView cache reset + boot recovery stays over home
+// Preserved FIX18 contract: manual Start-only ticket entry + stable home routing
 // Preserved FIX17 contract: background zero-cash recovery + ticket-image readiness gate
 // Preserved FIX16 contract: home-first handshake with controller-startup retry safety
 var activeKioskHomeRequest = null;
@@ -130,6 +131,14 @@ function isCheckoutStartBlocked() {
     return typeof paymentInProgress !== "undefined" && !!paymentInProgress;
 }
 
+function shouldKeepHomeDuringBootRecovery() {
+    return !!(
+        window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.shouldKeepHomeDuringBootRecovery === "function" &&
+        window.MonsterCashBridge.shouldKeepHomeDuringBootRecovery()
+    );
+}
+
 function waitForTicketCatalogReady() {
     if (
         window.MonsterTicketCatalog &&
@@ -202,7 +211,11 @@ function showPage(pageId) {
         releaseWebOnlyPaymentLock();
     }
     // 收款、找零或列印授權尚未結束時，不允許閒置計時器把畫面送回首頁。
-    if (pageId === "homePage" && hasBlockingCheckoutTransaction()) {
+    if (
+        pageId === "homePage" &&
+        hasBlockingCheckoutTransaction() &&
+        !shouldKeepHomeDuringBootRecovery()
+    ) {
         if (
             window.MonsterCashBridge &&
             typeof window.MonsterCashBridge.getPurchasePage === "function"
@@ -313,13 +326,13 @@ document
 });
 
 window.MonsterHomeGuard = {
-    version: "fix18",
+    version: "fix19",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix18",
+    version: "fix19",
     requestHome: requestKioskHome,
     markNativeHomeReady: markNativeHomeReady,
     isHome: function () {

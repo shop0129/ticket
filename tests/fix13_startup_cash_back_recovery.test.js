@@ -264,7 +264,11 @@ async function testRealControllerTransactionIsRestored() {
 
     harness.listeners.DOMContentLoaded();
     await flush(16);
-    assert.strictEqual(harness.page(), "ticketPage");
+    assert.strictEqual(
+        harness.page(),
+        "homePage",
+        "FIX19 開機恢復收款時保留首頁作為底層，不自動切到票種頁"
+    );
     assert.strictEqual(
         harness.sandbox.MonsterCashBridge.hasBlockingTransaction(),
         true,

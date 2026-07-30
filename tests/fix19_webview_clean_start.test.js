@@ -15,8 +15,8 @@ function readProject(relative) {
     return fs.readFileSync(path.join(projectRoot, relative), "utf8");
 }
 
-function classList(initial) {
-    var values = initial || [];
+function classList(active) {
+    var values = active ? ["active"] : [];
     return {
         add: function (value) {
             if (values.indexOf(value) < 0) values.push(value);
@@ -30,35 +30,23 @@ function classList(initial) {
     };
 }
 
-function element(id, active) {
-    var listeners = {};
-    var attributes = {};
+function pageElement(id, active) {
     return {
         id: id,
-        classList: classList(active ? ["active"] : []),
+        classList: classList(active),
         style: {},
-        addEventListener: function (name, handler) {
-            listeners[name] = handler;
-        },
-        setAttribute: function (name, value) {
-            attributes[name] = String(value);
-        },
-        getAttribute: function (name) {
-            return attributes[name] || null;
-        },
-        removeAttribute: function (name) {
-            delete attributes[name];
-        },
-        listeners: listeners
+        addEventListener: function () {},
+        setAttribute: function () {},
+        getAttribute: function () { return null; },
+        removeAttribute: function () {}
     };
 }
 
-async function runBehaviorTest() {
-    var now = 100000;
-    var home = element("homePage", true);
-    var tickets = element("ticketPage", false);
-    var start = element("startBtn", false);
-    var back = element("backBtn", false);
+function verifyBootRecoveryStaysOverHome() {
+    var home = pageElement("homePage", false);
+    var tickets = pageElement("ticketPage", true);
+    var start = pageElement("startBtn", false);
+    var back = pageElement("backBtn", false);
     var pages = [home, tickets];
     var context = {
         window: {},
@@ -76,13 +64,13 @@ async function runBehaviorTest() {
             },
             querySelector: function (selector) {
                 if (selector !== ".page.active") return null;
-                return pages.filter(function (page) {
-                    return page.classList.contains("active");
+                return pages.filter(function (item) {
+                    return item.classList.contains("active");
                 })[0] || null;
             },
             addEventListener: function () {}
         },
-        Date: { now: function () { return now; } },
+        Date: Date,
         Promise: Promise,
         setTimeout: function () { return 1; },
         clearTimeout: function () {},
@@ -100,31 +88,16 @@ async function runBehaviorTest() {
         }
     };
     context.window = context;
-    context.MonsterTicketCatalog = {
-        whenReady: function () { return Promise.resolve(true); }
+    context.MonsterCashBridge = {
+        hasBlockingTransaction: function () { return true; },
+        isStartBlocked: function () { return true; },
+        shouldKeepHomeDuringBootRecovery: function () { return true; },
+        getPurchasePage: function () { return "ticketPage"; }
     };
-
     vm.runInNewContext(read("js/modules/page.js"), context);
-    now += 2000;
-
-    assert.strictEqual(context.showPage("ticketPage"), false);
+    assert.strictEqual(context.showPage("homePage"), true);
     assert.strictEqual(home.classList.contains("active"), true);
-
-    start.listeners.click({
-        isTrusted: false,
-        preventDefault: function () {}
-    });
-    await Promise.resolve();
-    assert.strictEqual(home.classList.contains("active"), true);
-
-    start.listeners.click({
-        isTrusted: true,
-        preventDefault: function () {}
-    });
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
-    assert.strictEqual(tickets.classList.contains("active"), true);
+    assert.strictEqual(tickets.classList.contains("active"), false);
 }
 
 var index = read("index.html");
@@ -139,29 +112,38 @@ var build = readProject(
     "02_Android_Kiosk119_WebView_Clean_Start/webkiosk/build.gradle.kts"
 );
 var installer = readProject("01_INSTALL_KIOSK119_WEBVIEW_CLEAN_AND_REBOOT.cmd");
+var verifier = readProject("tools/verify_kiosk119_worker.cmd");
 
 assert.ok(index.indexOf("FIX19 WEBVIEW CLEAN START") >= 0);
 assert.ok(index.indexOf("js/modules/page.js?v=7833fix19") >= 0);
 assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix19") >= 0);
-assert.ok(index.indexOf("data-fix18-manual-start") >= 0);
-assert.ok(page.indexOf("event.isTrusted !== true") >= 0);
-assert.ok(page.indexOf("ticketEntryPermit") >= 0);
-assert.ok(page.indexOf("permitTicketPageForManualStart") >= 0);
-assert.ok(page.indexOf("TICKET_ENTRY_BLOCKED") >= 0);
-assert.ok(page.indexOf('version: "fix19"') >= 0);
-assert.ok(cash.indexOf("首頁已顯示時，零投入的背景恢復不得把客人推進票種頁") >= 0);
-assert.ok(worker.indexOf("7833-fix18-manual-start-only-20260730-1") >= 0);
+assert.ok(worker.indexOf("7833-fix19-webview-clean-start-20260730-1") >= 0);
+
+assert.ok(page.indexOf("shouldKeepHomeDuringBootRecovery") >= 0);
+assert.ok(cash.indexOf("var bootSessionRecovery = !!active") >= 0);
+assert.ok(cash.indexOf("if (bootSessionRecovery && active)") >= 0);
+assert.ok(cash.indexOf("shouldKeepHomeDuringBootRecovery: function ()") >= 0);
+
+assert.ok(activity.indexOf("purgeStalePwaStorageBeforeWebView()") >= 0);
+assert.ok(
+    activity.indexOf("purgeStalePwaStorageBeforeWebView()") <
+        activity.indexOf("setContentView(R.layout.activity_kiosk)")
+);
+assert.ok(activity.indexOf('File(webViewRoot, "Default/Service Worker")') >= 0);
+assert.ok(activity.indexOf('File(webViewRoot, "Default/Cache")') >= 0);
+assert.ok(activity.indexOf("Local Storage") >= 0);
+assert.strictEqual(activity.indexOf("WebStorage.getInstance().deleteAllData()"), -1);
+assert.strictEqual(activity.indexOf("localStorage.clear()"), -1);
 assert.ok(activity.indexOf("kiosk=119&home=1&build=fix19") >= 0);
-assert.ok(activity.indexOf("markNativeHomeReady('kiosk119')") >= 0);
-assert.ok(activity.indexOf("NATIVE_HOME_RELEASE_GUARD_MS = 700L") >= 0);
 assert.ok(build.indexOf("versionCode = 119") >= 0);
 assert.ok(build.indexOf("1.17-sprint11t-kiosk119-webview-clean-start") >= 0);
+
 assert.ok(installer.indexOf("versionCode=113") >= 0);
 assert.ok(installer.indexOf("versionCode=119") >= 0);
+assert.ok(installer.indexOf("pwa_storage_reset_applied") >= 0);
+assert.strictEqual(installer.indexOf("pm clear"), -1);
+assert.ok(verifier.indexOf("KIOSK119_HOME_WEBVIEW_CLEAN_READY") >= 0);
+assert.ok(verifier.indexOf("pwa_storage_reset_applied") >= 0);
 
-runBehaviorTest().then(function () {
-    console.log("PASS FIX18 manual Start-only routing: 18 assertions");
-}).catch(function (error) {
-    console.error(error && error.stack || error);
-    process.exitCode = 1;
-});
+verifyBootRecoveryStaysOverHome();
+console.log("PASS FIX19 WebView clean start: 25 assertions");

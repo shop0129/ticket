@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX18
+// 小怪獸售票機 V7.8.3.3 FIX19
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -12,6 +12,9 @@
     var STALE_ZERO_CASH_MS = 5 * 60 * 1000;
     var pollTimer = null;
     var active = loadJson(TRANSACTION_KEY);
+    // FIX19：如果這筆交易是在開啟網頁前就已存在，恢復流程只顯示安全遮罩，
+    // 不把首頁底層自動切到票種頁。交易與已投入現金仍完整保留。
+    var bootSessionRecovery = !!active;
     // 只有「重新開機前留下、且尚未投入現金」的交易走背景首頁恢復。
     // 新交易仍維持原本的付款頁鎖定，已投入現金／列印授權也絕不放行。
     var bootHomeReleasePending = !!active && !hasAcceptedCashEvidence(active);
@@ -23,7 +26,7 @@
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
     // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
-    var OVERLAY_FIX_VERSION = "fix18";
+    var OVERLAY_FIX_VERSION = "fix19";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;
@@ -239,6 +242,9 @@
     }
 
     function keepPurchasePageVisible() {
+        if (bootSessionRecovery && active) {
+            return;
+        }
         if (
             bootHomeReleasePending &&
             active &&
@@ -390,6 +396,7 @@
         active = null;
         pendingContext = null;
         pendingPurchasePage = null;
+        bootSessionRecovery = false;
         bootHomeReleasePending = false;
         bootRecoveryResolved = true;
         saveActive();
@@ -954,6 +961,7 @@
         }
         setTimeout(function () {
             active = null;
+            bootSessionRecovery = false;
             bootHomeReleasePending = false;
             saveActive();
             hideOverlay();
@@ -991,6 +999,7 @@
         if (active && active.state === "COMPLETED") {
             clearStoredTransaction();
         }
+        bootSessionRecovery = false;
         var context = preparedContext;
         if (!context) {
             try {
@@ -1085,6 +1094,7 @@
         }).catch(function (error) {
             if (error.code === "PAIRING_REQUIRED") localStorage.removeItem(PAIRING_KEY);
             active = null;
+            bootSessionRecovery = false;
             bootHomeReleasePending = false;
             pendingPurchasePage = null;
             saveActive();
@@ -1295,6 +1305,13 @@
                 active.state !== "COMPLETED"
             ) || !bootRecoveryResolved;
         },
+        shouldKeepHomeDuringBootRecovery: function () {
+            return !!(
+                bootSessionRecovery &&
+                active &&
+                active.state !== "COMPLETED"
+            );
+        },
         getPurchasePage: purchasePage,
         requestCancelAndReturn: requestCancelAndReturn,
         requestHomeIfSafe: requestHomeIfSafe,
@@ -1334,6 +1351,7 @@
         releaseAfterReconciliation: function (orderNo) {
             if (active && active.order && active.order.orderNo === orderNo) {
                 active = null;
+                bootSessionRecovery = false;
                 bootRecoveryResolved = true;
                 saveActive();
                 hideOverlay();
@@ -1344,6 +1362,7 @@
             getActive: function () { return active; },
             setActive: function (value) {
                 active = value;
+                bootSessionRecovery = false;
                 bootHomeReleasePending = false;
                 bootRecoveryResolved = true;
                 saveActive();
