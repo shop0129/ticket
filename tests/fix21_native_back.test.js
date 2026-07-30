@@ -120,16 +120,16 @@ var index = read("index.html");
 var page = read("js/modules/page.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK124_NATIVE_ROUTE_AND_REBOOT.cmd");
+var installer = readProject("01_INSTALL_KIOSK125_LINEPAY_UNLOCK_AND_REBOOT.cmd");
 
-assert.ok(index.indexOf("FIX24 NATIVE ROUTE STATE") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix24") >= 0);
+assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix25") >= 0);
 assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix24") >= 0);
 assert.ok(page.indexOf("notifyNativeTicketBack") >= 0);
 assert.ok(page.indexOf('"touchend", handleTicketBack, true') >= 0);
@@ -138,11 +138,11 @@ assert.ok(activity.indexOf("requestWebHomeAfterNativeBack") >= 0);
 assert.ok(activity.indexOf("acceptedEvidence(storedTransaction())") >= 0);
 assert.ok(activity.indexOf("HOME_REQUESTED") >= 0);
 assert.ok(activity.indexOf("PAYMENT_PRESERVED") >= 0);
-assert.ok(build.indexOf("versionCode = 124") >= 0);
-assert.ok(build.indexOf("1.22-sprint11y-kiosk124-native-route-state") >= 0);
+assert.ok(build.indexOf("versionCode = 125") >= 0);
+assert.ok(build.indexOf("1.23-sprint11z-kiosk125-linepay-input-unlock") >= 0);
 assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
 assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
-assert.ok(worker.indexOf("7833-fix24-native-route-state-20260731-1") >= 0);
+assert.ok(worker.indexOf("7833-fix25-linepay-input-unlock-20260731-1") >= 0);
 
 verifyTicketBackUsesNativeChannel().then(function () {
     console.log("PASS FIX21 native Back: 19 assertions");

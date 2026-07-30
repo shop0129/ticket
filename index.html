@@ -13,8 +13,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX24 Native Route State">
-<!-- V7.8.3.3 · FIX24 NATIVE ROUTE STATE -->
+<meta name="monster-app-version" content="V7.8.3.3 FIX25 LinePay Input Unlock">
+<!-- V7.8.3.3 · FIX25 LINEPAY INPUT UNLOCK -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT -->
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
@@ -322,6 +322,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         <input
             type="password"
             id="adminLoginPassword"
+            inputmode="numeric"
             autocomplete="current-password"
             placeholder="請輸入密碼">
 
@@ -1697,7 +1698,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix24"></script>  
+<script src="js/modules/page.js?v=7833fix25"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
@@ -1720,7 +1721,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/consumePoints.js?v=7833fix9"></script>
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
 <script src="js/modules/payment.js?v=7833fix16"></script>
-<script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
+<script src="js/cloud/linepay-scanner.js?v=7833fix25"></script>
 <script src="js/hardware/cash-bridge.js?v=7833fix24"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
@@ -1747,13 +1748,13 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<!-- FIX24 uses the single live Enterprise status badge. -->
+<!-- FIX25 uses the single live Enterprise status badge. -->
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 <script>
-// FIX24 keeps the native Home/Back gate and prevents stale Home callbacks from
+// FIX25 keeps the native Home/Back gate and prevents stale Home callbacks from
 // competing with a user-selected Start or Admin destination.
 (function () {
     "use strict";

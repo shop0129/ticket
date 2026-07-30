@@ -117,19 +117,19 @@ var catalog = read("js/modules/ticketCatalog.js");
 var enterprise = read("js/core/enterprise-core.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK124_NATIVE_ROUTE_AND_REBOOT.cmd");
+var installer = readProject("01_INSTALL_KIOSK125_LINEPAY_UNLOCK_AND_REBOOT.cmd");
 var renderStart = catalog.indexOf("function renderTicketCatalog()");
 var fallbackCommit = catalog.indexOf("commitTicketCatalog(entries, {})", renderStart);
 var preloadStart = catalog.indexOf("Promise.all", renderStart);
 
-assert.ok(index.indexOf("V7.8.3.3 · FIX24 NATIVE ROUTE STATE") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix24") >= 0);
+assert.ok(index.indexOf("V7.8.3.3 · FIX25 LINEPAY INPUT UNLOCK") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix25") >= 0);
 assert.ok(index.indexOf("js/modules/ticketCatalog.js?v=7833fix24") >= 0);
 assert.ok(index.indexOf("js/core/enterprise-core.js?v=7833fix24") >= 0);
 assert.strictEqual(index.indexOf('id="v7-phase1-badge"'), -1);
@@ -142,10 +142,10 @@ assert.ok(page.indexOf('return "TICKET_READY"') >= 0);
 assert.ok(activity.indexOf('result == "TICKET_READY"') >= 0);
 assert.ok(activity.indexOf("completeNativeRoute(") >= 0);
 assert.ok(activity.indexOf("NativeDestination.OPENING_TICKET") >= 0);
-assert.ok(activity.indexOf("kiosk=124&home=1&build=fix24") >= 0);
-assert.ok(build.indexOf("versionCode = 124") >= 0);
-assert.ok(build.indexOf("1.22-sprint11y-kiosk124-native-route-state") >= 0);
-assert.ok(worker.indexOf("7833-fix24-native-route-state-20260731-1") >= 0);
+assert.ok(activity.indexOf("kiosk=125&home=1&build=fix25") >= 0);
+assert.ok(build.indexOf("versionCode = 125") >= 0);
+assert.ok(build.indexOf("1.23-sprint11z-kiosk125-linepay-input-unlock") >= 0);
+assert.ok(worker.indexOf("7833-fix25-linepay-input-unlock-20260731-1") >= 0);
 assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
 assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
 assert.ok(installer.indexOf("versionCode=113") >= 0);

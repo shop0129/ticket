@@ -29,6 +29,32 @@
         else localStorage.removeItem(ACTIVE_KEY);
     }
 
+    function hasSubmittedPaymentEvidence(transaction) {
+        var state;
+        if (!transaction) return false;
+        state = String(transaction.state || "");
+        if (
+            state === "WAITING_SCAN" ||
+            state === "SETUP_REQUIRED" ||
+            state === "FAILED" ||
+            state === "REFUNDED"
+        ) {
+            return false;
+        }
+        if (transaction.authorization || transaction.submittedAt) return true;
+        return state === "SUBMITTING" ||
+            state === "CHECKING" ||
+            state === "AUTHORIZED" ||
+            state === "ORDER_SAVED" ||
+            state === "RECOVERY_REQUIRED" ||
+            state === "MANUAL_REVIEW";
+    }
+
+    function canDiscardWithoutPaymentRisk(transaction) {
+        if (!transaction) return true;
+        return !hasSubmittedPaymentEvidence(transaction);
+    }
+
     function setLocked(locked) {
         if (window.MonsterPayment) window.MonsterPayment.setLocked(locked);
         else window.paymentInProgress = !!locked;
@@ -90,6 +116,23 @@
     function hideOverlay() {
         var overlay = document.getElementById("linePayScanOverlay");
         if (overlay) overlay.classList.remove("show");
+    }
+
+    function clearUnfundedTransaction(reason) {
+        if (!canDiscardWithoutPaymentRisk(active)) return false;
+        stopTimers();
+        active = null;
+        saveActive();
+        resetBuffer();
+        hideOverlay();
+        setLocked(false);
+        try {
+            localStorage.setItem(
+                "monsterLinePayLastSafeReleaseV1",
+                JSON.stringify({ at: Date.now(), reason: String(reason || "safe-release") })
+            );
+        } catch (ignore) {}
+        return true;
     }
 
     function updateScanProgress(message) {
@@ -475,8 +518,35 @@
         return symbols[code] || "";
     }
 
+    function isEditableTarget(target) {
+        var tag;
+        if (!target) return false;
+        tag = String(target.tagName || "").toUpperCase();
+        return tag === "INPUT" ||
+            tag === "TEXTAREA" ||
+            tag === "SELECT" ||
+            target.isContentEditable === true;
+    }
+
+    function scannerOverlayVisible() {
+        var overlay = document.getElementById("linePayScanOverlay");
+        return !!(
+            overlay &&
+            overlay.classList &&
+            typeof overlay.classList.contains === "function" &&
+            overlay.classList.contains("show")
+        );
+    }
+
+    function shouldCaptureScannerKey(event) {
+        if (!active || active.state !== "WAITING_SCAN") return false;
+        if (!scannerOverlayVisible()) return false;
+        if (isEditableTarget(event && event.target)) return false;
+        return true;
+    }
+
     function handleScannerKey(event) {
-        if (!active || active.state !== "WAITING_SCAN") return;
+        if (!shouldCaptureScannerKey(event)) return;
         var code = event.which || event.keyCode || 0;
         if (code === 13 || event.key === "Enter") {
             event.preventDefault();
@@ -508,6 +578,9 @@
     }
 
     function start(context) {
+        if (active && canDiscardWithoutPaymentRisk(active)) {
+            clearUnfundedTransaction("new-linepay-start");
+        }
         if (active && active.state !== "FAILED" && active.state !== "REFUNDED") {
             setLocked(true);
             recover();
@@ -533,6 +606,13 @@
 
     function recover() {
         if (!active) return;
+        // Waiting-for-scan/setup/failed records contain no submitted payment.
+        // They must never survive a reload and block Start, Back, or password
+        // digits. Only a submitted/checking/paid transaction is restored.
+        if (canDiscardWithoutPaymentRisk(active)) {
+            clearUnfundedTransaction("startup-unfunded-release");
+            return;
+        }
         setLocked(true);
         if (active.state === "WAITING_SCAN" || active.state === "SETUP_REQUIRED") {
             setOverlay({
@@ -588,7 +668,13 @@
     window.MonsterLinePayScanner = {
         start: start,
         hasBlockingTransaction: function () {
-            return !!active;
+            return hasSubmittedPaymentEvidence(active);
+        },
+        hasSubmittedPayment: function () {
+            return hasSubmittedPaymentEvidence(active);
+        },
+        clearUnfundedTransaction: function (reason) {
+            return clearUnfundedTransaction(reason || "external-safe-release");
         },
         health: function () {
             return callable("linePayHealth", {});
@@ -599,7 +685,10 @@
         _test: {
             extractOneTimeKey: extractOneTimeKey,
             getActive: function () { return active; },
-            setActive: function (value) { active = value; saveActive(); }
+            setActive: function (value) { active = value; saveActive(); },
+            shouldCaptureScannerKey: shouldCaptureScannerKey,
+            hasSubmittedPaymentEvidence: hasSubmittedPaymentEvidence,
+            clearUnfundedTransaction: clearUnfundedTransaction
         }
     };
 

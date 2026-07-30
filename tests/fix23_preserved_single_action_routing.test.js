@@ -141,27 +141,27 @@ var page = read("js/modules/page.js");
 var worker = read("service-worker.js");
 var enterprise = read("js/core/enterprise-core.js");
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
 );
 
-assert.ok(index.indexOf("FIX24 NATIVE ROUTE STATE") >= 0);
+assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
 assert.ok(index.indexOf("openAdminLoginFromHome(event)") >= 0);
 assert.ok(index.indexOf("setTimeout(forceHomeIfSafe, 1200)") < 0);
 assert.ok(page.indexOf('openTicketsNow("browser-start")') >= 0);
 assert.ok(page.indexOf('cancelTicketEntryRequest("admin")') >= 0);
 assert.ok(page.indexOf('cancelPendingHomeRoute("start")') >= 0);
 assert.ok(page.indexOf("waitForTicketCatalogReady().then") < 0);
-assert.ok(page.indexOf('version: "fix24"') >= 0);
+assert.ok(page.indexOf('version: "fix25"') >= 0);
 assert.ok(enterprise.indexOf('var BUILD = "FIX24"') >= 0);
-assert.ok(worker.indexOf("7833-fix24-native-route-state-20260731-1") >= 0);
-assert.ok(activity.indexOf("kiosk=124&home=1&build=fix24") >= 0);
+assert.ok(worker.indexOf("7833-fix25-linepay-input-unlock-20260731-1") >= 0);
+assert.ok(activity.indexOf("kiosk=125&home=1&build=fix25") >= 0);
 assert.ok(activity.indexOf("NATIVE_TOUCH_ARM_MS = 500L") >= 0);
 assert.ok(activity.indexOf("NATIVE_TOUCH_MIN_MS = 0L") >= 0);
-assert.ok(build.indexOf("versionCode = 124") >= 0);
+assert.ok(build.indexOf("versionCode = 125") >= 0);
 
 verifySingleActionRouting().then(function () {
     console.log("PASS FIX24 native-route-state routing: 22 assertions");

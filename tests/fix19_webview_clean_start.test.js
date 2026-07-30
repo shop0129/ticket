@@ -105,20 +105,20 @@ var page = read("js/modules/page.js");
 var cash = read("js/hardware/cash-bridge.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK124_NATIVE_ROUTE_AND_REBOOT.cmd");
-var verifier = readProject("tools/verify_kiosk124_worker.cmd");
+var installer = readProject("01_INSTALL_KIOSK125_LINEPAY_UNLOCK_AND_REBOOT.cmd");
+var verifier = readProject("tools/verify_kiosk125_worker.cmd");
 
-assert.ok(index.indexOf("FIX24 NATIVE ROUTE STATE") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix24") >= 0);
+assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix25") >= 0);
 assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix24") >= 0);
 assert.ok(worker.indexOf("7833-fix19-webview-clean-start-20260730-1") >= 0);
-assert.ok(worker.indexOf("7833-fix24-native-route-state-20260731-1") >= 0);
+assert.ok(worker.indexOf("7833-fix25-linepay-input-unlock-20260731-1") >= 0);
 
 assert.ok(page.indexOf("shouldKeepHomeDuringBootRecovery") >= 0);
 assert.ok(cash.indexOf("var bootSessionRecovery = !!active") >= 0);
@@ -135,15 +135,15 @@ assert.ok(activity.indexOf('File(webViewRoot, "Default/Cache")') >= 0);
 assert.ok(activity.indexOf("Local Storage") >= 0);
 assert.strictEqual(activity.indexOf("WebStorage.getInstance().deleteAllData()"), -1);
 assert.strictEqual(activity.indexOf("localStorage.clear()"), -1);
-assert.ok(activity.indexOf("kiosk=124&home=1&build=fix24") >= 0);
-assert.ok(build.indexOf("versionCode = 124") >= 0);
-assert.ok(build.indexOf("1.22-sprint11y-kiosk124-native-route-state") >= 0);
+assert.ok(activity.indexOf("kiosk=125&home=1&build=fix25") >= 0);
+assert.ok(build.indexOf("versionCode = 125") >= 0);
+assert.ok(build.indexOf("1.23-sprint11z-kiosk125-linepay-input-unlock") >= 0);
 
 assert.ok(installer.indexOf("versionCode=113") >= 0);
-assert.ok(installer.indexOf("versionCode=124") >= 0);
+assert.ok(installer.indexOf("versionCode=125") >= 0);
 assert.ok(installer.indexOf("pwa_storage_reset_applied") >= 0);
 assert.strictEqual(installer.indexOf("pm clear"), -1);
-assert.ok(verifier.indexOf("KIOSK124_NATIVE_HOME_READY") >= 0);
+assert.ok(verifier.indexOf("KIOSK125_NATIVE_HOME_READY") >= 0);
 assert.ok(verifier.indexOf("pwa_storage_reset_applied") >= 0);
 
 verifyBootRecoveryStaysOverHome();

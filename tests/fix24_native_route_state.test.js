@@ -123,7 +123,7 @@ async function verifyRoutes() {
     // Native Admin may be requested while an old ticket DOM is underneath the
     // native Home. It must select Admin directly with no ticket route.
     assert.strictEqual(
-        context.MonsterKioskRouting.openAdminFromNative("kiosk124-test"),
+        context.MonsterKioskRouting.openAdminFromNative("kiosk125-test"),
         "ADMIN_READY"
     );
     assert.strictEqual(admin.classList.contains("active"), true);
@@ -140,14 +140,14 @@ var index = read("index.html");
 var cash = read("js/hardware/cash-bridge.js");
 var role = read("js/modules/roleManager.js");
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
 );
 
-assert.ok(index.indexOf("FIX24 NATIVE ROUTE STATE") >= 0);
+assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
 assert.ok(index.indexOf("returnToKioskHome('admin-login-back')") >= 0);
 assert.ok(role.indexOf('returnToKioskHome("admin-logout")') >= 0);
 assert.ok(cash.indexOf("blocksTicketBrowsing") >= 0);
@@ -158,8 +158,8 @@ assert.ok(activity.indexOf("confirmWebHomeThenShow") >= 0);
 assert.ok(activity.indexOf("confirmExplicitHomeSafe") >= 0);
 assert.ok(activity.indexOf("NativeDestination.OPENING_TICKET") >= 0);
 assert.ok(activity.indexOf("NativeDestination.OPENING_ADMIN") >= 0);
-assert.ok(activity.indexOf("kiosk=124&home=1&build=fix24") >= 0);
-assert.ok(build.indexOf("versionCode = 124") >= 0);
+assert.ok(activity.indexOf("kiosk=125&home=1&build=fix25") >= 0);
+assert.ok(build.indexOf("versionCode = 125") >= 0);
 
 verifyRoutes().then(function () {
     console.log("PASS FIX24 native-route state: 20 assertions");

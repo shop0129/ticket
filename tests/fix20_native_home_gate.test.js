@@ -130,23 +130,23 @@ var page = read("js/modules/page.js");
 var cash = read("js/hardware/cash-bridge.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var layout = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/res/layout/activity_kiosk.xml"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/res/layout/activity_kiosk.xml"
 );
 var build = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK124_NATIVE_ROUTE_AND_REBOOT.cmd");
-var verifier = readProject("tools/verify_kiosk124_worker.cmd");
+var installer = readProject("01_INSTALL_KIOSK125_LINEPAY_UNLOCK_AND_REBOOT.cmd");
+var verifier = readProject("tools/verify_kiosk125_worker.cmd");
 
-assert.ok(index.indexOf("FIX24 NATIVE ROUTE STATE") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix24") >= 0);
+assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix25") >= 0);
 assert.ok(page.indexOf("openTicketsFromNative") >= 0);
 assert.ok(page.indexOf("notifyNativeTicketReady") >= 0);
-assert.ok(worker.indexOf("7833-fix24-native-route-state-20260731-1") >= 0);
+assert.ok(worker.indexOf("7833-fix25-linepay-input-unlock-20260731-1") >= 0);
 assert.ok(layout.indexOf('android:id="@+id/kioskHomePanel"') >= 0);
 assert.ok(layout.indexOf('android:id="@+id/kioskHomeStart"') >= 0);
 assert.ok(layout.indexOf('@drawable/kiosk_home_bg') >= 0);
@@ -159,10 +159,10 @@ assert.ok(activity.indexOf("ticketPageReady") >= 0);
 assert.ok(activity.indexOf("activePaymentReady") >= 0);
 assert.ok(cash.indexOf("MonsterNativeKiosk.activePaymentReady") >= 0);
 assert.ok(activity.indexOf("mainFrameLoaded = false") >= 0);
-assert.ok(build.indexOf("versionCode = 124") >= 0);
+assert.ok(build.indexOf("versionCode = 125") >= 0);
 assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
 assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
-assert.ok(verifier.indexOf("KIOSK124_NATIVE_HOME_READY") >= 0);
+assert.ok(verifier.indexOf("KIOSK125_NATIVE_HOME_READY") >= 0);
 assert.ok(verifier.indexOf("native_home_visible") >= 0);
 
 verifyNativeReleaseIsImmediate().then(function () {

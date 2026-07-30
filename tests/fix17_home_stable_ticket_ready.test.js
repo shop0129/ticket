@@ -28,12 +28,12 @@ var renderCatalog = catalog.slice(
     catalog.indexOf("function whenTicketCatalogReady()")
 );
 var activity = readProject(
-    "02_Android_Kiosk124_Native_Route_State/webkiosk/src/main/java/" +
+    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 
-assert.ok(index.indexOf("FIX24 NATIVE ROUTE STATE") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix24") >= 0);
+assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix25") >= 0);
 assert.ok(index.indexOf("js/modules/ticketCatalog.js?v=7833fix24") >= 0);
 assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix24") >= 0);
 
@@ -61,9 +61,9 @@ assert.ok(catalog.indexOf("TICKET_IMAGE_FALLBACK") >= 0);
 assert.ok(catalog.indexOf('version: "fix24"') >= 0);
 
 assert.ok(
-    worker.indexOf("7833-fix24-native-route-state-20260731-1") >= 0
+    worker.indexOf("7833-fix25-linepay-input-unlock-20260731-1") >= 0
 );
-assert.ok(activity.indexOf("kiosk=124&home=1&build=fix24") >= 0);
+assert.ok(activity.indexOf("kiosk=125&home=1&build=fix25") >= 0);
 assert.ok(activity.indexOf("else returnHomeOrPreserveActivePayment()") >= 0);
 assert.ok(
     activity.indexOf("if(cash||line||acceptedEvidence(transaction))return false;") >= 0

@@ -1,4 +1,6 @@
-// V7.8.3.3 FIX24 | Native route state
+// V7.8.3.3 FIX25 | LINE Pay stale-state and password-input unlock
+// FIX25 releases a pre-scan LINE Pay record after reload and reserves the
+// scanner key listener for its visible overlay, never a login/input field.
 // FIX24 gives browser Start, native Start, Admin, and every Home return one
 // explicit route. A late startup/home callback cannot cover a page selected by
 // the user, while a zero-cash boot recovery may continue safely in background.
@@ -492,13 +494,13 @@ ticketBackButton.addEventListener("touchend", handleTicketBack, true);
 ticketBackButton.addEventListener("click", handleTicketBack, true);
 
 window.MonsterHomeGuard = {
-    version: "fix24",
+    version: "fix25",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix24",
+    version: "fix25",
     requestHome: requestKioskHome,
     returnHome: returnToKioskHome,
     markNativeHomeReady: markNativeHomeReady,
