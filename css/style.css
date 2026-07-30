@@ -958,6 +958,17 @@ cursor:pointer;
     filter:grayscale(100%);
 
 }
+
+#linePayBtn[data-payment-setting-disabled="1"],
+#cartLineBtn[data-payment-setting-disabled="1"]{
+
+    opacity:.62;
+
+    cursor:pointer;
+
+    filter:grayscale(35%);
+
+}
 .admin-test-btn{
 
     position:absolute;

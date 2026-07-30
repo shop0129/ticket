@@ -1,3 +1,10 @@
+# V7.8.3.3 FIX26E LINE Pay Button + Device Activation
+
+- 修正單張票與購物車 LINE Pay 按鈕完全沒有畫面。
+- 舊付款設定關閉 LINE Pay 時改為顯示明確提示。
+- 按下後先檢查後端與裝置狀態；未啟用時直接進入裝置啟用。
+- 更新前端版本與 PWA 快取；Firebase Functions、Kiosk 125、Controller 113 不變。
+
 # V7.8.3.3 FIX14 Startup Home + Back Guard
 
 - 選擇票種頁的返回鍵改用獨立首頁保護層，不再被舊 PWA 程式攔回票種頁。

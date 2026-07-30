@@ -28,12 +28,12 @@ var backend = readPackage("functions/index.js");
 var client = readPackage("functions/lib/linepay-client.js");
 var firebase = JSON.parse(readPackage("firebase.json"));
 
-ok(index.indexOf("FIX26 LINEPAY OFFLINE V4") >= 0, "首頁應標示 FIX26");
+ok(index.indexOf("FIX26E LINEPAY BUTTON + ACTIVATION") >= 0, "首頁應標示 FIX26E");
 ok(index.indexOf("checkLinePayBackend()") >= 0, "後台應提供後端連線檢查");
 ok(scanner.indexOf("window.checkLinePayBackend = checkBackend") >= 0, "前端應提供健康檢查");
 ok(scanner.indexOf('callable("payWithLinePayMyCode"') >= 0, "付款應只透過 Callable 後端");
-ok(enterprise.indexOf('var BUILD = "FIX26"') >= 0, "單一版本標籤應更新 FIX26");
-ok(worker.indexOf("7833-fix26-linepay-offline-v4-20260731-1") >= 0, "離線快取應更新 FIX26");
+ok(enterprise.indexOf('var BUILD = "FIX26E"') >= 0, "單一版本標籤應更新 FIX26E");
+ok(worker.indexOf("7833-fix26e-linepay-button-activation-20260731-1") >= 0, "離線快取應更新 FIX26E");
 
 [
     "registerLinePayKiosk",

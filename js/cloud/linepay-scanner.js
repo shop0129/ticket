@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX26
+// 小怪獸售票機 V7.8.3.3 FIX26E
 // LINE Pay Offline API v4：USB HID 掃描客人 My Code
 // 金鑰只存在 Firebase Secret；前端不保存 Channel Secret。
 // Android WebView 61 相容（ES5）
@@ -35,6 +35,7 @@
         if (!transaction) return false;
         state = String(transaction.state || "");
         if (
+            state === "CHECKING_BACKEND" ||
             state === "WAITING_SCAN" ||
             state === "SETUP_REQUIRED" ||
             state === "FAILED" ||
@@ -498,6 +499,7 @@
             return;
         }
         if (
+            active.state !== "CHECKING_BACKEND" &&
             active.state !== "WAITING_SCAN" &&
             active.state !== "SETUP_REQUIRED" &&
             active.state !== "FAILED"
@@ -613,7 +615,7 @@
         }
         active = {
             version: 1,
-            state: "WAITING_SCAN",
+            state: "CHECKING_BACKEND",
             order: context,
             createdAt: Date.now(),
             updatedAt: Date.now()
@@ -622,10 +624,47 @@
         resetBuffer();
         setLocked(true);
         setOverlay({
-            state: "waiting",
-            title: "請出示 LINE Pay 付款碼",
-            message: "請客人開啟 LINE Pay 的「付款碼」，對準點餐機掃描器。",
+            state: "processing",
+            title: "正在準備 LINE Pay",
+            message: "正在檢查後端與點餐機啟用狀態，請稍候。",
             cancel: true
+        });
+        callable("linePayHealth", {}).then(function (result) {
+            if (!active || active.order.orderNo !== context.orderNo) return;
+            active.updatedAt = Date.now();
+            if (!result || result.registered !== true) {
+                active.state = "SETUP_REQUIRED";
+                saveActive();
+                setOverlay({
+                    state: "error",
+                    title: "此點餐機尚未啟用",
+                    message: "請由店長輸入 LINE Pay 裝置啟用碼，再開始掃描付款。",
+                    cancel: true,
+                    action: "啟用裝置"
+                });
+                return;
+            }
+            active.state = "WAITING_SCAN";
+            saveActive();
+            resetBuffer();
+            setOverlay({
+                state: "waiting",
+                title: "請出示 LINE Pay 付款碼",
+                message: "請客人開啟 LINE Pay 的「付款碼」，對準點餐機掃描器。",
+                cancel: true
+            });
+        }).catch(function (error) {
+            if (!active || active.order.orderNo !== context.orderNo) return;
+            active.state = "FAILED";
+            active.updatedAt = Date.now();
+            saveActive();
+            setOverlay({
+                state: "error",
+                title: "LINE Pay 暫時無法啟動",
+                message: error && error.message || "請檢查網路與後端連線後再試一次。",
+                cancel: true,
+                action: "改用其他方式"
+            });
         });
     }
 

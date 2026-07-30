@@ -5,7 +5,7 @@
 
     var VERSION = "7.8.3.3";
     // Preserved regression marker: var BUILD = "FIX24"
-    var BUILD = "FIX26";
+    var BUILD = "FIX26E";
     var listeners = {};
     var logs = [];
     var MAX_LOGS = 300;

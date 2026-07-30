@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX26 LINE Pay Offline v4 - Lite web package
+// 小怪獸售票機 V7.8.3.3 FIX26E LINE Pay button + activation - Lite web package
 // Preserved FIX25 cache marker: 7833-fix25-linepay-input-unlock-20260731-1
 // Preserved regression cache marker: 7833-fix15-kiosk-home-visible-print-20260729-1
 // Preserved FIX20 cache marker: 7833-fix20-native-home-gate-20260730-1
@@ -12,7 +12,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix26-linepay-offline-v4-20260731-1-lite1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix26e-linepay-button-activation-20260731-1-lite1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

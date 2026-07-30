@@ -277,6 +277,13 @@ function finalizePaymentContext(paymentType, context, hardware) {
 }
 
 function paymentSuccess(paymentType) {
+    if (
+        paymentType === "LINE Pay" &&
+        (!systemData || !systemData.payment || systemData.payment.linepay !== true)
+    ) {
+        alert("LINE Pay 目前在「管理 → 系統設定 → 付款方式」中關閉，請先勾選 LINE Pay 並儲存。");
+        return;
+    }
     if (paymentInProgress) {
         if (
             paymentType === "現金" &&
