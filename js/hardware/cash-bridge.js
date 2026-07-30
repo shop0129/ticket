@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX15
+// 小怪獸售票機 V7.8.3.3 FIX16
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -17,9 +17,13 @@
     var pendingStartToken = 0;
     var bootRecoveryResolved = !active;
     var bootRecoveryPromise = null;
-    var OVERLAY_FIX_VERSION = "fix15";
+    var bootRecoveryRetryTimer = null;
+    var bootRecoveryRetryAttempt = 0;
+    var OVERLAY_FIX_VERSION = "fix16";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
+    var BOOT_PAIRING_POLL_MS = 350;
+    var BOOT_RECOVERY_RETRY_DELAYS_MS = [1000, 2000, 3000, 5000, 5000];
 
     function loadJson(key) {
         try {
@@ -54,6 +58,19 @@
         }
         localStorage.setItem(PAIRING_KEY, entered);
         return entered;
+    }
+
+    function isPairingReady() {
+        return /^\d{8}$/.test(pairingKey());
+    }
+
+    function isTransientRecoveryError(error) {
+        var code = String(error && error.code || "");
+        return !code ||
+            code === "CONTROLLER_TIMEOUT" ||
+            code === "PAIRING_REQUIRED" ||
+            code === "NETWORK_ERROR" ||
+            code.indexOf("HTTP_5") === 0;
     }
 
     function api(path, options) {
@@ -340,6 +357,9 @@
     function clearStoredTransaction(returnPage, context) {
         var checkout = context || active && active.order || pendingContext;
         stopPolling();
+        if (bootRecoveryRetryTimer) clearTimeout(bootRecoveryRetryTimer);
+        bootRecoveryRetryTimer = null;
+        bootRecoveryRetryAttempt = 0;
         pendingStartToken += 1;
         active = null;
         pendingContext = null;
@@ -357,6 +377,43 @@
         } else if (typeof showPage === "function") {
             showPage(returnPage);
         }
+    }
+
+    function showBootRecoveryWaiting(error) {
+        var checkout = active && active.order;
+        var paid = Number(active && active.lastPaidNtd || 0);
+        bootRecoveryResolved = false;
+        setLocked(true);
+        setOverlay({
+            title: "正在啟動現金控制器",
+            amount: checkout && checkout.amount,
+            paid: paid,
+            remaining: checkout ? Math.max(0, checkout.amount - paid) : 0,
+            orderNo: checkout && checkout.orderNo,
+            message: (error && error.code === "PAIRING_REQUIRED")
+                ? "正在套用點餐機安全配對設定，完成後會自動恢復首頁。"
+                : "Controller 113 正在背景啟動，系統會自動重試，不需要重新開機。",
+            retry: false,
+            manage: false,
+            cancelAllowed: false
+        });
+    }
+
+    function scheduleBootRecoveryRetry(error) {
+        var delayIndex;
+        var delayMs;
+        showBootRecoveryWaiting(error);
+        if (bootRecoveryRetryTimer) return;
+        delayIndex = Math.min(
+            bootRecoveryRetryAttempt,
+            BOOT_RECOVERY_RETRY_DELAYS_MS.length - 1
+        );
+        delayMs = BOOT_RECOVERY_RETRY_DELAYS_MS[delayIndex];
+        bootRecoveryRetryAttempt += 1;
+        bootRecoveryRetryTimer = setTimeout(function () {
+            bootRecoveryRetryTimer = null;
+            recoverWhenBridgeReady();
+        }, delayMs);
     }
 
     function waitForBootCancel(orderNo, checkout, pollCount) {
@@ -384,6 +441,10 @@
             if (error.code === "ORDER_NOT_FOUND") {
                 clearStoredTransaction("homePage", checkout);
                 return "cleared";
+            }
+            if (!hasAcceptedCashEvidence(active) && isTransientRecoveryError(error)) {
+                scheduleBootRecoveryRetry(error);
+                return "retry";
             }
             bootRecoveryResolved = true;
             return "live";
@@ -421,6 +482,10 @@
             if (error.code === "ORDER_NOT_FOUND") {
                 clearStoredTransaction("homePage", checkout);
                 return "cleared";
+            }
+            if (!hasAcceptedCashEvidence(active) && isTransientRecoveryError(error)) {
+                scheduleBootRecoveryRetry(error);
+                return "retry";
             }
             // CASH_ALREADY_ACCEPTED 等拒絕必須保留交易，由原本恢復流程接手。
             bootRecoveryResolved = true;
@@ -472,6 +537,9 @@
             "/payments/" + encodeURIComponent(orderNo)
         ).then(function (payload) {
             if (active !== checking) return active ? "changed" : "cleared";
+            if (bootRecoveryRetryTimer) clearTimeout(bootRecoveryRetryTimer);
+            bootRecoveryRetryTimer = null;
+            bootRecoveryRetryAttempt = 0;
             updateActiveFromController(payload);
             if (isTerminalControllerStatus(payload.status)) {
                 clearStoredTransaction();
@@ -497,6 +565,10 @@
             ) {
                 clearStoredTransaction();
                 return "cleared";
+            }
+            if (!hasAcceptedCashEvidence(active) && isTransientRecoveryError(error)) {
+                scheduleBootRecoveryRetry(error);
+                return "retry";
             }
             showRecoveryBlocked(error);
             return "blocked";
@@ -997,11 +1069,16 @@
             clearStoredTransaction();
             return;
         }
-        // FIX14：開機先留在首頁；零投入舊付款會先請 Controller 113 安全取消。
+        // FIX16：等待 Kiosk 注入配對碼與 Controller 113 就緒，不把短暫啟動競態誤判為死鎖。
+        // 開機先留在首頁；零投入舊付款會先請 Controller 113 安全取消。
         // Controller 端會再次檢查實際投入金額，若已有現金就拒絕取消並恢復原交易。
         verifyStoredTransaction().then(function (result) {
             var authorizationId;
             var savedOrder;
+            if (result === "retry") {
+                scheduleBootRecoveryRetry();
+                return;
+            }
             if (result !== "live" || !active) return;
             if (active.state === "ISSUE_STARTED" || active.state === "ACK_PENDING") {
                 authorizationId = active.authorization && active.authorization.authorizationId;
@@ -1029,6 +1106,24 @@
             }
             resumeActivePayment();
         });
+    }
+
+    function recoverWhenBridgeReady() {
+        if (!active || active.state === "COMPLETED") {
+            recover();
+            return;
+        }
+        if (!isPairingReady()) {
+            showBootRecoveryWaiting({ code: "PAIRING_REQUIRED" });
+            if (!bootRecoveryRetryTimer) {
+                bootRecoveryRetryTimer = setTimeout(function () {
+                    bootRecoveryRetryTimer = null;
+                    recoverWhenBridgeReady();
+                }, BOOT_PAIRING_POLL_MS);
+            }
+            return;
+        }
+        recover();
     }
 
     function showHomeAfterSafeRelease() {
@@ -1079,6 +1174,10 @@
         return verifyStoredTransaction().then(function (result) {
             if (!active || result === "cleared") {
                 return showHomeAfterSafeRelease();
+            }
+            if (result === "retry") {
+                scheduleBootRecoveryRetry();
+                return false;
             }
             if (hasAcceptedCashEvidence(active)) {
                 resumeActivePayment();
@@ -1196,8 +1295,8 @@
     };
 
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", recover);
+        document.addEventListener("DOMContentLoaded", recoverWhenBridgeReady);
     } else {
-        setTimeout(recover, 0);
+        setTimeout(recoverWhenBridgeReady, 0);
     }
 })();

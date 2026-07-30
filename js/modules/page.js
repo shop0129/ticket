@@ -1,4 +1,4 @@
-// V7.8.3.3 FIX15 | kiosk home handshake with hardware-payment safety
+// V7.8.3.3 FIX16 | home-first handshake with controller-startup retry safety
 var activeKioskHomeRequest = null;
 
 function hasCashBridgeTransaction() {
