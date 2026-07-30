@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX23 Single Action Routing - Lite web package
+// 小怪獸售票機 V7.8.3.3 FIX24 Native Route State - Lite web package
 // Preserved regression cache marker: 7833-fix15-kiosk-home-visible-print-20260729-1
 // Preserved FIX20 cache marker: 7833-fix20-native-home-gate-20260730-1
 // Preserved FIX19 cache marker: 7833-fix19-webview-clean-start-20260730-1
@@ -11,7 +11,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix23-single-action-20260731-1-lite1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix24-native-route-state-20260731-1-lite1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

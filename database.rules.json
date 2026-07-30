@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "monsterTicket": {
+      "v1": {
+        ".read": "auth != null",
+        "orders": { ".write": "auth != null" },
+        "members": { ".write": "auth != null" },
+        "tickets": { ".write": "auth != null" },
+        "dashboard": { ".write": "auth != null" },
+        "venue": { ".write": "auth != null" },
+        "logs": { ".write": "auth != null" },
+        "auditLogs": { ".write": "auth != null" },
+        "system": { ".write": "auth != null" }
+      }
+    }
+  }
+}

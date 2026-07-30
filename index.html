@@ -13,8 +13,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX23 Single Action Routing">
-<!-- V7.8.3.3 · FIX23 SINGLE ACTION ROUTING -->
+<meta name="monster-app-version" content="V7.8.3.3 FIX24 Native Route State">
+<!-- V7.8.3.3 · FIX24 NATIVE ROUTE STATE -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT -->
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
@@ -333,7 +333,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             登入
         </button>
 
-        <button class="back-btn" onclick="showPage('homePage')">
+        <button class="back-btn" onclick="returnToKioskHome('admin-login-back')">
             返回
         </button>
 
@@ -1676,7 +1676,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 </audio>
 
 <script src="js/utils/legacy-polyfills.js?v=72c"></script>
-<script src="js/core/enterprise-core.js?v=7833fix23"></script>
+<script src="js/core/enterprise-core.js?v=7833fix24"></script>
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 
@@ -1697,7 +1697,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix23"></script>  
+<script src="js/modules/page.js?v=7833fix24"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
@@ -1705,7 +1705,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/stats.js?v=72c"></script>
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/core/sale-rule-engine.js?v=781"></script>
-<script src="js/modules/ticketCatalog.js?v=7833fix23"></script>
+<script src="js/modules/ticketCatalog.js?v=7833fix24"></script>
 <script src="js/modules/ticketManager.js?v=782"></script>
 <script src="js/cloud/cloud-ticket-sync.js?v=72c"></script>  
 <script src="js/modules/businessMode.js?v=780"></script>    
@@ -1721,7 +1721,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
 <script src="js/modules/payment.js?v=7833fix16"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
-<script src="js/hardware/cash-bridge.js?v=7833fix23"></script>
+<script src="js/hardware/cash-bridge.js?v=7833fix24"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
 <!-- Preserved FIX16 contract:
@@ -1747,13 +1747,13 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/employeeManager.js?v=73e3"></script>
 <script src="js/script.js?v=73e3"></script>
 
-<!-- FIX23 uses the single live Enterprise status badge. -->
+<!-- FIX24 uses the single live Enterprise status badge. -->
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 <script>
-// FIX23 keeps the native Home/Back gate and prevents startup timers from
+// FIX24 keeps the native Home/Back gate and prevents stale Home callbacks from
 // competing with a user-selected Start or Admin destination.
 (function () {
     "use strict";

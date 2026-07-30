@@ -1,7 +1,7 @@
-// V7.8.3.3 FIX23 | One tap = one route
-// FIX23 gives browser Start, native Start, and Admin one synchronous routing
-// path. No delayed catalog promise or startup timer may change the destination
-// after the user's action has already been accepted.
+// V7.8.3.3 FIX24 | Native route state
+// FIX24 gives browser Start, native Start, Admin, and every Home return one
+// explicit route. A late startup/home callback cannot cover a page selected by
+// the user, while a zero-cash boot recovery may continue safely in background.
 // Preserved FIX21 contract: native ticket-back channel + Android home gate
 // Preserved FIX20 contract: Android native home gate + background ticket warm-up
 // Preserved FIX19 contract: WebView cache reset + boot recovery stays over home
@@ -28,6 +28,17 @@ function notifyNativeHome(reason) {
     try {
         bridge.showHome(String(reason || "web-home"));
     } catch (ignore) {}
+}
+
+function notifyNativeHomeRequested(reason) {
+    var bridge = nativeKioskBridge();
+    if (!bridge || typeof bridge.homeRequested !== "function") return false;
+    try {
+        bridge.homeRequested(String(reason || "web-home-request"));
+        return true;
+    } catch (ignore) {
+        return false;
+    }
 }
 
 function notifyNativeTicketBack(reason) {
@@ -157,6 +168,12 @@ function hasBlockingCheckoutTransaction() {
 
 function isCheckoutStartBlocked() {
     if (hasLinePayBridgeTransaction()) return true;
+    if (
+        window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.blocksTicketBrowsing === "function"
+    ) {
+        return !!window.MonsterCashBridge.blocksTicketBrowsing();
+    }
     if (
         window.MonsterCashBridge &&
         typeof window.MonsterCashBridge.isStartBlocked === "function" &&
@@ -305,6 +322,22 @@ function requestKioskHome(reason) {
     return Promise.resolve(forceHomePageIfSafe());
 }
 
+function returnToKioskHome(reason) {
+    var routeReason = reason || "explicit-home";
+    var acceptedCash = !!(
+        window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.hasAcceptedPayment === "function" &&
+        window.MonsterCashBridge.hasAcceptedPayment()
+    );
+    if (!acceptedCash && !hasLinePayBridgeTransaction()) {
+        // Back/Logout must feel immediate. A zero-cash Controller cancellation
+        // may continue safely behind the native Home panel.
+        notifyNativeHomeRequested(routeReason);
+    }
+    cancelPendingHomeRoute("explicit-" + routeReason);
+    return requestKioskHome(routeReason);
+}
+
 function showPage(pageId) {
     var previousPage = activePageId();
     clearInterval(countdownTimer);
@@ -389,9 +422,18 @@ function openTicketsFromNative(source) {
         notifyNativeStartBlocked("checkout");
         return "BLOCKED";
     }
-    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk123");
-    return openTicketsNow(source || "kiosk123");
+    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk124");
+    return openTicketsNow(source || "kiosk124");
 }
+
+function openAdminFromNative(source) {
+    cancelPendingHomeRoute("native-admin");
+    cancelTicketEntryRequest("native-admin");
+    recordKioskRoute("NATIVE_ADMIN_ACCEPTED", source || "kiosk124");
+    if (!showPage("adminLoginPage")) return "BLOCKED";
+    return "ADMIN_READY";
+}
+
 function resetIdleTimer() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(function () {
@@ -401,7 +443,7 @@ function resetIdleTimer() {
         }
         // 如果不是首頁就回首頁
         if (!document.getElementById("homePage").classList.contains("active")) {
-            showPage("homePage");
+            returnToKioskHome("idle-timeout");
         }
     }, systemData.homeTimeout * 1000);
 }
@@ -439,7 +481,7 @@ function handleTicketBack(event) {
     lastTicketBackRequestAt = now;
     playClick();
     recordKioskRoute("TICKET_BACK", event && event.type ? event.type : "unknown");
-    // Kiosk 123 shows the native Home immediately. The web transaction release
+    // Kiosk 124 shows the native Home immediately. The web transaction release
     // continues below, so a zero-cash stale transaction cannot make Back look dead.
     notifyNativeTicketBack("ticket-page");
     requestKioskHome("ticket-back");
@@ -450,16 +492,18 @@ ticketBackButton.addEventListener("touchend", handleTicketBack, true);
 ticketBackButton.addEventListener("click", handleTicketBack, true);
 
 window.MonsterHomeGuard = {
-    version: "fix23",
+    version: "fix24",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix23",
+    version: "fix24",
     requestHome: requestKioskHome,
+    returnHome: returnToKioskHome,
     markNativeHomeReady: markNativeHomeReady,
     openTicketsFromNative: openTicketsFromNative,
+    openAdminFromNative: openAdminFromNative,
     isHome: function () {
         var home = document.getElementById("homePage");
         return !!(home && home.classList.contains("active"));

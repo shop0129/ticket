@@ -1,6 +1,7 @@
-// 小怪獸售票機 V7.8.3.3 FIX23
-// FIX23 keeps cash recovery rules unchanged; Kiosk 123 supplies the visible
-// native home gate so background reconciliation cannot expose ticketPage.
+// 小怪獸售票機 V7.8.3.3 FIX24
+// FIX24 preserves accepted cash while allowing ticket browsing during a
+// zero-cash boot cancellation. Starting a new cash payment remains blocked
+// until Controller 113 has cleared the previous zero-cash session.
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -28,7 +29,7 @@
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
     // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
-    var OVERLAY_FIX_VERSION = "fix23";
+    var OVERLAY_FIX_VERSION = "fix24";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;
@@ -1299,6 +1300,18 @@
 
     window.MonsterCashBridge = {
         startCashPayment: startCashPayment,
+        hasAcceptedPayment: function () {
+            return hasAcceptedCashEvidence(active);
+        },
+        blocksTicketBrowsing: function () {
+            // A transaction recovered from boot with no accepted cash may keep
+            // cancelling in background while the customer browses ticket cards.
+            // The actual cash-payment entry point still verifies and blocks it.
+            if (pendingContext) return true;
+            if (!active || active.state === "COMPLETED") return false;
+            if (hasAcceptedCashEvidence(active)) return true;
+            return !bootHomeReleasePending;
+        },
         hasBlockingTransaction: function () {
             return !!pendingContext || !!(
                 bootRecoveryResolved &&

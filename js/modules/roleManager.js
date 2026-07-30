@@ -278,7 +278,9 @@ var currentUser = null;
         } else {
             window.MonsterRole.logout();
         }
-        if (window.showPage) {
+        if (window.returnToKioskHome) {
+            returnToKioskHome("admin-logout");
+        } else if (window.showPage) {
             showPage("homePage");
         }
     };
