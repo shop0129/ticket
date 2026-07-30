@@ -13,8 +13,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX25 LinePay Input Unlock">
-<!-- V7.8.3.3 · FIX25 LINEPAY INPUT UNLOCK -->
+<meta name="monster-app-version" content="V7.8.3.3 FIX26 LINE Pay Offline v4">
+<!-- V7.8.3.3 · FIX26 LINEPAY OFFLINE V4 -->
+<!-- Preserved regression marker: V7.8.3.3 · FIX25 LINEPAY INPUT UNLOCK -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT -->
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
@@ -1470,6 +1471,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                     開啟零扣款測試
                 </button>
 
+                <button
+                    class="hardware-test-btn"
+                    onclick="checkLinePayBackend()">
+                    檢查 LINE Pay 後端
+                </button>
+
             </div>
 
         </div>
@@ -1677,7 +1684,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 </audio>
 
 <script src="js/utils/legacy-polyfills.js?v=72c"></script>
-<script src="js/core/enterprise-core.js?v=7833fix24"></script>
+<!-- Preserved regression marker: js/core/enterprise-core.js?v=7833fix24 -->
+<script src="js/core/enterprise-core.js?v=7833fix26"></script>
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 
@@ -1721,7 +1729,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/consumePoints.js?v=7833fix9"></script>
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
 <script src="js/modules/payment.js?v=7833fix16"></script>
-<script src="js/cloud/linepay-scanner.js?v=7833fix25"></script>
+<script src="js/cloud/linepay-scanner.js?v=7833fix26"></script>
 <script src="js/hardware/cash-bridge.js?v=7833fix24"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>

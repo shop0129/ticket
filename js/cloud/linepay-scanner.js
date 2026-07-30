@@ -1,5 +1,6 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 10
+// 小怪獸售票機 V7.8.3.3 FIX26
 // LINE Pay Offline API v4：USB HID 掃描客人 My Code
+// 金鑰只存在 Firebase Secret；前端不保存 Channel Secret。
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
@@ -182,6 +183,30 @@
             return functionsInstance.httpsCallable(name)(data || {});
         }).then(function (result) {
             return result && result.data ? result.data : {};
+        });
+    }
+
+    function checkBackend() {
+        return callable("linePayHealth", {}).then(function (result) {
+            var environment = result.environment === "production"
+                ? "正式收款"
+                : "沙盒測試";
+            var registered = result.registered
+                ? "此點餐機已啟用"
+                : "此點餐機尚未啟用（第一次付款時輸入啟用碼）";
+            alert(
+                "✅ LINE Pay 後端連線正常\n" +
+                "模式：" + environment + "\n" +
+                "API：" + (result.apiVersion || "offline-v4") + "\n" +
+                registered
+            );
+            return result;
+        }).catch(function (error) {
+            alert(
+                "❌ LINE Pay 後端尚未就緒\n" +
+                (error && error.message || "請先執行後端設定與部署程式")
+            );
+            return null;
         });
     }
 
@@ -679,6 +704,7 @@
         health: function () {
             return callable("linePayHealth", {});
         },
+        checkBackend: checkBackend,
         clearRegistration: function () {
             functionsInstance = null;
         },
@@ -691,6 +717,8 @@
             clearUnfundedTransaction: clearUnfundedTransaction
         }
     };
+
+    window.checkLinePayBackend = checkBackend;
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", recover);
