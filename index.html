@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX16 Home First + No Freeze">
+<meta name="monster-app-version" content="V7.8.3.3 FIX17 Stable Home + Ticket Ready">
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
 
@@ -1695,7 +1695,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix16"></script>  
+<script src="js/modules/page.js?v=7833fix17"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
@@ -1703,7 +1703,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/stats.js?v=72c"></script>
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/core/sale-rule-engine.js?v=781"></script>
-<script src="js/modules/ticketCatalog.js?v=781"></script>
+<script src="js/modules/ticketCatalog.js?v=7833fix17"></script>
 <script src="js/modules/ticketManager.js?v=782"></script>
 <script src="js/cloud/cloud-ticket-sync.js?v=72c"></script>  
 <script src="js/modules/businessMode.js?v=780"></script>    
@@ -1719,9 +1719,13 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
 <script src="js/modules/payment.js?v=7833fix16"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
-<script src="js/hardware/cash-bridge.js?v=7833fix16"></script>
+<script src="js/hardware/cash-bridge.js?v=7833fix17"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
+<!-- Preserved FIX16 contract:
+     FIX16 HOME FIRST + NO FREEZE
+     js/modules/page.js?v=7833fix16
+     js/hardware/cash-bridge.js?v=7833fix16 -->
 <!-- Regression markers retained for the previously verified FIX9 loading contract:
      js/modules/page.js?v=7833fix9
      js/hardware/cash-bridge.js?v=7833fix9 -->
@@ -1742,13 +1746,13 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/script.js?v=73e3"></script>
 
 <!-- Regression marker: V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT -->
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX16 HOME FIRST + NO FREEZE</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX17 HOME STABLE + TICKET READY</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 <script>
-// FIX16 critical home guard is kept inline so a slow Android WebView cannot mix
+// FIX17 critical home guard is kept inline so a slow Android WebView cannot mix
 // the new index with an older cached page.js and lose the Home/Back behavior.
 (function () {
     "use strict";
@@ -1836,8 +1840,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.addEventListener("controllerchange", function () {
             if (reloadRequested && paymentSafeForUpdate() &&
-                sessionStorage.getItem("monsterFix16SwReloaded") !== "1") {
-                sessionStorage.setItem("monsterFix16SwReloaded", "1");
+                sessionStorage.getItem("monsterFix17SwReloaded") !== "1") {
+                sessionStorage.setItem("monsterFix17SwReloaded", "1");
                 location.reload();
             }
         });

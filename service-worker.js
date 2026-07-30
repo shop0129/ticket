@@ -1,4 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX16 Home First + No Freeze
+// 小怪獸售票機 V7.8.3.3 FIX17 Stable Home + Ticket Ready
+// Preserved FIX16 cache marker: 7833-fix16-home-first-no-freeze-20260729-1
 // Preserved FIX15 cache marker: 7833-fix15-kiosk-home-visible-print-20260729-1
 // Preserved base cache: 7833-fix14-startup-home-back-guard-20260729-1
 // Regression marker: 7833-fix13-startup-cash-back-recovery-20260729-1
@@ -6,7 +7,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix16-home-first-no-freeze-20260729-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix17-home-stable-ticket-ready-20260730-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

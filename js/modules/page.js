@@ -1,5 +1,7 @@
-// V7.8.3.3 FIX16 | home-first handshake with controller-startup retry safety
+// V7.8.3.3 FIX17 | stable home routing + ticket-image readiness gate
+// Preserved FIX16 contract: home-first handshake with controller-startup retry safety
 var activeKioskHomeRequest = null;
+var activeTicketPageRequest = 0;
 
 function hasCashBridgeTransaction() {
     return !!(
@@ -21,6 +23,28 @@ function hasBlockingCheckoutTransaction() {
     if (hasCashBridgeTransaction()) return true;
     if (hasLinePayBridgeTransaction()) return true;
     return typeof paymentInProgress !== "undefined" && !!paymentInProgress;
+}
+
+function isCheckoutStartBlocked() {
+    if (hasLinePayBridgeTransaction()) return true;
+    if (
+        window.MonsterCashBridge &&
+        typeof window.MonsterCashBridge.isStartBlocked === "function" &&
+        window.MonsterCashBridge.isStartBlocked()
+    ) {
+        return true;
+    }
+    return typeof paymentInProgress !== "undefined" && !!paymentInProgress;
+}
+
+function waitForTicketCatalogReady() {
+    if (
+        window.MonsterTicketCatalog &&
+        typeof window.MonsterTicketCatalog.whenReady === "function"
+    ) {
+        return window.MonsterTicketCatalog.whenReady();
+    }
+    return Promise.resolve(true);
 }
 
 function releaseWebOnlyPaymentLock() {
@@ -115,11 +139,34 @@ document.addEventListener("click", resetIdleTimer);
 document.addEventListener("touchstart", resetIdleTimer);
 document
     .getElementById("startBtn")
-    .addEventListener("click", function () {
+    .addEventListener("click", function (event) {
+    var requestId;
+    var startButton = document.getElementById("startBtn");
+    if (event && typeof event.preventDefault === "function") {
+        event.preventDefault();
+    }
     playClick();
-    setTimeout(function () {
+    if (isCheckoutStartBlocked()) {
+        alert("系統正在確認上一筆交易，請稍候幾秒後再按「開始購票」。");
+        return;
+    }
+    requestId = ++activeTicketPageRequest;
+    if (startButton) {
+        startButton.style.pointerEvents = "none";
+        startButton.setAttribute("aria-busy", "true");
+    }
+    waitForTicketCatalogReady().then(function () {
+        if (requestId !== activeTicketPageRequest) return;
+        if (isCheckoutStartBlocked()) return;
         showPage("ticketPage");
-    }, 100);
+    }).catch(function () {
+        if (requestId !== activeTicketPageRequest) return;
+        if (!isCheckoutStartBlocked()) showPage("ticketPage");
+    }).then(function () {
+        if (requestId !== activeTicketPageRequest || !startButton) return;
+        startButton.style.pointerEvents = "";
+        startButton.removeAttribute("aria-busy");
+    });
 });
 document
     .getElementById("backBtn")
@@ -132,13 +179,13 @@ document
 });
 
 window.MonsterHomeGuard = {
-    version: "fix15",
+    version: "fix17",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix15",
+    version: "fix17",
     requestHome: requestKioskHome,
     isHome: function () {
         var home = document.getElementById("homePage");

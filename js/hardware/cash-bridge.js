@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX16
+// 小怪獸售票機 V7.8.3.3 FIX17
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -12,6 +12,9 @@
     var STALE_ZERO_CASH_MS = 5 * 60 * 1000;
     var pollTimer = null;
     var active = loadJson(TRANSACTION_KEY);
+    // 只有「重新開機前留下、且尚未投入現金」的交易走背景首頁恢復。
+    // 新交易仍維持原本的付款頁鎖定，已投入現金／列印授權也絕不放行。
+    var bootHomeReleasePending = !!active && !hasAcceptedCashEvidence(active);
     var pendingPurchasePage = null;
     var pendingContext = null;
     var pendingStartToken = 0;
@@ -19,7 +22,8 @@
     var bootRecoveryPromise = null;
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
-    var OVERLAY_FIX_VERSION = "fix16";
+    // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
+    var OVERLAY_FIX_VERSION = "fix17";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;
@@ -235,6 +239,13 @@
     }
 
     function keepPurchasePageVisible() {
+        if (
+            bootHomeReleasePending &&
+            active &&
+            !hasAcceptedCashEvidence(active)
+        ) {
+            return;
+        }
         var target = purchasePage();
         var current = document.querySelector(".page.active");
         if (
@@ -257,7 +268,7 @@
         if (coinCount === undefined || coinCount === null) {
             coinCount = active && active.lastCoinCount || 0;
         }
-        keepPurchasePageVisible();
+        if (!data.preservePage) keepPurchasePageVisible();
         overlay = ensureOverlay();
         overlay.classList.add("show");
         // FIX11：即使外部 CSS 尚在舊 PWA 快取，也強制顯示現金付款資訊。
@@ -351,6 +362,9 @@
         active.lastBillCount = Number(payload.billCount || 0);
         active.lastCounts = payload.counts || {};
         active.updatedAt = Date.now();
+        if (Number(active.lastPaidNtd || 0) > 0) {
+            bootHomeReleasePending = false;
+        }
         saveActive();
     }
 
@@ -364,6 +378,7 @@
         active = null;
         pendingContext = null;
         pendingPurchasePage = null;
+        bootHomeReleasePending = false;
         bootRecoveryResolved = true;
         saveActive();
         hideOverlay();
@@ -383,6 +398,12 @@
         var checkout = active && active.order;
         var paid = Number(active && active.lastPaidNtd || 0);
         bootRecoveryResolved = false;
+        if (bootHomeReleasePending && !hasAcceptedCashEvidence(active)) {
+            // FIX17：零元殘留交易只在背景對帳，不再顯示付款遮罩或切到票種頁。
+            hideOverlay();
+            setLocked(false);
+            return;
+        }
         setLocked(true);
         setOverlay({
             title: "正在啟動現金控制器",
@@ -496,8 +517,9 @@
     function showRecoveryBlocked(error) {
         var checkout = active && active.order;
         var paid = Number(active && active.lastPaidNtd || 0);
+        var preserveHome = bootHomeReleasePending && !hasAcceptedCashEvidence(active);
         bootRecoveryResolved = true;
-        setLocked(true);
+        setLocked(!preserveHome);
         setOverlay({
             title: hasAcceptedCashEvidence(active)
                 ? "需要員工確認上一筆交易"
@@ -510,7 +532,8 @@
                 "。系統已保留交易，避免重複收款。",
             retry: true,
             manage: hasAcceptedCashEvidence(active),
-            cancelAllowed: !hasAcceptedCashEvidence(active)
+            cancelAllowed: !hasAcceptedCashEvidence(active),
+            preservePage: preserveHome
         });
     }
 
@@ -919,6 +942,7 @@
         }
         setTimeout(function () {
             active = null;
+            bootHomeReleasePending = false;
             saveActive();
             hideOverlay();
             setLocked(false);
@@ -1012,6 +1036,7 @@
             return;
         }
         pendingContext = null;
+        bootHomeReleasePending = false;
         active = {
             version: 1,
             state: "REQUESTING",
@@ -1048,6 +1073,7 @@
         }).catch(function (error) {
             if (error.code === "PAIRING_REQUIRED") localStorage.removeItem(PAIRING_KEY);
             active = null;
+            bootHomeReleasePending = false;
             pendingPurchasePage = null;
             saveActive();
             setLocked(false);
@@ -1080,6 +1106,12 @@
                 return;
             }
             if (result !== "live" || !active) return;
+            if (bootHomeReleasePending && !hasAcceptedCashEvidence(active)) {
+                // Controller 尚未完成零元取消時留在首頁並持續背景重試。
+                bootRecoveryResolved = false;
+                scheduleBootRecoveryRetry({ code: "HOME_RELEASE_PENDING" });
+                return;
+            }
             if (active.state === "ISSUE_STARTED" || active.state === "ACK_PENDING") {
                 authorizationId = active.authorization && active.authorization.authorizationId;
                 savedOrder = salesHistory.find(function (order) {
@@ -1145,6 +1177,7 @@
     // Kiosk 115 與票種頁返回鍵共用的安全首頁交握：
     // 沒有投入現金可向 Controller 113 對帳後取消；已有投入則保留交易與明細。
     function requestHomeIfSafe(options) {
+        var released;
         options = options || {};
         if (pendingContext && !active) {
             pendingStartToken += 1;
@@ -1157,39 +1190,38 @@
             return Promise.resolve(showHomeAfterSafeRelease());
         }
         if (hasAcceptedCashEvidence(active)) {
+            bootHomeReleasePending = false;
             bootRecoveryResolved = true;
             resumeActivePayment();
             return Promise.resolve(false);
         }
-        setLocked(true);
-        setOverlay({
-            title: "正在安全返回首頁",
-            amount: active.order && active.order.amount,
-            paid: 0,
-            remaining: active.order && active.order.amount,
-            orderNo: active.order && active.order.orderNo,
-            message: "正在通知 Controller 113 停止上一筆未投入現金的付款，完成後會自動回首頁。",
-            cancelAllowed: false
-        });
-        return verifyStoredTransaction().then(function (result) {
-            if (!active || result === "cleared") {
-                return showHomeAfterSafeRelease();
-            }
+        // FIX17：尚未投入現金時先回首頁，Controller 取消與對帳留在背景執行。
+        // 開始購票鍵會由 isStartBlocked() 暫時擋住，避免舊付款未取消前建立新單。
+        bootHomeReleasePending = true;
+        bootRecoveryResolved = false;
+        hideOverlay();
+        setLocked(false);
+        released = showHomeAfterSafeRelease();
+        verifyStoredTransaction().then(function (result) {
+            if (!active || result === "cleared") return;
             if (result === "retry") {
                 scheduleBootRecoveryRetry();
-                return false;
+                return;
             }
             if (hasAcceptedCashEvidence(active)) {
+                bootHomeReleasePending = false;
+                bootRecoveryResolved = true;
                 resumeActivePayment();
-                return false;
+                return;
             }
-            // 控制器尚未確認取消時持續顯示零元交易明細，不能假裝已可開始新交易。
-            resumeActivePayment();
-            return false;
+            if (result === "live") {
+                bootRecoveryResolved = false;
+                scheduleBootRecoveryRetry({ code: "HOME_RELEASE_PENDING" });
+            }
         }, function (error) {
             showRecoveryBlocked(error);
-            return false;
         });
+        return Promise.resolve(!!released);
     }
 
     function resumeActivePayment() {
@@ -1198,6 +1230,15 @@
         var paid;
         var state;
         if (!context) {
+            setLocked(false);
+            return false;
+        }
+        if (
+            bootHomeReleasePending &&
+            active &&
+            !hasAcceptedCashEvidence(active)
+        ) {
+            hideOverlay();
             setLocked(false);
             return false;
         }
@@ -1229,8 +1270,18 @@
             return !!pendingContext || !!(
                 bootRecoveryResolved &&
                 active &&
-                active.state !== "COMPLETED"
+                active.state !== "COMPLETED" &&
+                (
+                    !bootHomeReleasePending ||
+                    hasAcceptedCashEvidence(active)
+                )
             );
+        },
+        isStartBlocked: function () {
+            return !!pendingContext || !!(
+                active &&
+                active.state !== "COMPLETED"
+            ) || !bootRecoveryResolved;
         },
         getPurchasePage: purchasePage,
         requestCancelAndReturn: requestCancelAndReturn,
@@ -1281,6 +1332,7 @@
             getActive: function () { return active; },
             setActive: function (value) {
                 active = value;
+                bootHomeReleasePending = false;
                 bootRecoveryResolved = true;
                 saveActive();
             },
