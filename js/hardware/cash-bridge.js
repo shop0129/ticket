@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX17
+// 小怪獸售票機 V7.8.3.3 FIX18
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -23,7 +23,7 @@
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
     // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
-    var OVERLAY_FIX_VERSION = "fix17";
+    var OVERLAY_FIX_VERSION = "fix18";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;
@@ -243,6 +243,18 @@
             bootHomeReleasePending &&
             active &&
             !hasAcceptedCashEvidence(active)
+        ) {
+            return;
+        }
+        // FIX18：首頁已顯示時，零投入的背景恢復不得把客人推進票種頁。
+        // 真正由票種頁開始的新付款，以及已有投入現金的恢復流程不受影響。
+        if (
+            active &&
+            !pendingContext &&
+            !hasAcceptedCashEvidence(active) &&
+            window.MonsterKioskRouting &&
+            typeof window.MonsterKioskRouting.isHome === "function" &&
+            window.MonsterKioskRouting.isHome()
         ) {
             return;
         }

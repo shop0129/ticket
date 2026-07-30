@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX17 Stable Home + Ticket Ready">
+<meta name="monster-app-version" content="V7.8.3.3 FIX18 Manual Start Only">
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
 
@@ -1695,7 +1695,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix17"></script>  
+<script src="js/modules/page.js?v=7833fix18"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
@@ -1719,7 +1719,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
 <script src="js/modules/payment.js?v=7833fix16"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
-<script src="js/hardware/cash-bridge.js?v=7833fix17"></script>
+<script src="js/hardware/cash-bridge.js?v=7833fix18"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
 <!-- Preserved FIX16 contract:
@@ -1746,17 +1746,18 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/script.js?v=73e3"></script>
 
 <!-- Regression marker: V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT -->
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX17 HOME STABLE + TICKET READY</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX18 MANUAL START ONLY</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 <script>
-// FIX17 critical home guard is kept inline so a slow Android WebView cannot mix
-// the new index with an older cached page.js and lose the Home/Back behavior.
+// FIX18 critical home guard is kept inline so a slow Android WebView cannot mix
+// the new index with an older cached page.js and accept a synthetic Start click.
 (function () {
     "use strict";
     var reloadRequested = false;
+    var inlineHomeReadyAt = Date.now();
 
     function cashBlocking() {
         return !!(
@@ -1815,6 +1816,22 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         }, true);
     }
 
+    function installManualStartGuard() {
+        var start = document.getElementById("startBtn");
+        if (!start || start.getAttribute("data-fix18-manual-start") === "1") return;
+        start.setAttribute("data-fix18-manual-start", "1");
+        start.addEventListener("click", function (event) {
+            if (
+                !event ||
+                event.isTrusted !== true ||
+                Date.now() - inlineHomeReadyAt < 900
+            ) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+            }
+        }, true);
+    }
+
     function paymentSafeForUpdate() {
         return !cashBlocking() && !linePayBlocking() &&
             !(typeof window.paymentInProgress !== "undefined" && window.paymentInProgress);
@@ -1826,9 +1843,11 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         registration.waiting.postMessage({ type: "SKIP_WAITING" });
     }
 
+    installManualStartGuard();
     installBackGuard();
     forceHomeIfSafe();
     setTimeout(function () {
+        installManualStartGuard();
         installBackGuard();
         forceHomeIfSafe();
     }, 250);
@@ -1840,8 +1859,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     if ("serviceWorker" in navigator) {
         navigator.serviceWorker.addEventListener("controllerchange", function () {
             if (reloadRequested && paymentSafeForUpdate() &&
-                sessionStorage.getItem("monsterFix17SwReloaded") !== "1") {
-                sessionStorage.setItem("monsterFix17SwReloaded", "1");
+                sessionStorage.getItem("monsterFix18SwReloaded") !== "1") {
+                sessionStorage.setItem("monsterFix18SwReloaded", "1");
                 location.reload();
             }
         });

@@ -28,14 +28,14 @@ var renderCatalog = catalog.slice(
     catalog.indexOf("function whenTicketCatalogReady()")
 );
 var activity = readProject(
-    "02_Android_Kiosk117_Home_Stable_Ticket_Ready/webkiosk/src/main/java/" +
+    "02_Android_Kiosk118_Manual_Start_Only/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 
-assert.ok(index.indexOf("FIX17 HOME STABLE + TICKET READY") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix17") >= 0);
+assert.ok(index.indexOf("FIX18 MANUAL START ONLY") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix18") >= 0);
 assert.ok(index.indexOf("js/modules/ticketCatalog.js?v=7833fix17") >= 0);
-assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix17") >= 0);
+assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix18") >= 0);
 
 assert.ok(page.indexOf("isCheckoutStartBlocked") >= 0);
 assert.ok(page.indexOf("MonsterCashBridge.isStartBlocked()") >= 0);
@@ -64,9 +64,9 @@ assert.ok(catalog.indexOf("TICKET_IMAGE_FALLBACK") >= 0);
 assert.ok(catalog.indexOf('version: "fix17"') >= 0);
 
 assert.ok(
-    worker.indexOf("7833-fix17-home-stable-ticket-ready-20260730-1") >= 0
+    worker.indexOf("7833-fix18-manual-start-only-20260730-1") >= 0
 );
-assert.ok(activity.indexOf("kiosk=117&home=1&build=fix17") >= 0);
+assert.ok(activity.indexOf("kiosk=118&home=1&build=fix18") >= 0);
 assert.ok(activity.indexOf("else returnHomeOrPreserveActivePayment()") >= 0);
 assert.ok(
     activity.indexOf("if(cash||line||acceptedEvidence(transaction))return false;") >= 0
