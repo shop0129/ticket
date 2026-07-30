@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX22 Instant Start
+// 小怪獸售票機 V7.8.3.3 FIX22 Instant Start - Lite web package
 // Preserved regression cache marker: 7833-fix15-kiosk-home-visible-print-20260729-1
 // Preserved FIX20 cache marker: 7833-fix20-native-home-gate-20260730-1
 // Preserved FIX19 cache marker: 7833-fix19-webview-clean-start-20260730-1
@@ -11,7 +11,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix22-instant-start-20260731-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix22-instant-start-20260731-1-lite1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -40,6 +40,7 @@ var CORE_ASSETS = [
     "./images/category-other.png",
     "./images/category-summer.png",
     "./images/home-bg.png",
+    "./images/home-bg.webp",
     "./images/pwa/apple-touch-icon.png",
     "./images/pwa/icon-192.png",
     "./images/pwa/icon-512.png",
@@ -50,6 +51,7 @@ var CORE_ASSETS = [
     "./images/ticket-3h-red.png",
     "./images/ticket-baby.png",
     "./images/ticket-bg.png",
+    "./images/ticket-bg.webp",
     "./images/ticket-early.png",
     "./images/ticket-parent.png",
     "./images/ticket-powerbank.png",
@@ -120,6 +122,8 @@ var CORE_ASSETS = [
     "./js/staff/ticket-validator.js"
 ];
 
+var INSTALL_BATCH_SIZE = 4;
+
 function cacheCoreAsset(cache, asset) {
     return cache.add(new Request(asset, { cache: "reload" })).catch(function (error) {
         console.warn("[MonsterPWA] 快取失敗", asset, error);
@@ -127,12 +131,28 @@ function cacheCoreAsset(cache, asset) {
     });
 }
 
+function cacheCoreAssetsInBatches(cache, offset) {
+    var start = offset || 0;
+    var batch;
+
+    if (start >= CORE_ASSETS.length) {
+        return Promise.resolve();
+    }
+
+    batch = CORE_ASSETS.slice(start, start + INSTALL_BATCH_SIZE);
+    return Promise.all(batch.map(function (asset) {
+        return cacheCoreAsset(cache, asset);
+    })).then(function () {
+        return cacheCoreAssetsInBatches(cache, start + INSTALL_BATCH_SIZE);
+    });
+}
+
 self.addEventListener("install", function (event) {
     event.waitUntil(
         caches.open(CACHE_NAME).then(function (cache) {
-            return Promise.all(CORE_ASSETS.map(function (asset) {
-                return cacheCoreAsset(cache, asset);
-            }));
+            // RK3288 / Android 8.1: limit concurrent downloads so the old
+            // WebView is not flooded by more than one hundred cache requests.
+            return cacheCoreAssetsInBatches(cache, 0);
         }).then(function () {
             return self.skipWaiting();
         })

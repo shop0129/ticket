@@ -9,7 +9,7 @@ var ticketCatalogRenderToken = 0;
 var ticketCatalogReady = true;
 var ticketCatalogReadyPromise = Promise.resolve(true);
 var ticketCatalogWarmPromise = Promise.resolve(true);
-var TICKET_IMAGE_FALLBACK = "images/ticket-bg.png";
+var TICKET_IMAGE_FALLBACK = "images/ticket-bg.webp";
 var TICKET_IMAGE_WAIT_MS = 8000;
 
 var ticketCategoryMap = {
