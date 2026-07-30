@@ -1,4 +1,6 @@
-// 小怪獸售票機 V7.8.3.3 FIX19
+// 小怪獸售票機 V7.8.3.3 FIX20
+// FIX20 keeps cash recovery rules unchanged; Kiosk 120 supplies the visible
+// native home gate so background reconciliation cannot expose ticketPage.
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -26,7 +28,7 @@
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
     // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
-    var OVERLAY_FIX_VERSION = "fix19";
+    var OVERLAY_FIX_VERSION = "fix20";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;
@@ -1280,6 +1282,15 @@
             counts: active && active.lastCounts,
             cancelAllowed: paid === 0
         });
+        if (
+            hasAcceptedCashEvidence(active) &&
+            window.MonsterNativeKiosk &&
+            typeof window.MonsterNativeKiosk.activePaymentReady === "function"
+        ) {
+            try {
+                window.MonsterNativeKiosk.activePaymentReady(state);
+            } catch (ignore) {}
+        }
         if (active && active.order && active.order.orderNo) {
             pollPayment(active.order.orderNo);
         }

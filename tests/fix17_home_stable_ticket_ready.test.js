@@ -28,14 +28,14 @@ var renderCatalog = catalog.slice(
     catalog.indexOf("function whenTicketCatalogReady()")
 );
 var activity = readProject(
-    "02_Android_Kiosk119_WebView_Clean_Start/webkiosk/src/main/java/" +
+    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 
-assert.ok(index.indexOf("FIX19 WEBVIEW CLEAN START") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix19") >= 0);
+assert.ok(index.indexOf("FIX20 NATIVE HOME GATE") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix20") >= 0);
 assert.ok(index.indexOf("js/modules/ticketCatalog.js?v=7833fix17") >= 0);
-assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix19") >= 0);
+assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix20") >= 0);
 
 assert.ok(page.indexOf("isCheckoutStartBlocked") >= 0);
 assert.ok(page.indexOf("MonsterCashBridge.isStartBlocked()") >= 0);
@@ -64,9 +64,9 @@ assert.ok(catalog.indexOf("TICKET_IMAGE_FALLBACK") >= 0);
 assert.ok(catalog.indexOf('version: "fix17"') >= 0);
 
 assert.ok(
-    worker.indexOf("7833-fix19-webview-clean-start-20260730-1") >= 0
+    worker.indexOf("7833-fix20-native-home-gate-20260730-1") >= 0
 );
-assert.ok(activity.indexOf("kiosk=119&home=1&build=fix19") >= 0);
+assert.ok(activity.indexOf("kiosk=120&home=1&build=fix20") >= 0);
 assert.ok(activity.indexOf("else returnHomeOrPreserveActivePayment()") >= 0);
 assert.ok(
     activity.indexOf("if(cash||line||acceptedEvidence(transaction))return false;") >= 0

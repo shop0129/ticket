@@ -1,4 +1,5 @@
-// V7.8.3.3 FIX19 | WebView cache reset + boot recovery stays over home
+// V7.8.3.3 FIX20 | Android native home gate + background ticket warm-up
+// Preserved FIX19 contract: WebView cache reset + boot recovery stays over home
 // Preserved FIX18 contract: manual Start-only ticket entry + stable home routing
 // Preserved FIX17 contract: background zero-cash recovery + ticket-image readiness gate
 // Preserved FIX16 contract: home-first handshake with controller-startup retry safety
@@ -11,6 +12,34 @@ var nativeHomeReadyAt = 0;
 var HOME_START_GUARD_MS = 1200;
 var NATIVE_START_GUARD_MS = 600;
 var KIOSK_ROUTE_TRACE_KEY = "monsterKioskRouteTraceV1";
+
+function nativeKioskBridge() {
+    return window.MonsterNativeKiosk || null;
+}
+
+function notifyNativeHome(reason) {
+    var bridge = nativeKioskBridge();
+    if (!bridge || typeof bridge.showHome !== "function") return;
+    try {
+        bridge.showHome(String(reason || "web-home"));
+    } catch (ignore) {}
+}
+
+function notifyNativeTicketReady(source) {
+    var bridge = nativeKioskBridge();
+    if (!bridge || typeof bridge.ticketPageReady !== "function") return;
+    try {
+        bridge.ticketPageReady(String(source || "web"));
+    } catch (ignore) {}
+}
+
+function notifyNativeStartBlocked(reason) {
+    var bridge = nativeKioskBridge();
+    if (!bridge || typeof bridge.startBlocked !== "function") return;
+    try {
+        bridge.startBlocked(String(reason || "blocked"));
+    } catch (ignore) {}
+}
 
 function recordKioskRoute(type, detail) {
     var trace;
@@ -176,6 +205,7 @@ function forceHomePageIfSafe() {
         markHomeStable("force-home");
     }
     resetIdleTimer();
+    notifyNativeHome("force-home");
     return true;
 }
 
@@ -251,7 +281,87 @@ function showPage(pageId) {
         markHomeStable("show-page");
     }
     resetIdleTimer();
+    if (pageId === "homePage") notifyNativeHome("show-page");
     return true;
+}
+
+function openTicketsFromNative(source) {
+    var requestId;
+    var startButton = document.getElementById("startBtn");
+    var home;
+    if (!isHomePageActive()) {
+        releaseWebOnlyPaymentLock();
+        if (hasBlockingCheckoutTransaction()) {
+            recordKioskRoute("NATIVE_START_BLOCKED", "checkout");
+            notifyNativeStartBlocked("checkout");
+            return "BLOCKED";
+        }
+        document.querySelectorAll(".page").forEach(function (page) {
+            page.classList.remove("active");
+        });
+        home = document.getElementById("homePage");
+        if (!home) {
+            recordKioskRoute("NATIVE_START_BLOCKED", "home-unavailable");
+            notifyNativeStartBlocked("home-unavailable");
+            return "BLOCKED";
+        }
+        home.classList.add("active");
+        markHomeStable("native-entry-reset");
+    }
+    if (isCheckoutStartBlocked()) {
+        recordKioskRoute("NATIVE_START_BLOCKED", "checkout");
+        notifyNativeStartBlocked("checkout");
+        return "BLOCKED";
+    }
+    requestId = ++activeTicketPageRequest;
+    trustedTicketPageRequest = requestId;
+    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk120");
+    if (startButton) {
+        startButton.style.pointerEvents = "none";
+        startButton.setAttribute("aria-busy", "true");
+        startButton.setAttribute("data-ticket-request", String(requestId));
+    }
+    waitForTicketCatalogReady().then(function () {
+        if (requestId !== activeTicketPageRequest) {
+            notifyNativeStartBlocked("superseded");
+            return;
+        }
+        if (isCheckoutStartBlocked()) {
+            notifyNativeStartBlocked("checkout");
+            return;
+        }
+        if (!permitTicketPageForManualStart(requestId)) {
+            notifyNativeStartBlocked("permit");
+            return;
+        }
+        if (showPage("ticketPage")) {
+            notifyNativeTicketReady(source || "kiosk120");
+        } else {
+            notifyNativeStartBlocked("route");
+        }
+    }).catch(function () {
+        if (
+            requestId === activeTicketPageRequest &&
+            !isCheckoutStartBlocked() &&
+            permitTicketPageForManualStart(requestId) &&
+            showPage("ticketPage")
+        ) {
+            notifyNativeTicketReady((source || "kiosk120") + "-catalog-fallback");
+            return;
+        }
+        notifyNativeStartBlocked("catalog");
+    }).then(function () {
+        if (
+            !startButton ||
+            startButton.getAttribute("data-ticket-request") !== String(requestId)
+        ) {
+            return;
+        }
+        startButton.style.pointerEvents = "";
+        startButton.removeAttribute("aria-busy");
+        startButton.removeAttribute("data-ticket-request");
+    });
+    return "WAITING_CATALOG";
 }
 function resetIdleTimer() {
     clearTimeout(idleTimer);
@@ -326,15 +436,16 @@ document
 });
 
 window.MonsterHomeGuard = {
-    version: "fix19",
+    version: "fix20",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix19",
+    version: "fix20",
     requestHome: requestKioskHome,
     markNativeHomeReady: markNativeHomeReady,
+    openTicketsFromNative: openTicketsFromNative,
     isHome: function () {
         var home = document.getElementById("homePage");
         return !!(home && home.classList.contains("active"));

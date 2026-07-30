@@ -132,32 +132,32 @@ var page = read("js/modules/page.js");
 var cash = read("js/hardware/cash-bridge.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk119_WebView_Clean_Start/webkiosk/src/main/java/" +
+    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk119_WebView_Clean_Start/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK119_WEBVIEW_CLEAN_AND_REBOOT.cmd");
+var installer = readProject("01_INSTALL_KIOSK120_NATIVE_HOME_AND_REBOOT.cmd");
 
-assert.ok(index.indexOf("FIX19 WEBVIEW CLEAN START") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix19") >= 0);
-assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix19") >= 0);
+assert.ok(index.indexOf("FIX20 NATIVE HOME GATE") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix20") >= 0);
+assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix20") >= 0);
 assert.ok(index.indexOf("data-fix18-manual-start") >= 0);
 assert.ok(page.indexOf("event.isTrusted !== true") >= 0);
 assert.ok(page.indexOf("ticketEntryPermit") >= 0);
 assert.ok(page.indexOf("permitTicketPageForManualStart") >= 0);
 assert.ok(page.indexOf("TICKET_ENTRY_BLOCKED") >= 0);
-assert.ok(page.indexOf('version: "fix19"') >= 0);
+assert.ok(page.indexOf('version: "fix20"') >= 0);
 assert.ok(cash.indexOf("首頁已顯示時，零投入的背景恢復不得把客人推進票種頁") >= 0);
 assert.ok(worker.indexOf("7833-fix18-manual-start-only-20260730-1") >= 0);
-assert.ok(activity.indexOf("kiosk=119&home=1&build=fix19") >= 0);
-assert.ok(activity.indexOf("markNativeHomeReady('kiosk119')") >= 0);
-assert.ok(activity.indexOf("NATIVE_HOME_RELEASE_GUARD_MS = 700L") >= 0);
-assert.ok(build.indexOf("versionCode = 119") >= 0);
-assert.ok(build.indexOf("1.17-sprint11t-kiosk119-webview-clean-start") >= 0);
+assert.ok(activity.indexOf("kiosk=120&home=1&build=fix20") >= 0);
+assert.ok(activity.indexOf("markNativeHomeReady('kiosk120')") >= 0);
+assert.ok(activity.indexOf("NATIVE_HOME_RELEASE_GUARD_MS = 400L") >= 0);
+assert.ok(build.indexOf("versionCode = 120") >= 0);
+assert.ok(build.indexOf("1.18-sprint11u-kiosk120-native-home-gate") >= 0);
 assert.ok(installer.indexOf("versionCode=113") >= 0);
-assert.ok(installer.indexOf("versionCode=119") >= 0);
+assert.ok(installer.indexOf("versionCode=120") >= 0);
 
 runBehaviorTest().then(function () {
     console.log("PASS FIX18 manual Start-only routing: 18 assertions");

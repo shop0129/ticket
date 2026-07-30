@@ -30,24 +30,31 @@ function classList(active) {
     };
 }
 
-function pageElement(id, active) {
+function element(id, active) {
+    var listeners = {};
+    var attributes = {};
     return {
         id: id,
         classList: classList(active),
         style: {},
-        addEventListener: function () {},
-        setAttribute: function () {},
-        getAttribute: function () { return null; },
-        removeAttribute: function () {}
+        addEventListener: function (name, handler) { listeners[name] = handler; },
+        setAttribute: function (name, value) { attributes[name] = String(value); },
+        getAttribute: function (name) { return attributes[name] || null; },
+        removeAttribute: function (name) { delete attributes[name]; },
+        listeners: listeners
     };
 }
 
-function verifyBootRecoveryStaysOverHome() {
-    var home = pageElement("homePage", false);
-    var tickets = pageElement("ticketPage", true);
-    var start = pageElement("startBtn", false);
-    var back = pageElement("backBtn", false);
+async function verifyNativeReleaseWaitsForCatalog() {
+    var home = element("homePage", true);
+    var tickets = element("ticketPage", false);
+    var start = element("startBtn", false);
+    var back = element("backBtn", false);
     var pages = [home, tickets];
+    var ticketReady = "";
+    var homeShown = "";
+    var releaseCatalog;
+    var catalog = new Promise(function (resolve) { releaseCatalog = resolve; });
     var context = {
         window: {},
         document: {
@@ -64,8 +71,8 @@ function verifyBootRecoveryStaysOverHome() {
             },
             querySelector: function (selector) {
                 if (selector !== ".page.active") return null;
-                return pages.filter(function (item) {
-                    return item.classList.contains("active");
+                return pages.filter(function (page) {
+                    return page.classList.contains("active");
                 })[0] || null;
             },
             addEventListener: function () {}
@@ -88,16 +95,36 @@ function verifyBootRecoveryStaysOverHome() {
         }
     };
     context.window = context;
-    context.MonsterCashBridge = {
-        hasBlockingTransaction: function () { return true; },
-        isStartBlocked: function () { return true; },
-        shouldKeepHomeDuringBootRecovery: function () { return true; },
-        getPurchasePage: function () { return "ticketPage"; }
+    context.MonsterTicketCatalog = {
+        whenReady: function () { return catalog; }
     };
+    context.MonsterNativeKiosk = {
+        ticketPageReady: function (source) { ticketReady = source; },
+        showHome: function (reason) { homeShown = reason; },
+        startBlocked: function () {}
+    };
+
     vm.runInNewContext(read("js/modules/page.js"), context);
+
+    assert.strictEqual(context.showPage("ticketPage"), false);
+    assert.strictEqual(home.classList.contains("active"), true);
+    assert.strictEqual(
+        context.MonsterKioskRouting.openTicketsFromNative("native-test"),
+        "WAITING_CATALOG"
+    );
+    assert.strictEqual(home.classList.contains("active"), true);
+    assert.strictEqual(ticketReady, "");
+
+    releaseCatalog(true);
+    await Promise.resolve();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.strictEqual(tickets.classList.contains("active"), true);
+    assert.strictEqual(ticketReady, "native-test");
     assert.strictEqual(context.showPage("homePage"), true);
     assert.strictEqual(home.classList.contains("active"), true);
-    assert.strictEqual(tickets.classList.contains("active"), false);
+    assert.strictEqual(homeShown, "show-page");
 }
 
 var index = read("index.html");
@@ -108,6 +135,9 @@ var activity = readProject(
     "02_Android_Kiosk120_Native_Home_Gate/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
+var layout = readProject(
+    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/src/main/res/layout/activity_kiosk.xml"
+);
 var build = readProject(
     "02_Android_Kiosk120_Native_Home_Gate/webkiosk/build.gradle.kts"
 );
@@ -116,35 +146,29 @@ var verifier = readProject("tools/verify_kiosk120_worker.cmd");
 
 assert.ok(index.indexOf("FIX20 NATIVE HOME GATE") >= 0);
 assert.ok(index.indexOf("js/modules/page.js?v=7833fix20") >= 0);
-assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix20") >= 0);
-assert.ok(worker.indexOf("7833-fix19-webview-clean-start-20260730-1") >= 0);
+assert.ok(page.indexOf("openTicketsFromNative") >= 0);
+assert.ok(page.indexOf("notifyNativeTicketReady") >= 0);
 assert.ok(worker.indexOf("7833-fix20-native-home-gate-20260730-1") >= 0);
-
-assert.ok(page.indexOf("shouldKeepHomeDuringBootRecovery") >= 0);
-assert.ok(cash.indexOf("var bootSessionRecovery = !!active") >= 0);
-assert.ok(cash.indexOf("if (bootSessionRecovery && active)") >= 0);
-assert.ok(cash.indexOf("shouldKeepHomeDuringBootRecovery: function ()") >= 0);
-
-assert.ok(activity.indexOf("purgeStalePwaStorageBeforeWebView()") >= 0);
-assert.ok(
-    activity.indexOf("purgeStalePwaStorageBeforeWebView()") <
-        activity.indexOf("setContentView(R.layout.activity_kiosk)")
-);
-assert.ok(activity.indexOf('File(webViewRoot, "Default/Service Worker")') >= 0);
-assert.ok(activity.indexOf('File(webViewRoot, "Default/Cache")') >= 0);
-assert.ok(activity.indexOf("Local Storage") >= 0);
-assert.strictEqual(activity.indexOf("WebStorage.getInstance().deleteAllData()"), -1);
-assert.strictEqual(activity.indexOf("localStorage.clear()"), -1);
-assert.ok(activity.indexOf("kiosk=120&home=1&build=fix20") >= 0);
+assert.ok(layout.indexOf('android:id="@+id/kioskHomePanel"') >= 0);
+assert.ok(layout.indexOf('android:id="@+id/kioskHomeStart"') >= 0);
+assert.ok(layout.indexOf('@drawable/kiosk_home_bg') >= 0);
+assert.ok(layout.indexOf('@drawable/kiosk_start_btn') >= 0);
+assert.ok(activity.indexOf("MotionEvent.ACTION_DOWN") >= 0);
+assert.ok(activity.indexOf("MotionEvent.ACTION_UP") >= 0);
+assert.ok(activity.indexOf("NATIVE_TOUCH_ARM_MS = 1_500L") >= 0);
+assert.ok(activity.indexOf("ticketPageReady") >= 0);
+assert.ok(activity.indexOf("activePaymentReady") >= 0);
+assert.ok(cash.indexOf("MonsterNativeKiosk.activePaymentReady") >= 0);
+assert.ok(activity.indexOf("mainFrameLoaded = false") >= 0);
 assert.ok(build.indexOf("versionCode = 120") >= 0);
-assert.ok(build.indexOf("1.18-sprint11u-kiosk120-native-home-gate") >= 0);
-
-assert.ok(installer.indexOf("versionCode=113") >= 0);
-assert.ok(installer.indexOf("versionCode=120") >= 0);
-assert.ok(installer.indexOf("pwa_storage_reset_applied") >= 0);
-assert.strictEqual(installer.indexOf("pm clear"), -1);
+assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
+assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
 assert.ok(verifier.indexOf("KIOSK120_NATIVE_HOME_READY") >= 0);
-assert.ok(verifier.indexOf("pwa_storage_reset_applied") >= 0);
+assert.ok(verifier.indexOf("native_home_visible") >= 0);
 
-verifyBootRecoveryStaysOverHome();
-console.log("PASS FIX19 WebView clean start: 25 assertions");
+verifyNativeReleaseWaitsForCatalog().then(function () {
+    console.log("PASS FIX20 native Home gate: 31 assertions");
+}).catch(function (error) {
+    console.error(error && error.stack || error);
+    process.exitCode = 1;
+});
