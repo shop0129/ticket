@@ -1,4 +1,6 @@
-// V7.8.3.3 FIX17 | ticket images are ready before the catalog is revealed
+// V7.8.3.3 FIX22 | complete fallback catalog is ready synchronously
+// Preserved FIX17 behavior: custom ticket images are preloaded before replacing
+// the fallback images. FIX22 no longer blocks Start while remote images warm.
 // =========================================
 // 小怪獸售票機 V6.3.1
 // 動態票券目錄
@@ -6,6 +8,7 @@
 var ticketCatalogRenderToken = 0;
 var ticketCatalogReady = true;
 var ticketCatalogReadyPromise = Promise.resolve(true);
+var ticketCatalogWarmPromise = Promise.resolve(true);
 var TICKET_IMAGE_FALLBACK = "images/ticket-bg.png";
 var TICKET_IMAGE_WAIT_MS = 8000;
 
@@ -171,13 +174,20 @@ function renderTicketCatalog() {
     var entries = collectVisibleTicketEntries();
     var uniqueSources = {};
     var sources;
-    ticketCatalogReady = false;
+    // Commit every card with a local fallback immediately. The ticket page is
+    // now complete and responsive even if Firebase or a custom PNG is slow.
+    commitTicketCatalog(entries, {});
+    ticketCatalogReady = true;
+    ticketCatalogReadyPromise = Promise.resolve(true);
+    if (typeof CustomEvent === "function") {
+        document.dispatchEvent(new CustomEvent("monster:ticket-catalog-ready"));
+    }
     entries.forEach(function (entry) {
         uniqueSources[entry.imageSrc] = true;
     });
     uniqueSources[TICKET_IMAGE_FALLBACK] = true;
     sources = Object.keys(uniqueSources);
-    ticketCatalogReadyPromise = Promise.all(
+    ticketCatalogWarmPromise = Promise.all(
         sources.map(preloadTicketImage)
     ).then(function (results) {
         var readyImages = {};
@@ -186,20 +196,19 @@ function renderTicketCatalog() {
             readyImages[result.src] = !!result.ready;
         });
         commitTicketCatalog(entries, readyImages);
-        ticketCatalogReady = true;
         if (typeof CustomEvent === "function") {
-            document.dispatchEvent(new CustomEvent("monster:ticket-catalog-ready"));
+            document.dispatchEvent(new CustomEvent("monster:ticket-images-ready"));
         }
         return true;
+    }).catch(function () {
+        // The synchronously committed fallback catalog remains usable.
+        return false;
     });
-    return ticketCatalogReadyPromise;
+    return ticketCatalogWarmPromise;
 }
 
 function whenTicketCatalogReady() {
-    return ticketCatalogReadyPromise.then(function () {
-        if (ticketCatalogReady) return true;
-        return whenTicketCatalogReady();
-    });
+    return ticketCatalogReadyPromise;
 }
 
 function updateEmptyTicketCategories() {
@@ -215,8 +224,9 @@ function updateEmptyTicketCategories() {
 }
 
 window.MonsterTicketCatalog = {
-    version: "fix17",
+    version: "fix22",
     render: renderTicketCatalog,
     whenReady: whenTicketCatalogReady,
+    whenImagesReady: function () { return ticketCatalogWarmPromise; },
     isReady: function () { return ticketCatalogReady; }
 };

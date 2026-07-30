@@ -120,17 +120,17 @@ var index = read("index.html");
 var page = read("js/modules/page.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk121_Native_Back/webkiosk/src/main/java/" +
+    "02_Android_Kiosk122_Instant_Start/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var build = readProject(
-    "02_Android_Kiosk121_Native_Back/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk122_Instant_Start/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK121_NATIVE_BACK_AND_REBOOT.cmd");
+var installer = readProject("01_INSTALL_KIOSK122_INSTANT_START_AND_REBOOT.cmd");
 
-assert.ok(index.indexOf("FIX21 NATIVE BACK") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix21") >= 0);
-assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix21") >= 0);
+assert.ok(index.indexOf("FIX22 INSTANT START") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix22") >= 0);
+assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix22") >= 0);
 assert.ok(page.indexOf("notifyNativeTicketBack") >= 0);
 assert.ok(page.indexOf('"touchend", handleTicketBack, true') >= 0);
 assert.ok(activity.indexOf("fun ticketBackRequested") >= 0);
@@ -138,11 +138,11 @@ assert.ok(activity.indexOf("requestWebHomeAfterNativeBack") >= 0);
 assert.ok(activity.indexOf("acceptedEvidence(storedTransaction())") >= 0);
 assert.ok(activity.indexOf("HOME_REQUESTED") >= 0);
 assert.ok(activity.indexOf("PAYMENT_PRESERVED") >= 0);
-assert.ok(build.indexOf("versionCode = 121") >= 0);
-assert.ok(build.indexOf("1.19-sprint11v-kiosk121-native-back") >= 0);
+assert.ok(build.indexOf("versionCode = 122") >= 0);
+assert.ok(build.indexOf("1.20-sprint11w-kiosk122-instant-start") >= 0);
 assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
 assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
-assert.ok(worker.indexOf("7833-fix21-native-back-20260731-1") >= 0);
+assert.ok(worker.indexOf("7833-fix22-instant-start-20260731-1") >= 0);
 
 verifyTicketBackUsesNativeChannel().then(function () {
     console.log("PASS FIX21 native Back: 19 assertions");

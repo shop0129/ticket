@@ -28,23 +28,19 @@ var renderCatalog = catalog.slice(
     catalog.indexOf("function whenTicketCatalogReady()")
 );
 var activity = readProject(
-    "02_Android_Kiosk121_Native_Back/webkiosk/src/main/java/" +
+    "02_Android_Kiosk122_Instant_Start/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 
-assert.ok(index.indexOf("FIX21 NATIVE BACK") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix21") >= 0);
-assert.ok(index.indexOf("js/modules/ticketCatalog.js?v=7833fix17") >= 0);
-assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix21") >= 0);
+assert.ok(index.indexOf("FIX22 INSTANT START") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix22") >= 0);
+assert.ok(index.indexOf("js/modules/ticketCatalog.js?v=7833fix22") >= 0);
+assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix22") >= 0);
 
 assert.ok(page.indexOf("isCheckoutStartBlocked") >= 0);
 assert.ok(page.indexOf("MonsterCashBridge.isStartBlocked()") >= 0);
 assert.ok(page.indexOf("MonsterTicketCatalog.whenReady()") >= 0);
-assert.ok(
-    startHandler.indexOf("waitForTicketCatalogReady().then") <
-        startHandler.indexOf('showPage("ticketPage")'),
-    "ticket page must wait for the catalog readiness gate"
-);
+assert.ok(startHandler.indexOf("waitForTicketCatalogReady().then") >= 0);
 
 assert.ok(cash.indexOf("bootHomeReleasePending") >= 0);
 assert.ok(cash.indexOf("if (!data.preservePage) keepPurchasePageVisible();") >= 0);
@@ -56,17 +52,17 @@ assert.ok(cash.indexOf("hasAcceptedCashEvidence(active)") >= 0);
 assert.ok(catalog.indexOf("preloadTicketImage") >= 0);
 assert.ok(catalog.indexOf("Promise.all") >= 0);
 assert.ok(
-    renderCatalog.indexOf("commitTicketCatalog(entries, readyImages)") >
+    renderCatalog.indexOf("commitTicketCatalog(entries, {})") <
         renderCatalog.indexOf("Promise.all"),
-    "catalog DOM must be committed only after images settle"
+    "complete fallback catalog must be committed before images settle"
 );
 assert.ok(catalog.indexOf("TICKET_IMAGE_FALLBACK") >= 0);
-assert.ok(catalog.indexOf('version: "fix17"') >= 0);
+assert.ok(catalog.indexOf('version: "fix22"') >= 0);
 
 assert.ok(
-    worker.indexOf("7833-fix21-native-back-20260731-1") >= 0
+    worker.indexOf("7833-fix22-instant-start-20260731-1") >= 0
 );
-assert.ok(activity.indexOf("kiosk=121&home=1&build=fix21") >= 0);
+assert.ok(activity.indexOf("kiosk=122&home=1&build=fix22") >= 0);
 assert.ok(activity.indexOf("else returnHomeOrPreserveActivePayment()") >= 0);
 assert.ok(
     activity.indexOf("if(cash||line||acceptedEvidence(transaction))return false;") >= 0

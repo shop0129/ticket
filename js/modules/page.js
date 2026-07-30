@@ -1,4 +1,8 @@
-// V7.8.3.3 FIX21 | Native ticket-back channel + Android home gate
+// V7.8.3.3 FIX22 | Instant native Start + single version badge
+// FIX22 opens the complete fallback catalog synchronously. Remote ticket
+// images continue warming in the background and can never hold the native
+// Home panel above an already-open ticket page.
+// Preserved FIX21 contract: native ticket-back channel + Android home gate
 // Preserved FIX20 contract: Android native home gate + background ticket warm-up
 // Preserved FIX19 contract: WebView cache reset + boot recovery stays over home
 // Preserved FIX18 contract: manual Start-only ticket entry + stable home routing
@@ -328,53 +332,35 @@ function openTicketsFromNative(source) {
     }
     requestId = ++activeTicketPageRequest;
     trustedTicketPageRequest = requestId;
-    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk121");
+    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk122");
     if (startButton) {
         startButton.style.pointerEvents = "none";
         startButton.setAttribute("aria-busy", "true");
         startButton.setAttribute("data-ticket-request", String(requestId));
     }
-    waitForTicketCatalogReady().then(function () {
-        if (requestId !== activeTicketPageRequest) {
-            notifyNativeStartBlocked("superseded");
-            return;
-        }
-        if (isCheckoutStartBlocked()) {
-            notifyNativeStartBlocked("checkout");
-            return;
-        }
-        if (!permitTicketPageForManualStart(requestId)) {
-            notifyNativeStartBlocked("permit");
-            return;
-        }
-        if (showPage("ticketPage")) {
-            notifyNativeTicketReady(source || "kiosk121");
-        } else {
-            notifyNativeStartBlocked("route");
-        }
-    }).catch(function () {
-        if (
-            requestId === activeTicketPageRequest &&
-            !isCheckoutStartBlocked() &&
-            permitTicketPageForManualStart(requestId) &&
-            showPage("ticketPage")
-        ) {
-            notifyNativeTicketReady((source || "kiosk121") + "-catalog-fallback");
-            return;
-        }
-        notifyNativeStartBlocked("catalog");
-    }).then(function () {
-        if (
-            !startButton ||
-            startButton.getAttribute("data-ticket-request") !== String(requestId)
-        ) {
-            return;
-        }
+    if (!permitTicketPageForManualStart(requestId)) {
+        notifyNativeStartBlocked("permit");
+        return "BLOCKED";
+    }
+    if (!showPage("ticketPage")) {
+        notifyNativeStartBlocked("route");
+        return "BLOCKED";
+    }
+    // Notify Android before any asynchronous image/Firebase work. This makes
+    // the native panel disappear during the same accepted touch transaction.
+    notifyNativeTicketReady(source || "kiosk122");
+    recordKioskRoute("NATIVE_TICKET_VISIBLE", source || "kiosk122");
+    if (startButton) {
         startButton.style.pointerEvents = "";
         startButton.removeAttribute("aria-busy");
         startButton.removeAttribute("data-ticket-request");
+    }
+    // The catalog already contains a full local fallback image for every card.
+    // Keep warming custom images without delaying navigation.
+    waitForTicketCatalogReady().catch(function () {
+        recordKioskRoute("CATALOG_WARM_FAILED", source || "kiosk122");
     });
-    return "WAITING_CATALOG";
+    return "TICKET_READY";
 }
 function resetIdleTimer() {
     clearTimeout(idleTimer);
@@ -452,7 +438,7 @@ function handleTicketBack(event) {
     lastTicketBackRequestAt = now;
     playClick();
     recordKioskRoute("TICKET_BACK", event && event.type ? event.type : "unknown");
-    // Kiosk 121 shows the native Home immediately. The web transaction release
+    // Kiosk 122 shows the native Home immediately. The web transaction release
     // continues below, so a zero-cash stale transaction cannot make Back look dead.
     notifyNativeTicketBack("ticket-page");
     requestKioskHome("ticket-back");
@@ -463,13 +449,13 @@ ticketBackButton.addEventListener("touchend", handleTicketBack, true);
 ticketBackButton.addEventListener("click", handleTicketBack, true);
 
 window.MonsterHomeGuard = {
-    version: "fix21",
+    version: "fix22",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix21",
+    version: "fix22",
     requestHome: requestKioskHome,
     markNativeHomeReady: markNativeHomeReady,
     openTicketsFromNative: openTicketsFromNative,

@@ -1,10 +1,10 @@
-// 小怪獸售票機 V7.4 Enterprise Core
+// 小怪獸售票機 V7.8.3.3 Enterprise Core
 // 集中版本、事件、日誌、權限與系統狀態。保持 ES5 / Android WebView 相容。
 (function (window, document) {
     "use strict";
 
-    var VERSION = "7.4.0";
-    var BUILD = "20260717-enterprise-1";
+    var VERSION = "7.8.3.3";
+    var BUILD = "FIX22";
     var listeners = {};
     var logs = [];
     var MAX_LOGS = 300;
@@ -105,7 +105,7 @@
             document.body.appendChild(badge);
         }
         state = health();
-        badge.textContent = "V" + VERSION + " · " + (state.online ? "ONLINE" : "OFFLINE");
+        badge.textContent = "V" + VERSION + " · " + BUILD + " · " + (state.online ? "ONLINE" : "OFFLINE");
         badge.style.background = state.online ? "rgba(24,35,52,.88)" : "rgba(170,54,54,.92)";
     }
     function boot() {
