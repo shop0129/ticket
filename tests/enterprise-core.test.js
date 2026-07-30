@@ -30,5 +30,5 @@ ok(window.MonsterEnterprise.can('order.create') === true, '員工應可售票');
 ok(window.MonsterEnterprise.can('system.settings') === false, '員工不可修改系統設定');
 ok(window.MonsterEnterprise.health().online === true, '健康狀態應回報網路');
 ok(!!elements.monsterEnterpriseStatus, '應建立版本狀態指示');
-ok(elements.monsterEnterpriseStatus.textContent === 'V7.8.3.3 · FIX26E · ONLINE', '應只顯示目前版本與連線狀態');
+ok(elements.monsterEnterpriseStatus.textContent === 'V7.8.3.3 · FIX26F · ONLINE', '應只顯示目前版本與連線狀態');
 console.log('PASS enterprise core: ' + count + ' assertions');

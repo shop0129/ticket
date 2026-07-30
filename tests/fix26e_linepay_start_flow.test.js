@@ -115,6 +115,11 @@ async function flushPromises() {
     });
     assert.strictEqual(locked, true, "按 LINE Pay 後應立即鎖定付款按鈕");
     assert.strictEqual(elements.linePayScanTitle.textContent, "正在準備 LINE Pay");
+    assert.strictEqual(elements.linePayScanOverlay.style.display, "flex", "舊版 WebView 應以行內樣式顯示彈窗");
+    assert.strictEqual(elements.linePayScanOverlay.style.top, "0", "彈窗上緣應固定在畫面頂端");
+    assert.strictEqual(elements.linePayScanOverlay.style.right, "0", "彈窗右緣應固定在畫面邊界");
+    assert.strictEqual(elements.linePayScanOverlay.style.bottom, "0", "彈窗下緣應固定在畫面底端");
+    assert.strictEqual(elements.linePayScanOverlay.style.left, "0", "彈窗左緣應固定在畫面邊界");
     await flushPromises();
     assert.ok(callableNames.indexOf("linePayHealth") >= 0, "應呼叫後端健康檢查");
     assert.strictEqual(context.MonsterLinePayScanner._test.getActive().state, "SETUP_REQUIRED");
@@ -133,7 +138,7 @@ async function flushPromises() {
     assert.strictEqual(context.MonsterLinePayScanner._test.getActive().state, "WAITING_SCAN");
     assert.strictEqual(elements.linePayScanTitle.textContent, "請出示 LINE Pay 付款碼");
 
-    console.log("PASS FIX26E LINE Pay start flow: 9 assertions");
+    console.log("PASS FIX26F LINE Pay start flow: 14 assertions");
 }()).catch(function (error) {
     console.error(error);
     process.exit(1);

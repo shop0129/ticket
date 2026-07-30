@@ -1,3 +1,11 @@
+# V7.8.3.3 FIX26F LINE Pay WebView Overlay Repair
+
+- 將舊版 Android WebView 61 不支援的 `inset`／`min()` 版面寫法改為相容寫法。
+- LINE Pay 彈窗的全螢幕位置與顯示狀態增加行內保護。
+- 修正按下後付款按鈕變灰，但準備／裝置啟用／掃描畫面落在螢幕外的問題。
+- 保留 FIX26E 的單張票、購物車、裝置啟用碼及 18 碼掃描流程。
+- 更新前端版本與 PWA 快取；Firebase Functions、Kiosk 125、Controller 113 不變。
+
 # V7.8.3.3 FIX26E LINE Pay Button + Device Activation
 
 - 修正單張票與購物車 LINE Pay 按鈕完全沒有畫面。

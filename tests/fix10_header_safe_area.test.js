@@ -21,7 +21,7 @@ const checks = [
     ["ticket back button follows safe top", css.includes("#ticketPage > .ticket-header #backBtn")],
     ["detail back button follows safe top", css.includes("#detailPage > .ticket-header #detailBackBtn")],
     ["current FIX13 version badge exists", html.includes("V7.8.3.3 · FIX13 STARTUP + CASH + BACK RECOVERY")],
-    ["stylesheet cache-buster changed", html.includes("css/style.css?v=7833fix26e")],
+    ["stylesheet cache-buster changed", html.includes("css/style.css?v=7833fix26f")],
     ["cash CSS cache-buster changed", html.includes("css/cash-bridge.css?v=7833fix11")],
     ["cash JS cache-buster changed", html.includes("js/hardware/cash-bridge.js?v=7833fix13")],
     ["Service Worker cache changed", sw.includes("7833-fix13-startup-cash-back-recovery-20260729-1")],

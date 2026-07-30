@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX26E
+// 小怪獸售票機 V7.8.3.3 FIX26F
 // LINE Pay Offline API v4：USB HID 掃描客人 My Code
 // 金鑰只存在 Firebase Secret；前端不保存 Channel Secret。
 // Android WebView 61 相容（ES5）
@@ -62,13 +62,38 @@
         else window.paymentInProgress = !!locked;
     }
 
+    function applyLegacyWebViewOverlayLayout(overlay) {
+        if (!overlay || !overlay.style) return;
+        // Android 8.1 / WebView 61 ignores CSS `inset: 0`. Keep the critical
+        // fullscreen layout inline so a stale/missing stylesheet cannot leave
+        // the payment buttons locked behind an off-screen dialog.
+        overlay.style.position = "fixed";
+        overlay.style.top = "0";
+        overlay.style.right = "0";
+        overlay.style.bottom = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.boxSizing = "border-box";
+        overlay.style.zIndex = "100100";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.padding = "28px";
+        overlay.style.background = "rgba(10, 24, 31, .91)";
+    }
+
     function ensureOverlay() {
         var overlay = document.getElementById("linePayScanOverlay");
-        if (overlay) return overlay;
+        if (overlay) {
+            applyLegacyWebViewOverlayLayout(overlay);
+            return overlay;
+        }
         overlay = document.createElement("div");
         overlay.id = "linePayScanOverlay";
         overlay.className = "linepay-scan-overlay";
         overlay.setAttribute("data-state", "waiting");
+        applyLegacyWebViewOverlayLayout(overlay);
+        overlay.style.display = "none";
         overlay.innerHTML = [
             '<div id="linePayScanCard" class="linepay-scan-card" tabindex="-1">',
             '  <div class="linepay-scan-logo">LINE Pay</div>',
@@ -94,6 +119,9 @@
         options = options || {};
         var overlay = ensureOverlay();
         overlay.classList.add("show");
+        // Inline display wins even if WebView is still holding an older CSS
+        // cache whose unsupported layout placed the overlay off screen.
+        overlay.style.display = "flex";
         overlay.setAttribute("data-state", options.state || "waiting");
         document.getElementById("linePayScanTitle").textContent =
             options.title || "請出示付款碼";
@@ -117,7 +145,10 @@
 
     function hideOverlay() {
         var overlay = document.getElementById("linePayScanOverlay");
-        if (overlay) overlay.classList.remove("show");
+        if (overlay) {
+            overlay.classList.remove("show");
+            if (overlay.style) overlay.style.display = "none";
+        }
     }
 
     function clearUnfundedTransaction(reason) {
