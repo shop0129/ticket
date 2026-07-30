@@ -1,4 +1,5 @@
-// V7.8.3.3 FIX20 | Android native home gate + background ticket warm-up
+// V7.8.3.3 FIX21 | Native ticket-back channel + Android home gate
+// Preserved FIX20 contract: Android native home gate + background ticket warm-up
 // Preserved FIX19 contract: WebView cache reset + boot recovery stays over home
 // Preserved FIX18 contract: manual Start-only ticket entry + stable home routing
 // Preserved FIX17 contract: background zero-cash recovery + ticket-image readiness gate
@@ -12,6 +13,7 @@ var nativeHomeReadyAt = 0;
 var HOME_START_GUARD_MS = 1200;
 var NATIVE_START_GUARD_MS = 600;
 var KIOSK_ROUTE_TRACE_KEY = "monsterKioskRouteTraceV1";
+var lastTicketBackRequestAt = 0;
 
 function nativeKioskBridge() {
     return window.MonsterNativeKiosk || null;
@@ -23,6 +25,17 @@ function notifyNativeHome(reason) {
     try {
         bridge.showHome(String(reason || "web-home"));
     } catch (ignore) {}
+}
+
+function notifyNativeTicketBack(reason) {
+    var bridge = nativeKioskBridge();
+    if (!bridge || typeof bridge.ticketBackRequested !== "function") return false;
+    try {
+        bridge.ticketBackRequested(String(reason || "ticket-back"));
+        return true;
+    } catch (ignore) {
+        return false;
+    }
 }
 
 function notifyNativeTicketReady(source) {
@@ -315,7 +328,7 @@ function openTicketsFromNative(source) {
     }
     requestId = ++activeTicketPageRequest;
     trustedTicketPageRequest = requestId;
-    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk120");
+    recordKioskRoute("NATIVE_START_ACCEPTED", source || "kiosk121");
     if (startButton) {
         startButton.style.pointerEvents = "none";
         startButton.setAttribute("aria-busy", "true");
@@ -335,7 +348,7 @@ function openTicketsFromNative(source) {
             return;
         }
         if (showPage("ticketPage")) {
-            notifyNativeTicketReady(source || "kiosk120");
+            notifyNativeTicketReady(source || "kiosk121");
         } else {
             notifyNativeStartBlocked("route");
         }
@@ -346,7 +359,7 @@ function openTicketsFromNative(source) {
             permitTicketPageForManualStart(requestId) &&
             showPage("ticketPage")
         ) {
-            notifyNativeTicketReady((source || "kiosk120") + "-catalog-fallback");
+            notifyNativeTicketReady((source || "kiosk121") + "-catalog-fallback");
             return;
         }
         notifyNativeStartBlocked("catalog");
@@ -425,24 +438,38 @@ document
         startButton.removeAttribute("data-ticket-request");
     });
 });
-document
-    .getElementById("backBtn")
-    .addEventListener("click", function (event) {
+function handleTicketBack(event) {
+    var now = Date.now();
     if (event && typeof event.preventDefault === "function") {
         event.preventDefault();
     }
+    if (event && typeof event.stopImmediatePropagation === "function") {
+        event.stopImmediatePropagation();
+    }
+    // Android 8.1 WebView can emit touchend and click for one tap. Keep one
+    // request while still accepting either event if the other is swallowed.
+    if (now - lastTicketBackRequestAt < 450) return;
+    lastTicketBackRequestAt = now;
     playClick();
+    recordKioskRoute("TICKET_BACK", event && event.type ? event.type : "unknown");
+    // Kiosk 121 shows the native Home immediately. The web transaction release
+    // continues below, so a zero-cash stale transaction cannot make Back look dead.
+    notifyNativeTicketBack("ticket-page");
     requestKioskHome("ticket-back");
-});
+}
+
+var ticketBackButton = document.getElementById("backBtn");
+ticketBackButton.addEventListener("touchend", handleTicketBack, true);
+ticketBackButton.addEventListener("click", handleTicketBack, true);
 
 window.MonsterHomeGuard = {
-    version: "fix20",
+    version: "fix21",
     forceHomeIfSafe: forceHomePageIfSafe,
     hasBlockingCheckout: hasBlockingCheckoutTransaction
 };
 
 window.MonsterKioskRouting = {
-    version: "fix20",
+    version: "fix21",
     requestHome: requestKioskHome,
     markNativeHomeReady: markNativeHomeReady,
     openTicketsFromNative: openTicketsFromNative,

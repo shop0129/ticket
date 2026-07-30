@@ -132,23 +132,23 @@ var page = read("js/modules/page.js");
 var cash = read("js/hardware/cash-bridge.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/src/main/java/" +
+    "02_Android_Kiosk121_Native_Back/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var layout = readProject(
-    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/src/main/res/layout/activity_kiosk.xml"
+    "02_Android_Kiosk121_Native_Back/webkiosk/src/main/res/layout/activity_kiosk.xml"
 );
 var build = readProject(
-    "02_Android_Kiosk120_Native_Home_Gate/webkiosk/build.gradle.kts"
+    "02_Android_Kiosk121_Native_Back/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK120_NATIVE_HOME_AND_REBOOT.cmd");
-var verifier = readProject("tools/verify_kiosk120_worker.cmd");
+var installer = readProject("01_INSTALL_KIOSK121_NATIVE_BACK_AND_REBOOT.cmd");
+var verifier = readProject("tools/verify_kiosk121_worker.cmd");
 
-assert.ok(index.indexOf("FIX20 NATIVE HOME GATE") >= 0);
-assert.ok(index.indexOf("js/modules/page.js?v=7833fix20") >= 0);
+assert.ok(index.indexOf("FIX21 NATIVE BACK") >= 0);
+assert.ok(index.indexOf("js/modules/page.js?v=7833fix21") >= 0);
 assert.ok(page.indexOf("openTicketsFromNative") >= 0);
 assert.ok(page.indexOf("notifyNativeTicketReady") >= 0);
-assert.ok(worker.indexOf("7833-fix20-native-home-gate-20260730-1") >= 0);
+assert.ok(worker.indexOf("7833-fix21-native-back-20260731-1") >= 0);
 assert.ok(layout.indexOf('android:id="@+id/kioskHomePanel"') >= 0);
 assert.ok(layout.indexOf('android:id="@+id/kioskHomeStart"') >= 0);
 assert.ok(layout.indexOf('@drawable/kiosk_home_bg') >= 0);
@@ -160,10 +160,10 @@ assert.ok(activity.indexOf("ticketPageReady") >= 0);
 assert.ok(activity.indexOf("activePaymentReady") >= 0);
 assert.ok(cash.indexOf("MonsterNativeKiosk.activePaymentReady") >= 0);
 assert.ok(activity.indexOf("mainFrameLoaded = false") >= 0);
-assert.ok(build.indexOf("versionCode = 120") >= 0);
+assert.ok(build.indexOf("versionCode = 121") >= 0);
 assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
 assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
-assert.ok(verifier.indexOf("KIOSK120_NATIVE_HOME_READY") >= 0);
+assert.ok(verifier.indexOf("KIOSK121_NATIVE_HOME_READY") >= 0);
 assert.ok(verifier.indexOf("native_home_visible") >= 0);
 
 verifyNativeReleaseWaitsForCatalog().then(function () {

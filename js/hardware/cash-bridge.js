@@ -1,5 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX20
-// FIX20 keeps cash recovery rules unchanged; Kiosk 120 supplies the visible
+// 小怪獸售票機 V7.8.3.3 FIX21
+// FIX21 keeps cash recovery rules unchanged; Kiosk 121 supplies the visible
 // native home gate so background reconciliation cannot expose ticketPage.
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
@@ -28,7 +28,7 @@
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
     // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
-    var OVERLAY_FIX_VERSION = "fix20";
+    var OVERLAY_FIX_VERSION = "fix21";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;

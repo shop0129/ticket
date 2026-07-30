@@ -30,24 +30,28 @@ function classList(active) {
     };
 }
 
-function pageElement(id, active) {
+function element(id, active) {
+    var listeners = {};
+    var attributes = {};
     return {
         id: id,
         classList: classList(active),
         style: {},
-        addEventListener: function () {},
-        setAttribute: function () {},
-        getAttribute: function () { return null; },
-        removeAttribute: function () {}
+        addEventListener: function (name, handler) { listeners[name] = handler; },
+        setAttribute: function (name, value) { attributes[name] = String(value); },
+        getAttribute: function (name) { return attributes[name] || null; },
+        removeAttribute: function (name) { delete attributes[name]; },
+        listeners: listeners
     };
 }
 
-function verifyBootRecoveryStaysOverHome() {
-    var home = pageElement("homePage", false);
-    var tickets = pageElement("ticketPage", true);
-    var start = pageElement("startBtn", false);
-    var back = pageElement("backBtn", false);
+async function verifyTicketBackUsesNativeChannel() {
+    var home = element("homePage", false);
+    var tickets = element("ticketPage", true);
+    var start = element("startBtn", false);
+    var back = element("backBtn", false);
     var pages = [home, tickets];
+    var nativeBackReason = "";
     var context = {
         window: {},
         document: {
@@ -64,8 +68,8 @@ function verifyBootRecoveryStaysOverHome() {
             },
             querySelector: function (selector) {
                 if (selector !== ".page.active") return null;
-                return pages.filter(function (item) {
-                    return item.classList.contains("active");
+                return pages.filter(function (page) {
+                    return page.classList.contains("active");
                 })[0] || null;
             },
             addEventListener: function () {}
@@ -80,7 +84,6 @@ function verifyBootRecoveryStaysOverHome() {
         systemData: { homeTimeout: 60 },
         paymentInProgress: false,
         playClick: function () {},
-        alert: function () {},
         localStorage: {
             values: {},
             getItem: function (key) { return this.values[key] || null; },
@@ -88,21 +91,33 @@ function verifyBootRecoveryStaysOverHome() {
         }
     };
     context.window = context;
-    context.MonsterCashBridge = {
-        hasBlockingTransaction: function () { return true; },
-        isStartBlocked: function () { return true; },
-        shouldKeepHomeDuringBootRecovery: function () { return true; },
-        getPurchasePage: function () { return "ticketPage"; }
+    context.MonsterNativeKiosk = {
+        ticketBackRequested: function (reason) { nativeBackReason = reason; },
+        showHome: function () {},
+        ticketPageReady: function () {},
+        startBlocked: function () {}
     };
+
     vm.runInNewContext(read("js/modules/page.js"), context);
-    assert.strictEqual(context.showPage("homePage"), true);
+
+    assert.strictEqual(typeof back.listeners.touchend, "function");
+    assert.strictEqual(typeof back.listeners.click, "function");
+    back.listeners.touchend({
+        type: "touchend",
+        preventDefault: function () {},
+        stopImmediatePropagation: function () {}
+    });
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    assert.strictEqual(nativeBackReason, "ticket-page");
     assert.strictEqual(home.classList.contains("active"), true);
     assert.strictEqual(tickets.classList.contains("active"), false);
 }
 
 var index = read("index.html");
 var page = read("js/modules/page.js");
-var cash = read("js/hardware/cash-bridge.js");
 var worker = read("service-worker.js");
 var activity = readProject(
     "02_Android_Kiosk121_Native_Back/webkiosk/src/main/java/" +
@@ -112,39 +127,26 @@ var build = readProject(
     "02_Android_Kiosk121_Native_Back/webkiosk/build.gradle.kts"
 );
 var installer = readProject("01_INSTALL_KIOSK121_NATIVE_BACK_AND_REBOOT.cmd");
-var verifier = readProject("tools/verify_kiosk121_worker.cmd");
 
 assert.ok(index.indexOf("FIX21 NATIVE BACK") >= 0);
 assert.ok(index.indexOf("js/modules/page.js?v=7833fix21") >= 0);
 assert.ok(index.indexOf("js/hardware/cash-bridge.js?v=7833fix21") >= 0);
-assert.ok(worker.indexOf("7833-fix19-webview-clean-start-20260730-1") >= 0);
-assert.ok(worker.indexOf("7833-fix21-native-back-20260731-1") >= 0);
-
-assert.ok(page.indexOf("shouldKeepHomeDuringBootRecovery") >= 0);
-assert.ok(cash.indexOf("var bootSessionRecovery = !!active") >= 0);
-assert.ok(cash.indexOf("if (bootSessionRecovery && active)") >= 0);
-assert.ok(cash.indexOf("shouldKeepHomeDuringBootRecovery: function ()") >= 0);
-
-assert.ok(activity.indexOf("purgeStalePwaStorageBeforeWebView()") >= 0);
-assert.ok(
-    activity.indexOf("purgeStalePwaStorageBeforeWebView()") <
-        activity.indexOf("setContentView(R.layout.activity_kiosk)")
-);
-assert.ok(activity.indexOf('File(webViewRoot, "Default/Service Worker")') >= 0);
-assert.ok(activity.indexOf('File(webViewRoot, "Default/Cache")') >= 0);
-assert.ok(activity.indexOf("Local Storage") >= 0);
-assert.strictEqual(activity.indexOf("WebStorage.getInstance().deleteAllData()"), -1);
-assert.strictEqual(activity.indexOf("localStorage.clear()"), -1);
-assert.ok(activity.indexOf("kiosk=121&home=1&build=fix21") >= 0);
+assert.ok(page.indexOf("notifyNativeTicketBack") >= 0);
+assert.ok(page.indexOf('"touchend", handleTicketBack, true') >= 0);
+assert.ok(activity.indexOf("fun ticketBackRequested") >= 0);
+assert.ok(activity.indexOf("requestWebHomeAfterNativeBack") >= 0);
+assert.ok(activity.indexOf("acceptedEvidence(storedTransaction())") >= 0);
+assert.ok(activity.indexOf("HOME_REQUESTED") >= 0);
+assert.ok(activity.indexOf("PAYMENT_PRESERVED") >= 0);
 assert.ok(build.indexOf("versionCode = 121") >= 0);
 assert.ok(build.indexOf("1.19-sprint11v-kiosk121-native-back") >= 0);
+assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
+assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
+assert.ok(worker.indexOf("7833-fix21-native-back-20260731-1") >= 0);
 
-assert.ok(installer.indexOf("versionCode=113") >= 0);
-assert.ok(installer.indexOf("versionCode=121") >= 0);
-assert.ok(installer.indexOf("pwa_storage_reset_applied") >= 0);
-assert.strictEqual(installer.indexOf("pm clear"), -1);
-assert.ok(verifier.indexOf("KIOSK121_NATIVE_HOME_READY") >= 0);
-assert.ok(verifier.indexOf("pwa_storage_reset_applied") >= 0);
-
-verifyBootRecoveryStaysOverHome();
-console.log("PASS FIX19 WebView clean start: 25 assertions");
+verifyTicketBackUsesNativeChannel().then(function () {
+    console.log("PASS FIX21 native Back: 19 assertions");
+}).catch(function (error) {
+    console.error(error && error.stack || error);
+    process.exitCode = 1;
+});

@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX20 Native Home Gate">
+<meta name="monster-app-version" content="V7.8.3.3 FIX21 Native Back">
 <!-- FIX10 keeps the completed V7.8.3.3 FIX9 Payment Page + Cart Reset behavior. -->
 <!-- Regression marker: V7.8.3.3 · FIX9 PAYMENT PAGE + CART RESET -->
 
@@ -1695,7 +1695,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/utils/helper.js?v=72c"></script>
 <script src="js/utils/sound.js?v=72c"></script>
     
-<script src="js/modules/page.js?v=7833fix20"></script>  
+<script src="js/modules/page.js?v=7833fix21"></script>  
 <script src="js/modules/history.js?v=72c"></script>
 <script src="js/cloud/cloud-order-sync.js?v=73f1fix1"></script>
 <script src="js/cloud/cloud-dashboard-sync.js?v=73f1fix1"></script>    
@@ -1719,7 +1719,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
 <script src="js/modules/payment.js?v=7833fix16"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833s10"></script>
-<script src="js/hardware/cash-bridge.js?v=7833fix20"></script>
+<script src="js/hardware/cash-bridge.js?v=7833fix21"></script>
 <script src="js/hardware/coin-manager.js?v=7833fix7"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
 <!-- Preserved FIX16 contract:
@@ -1746,14 +1746,14 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/script.js?v=73e3"></script>
 
 <!-- Regression marker: V7.8.3.3 · FIX15 KIOSK HOME + VISIBLE PRINT -->
-<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX20 NATIVE HOME GATE</div>
+<div id="v7-phase1-badge" style="position:fixed;right:8px;bottom:6px;z-index:99999;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.65);color:#fff;font:12px Arial,sans-serif;pointer-events:none">V7.8.3.3 · FIX21 NATIVE BACK</div>
 
 <script src="js/cloud/cloud-order-lifecycle.js?v=770"></script>
 <script src="js/cloud/v71-migration.js?v=72"></script>
 <script src="js/pwa/pwa-manager.js?v=73f1fix1"></script>
 <script>
-// FIX20 keeps the FIX19 cache reset but the Android wrapper now owns the visible
-// startup home. WebView can warm up underneath without exposing partial tickets.
+// FIX21 keeps the FIX20 native Home gate and adds a dedicated ticket Back channel.
+// WebView can warm up underneath without exposing partial tickets.
 (function () {
     "use strict";
     var reloadRequested = false;
@@ -1807,6 +1807,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             event.stopImmediatePropagation();
             if (typeof window.playClick === "function") window.playClick();
             if (linePayBlocking()) return;
+            if (window.MonsterNativeKiosk &&
+                typeof window.MonsterNativeKiosk.ticketBackRequested === "function") {
+                try {
+                    window.MonsterNativeKiosk.ticketBackRequested("inline-ticket-back");
+                } catch (ignore) {}
+            }
             if (window.MonsterKioskRouting &&
                 typeof window.MonsterKioskRouting.requestHome === "function") {
                 window.MonsterKioskRouting.requestHome("ticket-back");
