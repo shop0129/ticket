@@ -1,3 +1,10 @@
+# V7.8.3.3 FIX26G Business Mode Holiday Save Repair
+
+- 修正每週固定公休日存檔後又恢復星期一。
+- 公休日設定改用單調遞增版本與穩定字串格式。
+- Firebase 寫入後回讀核對，並移除舊版同名儲存函式衝突。
+- 保留 FIX26F LINE Pay 正式收款、Kiosk 125 與 Controller 113。
+
 # V7.8.3.3 FIX26F LINE Pay WebView Overlay Repair
 
 - 將舊版 Android WebView 61 不支援的 `inset`／`min()` 版面寫法改為相容寫法。

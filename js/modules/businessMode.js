@@ -1,11 +1,13 @@
 // =========================================
-// 小怪獸售票機 V7.8 Business Mode Engine
+// 小怪獸售票機 V7.8.3.3 FIX26G Business Mode Engine
 // 日期規則、特殊日期、公休日、寒暑假與跨裝置同步
+// FIX26G：公休日使用單調遞增版本、穩定格式與雲端回讀驗證。
 // =========================================
 (function(){
     "use strict";
 
     var STORAGE_KEY = "businessMode";
+    var CLOSED_WEEKDAYS_BACKUP_KEY = "businessModeClosedWeekdays";
     var CLOUD_PATH = "monsterTicket/v1/system/businessMode";
     var midnightTimer = null;
     var cloudRef = null;
@@ -35,6 +37,7 @@
             weekdayMode:"weekday",
             weekendMode:"holiday",
             closedWeekdays:[1],
+            closedWeekdaysCsv:"1",
             seasons:[
                 {id:"winter",name:"寒假",enabled:true,start:"01-20",end:"02-15",mode:"summer"},
                 {id:"summer",name:"暑假",enabled:true,start:"07-01",end:"08-31",mode:"summer"}
@@ -52,6 +55,36 @@
         };
     }
 
+    function normalizeClosedWeekdays(value, fallback){
+        var result = [];
+        var source = value;
+
+        if(typeof source === "string"){
+            source = source === "" ? [] : source.split(",");
+        }
+
+        if(Array.isArray(source)){
+            source.forEach(function(item){ result.push(Number(item)); });
+        }else if(source && typeof source === "object"){
+            // 相容舊版 Firebase 可能回傳的 {0:2} 或 {2:true} 格式。
+            Object.keys(source).forEach(function(key){
+                var item = source[key];
+                if(item === true || item === "true") result.push(Number(key));
+                else result.push(Number(item));
+            });
+        }else if(Array.isArray(fallback)){
+            fallback.forEach(function(item){ result.push(Number(item)); });
+        }
+
+        return result.filter(function(value,index,items){
+            return value >= 0 && value <= 6 && Math.floor(value) === value && items.indexOf(value) === index;
+        }).sort(function(a,b){ return a-b; });
+    }
+
+    function sameClosedWeekdays(left,right){
+        return normalizeClosedWeekdays(left,[]).join(",") === normalizeClosedWeekdays(right,[]).join(",");
+    }
+
     function normalizeConfig(raw){
         var base = defaultConfig();
         raw = raw && typeof raw === "object" ? raw : {};
@@ -61,7 +94,10 @@
         base.auto = raw.auto !== false;
         base.mode = MODE_META[base.mode] ? base.mode : "weekday";
         base.resolvedMode = MODE_META[base.resolvedMode] ? base.resolvedMode : base.mode;
-        base.closedWeekdays = Array.isArray(base.closedWeekdays) ? base.closedWeekdays.map(Number).filter(function(v){return v>=0&&v<=6;}) : [1];
+        var hasCsv = Object.prototype.hasOwnProperty.call(raw,"closedWeekdaysCsv");
+        var closedSource = hasCsv ? raw.closedWeekdaysCsv : base.closedWeekdays;
+        base.closedWeekdays = normalizeClosedWeekdays(closedSource,[1]);
+        base.closedWeekdaysCsv = base.closedWeekdays.join(",");
         base.seasons = Array.isArray(base.seasons) ? base.seasons : [];
         base.specialDates = Array.isArray(base.specialDates) ? base.specialDates : [];
         base.openingHours = Object.assign(defaultConfig().openingHours, base.openingHours || {});
@@ -73,12 +109,27 @@
         try{ raw = JSON.parse(localStorage.getItem(STORAGE_KEY)); }catch(error){ raw = null; }
         // 舊版只有 mode/auto 時也能自動遷移
         window.businessMode = normalizeConfig(raw || window.businessMode || {});
+        if(!raw || (!Object.prototype.hasOwnProperty.call(raw,"closedWeekdays") && !Object.prototype.hasOwnProperty.call(raw,"closedWeekdaysCsv"))){
+            var backedUp = localStorage.getItem(CLOSED_WEEKDAYS_BACKUP_KEY);
+            if(backedUp !== null){
+                window.businessMode.closedWeekdays = normalizeClosedWeekdays(backedUp,window.businessMode.closedWeekdays);
+                window.businessMode.closedWeekdaysCsv = window.businessMode.closedWeekdays.join(",");
+            }
+        }
         return window.businessMode;
     }
 
     function saveLocal(config){
         window.businessMode = normalizeConfig(config);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(window.businessMode));
+        localStorage.setItem(CLOSED_WEEKDAYS_BACKUP_KEY,window.businessMode.closedWeekdaysCsv);
+    }
+
+    function nextUpdatedAt(config){
+        var now = Date.now();
+        var current = Number((window.businessMode && window.businessMode.updatedAt) || 0);
+        var candidate = Number((config && config.updatedAt) || 0);
+        return Math.max(now,current+1,candidate+1);
     }
 
     function isMonthDayInRange(md,start,end){
@@ -223,7 +274,14 @@
         cfg.weekdayMode = (document.getElementById("bmWeekdayMode")||{}).value || "weekday";
         cfg.weekendMode = (document.getElementById("bmWeekendMode")||{}).value || "holiday";
         cfg.mode = (document.getElementById("bmManualMode")||{}).value || cfg.mode;
-        cfg.closedWeekdays = Array.prototype.slice.call(document.querySelectorAll("[data-bm-closed]:checked")).map(function(el){return Number(el.getAttribute("data-bm-closed"));});
+        // WebView 61 相容：不要依賴複合 :checked selector，逐顆讀取 checked。
+        cfg.closedWeekdays = Array.prototype.slice.call(document.querySelectorAll("[data-bm-closed]")).filter(function(el){
+            return el.checked === true;
+        }).map(function(el){
+            return Number(el.getAttribute("data-bm-closed"));
+        });
+        cfg.closedWeekdays = normalizeClosedWeekdays(cfg.closedWeekdays,[]);
+        cfg.closedWeekdaysCsv = cfg.closedWeekdays.join(",");
         cfg.seasons = Array.prototype.slice.call(document.querySelectorAll("[data-season-row]")).map(function(row,index){
             return {id:"season_"+index,name:(row.querySelector("[data-season-name]")||{}).value||"季節期間",start:(row.querySelector("[data-season-start]")||{}).value||"",end:(row.querySelector("[data-season-end]")||{}).value||"",mode:(row.querySelector("[data-season-mode]")||{}).value||"summer",enabled:!!(row.querySelector("[data-season-enabled]")||{}).checked};
         });
@@ -234,7 +292,8 @@
             var open=document.querySelector("[data-hours-open='"+mode+"']"), close=document.querySelector("[data-hours-close='"+mode+"']");
             cfg.openingHours[mode]={open:open?open.value:"",close:close?close.value:""};
         });
-        cfg.updatedAt = Date.now();
+        // 不受點餐機／筆電時鐘差異影響，新設定的版本一定比舊設定大。
+        cfg.updatedAt = nextUpdatedAt(cfg);
         cfg.updatedBy = window.MonsterAuth && MonsterAuth.getCurrentUser ? ((MonsterAuth.getCurrentUser()||{}).name||"") : "";
         return cfg;
     }
@@ -249,7 +308,23 @@
 
     function saveCloud(cfg){
         if(!window.MonsterCloud || !MonsterCloud.database) return Promise.resolve(false);
-        return MonsterCloud.database.ref(CLOUD_PATH).set(cfg).then(function(){return true;}).catch(function(error){console.warn("[BusinessMode] cloud save failed",error);return false;});
+        var expected = normalizeClosedWeekdays(cfg.closedWeekdays,[]);
+        var ref = MonsterCloud.database.ref(CLOUD_PATH);
+        return ref.set(cfg).then(function(){
+            return ref.once("value");
+        }).then(function(snapshot){
+            var saved = normalizeConfig(snapshot.val() || {});
+            if(!sameClosedWeekdays(saved.closedWeekdays,expected)){
+                throw new Error("closed-weekdays-verification-failed");
+            }
+            return true;
+        }).catch(function(error){console.warn("[BusinessMode] cloud save failed",error);return false;});
+    }
+
+    function closedWeekdayLabel(days){
+        var names=["日","一","二","三","四","五","六"];
+        days=normalizeClosedWeekdays(days,[]);
+        return days.length ? days.map(function(day){return "星期"+names[day];}).join("、") : "未設定";
     }
 
     function saveBusinessMode(){
@@ -261,7 +336,7 @@
         saveCloud(window.businessMode).then(function(synced){
             if(window.MonsterAuth) MonsterAuth.audit("business.update","營業模式規則已更新",{source:"admin",targetType:"business",targetId:"mode",auto:cfg.auto});
             renderBusinessMode();
-            alert("✅ 營業模式已儲存"+(synced?"，並同步至其他裝置":"（目前使用本機設定，連線後會再同步）"));
+            alert("✅ 營業模式已儲存\n公休日："+closedWeekdayLabel(window.businessMode.closedWeekdays)+(synced?"\n已核對並同步至其他裝置":"\n目前使用本機設定，連線後會再同步"));
         });
     }
 
@@ -285,9 +360,14 @@
                     var remote=snapshot.val();
                     if(!remote) return;
                     var local=loadConfig();
-                    if(Number(remote.updatedAt||0) < Number(local.updatedAt||0)) return;
+                    var remoteConfig=normalizeConfig(remote);
+                    var remoteVersion=Number(remoteConfig.updatedAt||0);
+                    var localVersion=Number(local.updatedAt||0);
+                    if(remoteVersion < localVersion) return;
+                    // 相同版本但內容不同時保留本機剛儲存的選擇，避免舊星期一回蓋。
+                    if(remoteVersion === localVersion && localVersion > 0 && !sameClosedWeekdays(remoteConfig.closedWeekdays,local.closedWeekdays)) return;
                     applyingCloud=true;
-                    saveLocal(remote);
+                    saveLocal(remoteConfig);
                     applyResolved();
                     applyingCloud=false;
                 });
@@ -300,6 +380,7 @@
         apply:applyResolved,
         getCurrentMode:currentMode,
         getConfig:function(){return clone(loadConfig());},
+        normalizeClosedWeekdays:function(value){return normalizeClosedWeekdays(value,[]);},
         getModeMeta:function(mode){return clone(MODE_META[mode]||{});},
         dateKey:dateKey
     };

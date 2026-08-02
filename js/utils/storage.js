@@ -32,8 +32,12 @@ function saveSalesHistory() {
 function saveSystemSetting() {
     localStorage.setItem("systemData", JSON.stringify(systemData));
 }
-function saveBusinessMode() {
-    localStorage.setItem("businessData", JSON.stringify(businessData));
+// 舊版 V5.6 的 businessData 已停用。名稱不可再使用 saveBusinessMode，
+// 避免覆蓋 V7.8 Business Mode Engine 的正式儲存函式。
+function saveLegacyBusinessData() {
+    if (typeof businessData !== "undefined") {
+        localStorage.setItem("businessData", JSON.stringify(businessData));
+    }
 }
 function loadStorage(key, defaultValue) {
     try {

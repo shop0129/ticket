@@ -32,8 +32,8 @@ ok(index.indexOf("FIX26F LINEPAY WEBVIEW OVERLAY REPAIR") >= 0, "首頁應標示
 ok(index.indexOf("checkLinePayBackend()") >= 0, "後台應提供後端連線檢查");
 ok(scanner.indexOf("window.checkLinePayBackend = checkBackend") >= 0, "前端應提供健康檢查");
 ok(scanner.indexOf('callable("payWithLinePayMyCode"') >= 0, "付款應只透過 Callable 後端");
-ok(enterprise.indexOf('var BUILD = "FIX26F"') >= 0, "單一版本標籤應更新 FIX26F");
-ok(worker.indexOf("7833-fix26f-linepay-webview-overlay-20260731-1") >= 0, "離線快取應更新 FIX26F");
+ok(enterprise.indexOf('var BUILD = "FIX26G"') >= 0, "單一版本標籤應更新 FIX26G");
+ok(worker.indexOf("7833-fix26g-businessmode-holiday-save-20260803-1") >= 0, "離線快取應更新 FIX26G");
 
 [
     "registerLinePayKiosk",

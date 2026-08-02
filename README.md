@@ -1,8 +1,8 @@
-# 小怪獸售票機 V7.8.3.3 Sprint 6
+# 小怪獸售票機 V7.8.3.3 FIX26G
 
-目前正式版本：V7.8.3.3 Point Form Reset Fix＋Sprint 6 Production Cash Integration
+目前正式版本：V7.8.3.3 FIX26G Business Mode Holiday Save Repair
 
-本版以完整 V7.8.3.3 為底，加入點餐機本機現金控制器橋接。原有會員點數、票券規則、營業模式、QR驗票、作廢保護、Firebase與後台功能皆保留。
+本版以已完成 LINE Pay 正式收款的 FIX26F 為底，修正營業模式公休日保存。會員點數、票券規則、LINE Pay、現金付款、QR 驗票、Firebase 與後台功能皆保留。
 
 ## 主要入口
 - `index.html`：Kiosk 售票機
