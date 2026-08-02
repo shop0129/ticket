@@ -304,8 +304,9 @@ function saveMemberEditor() {
     var isNew = !id;
     var name = document.getElementById("memberEditName").value.trim();
     var phone = memberPhone(document.getElementById("memberEditPhone").value);
-    if (!name || !phone) {
-        alert("❌ 姓名與手機不可空白");
+    var birthday = document.getElementById("memberEditBirthday").value;
+    if (!name || !phone || !birthday) {
+        alert("❌ 姓名、手機與出生年月日不可空白");
         return;
     }
     if (memberData.some(function (member) {
@@ -318,7 +319,7 @@ function saveMemberEditor() {
     var values = {
         name: name,
         phone: phone,
-        birthday: document.getElementById("memberEditBirthday").value,
+        birthday: birthday,
         joinDate: document.getElementById("memberEditJoinDate").value.trim() ||
             new Date().toLocaleDateString("zh-TW"),
         totalSpend: Math.max(0, Number(document.getElementById("memberEditSpend").value) || 0),
@@ -334,15 +335,21 @@ function saveMemberEditor() {
         memberData.unshift(__assign(__assign({ id: "member_" + Date.now(), memberNo: newMemberNo() }, values), { lastPurchaseDate: "", toyPoints: 0, pointHistory: [], toyPointHistory: [] }));
     }
     saveMembers();
+    var savedMember = memberData.find(function (member) {
+        return member.phone === phone;
+    });
     if (window.MonsterAuth) {
-        var savedMember = memberData.find(function (member) {
-            return member.phone === phone;
-        });
         MonsterAuth.audit(
             isNew ? "member.create" : "member.update",
             (isNew ? "新增會員：" : "修改會員：") + name,
             { source: "staff", targetType: "member", targetId: savedMember ? savedMember.id : id }
         );
+    }
+    if (savedMember && window.MonsterMemberPortalAdmin) {
+        MonsterMemberPortalAdmin.syncBirthdayCredential(savedMember, { silent: true })
+            .catch(function (error) {
+                console.warn("[MemberPortal] birthday login sync pending", error);
+            });
     }
     closeMemberEditor();
     renderMemberList();
@@ -413,6 +420,13 @@ function searchQuickMember() {
         currentMember = member;
         renderQuickResult();
         renderSelectedMember();
+        // FIX27：舊會員購票仍只輸入手機；若既有生日完整，背景自動啟用手機查詢。
+        if (member.birthday && window.MonsterMemberPortalAdmin) {
+            MonsterMemberPortalAdmin.syncBirthdayCredential(member, { silent: true })
+                .catch(function (error) {
+                    console.warn("[MemberPortal] existing member activation pending", error);
+                });
+        }
     }
     else {
         renderQuickJoin(phone);
@@ -427,8 +441,13 @@ function renderQuickJoin(phone) {
 function createQuickMember(phone) {
     playClick();
     var name = document.getElementById("quickJoinName").value.trim();
+    var birthday = document.getElementById("quickJoinBirthday").value;
     if (!name) {
         alert("請輸入會員姓名");
+        return;
+    }
+    if (!birthday) {
+        alert("請選擇出生年月日，之後才能用手機查詢點數");
         return;
     }
     var member = {
@@ -436,7 +455,7 @@ function createQuickMember(phone) {
         memberNo: newMemberNo(),
         name: name,
         phone: memberPhone(phone),
-        birthday: document.getElementById("quickJoinBirthday").value,
+        birthday: birthday,
         joinDate: new Date().toLocaleDateString("zh-TW"),
         totalSpend: 0,
         points: 0,
@@ -451,7 +470,13 @@ function createQuickMember(phone) {
     currentMember = member;
     renderQuickResult();
     renderSelectedMember();
-    alert("✅ 已加入會員");
+    if (window.MonsterMemberPortalAdmin) {
+        MonsterMemberPortalAdmin.syncBirthdayCredential(member, { silent: true })
+            .catch(function (error) {
+                console.warn("[MemberPortal] new member activation pending", error);
+            });
+    }
+    alert("✅ 已加入會員\n下次購票仍只要輸入手機號碼");
 }
 function renderQuickResult() {
     var box = document.getElementById("memberQuickResult");
@@ -751,7 +776,11 @@ function lateBindOrderMember(orderNo) {
             alert("❌ 姓名不可空白");
             return;
         }
-        var birthday = prompt("生日（可留空，例如 2020-05-10）：");
+        var birthday = prompt("生日（必填，例如 2020-05-10）：");
+        if (birthday === null || !birthday.trim()) {
+            alert("❌ 出生年月日不可空白");
+            return;
+        }
         member = {
             id: "member_" + Date.now(),
             memberNo: newMemberNo(),
@@ -769,6 +798,12 @@ function lateBindOrderMember(orderNo) {
         };
         memberData.unshift(member);
         saveMembers();
+        if (window.MonsterMemberPortalAdmin) {
+            MonsterMemberPortalAdmin.syncBirthdayCredential(member, { silent: true })
+                .catch(function (error) {
+                    console.warn("[MemberPortal] late member activation pending", error);
+                });
+        }
     }
     var order = salesHistory.find(function (item) {
         return item.orderNo === orderNo;

@@ -7183,3 +7183,71 @@ System Setting
 #detailPage > .ticket-header #detailBackBtn{
     top:calc(var(--ticket-kiosk-safe-top) + 15px) !important;
 }
+
+/* V7.8.3.3 FIX27 - Member self-service portal controls */
+.member-portal-toolbar-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    margin:0 0 16px;
+    padding:16px 18px;
+    border:1px solid #bfeaf5;
+    border-radius:16px;
+    background:#effcff;
+}
+.member-portal-toolbar-card strong,
+.member-portal-toolbar-card span{display:block}
+.member-portal-toolbar-card strong{font-size:18px;color:#183953}
+.member-portal-toolbar-card span{margin-top:5px;color:#567085;font-size:13px}
+.member-portal-toolbar-card button,
+.member-birthday-login-btn{
+    border:0;
+    border-radius:12px;
+    padding:11px 15px;
+    background:#1b7892;
+    color:#fff;
+    font-weight:900;
+}
+.member-birthday-login-btn{background:#5544a5}
+.member-birthday-login-btn:disabled{background:#9da2b1;cursor:not-allowed;opacity:.72}
+.member-portal-admin-overlay{
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:rgba(15,23,42,.78);
+}
+.member-portal-admin-card{
+    position:relative;
+    width:96vw;
+    max-width:520px;
+    max-height:92vh;
+    overflow:auto;
+    padding:28px;
+    border-radius:22px;
+    background:#fff;
+    color:#1b2440;
+    text-align:center;
+    box-shadow:0 25px 70px rgba(0,0,0,.3);
+}
+.member-portal-admin-card h2{margin:0 38px 20px}
+.member-portal-admin-close{
+    position:absolute;
+    top:12px;
+    right:14px;
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:50%;
+    background:#edf0f6;
+    color:#1b2440;
+    font-size:28px;
+}
+.member-portal-qr-box{display:flex;justify-content:center;min-height:260px;align-items:center}
+.member-portal-qr-box svg{width:260px!important;height:260px!important;max-width:100%}
+.member-portal-admin-help{font-weight:800}
+.member-portal-url{padding:12px;border-radius:10px;background:#f1f3f8;overflow-wrap:anywhere;font-size:12px}
+@media(max-width:720px){
+    .member-portal-toolbar-card{align-items:stretch;flex-direction:column}
+    .member-portal-toolbar-card button{width:100%}
+}

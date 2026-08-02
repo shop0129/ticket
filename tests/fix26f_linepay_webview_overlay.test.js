@@ -38,9 +38,9 @@ ok(index.indexOf("linepay-scanner.css?v=7833fix26f") >= 0,
     "LINE Pay 樣式應使用 FIX26F 快取版本");
 ok(index.indexOf("linepay-scanner.js?v=7833fix26f") >= 0,
     "LINE Pay 程式應使用 FIX26F 快取版本");
-ok(enterprise.indexOf('var BUILD = "FIX26G"') >= 0,
-    "右下角版本應顯示目前 FIX26G");
-ok(worker.indexOf("7833-fix26g-businessmode-holiday-save-20260803-1") >= 0,
-    "Service Worker 應切換目前 FIX26G 快取");
+ok(enterprise.indexOf('var BUILD = "FIX27"') >= 0,
+    "右下角版本應顯示目前 FIX27");
+ok(worker.indexOf("7833-fix27-member-self-service-20260803-1") >= 0,
+    "Service Worker 應切換目前 FIX27 快取");
 
 console.log("PASS FIX26F LINE Pay WebView overlay: " + count + " assertions");

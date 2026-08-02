@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+    <meta name="theme-color" content="#1b2440">
+    <meta name="robots" content="noindex,nofollow">
+    <title>會員查詢｜小怪獸放電所</title>
+    <link rel="icon" href="images/pwa/icon-192.png">
+    <link rel="stylesheet" href="css/member-portal.css?v=7833fix27">
+</head>
+<body>
+    <main class="portal-shell">
+        <section id="memberPortalLogin" class="portal-login-card">
+            <div class="portal-brand">
+                <img src="images/pwa/icon-192.png" alt="小怪獸放電所">
+                <div>
+                    <span>小怪獸放電所</span>
+                    <h1>會員自助查詢</h1>
+                </div>
+            </div>
+
+            <p class="portal-intro">輸入入會時登記的手機號碼與出生年月日，查詢自己的點數及消費紀錄。</p>
+
+            <form id="memberPortalForm" novalidate>
+                <label for="memberPortalPhone">手機號碼</label>
+                <input id="memberPortalPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="例如 0912 345 678" required>
+
+                <label for="memberPortalBirthday">出生年月日</label>
+                <input id="memberPortalBirthday" name="birthday" type="date" autocomplete="bday" required>
+
+                <button id="memberPortalSubmit" type="submit">查詢我的會員資料</button>
+            </form>
+
+            <div id="memberPortalMessage" class="portal-message" role="status" aria-live="polite"></div>
+            <p class="portal-help">尚未填寫生日或無法登入時，請洽現場工作人員協助啟用。</p>
+        </section>
+
+        <section id="memberPortalDashboard" class="portal-dashboard" hidden>
+            <header class="portal-dashboard-head">
+                <div>
+                    <span class="portal-eyebrow">我的會員</span>
+                    <h1 id="memberPortalName">會員</h1>
+                    <p id="memberPortalMeta"></p>
+                </div>
+                <button id="memberPortalLogout" type="button">登出</button>
+            </header>
+
+            <div id="memberPortalSummary" class="portal-summary"></div>
+
+            <nav class="portal-tabs" aria-label="會員資料分類">
+                <button type="button" class="active" data-portal-tab="orders">消費紀錄</button>
+                <button type="button" data-portal-tab="points">消費點數</button>
+                <button type="button" data-portal-tab="toys">玩具點數</button>
+            </nav>
+
+            <div id="memberPortalOrders" class="portal-panel active"></div>
+            <div id="memberPortalPoints" class="portal-panel"></div>
+            <div id="memberPortalToys" class="portal-panel"></div>
+
+            <p id="memberPortalRetrieved" class="portal-retrieved"></p>
+        </section>
+    </main>
+
+    <footer>資料僅供會員本人查詢｜小怪獸放電所</footer>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
+    <script src="js/cloud/firebase-config.js?v=72c"></script>
+    <script src="js/member-portal.js?v=7833fix27"></script>
+</body>
+</html>

@@ -1,3 +1,10 @@
+# V7.8.3.3 FIX27 Member Self Service Portal
+
+- 新增客人手機＋出生年月日會員查詢頁。
+- 舊會員購票仍只輸入手機，新會員第一次加入才補姓名與生日。
+- 新增查詢 QR Code、生日登入自動啟用／重設與錯誤鎖定保護。
+- 保留 FIX26G 公休日、FIX26F LINE Pay、現金與列印正式流程。
+
 # V7.8.3.3 FIX26G Business Mode Holiday Save Repair
 
 - 修正每週固定公休日存檔後又恢復星期一。

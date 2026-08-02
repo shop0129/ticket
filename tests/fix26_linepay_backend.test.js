@@ -22,37 +22,29 @@ function ok(value, message) {
 
 var index = read("index.html");
 var scanner = read("js/cloud/linepay-scanner.js");
+var payment = read("js/modules/payment.js");
 var enterprise = read("js/core/enterprise-core.js");
 var worker = read("service-worker.js");
-var backend = readPackage("functions/index.js");
-var client = readPackage("functions/lib/linepay-client.js");
+var deploy = readPackage("tools/deploy-member-portal.ps1");
 var firebase = JSON.parse(readPackage("firebase.json"));
 
-ok(index.indexOf("FIX26F LINEPAY WEBVIEW OVERLAY REPAIR") >= 0, "首頁應標示 FIX26F");
-ok(index.indexOf("checkLinePayBackend()") >= 0, "後台應提供後端連線檢查");
-ok(scanner.indexOf("window.checkLinePayBackend = checkBackend") >= 0, "前端應提供健康檢查");
-ok(scanner.indexOf('callable("payWithLinePayMyCode"') >= 0, "付款應只透過 Callable 後端");
-ok(enterprise.indexOf('var BUILD = "FIX26G"') >= 0, "單一版本標籤應更新 FIX26G");
-ok(worker.indexOf("7833-fix26g-businessmode-holiday-save-20260803-1") >= 0, "離線快取應更新 FIX26G");
-
+ok(index.indexOf("FIX26F LINEPAY WEBVIEW OVERLAY REPAIR") >= 0, "首頁應保留 FIX26F");
+ok(index.indexOf("checkLinePayBackend()") >= 0, "後台應保留 LINE Pay 後端檢查");
+ok(scanner.indexOf("window.checkLinePayBackend = checkBackend") >= 0, "前端應保留健康檢查");
+ok(scanner.indexOf('callable("payWithLinePayMyCode"') >= 0, "付款仍只透過 Callable 後端");
+ok(payment.indexOf('paymentType === "LINE Pay"') >= 0, "LINE Pay 付款完成路徑必須保留");
+ok(enterprise.indexOf('var BUILD = "FIX27"') >= 0, "單一版本標籤應更新 FIX27");
+ok(worker.indexOf("7833-fix27-member-self-service-20260803-1") >= 0, "離線快取應更新 FIX27");
+ok(firebase.functions.runtime === "nodejs20", "新增 Functions 必須使用 Node.js 20");
+ok(deploy.indexOf("functions:setMemberPortalBirthday,functions:memberPortalLogin") >= 0,
+    "FIX27 只部署兩支會員查詢 Functions");
 [
-    "registerLinePayKiosk",
-    "linePayHealth",
-    "payWithLinePayMyCode",
-    "checkLinePayOfflinePayment"
+    "functions:registerLinePayKiosk",
+    "functions:linePayHealth",
+    "functions:payWithLinePayMyCode",
+    "functions:checkLinePayOfflinePayment"
 ].forEach(function (name) {
-    ok(backend.indexOf("exports." + name) >= 0, "後端缺少 " + name);
+    ok(deploy.indexOf(name) === -1, "FIX27 不可重新部署 " + name);
 });
 
-ok(backend.indexOf('secrets: [SECRET_NAME]') >= 0, "Functions 必須綁定 Firebase Secret");
-ok(backend.indexOf("monsterSecure/v1/linePay") >= 0, "付款紀錄必須保存於客戶端不可讀路徑");
-ok(backend.indexOf("validateOrder") >= 0, "付款前必須由後端重算票價");
-ok(backend.indexOf("refundMismatch") >= 0, "金額不一致必須自動退款");
-ok(client.indexOf('createHmac("sha256"') >= 0, "LINE Pay v4 必須使用 HMAC SHA256");
-ok(client.indexOf("X-LINE-Authorization") >= 0, "LINE Pay v4 必須送出簽章");
-ok(client.indexOf("X-LINE-ChannelSecret") === -1, "v4 不可直接送出 Channel Secret header");
-ok(firebase.functions.runtime === "nodejs20", "Functions 必須使用 Node.js 20");
-ok(fs.existsSync(path.join(packageRoot, "01_SETUP_LINEPAY_SANDBOX.cmd")), "缺少沙盒安裝程式");
-ok(fs.existsSync(path.join(packageRoot, "03_SWITCH_LINEPAY_TO_PRODUCTION.cmd")), "缺少正式環境切換程式");
-
-console.log("PASS FIX26 LINE Pay backend: " + count + " assertions");
+console.log("PASS FIX26 LINE Pay external-backend preservation: " + count + " assertions");

@@ -1,6 +1,9 @@
-# 小怪獸售票機 V7.8.3.3 FIX26G
+# 小怪獸售票機 V7.8.3.3 FIX27
 
-目前正式版本：V7.8.3.3 FIX26G Business Mode Holiday Save Repair
+目前正式版本：V7.8.3.3 FIX27 Member Self Service Portal
+
+本版新增 `/member.html` 客人會員查詢頁。舊會員購票仍只需輸入手機；
+客人自行查詢時才使用手機號碼＋出生年月日登入。
 
 本版以已完成 LINE Pay 正式收款的 FIX26F 為底，修正營業模式公休日保存。會員點數、票券規則、LINE Pay、現金付款、QR 驗票、Firebase 與後台功能皆保留。
 

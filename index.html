@@ -13,8 +13,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX26G Business Mode Holiday Save Repair">
-<!-- V7.8.3.3 · FIX26G BUSINESS MODE HOLIDAY SAVE REPAIR -->
+<meta name="monster-app-version" content="V7.8.3.3 FIX27 Member Self Service Portal">
+<!-- V7.8.3.3 · FIX27 MEMBER SELF SERVICE PORTAL -->
+<!-- Preserved FIX26G Business Mode Holiday Save Repair. -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX26F LINEPAY WEBVIEW OVERLAY REPAIR -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX26E LINEPAY BUTTON + ACTIVATION -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX25 LINEPAY INPUT UNLOCK -->
@@ -737,7 +738,27 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 </section>
 
 <!-- 會員管理 V6.4A -->
-<section id="memberManagerPage" class="page"><div class="tm-page"><div class="tm-top"><button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button><h1 class="tm-title">👥 會員管理</h1></div><div class="member-toolbar"><input id="memberSearchInput" type="search" placeholder="搜尋姓名、手機、會員編號"><button class="member-add-btn member-admin-only" onclick="openMemberEditor()">➕ 新增會員</button><button class="member-export-btn member-admin-only" onclick="exportMemberData()">📦 匯出會員</button><button class="member-import-btn member-admin-only" onclick="chooseMemberImportFile()">📥 匯入會員</button><input type="file" id="memberImportInput" accept=".json,application/json" hidden></div><div id="memberEditorPanel" style="display:none;"></div><div id="memberManagerList"></div></div></section>
+<section id="memberManagerPage" class="page">
+    <div class="tm-page">
+        <div class="tm-top">
+            <button class="back-btn" onclick="showPage('adminHomePage')">← 返回</button>
+            <h1 class="tm-title">👥 會員管理</h1>
+        </div>
+        <div class="member-portal-toolbar-card">
+            <div><strong>📱 客人會員自助查詢</strong><span>購票仍只需手機；手機查詢頁才需要出生年月日。</span></div>
+            <button type="button" onclick="showMemberPortalQr()">顯示查詢 QR Code</button>
+        </div>
+        <div class="member-toolbar">
+            <input id="memberSearchInput" type="search" placeholder="搜尋姓名、手機、會員編號">
+            <button class="member-add-btn member-admin-only" onclick="openMemberEditor()">➕ 新增會員</button>
+            <button class="member-export-btn member-admin-only" onclick="exportMemberData()">📦 匯出會員</button>
+            <button class="member-import-btn member-admin-only" onclick="chooseMemberImportFile()">📥 匯入會員</button>
+            <input type="file" id="memberImportInput" accept=".json,application/json" hidden>
+        </div>
+        <div id="memberEditorPanel" style="display:none;"></div>
+        <div id="memberManagerList"></div>
+    </div>
+</section>
 
 <!-- ==========================
 會員消費紀錄 V6.4C
@@ -1727,6 +1748,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/member.js?v=72c"></script>
 <script src="js/cloud/cloud-member-sync.js?v=72c"></script>
 <script src="js/vendor-qrcode.js?v=751"></script>
+<script src="js/cloud/member-portal-admin.js?v=7833fix27"></script>
 <script src="js/modules/ticketValidation.js?v=7627"></script>
 <script src="js/modules/consumePoints.js?v=7833fix9"></script>
 <script src="js/hardware/receipt-printer.js?v=7833fix7"></script>
