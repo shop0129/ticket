@@ -217,6 +217,8 @@
             ,"coin.refill_start": "開始補幣"
             ,"coin.refill_stop": "停止補幣"
             ,"coin.threshold_update": "修改硬幣安全庫存"
+            ,"coin.inventory_reset_denomination": "清零單一硬幣面額"
+            ,"coin.inventory_reset_all": "清零全部硬幣庫存"
             ,"note.inventory_update": "修改百元鈔庫存"
             ,"change.simulate": "模擬找零"
         };

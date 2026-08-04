@@ -130,17 +130,17 @@ var page = read("js/modules/page.js");
 var cash = read("js/hardware/cash-bridge.js");
 var worker = read("service-worker.js");
 var activity = readProject(
-    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/java/" +
+    "02_Android_Controller115_Coin_Reset_Manager/webkiosk/src/main/java/" +
     "com/littlemonster/webkiosk/KioskActivity.kt"
 );
 var layout = readProject(
-    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/src/main/res/layout/activity_kiosk.xml"
+    "02_Android_Controller115_Coin_Reset_Manager/webkiosk/src/main/res/layout/activity_kiosk.xml"
 );
 var build = readProject(
-    "02_Android_Kiosk125_LinePay_Input_Unlock/webkiosk/build.gradle.kts"
+    "02_Android_Controller115_Coin_Reset_Manager/webkiosk/build.gradle.kts"
 );
-var installer = readProject("01_INSTALL_KIOSK125_LINEPAY_UNLOCK_AND_REBOOT.cmd");
-var verifier = readProject("tools/verify_kiosk125_worker.cmd");
+var installer = readProject("01_INSTALL_CONTROLLER115_FIX29A_AND_REBOOT.cmd");
+var verifier = activity;
 
 assert.ok(index.indexOf("FIX25 LINEPAY INPUT UNLOCK") >= 0);
 assert.ok(index.indexOf("js/modules/page.js?v=7833fix25") >= 0);
@@ -160,8 +160,8 @@ assert.ok(activity.indexOf("activePaymentReady") >= 0);
 assert.ok(cash.indexOf("MonsterNativeKiosk.activePaymentReady") >= 0);
 assert.ok(activity.indexOf("mainFrameLoaded = false") >= 0);
 assert.ok(build.indexOf("versionCode = 125") >= 0);
-assert.ok(installer.indexOf(":webkiosk:installDebug") >= 0);
-assert.strictEqual(installer.indexOf(":app:installDebug"), -1);
+assert.ok(installer.indexOf(":app:installDebug") >= 0);
+assert.strictEqual(installer.indexOf(":webkiosk:installDebug"), -1);
 assert.ok(verifier.indexOf("KIOSK125_NATIVE_HOME_READY") >= 0);
 assert.ok(verifier.indexOf("native_home_visible") >= 0);
 

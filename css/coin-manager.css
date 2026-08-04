@@ -83,6 +83,58 @@
     background: #f7fbff;
 }
 
+.coin-reset-one-btn {
+    width: 100%;
+    margin-top: 10px;
+    padding: 9px 12px;
+    border: 0;
+    border-radius: 8px;
+    background: #fff3e0;
+    color: #a13b00;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.coin-reset-one-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.coin-reset-card {
+    border: 2px solid #f6b26b;
+}
+
+.coin-reset-warning {
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fff4e5;
+    color: #8a3b00 !important;
+    font-weight: 700;
+}
+
+.coin-reset-confirm,
+.coin-reset-password {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0;
+    font-weight: 700;
+}
+
+.coin-reset-confirm input {
+    width: 22px;
+    height: 22px;
+}
+
+.coin-reset-password input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px 12px;
+    border: 1px solid #c9ced6;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
 .coin-inventory-card.low {
     border-color: #ef5350;
     background: #fff0f1;

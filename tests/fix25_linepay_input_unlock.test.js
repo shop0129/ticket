@@ -156,7 +156,7 @@ var activity = fs.readFileSync(
     path.join(
         root,
         "..",
-        "02_Android_Kiosk125_LinePay_Input_Unlock",
+        "02_Android_Controller115_Coin_Reset_Manager",
         "webkiosk",
         "src",
         "main",

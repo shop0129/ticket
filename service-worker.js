@@ -1,4 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX27B Consume Points 10 Step - Lite web package
+// 小怪獸售票機 V7.8.3.3 FIX29A Controller115 Coin Reset Manager
+// Preserved FIX27B cache marker: 7833-fix27b-consume-points-10-step-20260804-1-lite1
 // Preserved FIX27A cache marker: 7833-fix27a-member-pin-20260803-1-lite1
 // Preserved FIX26G Business Mode holiday save repair.
 // Preserved FIX26F LINE Pay WebView overlay repair.
@@ -17,7 +18,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix27b-consume-points-10-step-20260804-1-lite1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix29a-controller115-coin-reset-20260804-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

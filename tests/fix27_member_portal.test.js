@@ -8,18 +8,13 @@ function read(relative) {
     return fs.readFileSync(path.resolve(__dirname, "..", relative), "utf8");
 }
 
-function readPackage(relative) {
-    return fs.readFileSync(path.resolve(__dirname, "..", "..", relative), "utf8");
-}
-
 const html = read("member.html");
 const client = read("js/member-portal.js");
 const admin = read("js/cloud/member-portal-admin.js");
 const members = read("js/modules/member.js");
 const index = read("index.html");
 const worker = read("service-worker.js");
-const backend = readPackage("functions/index.js");
-const deploy = readPackage("tools/deploy-member-portal.ps1");
+const packageRoot = path.resolve(__dirname, "..", "..");
 
 assert.ok(html.includes("會員自助查詢"));
 assert.ok(html.includes('id="memberPortalPin"'));
@@ -44,9 +39,8 @@ assert.ok(index.includes("member-portal-admin.js?v=7833fix27a"));
 assert.ok(worker.includes("7833-fix27a-member-pin-20260803-1-lite1"));
 assert.ok(worker.includes('"./member.html"'));
 assert.ok(worker.includes('"./js/member-portal.js"'));
-assert.ok(backend.includes("pin.auto_create"), "舊會員首次登入應自動建立末四碼密碼");
-assert.ok(backend.includes("pin.migrate_from_birthday"), "FIX27 生日憑證應可自動轉換");
-assert.ok(backend.includes("mustChangePin"), "初始密碼登入後應提示修改");
-assert.ok(deploy.includes("functions:setMemberPortalPin,functions:setMemberPortalBirthday,functions:memberPortalLogin,functions:memberPortalChangePin"));
+assert.ok(!fs.existsSync(path.join(packageRoot, "functions")), "FIX29A 不可重新部署會員 Functions");
+assert.ok(!fs.existsSync(path.join(packageRoot, "tools", "deploy-member-portal.ps1")),
+    "FIX29A 不可夾帶會員後端部署工具");
 
-console.log("PASS FIX27A member PIN portal: 27 assertions");
+console.log("PASS FIX27A member PIN portal preservation: 25 assertions");

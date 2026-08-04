@@ -13,8 +13,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX27B Consume Points 10 Step">
-<!-- V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
+<meta name="monster-app-version" content="V7.8.3.3 FIX29A Controller115 Coin Reset Manager">
+<!-- V7.8.3.3 · FIX29A CONTROLLER115 COIN RESET MANAGER -->
+<!-- Preserved regression marker: V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27A MEMBER PIN PORTAL -->
 <!-- Preserved FIX26G Business Mode Holiday Save Repair. -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX26F LINEPAY WEBVIEW OVERLAY REPAIR -->
@@ -35,7 +36,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/pwa.css?v=73f1">
 <link rel="stylesheet" href="css/cash-bridge.css?v=7833fix11">
 <link rel="stylesheet" href="css/linepay-scanner.css?v=7833fix26f">
-<link rel="stylesheet" href="css/coin-manager.css?v=7833s11k-auto-change">
+<link rel="stylesheet" href="css/coin-manager.css?v=7833fix29a-coin-reset">
 <link rel="stylesheet" href="css/receipt-printer.css?v=7833fix7">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
@@ -1236,7 +1237,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 
 <!-- ==========================
-零錢／補幣／補鈔管理 Controller 110
+零錢／補幣／補鈔管理 Controller 115
 ========================== -->
 
 <section id="coinManagerPage" class="page">
@@ -1251,7 +1252,28 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         </div>
 
         <div id="coinManagerStatus" class="coin-manager-status">
-            正在連接 Controller 110…
+            正在連接 Controller 115…
+        </div>
+
+        <div class="coin-section-card coin-reset-card">
+            <h2>硬幣庫存清零</h2>
+            <p class="coin-reset-warning">
+                清零只重設帳面庫存，不會讓硬幣機吐幣。請先實際取出要清零的硬幣，再重新補幣。
+            </p>
+            <label class="coin-reset-confirm">
+                <input id="coinResetPhysicalConfirm" type="checkbox">
+                我已實際取出要清零面額的硬幣
+            </label>
+            <label class="coin-reset-password">
+                店長密碼
+                <input id="coinResetPassword" type="password" autocomplete="current-password" placeholder="請輸入目前店長密碼">
+            </label>
+            <div class="coin-action-row">
+                <button type="button" class="coin-danger-btn" data-coin-reset-button="1" onclick="resetAllCoinInventory()">
+                    全部硬幣清零
+                </button>
+            </div>
+            <div id="coinLastReset" class="coin-note-meta">尚無硬幣清零紀錄</div>
         </div>
 
         <div class="coin-section-card">
@@ -1759,7 +1781,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/payment.js?v=7833fix27b"></script>
 <script src="js/cloud/linepay-scanner.js?v=7833fix26f"></script>
 <script src="js/hardware/cash-bridge.js?v=7833fix24"></script>
-<script src="js/hardware/coin-manager.js?v=7833fix7"></script>
+<script src="js/hardware/coin-manager.js?v=7833fix29a"></script>
 <script src="js/modules/detail.js?v=7833fix12"></script>
 <!-- Preserved FIX16 contract:
      FIX16 HOME FIRST + NO FREEZE

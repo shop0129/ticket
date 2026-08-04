@@ -1,5 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 11K
-// Controller 110 coin inventory / safe refill / production automatic change
+// 小怪獸售票機 V7.8.3.3 FIX29A
+// Controller 115 coin inventory / reset / safe refill / production automatic change
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
@@ -72,6 +72,41 @@
             MonsterPermission.requirePermission("coin.manage", "❌ 只有店長可以管理MDB零錢庫存");
     }
 
+    function verifyResetAuthorization() {
+        var physical = document.getElementById("coinResetPhysicalConfirm");
+        var passwordInput = document.getElementById("coinResetPassword");
+        var current = window.MonsterRole && MonsterRole.getCurrentUser
+            ? MonsterRole.getCurrentUser()
+            : null;
+        var password = passwordInput ? String(passwordInput.value || "") : "";
+        if (!physical || !physical.checked) {
+            alert("請先勾選「實體硬幣已取出」");
+            return false;
+        }
+        if (!current || current.role !== "admin" || !current.account) {
+            alert("只有目前登入的店長可以執行硬幣清零");
+            return false;
+        }
+        if (!password || !window.MonsterRole || !MonsterRole.login ||
+                !MonsterRole.login(current.account, password)) {
+            if (passwordInput) {
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+            alert("店長密碼錯誤，未執行清零");
+            return false;
+        }
+        if (passwordInput) passwordInput.value = "";
+        return true;
+    }
+
+    function clearResetConfirmation() {
+        var physical = document.getElementById("coinResetPhysicalConfirm");
+        var passwordInput = document.getElementById("coinResetPassword");
+        if (physical) physical.checked = false;
+        if (passwordInput) passwordInput.value = "";
+    }
+
     function setStatus(message, type) {
         var box = document.getElementById("coinManagerStatus");
         if (!box) return;
@@ -105,6 +140,7 @@
         var noteFinishButton = document.getElementById("note100RefillFinishButton");
         var noteLive = document.getElementById("note100AvailabilityLive");
         var productionLive = document.getElementById("productionChangeLive");
+        var lastReset = document.getElementById("coinLastReset");
         var noteAvailability = data.note100Availability || {};
         var productionChange = data.productionChange || null;
         var noteState = String(noteAvailability.state || "UNKNOWN");
@@ -138,7 +174,10 @@
                     '<div class="coin-inventory-count">' + Number(entries[i].count) + ' 枚</div>' +
                     '<div class="coin-inventory-sub">小計 NT$' + Number(entries[i].amountNtd) +
                     '｜警戒 ' + Number(entries[i].threshold) + ' 枚' +
-                    (entries[i].full ? "｜已滿" : "") + '</div></div>';
+                    (entries[i].full ? "｜已滿" : "") + '</div>' +
+                    '<button type="button" class="coin-reset-one-btn" data-coin-reset-button="1" ' +
+                    'onclick="resetCoinDenomination(' + Number(entries[i].denominationNtd) + ')">' +
+                    '清零此面額</button></div>';
             }
         }
         grid.innerHTML = html;
@@ -146,6 +185,16 @@
             ? ((inventory.stale ? "⚠ 資料可能已過期｜" : "") + "MDB更新：" + formatTime(inventory.updatedAt))
             : "尚未讀取 Tube Info";
         total.textContent = "硬幣總額：NT$" + Number((inventory && inventory.totalNtd) || 0);
+        if (lastReset) {
+            if (data.lastPhysicalEmptyReset) {
+                lastReset.textContent = "最近清零：" +
+                    formatTime(data.lastPhysicalEmptyReset.resetAt) + "｜" +
+                    String(data.lastPhysicalEmptyReset.operatorName || "店長") + "｜" +
+                    String(data.lastPhysicalEmptyReset.reason || "硬幣庫存清零");
+            } else {
+                lastReset.textContent = "尚無硬幣清零紀錄";
+            }
+        }
 
         [1, 5, 10, 50].forEach(function (value) {
             var input = document.getElementById("coinThreshold" + value);
@@ -217,6 +266,13 @@
         startButton.disabled = !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill;
         stopButton.disabled = !data.controllerOnline || !!data.pendingRequest || !data.activeRefill;
         refreshButton.disabled = !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill;
+        Array.prototype.forEach.call(
+            document.querySelectorAll("[data-coin-reset-button]"),
+            function (button) {
+                button.disabled = !data.controllerOnline || !!data.pendingRequest ||
+                    !!data.activeRefill || !!(productionChange && !productionChange.terminal);
+            }
+        );
         if (noteStartButton && noteFinishButton) {
             noteStartButton.disabled = noteRefillUiActive || noteBusy ||
                 !data.controllerOnline || !!data.pendingRequest || !!data.activeRefill ||
@@ -261,16 +317,20 @@
         });
     }
 
-    function queueAction(path, confirmation, auditAction, auditDetail) {
+    function queueAction(path, confirmation, auditAction, auditDetail, extraBody) {
         var who = actor();
+        var body = {
+            requestId: "WEB-" + Date.now() + "-" + Math.floor(Math.random() * 100000),
+            confirmation: confirmation,
+            operatorId: who.operatorId,
+            operatorName: who.operatorName
+        };
+        Object.keys(extraBody || {}).forEach(function (key) {
+            body[key] = extraBody[key];
+        });
         return api(path, {
             method: "POST",
-            body: {
-                requestId: "WEB-" + Date.now() + "-" + Math.floor(Math.random() * 100000),
-                confirmation: confirmation,
-                operatorId: who.operatorId,
-                operatorName: who.operatorName
-            }
+            body: body
         }).then(function (data) {
             if (window.MonsterAuth && MonsterAuth.audit) MonsterAuth.audit(auditAction, auditDetail, { source: "manager" });
             setStatus(data.message || "操作已送出", "success");
@@ -335,6 +395,56 @@
             "coin.refill_stop",
             "立即停止MDB補幣"
         ).catch(function () { return null; });
+    };
+
+    window.resetCoinDenomination = function (denominationNtd) {
+        var value = Number(denominationNtd);
+        if (!requireManager()) return;
+        if ([1, 5, 10, 50].indexOf(value) < 0) {
+            alert("不支援此硬幣面額清零");
+            return;
+        }
+        if (!latestStatus || !latestStatus.controllerOnline || latestStatus.pendingRequest ||
+                latestStatus.activeRefill) {
+            alert("Controller忙碌或未連線，現在不能清零");
+            return;
+        }
+        if (!confirm(
+            "確定將 " + value + " 元硬幣帳面庫存清零？\n\n" +
+            "請先實際取出該面額硬幣。這個按鈕不會讓硬幣機吐幣；其他面額不受影響。"
+        )) return;
+        if (!verifyResetAuthorization()) return;
+        queueAction(
+            "/coins/inventory/reset-denomination",
+            "PHYSICAL_COIN_DENOMINATION_" + value + "_EMPTIED",
+            "coin.inventory_reset_denomination",
+            "清零" + value + "元硬幣庫存",
+            { denominationNtd: value }
+        ).then(function () {
+            clearResetConfirmation();
+        }).catch(function () { return null; });
+    };
+
+    window.resetAllCoinInventory = function () {
+        if (!requireManager()) return;
+        if (!latestStatus || !latestStatus.controllerOnline || latestStatus.pendingRequest ||
+                latestStatus.activeRefill) {
+            alert("Controller忙碌或未連線，現在不能全部清零");
+            return;
+        }
+        if (!confirm(
+            "確定將 1、5、10、50 元硬幣帳面庫存全部清零？\n\n" +
+            "請先實際清空所有硬幣筒、錢箱及溢幣箱。此動作不會自動吐幣。"
+        )) return;
+        if (!verifyResetAuthorization()) return;
+        queueAction(
+            "/coins/inventory/reset-physical-empty",
+            "PHYSICAL_COIN_MODULE_EMPTIED",
+            "coin.inventory_reset_all",
+            "清零全部硬幣庫存"
+        ).then(function () {
+            clearResetConfirmation();
+        }).catch(function () { return null; });
     };
 
     window.saveCoinThresholds = function () {

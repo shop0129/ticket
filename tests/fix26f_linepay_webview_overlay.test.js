@@ -38,8 +38,8 @@ ok(index.indexOf("linepay-scanner.css?v=7833fix26f") >= 0,
     "LINE Pay 樣式應使用 FIX26F 快取版本");
 ok(index.indexOf("linepay-scanner.js?v=7833fix26f") >= 0,
     "LINE Pay 程式應使用 FIX26F 快取版本");
-ok(enterprise.indexOf('var BUILD = "FIX27B"') >= 0,
-    "右下角版本應顯示目前 FIX27B");
+ok(enterprise.indexOf('var BUILD = "FIX29A"') >= 0,
+    "右下角版本應顯示目前 FIX29A");
 ok(worker.indexOf("7833-fix27b-consume-points-10-step-20260804-1") >= 0,
     "Service Worker 應切換目前 FIX27B 快取");
 
