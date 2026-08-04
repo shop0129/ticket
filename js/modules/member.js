@@ -305,8 +305,8 @@ function saveMemberEditor() {
     var name = document.getElementById("memberEditName").value.trim();
     var phone = memberPhone(document.getElementById("memberEditPhone").value);
     var birthday = document.getElementById("memberEditBirthday").value;
-    if (!name || !phone || !birthday) {
-        alert("❌ 姓名、手機與出生年月日不可空白");
+    if (!name || !phone) {
+        alert("❌ 姓名與手機不可空白");
         return;
     }
     if (memberData.some(function (member) {
@@ -346,9 +346,9 @@ function saveMemberEditor() {
         );
     }
     if (savedMember && window.MonsterMemberPortalAdmin) {
-        MonsterMemberPortalAdmin.syncBirthdayCredential(savedMember, { silent: true })
+        MonsterMemberPortalAdmin.syncDefaultCredential(savedMember, { silent: true })
             .catch(function (error) {
-                console.warn("[MemberPortal] birthday login sync pending", error);
+                console.warn("[MemberPortal] PIN setup pending", error);
             });
     }
     closeMemberEditor();
@@ -420,9 +420,9 @@ function searchQuickMember() {
         currentMember = member;
         renderQuickResult();
         renderSelectedMember();
-        // FIX27：舊會員購票仍只輸入手機；若既有生日完整，背景自動啟用手機查詢。
-        if (member.birthday && window.MonsterMemberPortalAdmin) {
-            MonsterMemberPortalAdmin.syncBirthdayCredential(member, { silent: true })
+        // FIX27A：舊會員購票仍只輸入手機；背景只補缺少的末四碼初始密碼。
+        if (window.MonsterMemberPortalAdmin) {
+            MonsterMemberPortalAdmin.syncDefaultCredential(member, { silent: true })
                 .catch(function (error) {
                     console.warn("[MemberPortal] existing member activation pending", error);
                 });
@@ -436,30 +436,22 @@ function renderQuickJoin(phone) {
     var box = document.getElementById("memberQuickResult");
     if (!box)
         return;
-    box.innerHTML = "\n\n<div class=\"quick-join-card\">\n\n    <div class=\"quick-join-title\">\n        \u627E\u4E0D\u5230\u6703\u54E1\uFF0C\u53EF\u5FEB\u901F\u52A0\u5165\n    </div>\n\n    <input\n        id=\"quickJoinName\"\n        placeholder=\"\u6703\u54E1\u59D3\u540D\">\n\n    <input\n        id=\"quickJoinBirthday\"\n        type=\"date\">\n\n    <textarea\n        id=\"quickJoinNote\"\n        placeholder=\"\u5099\u8A3B\uFF08\u53EF\u4E0D\u586B\uFF09\"></textarea>\n\n    <button\n        onclick=\"createQuickMember('".concat(phone, "')\">\n        \u52A0\u5165\u6703\u54E1\u4E26\u5957\u7528\n    </button>\n\n</div>\n\n");
+    box.innerHTML = "\n\n<div class=\"quick-join-card\">\n\n    <div class=\"quick-join-title\">\n        \u627E\u4E0D\u5230\u6703\u54E1\uFF0C\u53EF\u4F7F\u7528\u9019\u500B\u624B\u6A5F\u865F\u78BC\u5FEB\u901F\u52A0\u5165\n    </div>\n\n    <div class=\"quick-join-hint\">\n        \u4E0D\u7528\u586B\u751F\u65E5\uFF0C\u6703\u54E1\u67E5\u8A62\u521D\u59CB\u5BC6\u78BC\u662F\u624B\u6A5F\u672B 4 \u78BC\n    </div>\n\n    <button\n        onclick=\"createQuickMember('".concat(phone, "')\">\n        \u52A0\u5165\u6703\u54E1\u4E26\u5957\u7528\n    </button>\n\n</div>\n\n");
 }
 function createQuickMember(phone) {
     playClick();
-    var name = document.getElementById("quickJoinName").value.trim();
-    var birthday = document.getElementById("quickJoinBirthday").value;
-    if (!name) {
-        alert("請輸入會員姓名");
-        return;
-    }
-    if (!birthday) {
-        alert("請選擇出生年月日，之後才能用手機查詢點數");
-        return;
-    }
+    var cleanPhone = memberPhone(phone);
+    var name = "會員" + cleanPhone.slice(-4);
     var member = {
         id: "member_" + Date.now(),
         memberNo: newMemberNo(),
         name: name,
-        phone: memberPhone(phone),
-        birthday: birthday,
+        phone: cleanPhone,
+        birthday: "",
         joinDate: new Date().toLocaleDateString("zh-TW"),
         totalSpend: 0,
         points: 0,
-        note: document.getElementById("quickJoinNote").value.trim(),
+        note: "購票時以手機快速加入",
         lastPurchaseDate: "",
         toyPoints: 0,
         pointHistory: [],
@@ -471,12 +463,12 @@ function createQuickMember(phone) {
     renderQuickResult();
     renderSelectedMember();
     if (window.MonsterMemberPortalAdmin) {
-        MonsterMemberPortalAdmin.syncBirthdayCredential(member, { silent: true })
+        MonsterMemberPortalAdmin.syncDefaultCredential(member, { silent: true })
             .catch(function (error) {
                 console.warn("[MemberPortal] new member activation pending", error);
             });
     }
-    alert("✅ 已加入會員\n下次購票仍只要輸入手機號碼");
+    alert("✅ 已加入會員\n下次購票仍只要輸入手機號碼\n會員查詢初始密碼為手機末 4 碼");
 }
 function renderQuickResult() {
     var box = document.getElementById("memberQuickResult");
@@ -776,17 +768,12 @@ function lateBindOrderMember(orderNo) {
             alert("❌ 姓名不可空白");
             return;
         }
-        var birthday = prompt("生日（必填，例如 2020-05-10）：");
-        if (birthday === null || !birthday.trim()) {
-            alert("❌ 出生年月日不可空白");
-            return;
-        }
         member = {
             id: "member_" + Date.now(),
             memberNo: newMemberNo(),
             name: name.trim(),
             phone: phone,
-            birthday: (birthday || "").trim(),
+            birthday: "",
             joinDate: new Date().toLocaleDateString("zh-TW"),
             totalSpend: 0,
             points: 0,
@@ -799,7 +786,7 @@ function lateBindOrderMember(orderNo) {
         memberData.unshift(member);
         saveMembers();
         if (window.MonsterMemberPortalAdmin) {
-            MonsterMemberPortalAdmin.syncBirthdayCredential(member, { silent: true })
+            MonsterMemberPortalAdmin.syncDefaultCredential(member, { silent: true })
                 .catch(function (error) {
                     console.warn("[MemberPortal] late member activation pending", error);
                 });

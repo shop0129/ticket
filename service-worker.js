@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX27 Member Self Service Portal - Lite web package
+// 小怪獸售票機 V7.8.3.3 FIX27A Member PIN Portal - Lite web package
 // Preserved FIX26G Business Mode holiday save repair.
 // Preserved FIX26F LINE Pay WebView overlay repair.
 // Preserved FIX26F cache marker: 7833-fix26f-linepay-webview-overlay-20260731-1
@@ -16,7 +16,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix27-member-self-service-20260803-1-lite1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix27a-member-pin-20260803-1-lite1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

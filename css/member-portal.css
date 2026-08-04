@@ -49,11 +49,26 @@ button{cursor:pointer}
 .portal-message{min-height:24px;margin-top:16px;text-align:center;font-size:14px;font-weight:800}
 .portal-message.error{color:var(--danger)}
 .portal-message.loading{color:#167892}
+.portal-message.success{color:#138259}
 .portal-help{margin:10px 0 0;color:var(--muted);font-size:13px;line-height:1.6;text-align:center}
 .portal-dashboard{padding:24px}
 .portal-dashboard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:4px 4px 20px}
 .portal-dashboard-head p{margin:7px 0 0;color:var(--muted);font-size:14px}
-#memberPortalLogout{flex:0 0 auto;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800}
+.portal-head-actions{display:flex;flex:0 0 auto;gap:8px}
+#memberPortalLogout,#memberPortalOpenPassword{padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-weight:800}
+#memberPortalOpenPassword{border-color:#c7edf5;background:#effcff;color:#17657b}
+.portal-pin-notice{margin:0 0 16px;padding:13px 15px;border:1px solid #ffd68d;border-radius:14px;background:#fff7e8;color:#794d00;font-size:14px;font-weight:900;line-height:1.55}
+.portal-password-panel{margin:0 0 20px;padding:18px;border:1px solid #c7edf5;border-radius:18px;background:#f3fcff}
+.portal-password-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.portal-password-head h2{margin:3px 0 0;font-size:21px}
+#memberPortalClosePassword{padding:8px 11px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);font-weight:800}
+#memberPortalPasswordForm{display:grid;grid-template-columns:1fr 1fr;gap:8px 12px}
+#memberPortalPasswordForm label{font-size:13px;font-weight:900}
+#memberPortalPasswordForm label:first-child,#memberPortalCurrentPin{grid-column:1/-1}
+#memberPortalPasswordForm input{width:100%;min-height:48px;padding:0 13px;border:2px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:16px;outline:none}
+#memberPortalPasswordForm input:focus{border-color:var(--cyan);box-shadow:0 0 0 4px rgba(39,201,239,.14)}
+#memberPortalChangePinSubmit{grid-column:1/-1;min-height:48px;margin-top:6px;border:0;border-radius:12px;background:#167892;color:#fff;font-weight:900}
+#memberPortalChangePinSubmit:disabled{cursor:wait;opacity:.58}
 .portal-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .portal-summary-card{padding:18px 14px;border-radius:18px;background:var(--soft);text-align:center}
 .portal-summary-card.points{background:#e9faff}
@@ -89,6 +104,11 @@ footer{padding:0 16px 28px;color:#80879a;font-size:12px;text-align:center}
     .portal-brand img{width:60px;height:60px}
     .portal-brand h1,.portal-dashboard-head h1{font-size:25px}
     .portal-dashboard{padding:18px 12px;border-radius:21px}
+    .portal-dashboard-head{flex-direction:column}
+    .portal-head-actions{width:100%}
+    .portal-head-actions button{flex:1}
+    #memberPortalPasswordForm{grid-template-columns:1fr}
+    #memberPortalPasswordForm label,#memberPortalPasswordForm input,#memberPortalChangePinSubmit{grid-column:1}
     .portal-summary{grid-template-columns:1fr 1fr}
     .portal-summary-card:last-child{grid-column:1/-1}
     .portal-tabs button{font-size:13px}

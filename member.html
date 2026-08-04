@@ -7,7 +7,7 @@
     <meta name="robots" content="noindex,nofollow">
     <title>會員查詢｜小怪獸放電所</title>
     <link rel="icon" href="images/pwa/icon-192.png">
-    <link rel="stylesheet" href="css/member-portal.css?v=7833fix27">
+    <link rel="stylesheet" href="css/member-portal.css?v=7833fix27a">
 </head>
 <body>
     <main class="portal-shell">
@@ -20,20 +20,20 @@
                 </div>
             </div>
 
-            <p class="portal-intro">輸入入會時登記的手機號碼與出生年月日，查詢自己的點數及消費紀錄。</p>
+            <p class="portal-intro">輸入入會時登記的手機號碼與 4 位密碼，查詢自己的點數及消費紀錄。</p>
 
             <form id="memberPortalForm" novalidate>
                 <label for="memberPortalPhone">手機號碼</label>
                 <input id="memberPortalPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="16" placeholder="例如 0912 345 678" required>
 
-                <label for="memberPortalBirthday">出生年月日</label>
-                <input id="memberPortalBirthday" name="birthday" type="date" autocomplete="bday" required>
+                <label for="memberPortalPin">4 位密碼</label>
+                <input id="memberPortalPin" name="pin" type="password" inputmode="numeric" autocomplete="current-password" minlength="4" maxlength="4" pattern="[0-9]{4}" placeholder="初始密碼為手機末 4 碼" required>
 
                 <button id="memberPortalSubmit" type="submit">查詢我的會員資料</button>
             </form>
 
             <div id="memberPortalMessage" class="portal-message" role="status" aria-live="polite"></div>
-            <p class="portal-help">尚未填寫生日或無法登入時，請洽現場工作人員協助啟用。</p>
+            <p class="portal-help">第一次登入請使用手機末 4 碼；忘記密碼可請現場工作人員協助重設。</p>
         </section>
 
         <section id="memberPortalDashboard" class="portal-dashboard" hidden>
@@ -43,8 +43,33 @@
                     <h1 id="memberPortalName">會員</h1>
                     <p id="memberPortalMeta"></p>
                 </div>
-                <button id="memberPortalLogout" type="button">登出</button>
+                <div class="portal-head-actions">
+                    <button id="memberPortalOpenPassword" type="button">修改密碼</button>
+                    <button id="memberPortalLogout" type="button">登出</button>
+                </div>
             </header>
+
+            <div id="memberPortalPinNotice" class="portal-pin-notice" hidden>目前使用手機末 4 碼初始密碼，建議立即改成自己的 4 位密碼。</div>
+
+            <section id="memberPortalPasswordPanel" class="portal-password-panel" hidden>
+                <div class="portal-password-head">
+                    <div>
+                        <span class="portal-eyebrow">帳號安全</span>
+                        <h2>修改 4 位密碼</h2>
+                    </div>
+                    <button id="memberPortalClosePassword" type="button">關閉</button>
+                </div>
+                <form id="memberPortalPasswordForm" novalidate>
+                    <label for="memberPortalCurrentPin">目前密碼</label>
+                    <input id="memberPortalCurrentPin" type="password" inputmode="numeric" autocomplete="current-password" maxlength="4" placeholder="4 位數字" required>
+                    <label for="memberPortalNewPin">新密碼</label>
+                    <input id="memberPortalNewPin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" placeholder="新的 4 位數字" required>
+                    <label for="memberPortalConfirmPin">再次輸入新密碼</label>
+                    <input id="memberPortalConfirmPin" type="password" inputmode="numeric" autocomplete="new-password" maxlength="4" placeholder="再次輸入" required>
+                    <button id="memberPortalChangePinSubmit" type="submit">儲存新密碼</button>
+                </form>
+                <div id="memberPortalPasswordMessage" class="portal-message" role="status" aria-live="polite"></div>
+            </section>
 
             <div id="memberPortalSummary" class="portal-summary"></div>
 
@@ -67,6 +92,6 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js"></script>
     <script src="js/cloud/firebase-config.js?v=72c"></script>
-    <script src="js/member-portal.js?v=7833fix27"></script>
+    <script src="js/member-portal.js?v=7833fix27a"></script>
 </body>
 </html>

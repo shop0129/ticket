@@ -1,4 +1,4 @@
-// 小怪獸放電所 V7.8.3.3 FIX27｜會員手機＋生日自助查詢
+// 小怪獸放電所 V7.8.3.3 FIX27A｜會員手機＋4 位密碼自助查詢
 (function () {
     "use strict";
 
@@ -8,7 +8,12 @@
     var form = document.getElementById("memberPortalForm");
     var submit = document.getElementById("memberPortalSubmit");
     var message = document.getElementById("memberPortalMessage");
-    var callable = null;
+    var passwordPanel = document.getElementById("memberPortalPasswordPanel");
+    var passwordForm = document.getElementById("memberPortalPasswordForm");
+    var passwordMessage = document.getElementById("memberPortalPasswordMessage");
+    var loginCallable = null;
+    var changePinCallable = null;
+    var currentPhone = "";
 
     function esc(value) {
         return String(value === undefined || value === null ? "" : value)
@@ -29,22 +34,23 @@
         for (i = 0; i < list.length; i += 1) callback(list[i], i);
     }
 
-    function setMessage(text, type) {
-        message.className = "portal-message " + (type || "");
-        message.textContent = text || "";
+    function setMessage(target, value, type) {
+        target.className = "portal-message " + (type || "");
+        target.textContent = value || "";
     }
 
     function initialize() {
         if (!window.firebase || !window.MONSTER_FIREBASE_CONFIG) {
-            setMessage("查詢服務載入失敗，請稍後重試", "error");
+            setMessage(message, "查詢服務載入失敗，請稍後重試", "error");
             return false;
         }
         try {
             if (!firebase.apps.length) firebase.initializeApp(window.MONSTER_FIREBASE_CONFIG);
-            callable = firebase.app().functions(REGION).httpsCallable("memberPortalLogin");
+            loginCallable = firebase.app().functions(REGION).httpsCallable("memberPortalLogin");
+            changePinCallable = firebase.app().functions(REGION).httpsCallable("memberPortalChangePin");
             return true;
         } catch (error) {
-            setMessage("查詢服務目前無法連線，請稍後重試", "error");
+            setMessage(message, "查詢服務目前無法連線，請稍後重試", "error");
             return false;
         }
     }
@@ -91,8 +97,22 @@
         }).join("");
     }
 
+    function openPasswordPanel() {
+        passwordPanel.hidden = false;
+        setMessage(passwordMessage, "", "");
+        document.getElementById("memberPortalCurrentPin").focus();
+        passwordPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function closePasswordPanel() {
+        passwordForm.reset();
+        setMessage(passwordMessage, "", "");
+        passwordPanel.hidden = true;
+    }
+
     function renderDashboard(payload) {
         var member = payload.member || {};
+        var notice = document.getElementById("memberPortalPinNotice");
         document.getElementById("memberPortalName").textContent = member.name || "會員";
         document.getElementById("memberPortalMeta").textContent =
             (member.memberNo || "") + "｜" + (member.phone || "") + "｜" + (member.level || "一般會員");
@@ -105,9 +125,11 @@
         renderLedger("memberPortalToys", member.toyPointHistory || [], "目前沒有玩具點數紀錄");
         document.getElementById("memberPortalRetrieved").textContent =
             "查詢時間：" + new Date(Number(payload.retrievedAt || Date.now())).toLocaleString("zh-TW");
+        notice.hidden = payload.mustChangePin !== true;
         loginBox.hidden = true;
         dashboard.hidden = false;
         window.scrollTo(0, 0);
+        if (payload.mustChangePin === true) setTimeout(openPasswordPanel, 120);
     }
 
     function errorMessage(error) {
@@ -115,41 +137,84 @@
         if (reason === "ACCOUNT_TEMPORARILY_LOCKED" || reason === "TOO_MANY_ATTEMPTS") {
             return error.message || "嘗試次數過多，請稍後再試";
         }
-        if (reason === "MEMBER_BIRTHDAY_INVALID" || reason === "BIRTHDAY_CREDENTIAL_STALE") {
-            return error.message || "請洽工作人員確認生日資料";
-        }
-        if (reason === "INVALID_MEMBER_LOGIN") {
-            return "手機號碼或出生年月日不正確，或尚未啟用查詢";
+        if (reason === "INVALID_MEMBER_LOGIN") return "手機號碼或 4 位密碼不正確";
+        if (reason === "DUPLICATE_MEMBER_PHONE") return "此手機有重複會員資料，請洽現場工作人員";
+        if (reason === "INVALID_LOGIN_FORMAT" || reason === "INVALID_PIN") {
+            return error.message || "請輸入正確的手機號碼與 4 位密碼";
         }
         return "目前無法查詢，請確認資料或稍後再試";
     }
 
     form.addEventListener("submit", function (event) {
+        var phone;
+        var pin;
         event.preventDefault();
-        var phone = document.getElementById("memberPortalPhone").value;
-        var birthday = document.getElementById("memberPortalBirthday").value;
-        if (!phone.trim() || !birthday) {
-            setMessage("請輸入手機號碼與出生年月日", "error");
+        phone = document.getElementById("memberPortalPhone").value;
+        pin = String(document.getElementById("memberPortalPin").value || "").trim();
+        if (!phone.trim() || !/^\d{4}$/.test(pin)) {
+            setMessage(message, "請輸入手機號碼與 4 位數字密碼", "error");
             return;
         }
-        if (!callable && !initialize()) return;
+        if (!loginCallable && !initialize()) return;
         submit.disabled = true;
-        setMessage("正在安全查詢會員資料…", "loading");
-        callable({ phone: phone, birthday: birthday }).then(function (result) {
-            setMessage("", "");
+        setMessage(message, "正在安全查詢會員資料…", "loading");
+        loginCallable({ phone: phone, pin: pin }).then(function (result) {
+            currentPhone = phone;
+            setMessage(message, "", "");
             renderDashboard(result.data || {});
         }).catch(function (error) {
-            setMessage(errorMessage(error), "error");
+            setMessage(message, errorMessage(error), "error");
         }).then(function () {
             submit.disabled = false;
         });
     });
 
+    passwordForm.addEventListener("submit", function (event) {
+        var currentPin;
+        var newPin;
+        var confirmPin;
+        var button = document.getElementById("memberPortalChangePinSubmit");
+        event.preventDefault();
+        currentPin = String(document.getElementById("memberPortalCurrentPin").value || "").trim();
+        newPin = String(document.getElementById("memberPortalNewPin").value || "").trim();
+        confirmPin = String(document.getElementById("memberPortalConfirmPin").value || "").trim();
+        if (!/^\d{4}$/.test(currentPin) || !/^\d{4}$/.test(newPin)) {
+            setMessage(passwordMessage, "目前密碼與新密碼都必須是 4 位數字", "error");
+            return;
+        }
+        if (newPin !== confirmPin) {
+            setMessage(passwordMessage, "兩次輸入的新密碼不一致", "error");
+            return;
+        }
+        if (currentPin === newPin) {
+            setMessage(passwordMessage, "新密碼不可與目前密碼相同", "error");
+            return;
+        }
+        if (!changePinCallable && !initialize()) return;
+        button.disabled = true;
+        setMessage(passwordMessage, "正在儲存新密碼…", "loading");
+        changePinCallable({ phone: currentPhone, currentPin: currentPin, newPin: newPin })
+            .then(function () {
+                document.getElementById("memberPortalPinNotice").hidden = true;
+                passwordForm.reset();
+                setMessage(passwordMessage, "密碼修改成功，下次請使用新密碼登入", "success");
+                setTimeout(closePasswordPanel, 1200);
+            }).catch(function (error) {
+                setMessage(passwordMessage, errorMessage(error), "error");
+            }).then(function () {
+                button.disabled = false;
+            });
+    });
+
+    document.getElementById("memberPortalOpenPassword").addEventListener("click", openPasswordPanel);
+    document.getElementById("memberPortalClosePassword").addEventListener("click", closePasswordPanel);
     document.getElementById("memberPortalLogout").addEventListener("click", function () {
+        currentPhone = "";
+        closePasswordPanel();
         dashboard.hidden = true;
         loginBox.hidden = false;
         form.reset();
-        setMessage("", "");
+        setMessage(message, "", "");
         window.scrollTo(0, 0);
     });
 
