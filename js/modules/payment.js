@@ -83,8 +83,19 @@ function currentPointUse() {
     };
 }
 
-function validatePointUse(pointUse) {
-    if (pointUse.points <= 0) return;
+function validatePointUse(pointUse, originalAmount) {
+    var points = Number(pointUse && pointUse.points || 0);
+    var discount = Number(pointUse && pointUse.discount || 0);
+    if (points === 0 && discount === 0) return;
+    if (!isFinite(points) || Math.floor(points) !== points || points < 10 || points % 10 !== 0) {
+        throw new Error("消費點數每次須使用 10 點、20 點、30 點…，未滿 10 點不能折抵");
+    }
+    if (!isFinite(discount) || discount !== points) {
+        throw new Error("消費點數折抵資料異常，請清除後重新選擇");
+    }
+    if (isFinite(Number(originalAmount)) && discount > Math.round(Number(originalAmount))) {
+        throw new Error("消費點數折抵不可超過訂單金額");
+    }
     if (!window.currentMember || Number(currentMember.points || 0) < pointUse.points) {
         throw new Error("會員點數不足，請重新確認");
     }
@@ -101,7 +112,14 @@ function buildPaymentContext() {
         throw new Error("找不到可付款的票券或金額");
     }
     var pointUse = currentPointUse();
-    validatePointUse(pointUse);
+    if (window.ConsumePoints && typeof ConsumePoints.calculateRedemption === "function") {
+        pointUse = ConsumePoints.calculateRedemption(
+            pointUse.points,
+            originalAmount,
+            window.currentMember || null
+        );
+    }
+    validatePointUse(pointUse, originalAmount);
     pointUse.discount = Math.min(Math.round(originalAmount), Math.round(pointUse.discount));
     var paidAmount = Math.max(0, Math.round(originalAmount) - pointUse.discount);
     var activePage = document.querySelector

@@ -33,8 +33,8 @@ ok(index.indexOf("checkLinePayBackend()") >= 0, "後台應保留 LINE Pay 後端
 ok(scanner.indexOf("window.checkLinePayBackend = checkBackend") >= 0, "前端應保留健康檢查");
 ok(scanner.indexOf('callable("payWithLinePayMyCode"') >= 0, "付款仍只透過 Callable 後端");
 ok(payment.indexOf('paymentType === "LINE Pay"') >= 0, "LINE Pay 付款完成路徑必須保留");
-ok(enterprise.indexOf('var BUILD = "FIX27A"') >= 0, "單一版本標籤應更新 FIX27A");
-ok(worker.indexOf("7833-fix27a-member-pin-20260803-1") >= 0, "離線快取應更新 FIX27A");
+ok(enterprise.indexOf('var BUILD = "FIX27B"') >= 0, "單一版本標籤應更新 FIX27B");
+ok(worker.indexOf("7833-fix27b-consume-points-10-step-20260804-1") >= 0, "離線快取應更新 FIX27B");
 ok(firebase.functions.runtime === "nodejs20", "新增 Functions 必須使用 Node.js 20");
 ok(deploy.indexOf("functions:setMemberPortalPin,functions:setMemberPortalBirthday,functions:memberPortalLogin,functions:memberPortalChangePin") >= 0,
     "FIX27A 只部署四支會員查詢 Functions");
