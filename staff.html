@@ -113,6 +113,53 @@
 
         </header>
 
+        <section class="staff-section attendance-section">
+
+            <div class="attendance-heading">
+                <div>
+                    <div class="staff-section-title">🕒 上下班打卡</div>
+                    <div class="staff-dashboard-date">打卡時間以雲端伺服器為準</div>
+                </div>
+                <button id="attendanceRefreshButton" class="staff-secondary-button">↻ 更新</button>
+            </div>
+
+            <div id="attendanceStatusCard" class="attendance-status-card is-off">
+                <div class="attendance-status-copy">
+                    <strong id="attendanceStatusTitle">讀取打卡狀態中…</strong>
+                    <span id="attendanceStatusDetail">請稍候</span>
+                </div>
+                <div class="attendance-actions">
+                    <button id="attendanceClockInButton" class="attendance-clock-button clock-in">上班打卡</button>
+                    <button id="attendanceClockOutButton" class="attendance-clock-button clock-out" style="display:none;">下班打卡</button>
+                </div>
+            </div>
+
+            <div id="attendanceMessage" class="attendance-message" aria-live="polite"></div>
+
+            <div class="attendance-my-heading">
+                <strong>我的本月紀錄</strong>
+                <span id="attendanceMyTotal">讀取中…</span>
+            </div>
+            <div id="attendanceMyList" class="attendance-record-list"></div>
+
+        </section>
+
+        <section class="staff-section admin-only attendance-admin-section">
+
+            <div class="staff-section-title">👑 員工工時報表</div>
+            <div class="staff-dashboard-date">店長可查詢每位員工的打卡紀錄與期間總時數</div>
+
+            <div class="attendance-report-toolbar">
+                <label>開始日期<input id="attendanceDateFrom" type="date"></label>
+                <label>結束日期<input id="attendanceDateTo" type="date"></label>
+                <button id="attendanceReportButton" class="staff-primary-button">查詢工時</button>
+            </div>
+
+            <div id="attendanceAdminSummary" class="attendance-admin-summary"></div>
+            <div id="attendanceAdminList"></div>
+
+        </section>
+
         <section class="staff-section">
 
             <div class="staff-section-title">
@@ -397,7 +444,7 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7.8.3.3 FIX8 Manager QR
+            小怪獸售票機・V7.8.3.3 FIX32 員工打卡
         </footer>
 
     </div>
@@ -643,7 +690,9 @@
 <script src="js/cloud/firebase-role-auth.js?v=fix31"></script>
 <script src="js/cloud/auth.js?v=fix31"></script>
 <script src="js/cloud/firebase-employee-service.js?v=fix31"></script>
-<script src="js/staff/staff-app.js?v=fix31"></script>
+<script src="js/cloud/firebase-attendance-service.js?v=fix32"></script>
+<script src="js/staff/attendance.js?v=fix32"></script>
+<script src="js/staff/staff-app.js?v=fix32"></script>
 <script src="js/core/reward-engine.js?v=782"></script>
 <script src="js/core/void-protection.js?v=783"></script>
 <script src="js/core/ticket-data-sync-engine.js?v=782"></script>

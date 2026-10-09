@@ -192,6 +192,9 @@
 
         applyRoleVisibility();
         renderDashboard();
+        if(window.MonsterAttendanceUI && MonsterAttendanceUI.activate){
+            MonsterAttendanceUI.activate(currentRole);
+        }
     }
 
     function showLogin(){
@@ -207,6 +210,9 @@
         }
 
         showLoginMessage("",false);
+        if(window.MonsterAttendanceUI && MonsterAttendanceUI.deactivate){
+            MonsterAttendanceUI.deactivate();
+        }
     }
 
     function login(){

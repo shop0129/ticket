@@ -1,4 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX31 Employee Cloud Sync
+// 小怪獸售票機 V7.8.3.3 FIX32 Employee Attendance
+// Preserved FIX31 cache marker: 7833-fix31-employee-cloud-sync-20261009-1
 // Preserved FIX29A Controller115 Coin Reset Manager baseline.
 // Preserved FIX27B cache marker: 7833-fix27b-consume-points-10-step-20260804-1-lite1
 // Preserved FIX27A cache marker: 7833-fix27a-member-pin-20260803-1-lite1
@@ -19,7 +20,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix31-employee-cloud-sync-20261009-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix32-employee-attendance-20261010-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -79,6 +80,7 @@ var CORE_ASSETS = [
     "./js/cloud/firebase-role-config.js",
     "./js/cloud/firebase-role-auth.js",
     "./js/cloud/firebase-employee-service.js",
+    "./js/cloud/firebase-attendance-service.js",
     "./js/cloud/linepay-scanner.js",
     "./js/cloud/member-portal-admin.js",
     "./js/cloud/v71-migration.js",
@@ -123,6 +125,7 @@ var CORE_ASSETS = [
     "./js/staff/order-center.js",
     "./js/staff/order-tools.js",
     "./js/staff/staff-app.js",
+    "./js/staff/attendance.js",
     "./js/staff/staff-config.js",
     "./js/staff/enterprise-manager.js",
     "./js/staff/consume-points-manager.js",
