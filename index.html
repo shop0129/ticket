@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX29A Controller115 Coin Reset Manager">
+<meta name="monster-app-version" content="V7.8.3.3 FIX31 Employee Cloud Sync">
 <!-- V7.8.3.3 · FIX29A CONTROLLER115 COIN RESET MANAGER -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27A MEMBER PIN PORTAL -->
@@ -731,6 +731,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             <div class="employee-toolbar-info">
                 僅店長可新增、修改、停用與刪除員工帳號。
             </div>
+            <button id="employeeMigrateButton" class="employee-add-btn" style="display:none;" onclick="migrateLegacyEmployeesToFirebase()">☁️ 同步本機舊帳號</button>
             <button class="employee-add-btn" onclick="openEmployeeEditor()">➕ 新增員工</button>
         </div>
 
@@ -1743,6 +1744,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-functions.js" onerror="window.MonsterFirebaseSdkFailed=true"></script>
 <script src="js/cloud/firebase-config.js?v=72c"></script>
 <script src="js/cloud/firebase-connect.js?v=72c"></script>
+<script src="js/cloud/firebase-role-config.js?v=fix31"></script>
 <script src="js/config/state.js?v=72c"></script>
 <script src="js/core/reward-engine.js?v=782"></script>
 <script src="js/core/void-protection.js?v=783"></script>
@@ -1801,10 +1803,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     
 <script src="js/modules/operation.js?v=771"></script>
 <script src="js/modules/dashboard.js?v=73f2"></script>
-<script src="js/modules/roleManager.js?v=73simple"></script>
-<script src="js/cloud/auth.js?v=73simple"></script>
-<script src="js/modules/employeeManager.js?v=73e3"></script>
-<script src="js/script.js?v=73e3"></script>
+<script src="js/modules/roleManager.js?v=fix31"></script>
+<script src="js/cloud/firebase-role-auth.js?v=fix31"></script>
+<script src="js/cloud/auth.js?v=fix31"></script>
+<script src="js/cloud/firebase-employee-service.js?v=fix31"></script>
+<script src="js/modules/employeeManager.js?v=fix31"></script>
+<script src="js/script.js?v=fix31"></script>
 
 <!-- FIX25 uses the single live Enterprise status badge. -->
 

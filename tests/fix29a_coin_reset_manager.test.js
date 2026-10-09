@@ -140,9 +140,10 @@ sandbox.window = sandbox;
 vm.runInNewContext(source, sandbox, { filename: "coin-manager.js" });
 
 async function flush() {
-    await Promise.resolve();
-    await Promise.resolve();
-    await Promise.resolve();
+    var i;
+    for (i = 0; i < 8; i += 1) {
+        await Promise.resolve();
+    }
 }
 
 (async function () {

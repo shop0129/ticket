@@ -34,12 +34,36 @@ function rollbackStats(stats, ticket, item) {
 // =========================================
 // 管理員／員工登入
 // =========================================
+var adminLoginBusy = false;
+
+function cloudLoginErrorMessage(error) {
+    var code = error && error.code ? String(error.code) : "";
+    if (code.indexOf("operation-not-allowed") >= 0) {
+        return "Firebase 尚未啟用電子郵件／密碼登入，請先依 FIX31 更新說明設定";
+    }
+    if (code.indexOf("functions/not-found") >= 0 || code.indexOf("functions/unimplemented") >= 0) {
+        return "員工雲端功能尚未部署，請先執行 FIX31 部署程式";
+    }
+    if (code.indexOf("network-request-failed") >= 0 || code.indexOf("unavailable") >= 0 || code.indexOf("firebase-not-ready") >= 0) {
+        return "雲端連線失敗，請確認網路後重試";
+    }
+    if (code.indexOf("too-many-requests") >= 0) {
+        return "登入嘗試次數過多，請稍後再試";
+    }
+    if (code.indexOf("wrong-password") >= 0 || code.indexOf("invalid-credential") >= 0 ||
+            code.indexOf("invalid-login-credentials") >= 0 || code.indexOf("user-not-found") >= 0 ||
+            code.indexOf("user-disabled") >= 0) {
+        return "帳號、密碼錯誤或帳號已停用";
+    }
+    return (error && error.message) || "帳號、密碼錯誤或帳號已停用";
+}
+
 function loginAdmin() {
     var accountInput = document.getElementById("adminLoginAccount");
     var passwordInput = document.getElementById("adminLoginPassword");
     var account;
     var password;
-    if (!passwordInput) {
+    if (!passwordInput || adminLoginBusy) {
         return;
     }
     account = accountInput ? accountInput.value.trim() : "";
@@ -51,15 +75,23 @@ function loginAdmin() {
         }
         return;
     }
-    if (!window.MonsterAuth || !MonsterAuth.login(account, password)) {
-        alert("❌ 帳號、密碼錯誤或帳號已停用");
-        passwordInput.value = "";
-        passwordInput.focus();
+    if (!window.MonsterAuth || !MonsterAuth.loginAsync) {
+        alert("❌ 雲端員工登入模組尚未載入");
         return;
     }
-    passwordInput.value = "";
-    showPage("adminHomePage");
-    applyRolePermissions();
+    adminLoginBusy = true;
+    MonsterAuth.loginAsync(account, password).then(function (success) {
+        if (!success) { throw { message: "帳號、密碼錯誤或帳號已停用" }; }
+        passwordInput.value = "";
+        showPage("adminHomePage");
+        applyRolePermissions();
+    }).catch(function (error) {
+        alert("❌ " + cloudLoginErrorMessage(error));
+        passwordInput.value = "";
+        passwordInput.focus();
+    }).then(function () {
+        adminLoginBusy = false;
+    });
 }
 // =========================================
 // 統計分頁

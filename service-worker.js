@@ -1,4 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX29A Controller115 Coin Reset Manager
+// 小怪獸售票機 V7.8.3.3 FIX31 Employee Cloud Sync
+// Preserved FIX29A Controller115 Coin Reset Manager baseline.
 // Preserved FIX27B cache marker: 7833-fix27b-consume-points-10-step-20260804-1-lite1
 // Preserved FIX27A cache marker: 7833-fix27a-member-pin-20260803-1-lite1
 // Preserved FIX26G Business Mode holiday save repair.
@@ -18,7 +19,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix29a-controller115-coin-reset-20260804-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix31-employee-cloud-sync-20261009-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -75,6 +76,9 @@ var CORE_ASSETS = [
     "./js/cloud/cloud-ticket-sync.js",
     "./js/cloud/firebase-config.js",
     "./js/cloud/firebase-connect.js",
+    "./js/cloud/firebase-role-config.js",
+    "./js/cloud/firebase-role-auth.js",
+    "./js/cloud/firebase-employee-service.js",
     "./js/cloud/linepay-scanner.js",
     "./js/cloud/member-portal-admin.js",
     "./js/cloud/v71-migration.js",

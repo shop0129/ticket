@@ -144,37 +144,14 @@
     }
 
     function loadSession(){
-
-        try{
-
-            if(
-                window.MonsterAuth &&
-                MonsterAuth.restoreSession &&
-                MonsterAuth.restoreSession()
-            ){
-                return MonsterAuth.getCurrentRole();
-            }
-
-            var data =
-            JSON.parse(
-                sessionStorage.getItem(
-                    config.sessionKey ||
-                    "monsterStaffSession"
-                ) || "null"
-            );
-
-            return data &&
-            (
-                data.role === "staff" ||
-                data.role === "admin"
-            )
-            ? data.role
-            : "";
-
-        }catch(error){
-
-            return "";
+        if(!window.MonsterAuth || !MonsterAuth.restoreSessionAsync){
+            return Promise.resolve("");
         }
+        return MonsterAuth.restoreSessionAsync().then(function(restored){
+            return restored ? MonsterAuth.getCurrentRole() : "";
+        }).catch(function(){
+            return "";
+        });
     }
 
     function applyRoleVisibility(){
@@ -246,25 +223,35 @@
             return;
         }
 
-        if(
-            !window.MonsterAuth ||
-            !MonsterAuth.login(account,password)
-        ){
-
-            showLoginMessage(
-                "帳號、密碼錯誤或帳號已停用",
-                true
-            );
-
-            passwordInput.select();
+        if(!window.MonsterAuth || !MonsterAuth.loginAsync){
+            showLoginMessage("雲端員工登入模組尚未載入",true);
             return;
         }
 
-        currentRole =
-        MonsterAuth.getCurrentRole();
-
-        saveSession(currentRole);
-        showHome();
+        byId("staffLoginButton").disabled = true;
+        showLoginMessage("正在連接雲端帳號…",false);
+        MonsterAuth.loginAsync(account,password).then(function(success){
+            if(!success){ throw { message:"帳號、密碼錯誤或帳號已停用" }; }
+            currentRole = MonsterAuth.getCurrentRole();
+            saveSession(currentRole);
+            showHome();
+        }).catch(function(error){
+            var code = error && error.code ? String(error.code) : "";
+            var message = error && error.message ? error.message : "帳號、密碼錯誤或帳號已停用";
+            if(code.indexOf("operation-not-allowed") >= 0){
+                message = "Firebase 尚未啟用電子郵件／密碼登入";
+            }else if(code.indexOf("functions/not-found") >= 0 || code.indexOf("functions/unimplemented") >= 0){
+                message = "員工雲端功能尚未部署";
+            }else if(code.indexOf("network-request-failed") >= 0 || code.indexOf("unavailable") >= 0){
+                message = "雲端連線失敗，請確認網路後重試";
+            }else if(code.indexOf("wrong-password") >= 0 || code.indexOf("invalid-credential") >= 0 || code.indexOf("user-not-found") >= 0 || code.indexOf("user-disabled") >= 0){
+                message = "帳號、密碼錯誤或帳號已停用";
+            }
+            showLoginMessage(message,true);
+            passwordInput.select();
+        }).then(function(){
+            byId("staffLoginButton").disabled = false;
+        });
     }
 
     function logout(){
@@ -1254,25 +1241,28 @@
                 );
             }
 
-            firebase.auth()
-            .signInAnonymously()
-            .then(function(){
-
-                setCloudState(
-                    "online",
-                    "雲端已連線"
-                );
-
-                watchCloudData();
-            })
-            .catch(function(error){
-
+            var authHandled = false;
+            var unsubscribe = firebase.auth().onAuthStateChanged(function(user){
+                if(authHandled){ return; }
+                if(user){
+                    authHandled = true;
+                    if(unsubscribe){ unsubscribe(); }
+                    setCloudState("online","雲端已連線");
+                    watchCloudData();
+                    return;
+                }
+                authHandled = true;
+                if(unsubscribe){ unsubscribe(); }
+                firebase.auth().signInAnonymously().then(function(){
+                    setCloudState("online","雲端已連線");
+                    watchCloudData();
+                }).catch(function(error){
+                    console.error(error);
+                    setCloudState("error","雲端登入失敗");
+                });
+            },function(error){
                 console.error(error);
-
-                setCloudState(
-                    "error",
-                    "雲端登入失敗"
-                );
+                setCloudState("error","雲端登入失敗");
             });
 
             firebase.database()
@@ -1497,18 +1487,14 @@
         bindEvents();
         startFirebase();
 
-        var savedRole =
-        loadSession();
-
-        if(savedRole){
-
-            currentRole = savedRole;
-            showHome();
-
-        }else{
-
-            showLogin();
-        }
+        loadSession().then(function(savedRole){
+            if(savedRole){
+                currentRole = savedRole;
+                showHome();
+            }else{
+                showLogin();
+            }
+        });
     }
 
     window.addEventListener(

@@ -81,23 +81,38 @@
         var password = passwordInput ? String(passwordInput.value || "") : "";
         if (!physical || !physical.checked) {
             alert("請先勾選「實體硬幣已取出」");
-            return false;
+            return Promise.resolve(false);
         }
         if (!current || current.role !== "admin" || !current.account) {
             alert("只有目前登入的店長可以執行硬幣清零");
-            return false;
+            return Promise.resolve(false);
         }
-        if (!password || !window.MonsterRole || !MonsterRole.login ||
-                !MonsterRole.login(current.account, password)) {
+        if (!password) {
+            if (passwordInput) {
+                passwordInput.value = "";
+                passwordInput.focus();
+            }
+            alert("店長密碼錯誤，未執行清零");
+            return Promise.resolve(false);
+        }
+        var verification;
+        if (window.MonsterAuth && MonsterAuth.reauthenticateCurrent) {
+            verification = MonsterAuth.reauthenticateCurrent(password);
+        } else {
+            verification = Promise.resolve(!!(window.MonsterRole && MonsterRole.login && MonsterRole.login(current.account, password)));
+        }
+        return verification.then(function (verified) {
+            if (!verified) { throw new Error("invalid-password"); }
+            if (passwordInput) { passwordInput.value = ""; }
+            return true;
+        }).catch(function () {
             if (passwordInput) {
                 passwordInput.value = "";
                 passwordInput.focus();
             }
             alert("店長密碼錯誤，未執行清零");
             return false;
-        }
-        if (passwordInput) passwordInput.value = "";
-        return true;
+        });
     }
 
     function clearResetConfirmation() {
@@ -413,15 +428,17 @@
             "確定將 " + value + " 元硬幣帳面庫存清零？\n\n" +
             "請先實際取出該面額硬幣。這個按鈕不會讓硬幣機吐幣；其他面額不受影響。"
         )) return;
-        if (!verifyResetAuthorization()) return;
-        queueAction(
-            "/coins/inventory/reset-denomination",
-            "PHYSICAL_COIN_DENOMINATION_" + value + "_EMPTIED",
-            "coin.inventory_reset_denomination",
-            "清零" + value + "元硬幣庫存",
-            { denominationNtd: value }
-        ).then(function () {
-            clearResetConfirmation();
+        verifyResetAuthorization().then(function (verified) {
+            if (!verified) { return null; }
+            return queueAction(
+                "/coins/inventory/reset-denomination",
+                "PHYSICAL_COIN_DENOMINATION_" + value + "_EMPTIED",
+                "coin.inventory_reset_denomination",
+                "清零" + value + "元硬幣庫存",
+                { denominationNtd: value }
+            ).then(function () {
+                clearResetConfirmation();
+            });
         }).catch(function () { return null; });
     };
 
@@ -436,14 +453,16 @@
             "確定將 1、5、10、50 元硬幣帳面庫存全部清零？\n\n" +
             "請先實際清空所有硬幣筒、錢箱及溢幣箱。此動作不會自動吐幣。"
         )) return;
-        if (!verifyResetAuthorization()) return;
-        queueAction(
-            "/coins/inventory/reset-physical-empty",
-            "PHYSICAL_COIN_MODULE_EMPTIED",
-            "coin.inventory_reset_all",
-            "清零全部硬幣庫存"
-        ).then(function () {
-            clearResetConfirmation();
+        verifyResetAuthorization().then(function (verified) {
+            if (!verified) { return null; }
+            return queueAction(
+                "/coins/inventory/reset-physical-empty",
+                "PHYSICAL_COIN_MODULE_EMPTIED",
+                "coin.inventory_reset_all",
+                "清零全部硬幣庫存"
+            ).then(function () {
+                clearResetConfirmation();
+            });
         }).catch(function () { return null; });
     };
 

@@ -166,6 +166,23 @@
         return true;
     }
 
+    function loginAsync(account, password) {
+        var cloudAuth = window.MonsterFirebaseRoleAuth;
+        if (!cloudAuth || !cloudAuth.enabled || !cloudAuth.enabled()) {
+            return Promise.resolve(login(account, password));
+        }
+        if (!cloudAuth.ready || !cloudAuth.ready()) {
+            return Promise.reject({
+                code: "auth/firebase-not-ready",
+                message: "雲端員工登入尚未完成連線，請確認網路後重試"
+            });
+        }
+        return cloudAuth.login(account, password).then(function () {
+            audit("auth.login", "雲端員工帳號登入", { source: "staff" });
+            return true;
+        });
+    }
+
     function logout() {
         if (getCurrentUser()) {
             audit("auth.logout", "登出系統", { source: "staff" });
@@ -173,6 +190,10 @@
         if (window.MonsterRole && MonsterRole.logout) {
             MonsterRole.logout();
         }
+        if (window.MonsterFirebaseRoleAuth && MonsterFirebaseRoleAuth.logout) {
+            return MonsterFirebaseRoleAuth.logout();
+        }
+        return Promise.resolve();
     }
 
     function restoreSession() {
@@ -180,6 +201,31 @@
             return false;
         }
         return MonsterRole.restoreSession();
+    }
+
+    function restoreSessionAsync() {
+        if (window.MonsterFirebaseRoleAuth && MonsterFirebaseRoleAuth.restoreSession) {
+            return MonsterFirebaseRoleAuth.restoreSession().then(function (restored) {
+                if (restored) {
+                    return true;
+                }
+                return restoreSession();
+            });
+        }
+        return Promise.resolve(restoreSession());
+    }
+
+    function isFirebaseSession() {
+        var user = getCurrentUser();
+        return !!(user && user.provider === "firebase");
+    }
+
+    function reauthenticateCurrent(password) {
+        if (isFirebaseSession() && window.MonsterFirebaseRoleAuth && MonsterFirebaseRoleAuth.reauthenticate) {
+            return MonsterFirebaseRoleAuth.reauthenticate(password);
+        }
+        var user = getCurrentUser();
+        return Promise.resolve(!!(user && window.MonsterRole && MonsterRole.login(user.account, password)));
     }
 
     function escapeHtml(value) {
@@ -284,10 +330,14 @@
     }
 
     window.MonsterAuth = {
-        version: "7.3-Phase3E-Part3",
+        version: "FIX31-Cloud-Employee",
         login: login,
+        loginAsync: loginAsync,
         logout: logout,
         restoreSession: restoreSession,
+        restoreSessionAsync: restoreSessionAsync,
+        isFirebaseSession: isFirebaseSession,
+        reauthenticateCurrent: reauthenticateCurrent,
         getCurrentUser: getCurrentUser,
         getCurrentRole: getCurrentRole,
         getActor: getActor,

@@ -128,11 +128,29 @@ var currentUser = null;
         }
         return {
             id: employee.id,
+            uid: employee.uid || "",
             account: employee.account,
             name: employee.name,
             role: employee.role,
+            provider: employee.provider || "local",
             loginAt: nowIso()
         };
+    }
+
+    function setAuthenticatedUser(profile) {
+        if (!profile || !profile.id || (profile.role !== ROLE_ADMIN && profile.role !== ROLE_STAFF)) {
+            return false;
+        }
+        currentUser = publicUser(profile);
+        currentUser.uid = profile.uid || profile.id;
+        currentUser.provider = "firebase";
+        currentUser.loginAt = profile.loginAt || currentUser.loginAt;
+        currentUserRole = currentUser.role;
+        window.currentUser = currentUser;
+        window.currentUserRole = currentUserRole;
+        saveSession(currentUser);
+        applyRolePermissions();
+        return true;
     }
 
     function saveSession(user) {
@@ -155,6 +173,10 @@ var currentUser = null;
             session = null;
         }
         if (!session || !session.id) {
+            return false;
+        }
+        // Firebase 工作階段必須由 Firebase Auth 重新驗證，不能只信任瀏覽器快取。
+        if (session.provider === "firebase") {
             return false;
         }
         list = ensureDefaultAccounts();
@@ -230,7 +252,7 @@ var currentUser = null;
     }
 
     window.MonsterRole = {
-        version: "7.3-Simple-Login",
+        version: "FIX31-Cloud-Employee",
         getEmployees: function () {
             return clone(ensureDefaultAccounts());
         },
@@ -250,6 +272,7 @@ var currentUser = null;
             return currentUserRole === ROLE_STAFF;
         },
         login: login,
+        setAuthenticatedUser: setAuthenticatedUser,
         logout: function () {
             currentUser = null;
             currentUserRole = null;
