@@ -444,12 +444,49 @@
         </section>
 
         <footer class="staff-footer">
-            小怪獸售票機・V7.8.3.3 FIX32 員工打卡
+            小怪獸售票機・V7.8.3.3 FIX33 打卡管理
         </footer>
 
     </div>
 
 </section>
+
+<!-- 店長修改打卡 -->
+<div id="attendanceEditModal" class="staff-modal" style="display:none;">
+
+    <div class="staff-modal-card attendance-edit-card">
+
+        <div class="staff-modal-header">
+            <div class="staff-modal-title">🕒 修改打卡時間</div>
+            <button id="attendanceEditClose" class="staff-modal-close">×</button>
+        </div>
+
+        <input id="attendanceEditId" type="hidden">
+        <div id="attendanceEditEmployee" class="staff-modal-member"></div>
+
+        <div class="staff-form-grid attendance-edit-grid">
+            <label>
+                <span>上班時間</span>
+                <input id="attendanceEditClockIn" type="datetime-local">
+            </label>
+            <label>
+                <span>下班時間</span>
+                <input id="attendanceEditClockOut" type="datetime-local">
+            </label>
+        </div>
+
+        <div class="attendance-edit-note">
+            儲存後會自動重新計算這次工時；忘記打下班卡也可以在這裡補上。
+        </div>
+
+        <div class="staff-modal-actions">
+            <button id="attendanceEditCancel" class="staff-secondary-button">取消</button>
+            <button id="attendanceEditSave" class="staff-primary-button">儲存修改</button>
+        </div>
+
+    </div>
+
+</div>
 
 <!-- 快速新增會員 -->
 <div id="staffMemberModal" class="staff-modal" style="display:none;">
@@ -690,9 +727,9 @@
 <script src="js/cloud/firebase-role-auth.js?v=fix31"></script>
 <script src="js/cloud/auth.js?v=fix31"></script>
 <script src="js/cloud/firebase-employee-service.js?v=fix31"></script>
-<script src="js/cloud/firebase-attendance-service.js?v=fix32"></script>
-<script src="js/staff/attendance.js?v=fix32"></script>
-<script src="js/staff/staff-app.js?v=fix32"></script>
+<script src="js/cloud/firebase-attendance-service.js?v=fix33"></script>
+<script src="js/staff/attendance.js?v=fix33"></script>
+<script src="js/staff/staff-app.js?v=fix33"></script>
 <script src="js/core/reward-engine.js?v=782"></script>
 <script src="js/core/void-protection.js?v=783"></script>
 <script src="js/core/ticket-data-sync-engine.js?v=782"></script>

@@ -18,8 +18,8 @@ var functionsSource = fs.readFileSync(path.join(packageRoot, "FIREBASE_STAFF_AUT
 assert.ok(staffHtml.indexOf('id="attendanceClockInButton"') >= 0);
 assert.ok(staffHtml.indexOf('id="attendanceClockOutButton"') >= 0);
 assert.ok(staffHtml.indexOf('id="attendanceAdminList"') >= 0);
-assert.ok(staffHtml.indexOf("firebase-attendance-service.js?v=fix32") >= 0);
-assert.ok(staffHtml.indexOf("attendance.js?v=fix32") >= 0);
+assert.ok(staffHtml.indexOf("firebase-attendance-service.js?v=fix3") >= 0);
+assert.ok(staffHtml.indexOf("attendance.js?v=fix3") >= 0);
 assert.ok(staffApp.indexOf("MonsterAttendanceUI.activate") >= 0);
 assert.ok(attendanceUi.indexOf("formatDuration") >= 0);
 assert.ok(attendanceUi.indexOf("adminReport") >= 0);

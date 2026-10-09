@@ -27,6 +27,10 @@
         clockIn: function () { return call("staffAttendanceV1ClockIn", {}); },
         clockOut: function () { return call("staffAttendanceV1ClockOut", {}); },
         listMine: function (from, to) { return call("staffAttendanceV1ListMine", { from: from, to: to }); },
-        adminReport: function (from, to) { return call("staffAttendanceV1AdminReport", { from: from, to: to }); }
+        adminReport: function (from, to) { return call("staffAttendanceV1AdminReport", { from: from, to: to }); },
+        adminUpdate: function (id, clockIn, clockOut) {
+            return call("staffAttendanceV1AdminUpdate", { id: id, clockIn: clockIn, clockOut: clockOut });
+        },
+        adminDelete: function (id) { return call("staffAttendanceV1AdminDelete", { id: id }); }
     };
 }());

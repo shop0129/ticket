@@ -1,4 +1,4 @@
-// 小怪獸售票機 FIX32 - 員工上下班打卡與店長工時報表
+// 小怪獸售票機 FIX33 - 員工打卡與店長編輯、刪除管理
 (function () {
     "use strict";
 
@@ -6,6 +6,7 @@
     var busy = false;
     var statusData = null;
     var minuteTimer = null;
+    var adminRecords = {};
 
     function byId(id) { return document.getElementById(id); }
 
@@ -34,6 +35,11 @@
         var rest = total % 60;
         if (!hours) { return rest + " 分"; }
         return hours + " 小時 " + rest + " 分";
+    }
+
+    function datetimeLocalValue(timestamp) {
+        var date = new Date(Number(timestamp || Date.now()));
+        return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     }
 
     function setMessage(text, type) {
@@ -145,6 +151,7 @@
         var summary = result && result.summary || {};
         var records = result && result.records || [];
         var html = "";
+        adminRecords = {};
         if (summaryBox) {
             summaryBox.innerHTML = '<div><span>完成班次</span><strong>' + Number(summary.completedShifts || 0) + '</strong></div>' +
                 '<div><span>總工時</span><strong>' + escapeHtml(formatDuration(summary.totalMinutes)) + '</strong></div>' +
@@ -155,12 +162,15 @@
             list.innerHTML = '<div class="attendance-empty">這個日期區間沒有打卡紀錄</div>';
             return;
         }
-        html += '<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>員工</th><th>日期</th><th>上班</th><th>下班</th><th>時數</th></tr></thead><tbody>';
+        html += '<div class="attendance-table-wrap"><table class="attendance-table"><thead><tr><th>員工</th><th>日期</th><th>上班</th><th>下班</th><th>時數</th><th>管理</th></tr></thead><tbody>';
         records.forEach(function (record) {
+            adminRecords[record.id] = record;
             html += '<tr><td><strong>' + escapeHtml(record.name) + '</strong><small>' + escapeHtml(record.account) + '</small></td>' +
                 '<td>' + escapeHtml(record.dateKey) + '</td><td>' + escapeHtml(formatDateTime(record.clockIn)) + '</td>' +
                 '<td>' + escapeHtml(record.clockOut ? formatDateTime(record.clockOut) : "上班中") + '</td>' +
-                '<td><b>' + (record.status === "open" ? "—" : escapeHtml(formatDuration(record.durationMinutes))) + '</b></td></tr>';
+                '<td><b>' + (record.status === "open" ? "—" : escapeHtml(formatDuration(record.durationMinutes))) + '</b></td>' +
+                '<td><div class="attendance-row-actions"><button type="button" data-attendance-edit="' + escapeHtml(record.id) + '">編輯</button>' +
+                '<button type="button" class="danger" data-attendance-delete="' + escapeHtml(record.id) + '">刪除</button></div></td></tr>';
         });
         html += '</tbody></table></div><div class="attendance-employee-totals">';
         (summary.employees || []).forEach(function (employee) {
@@ -170,6 +180,58 @@
         });
         html += '</div>';
         list.innerHTML = html;
+    }
+
+    function openAdminEditor(id) {
+        var record = adminRecords[id];
+        var modal = byId("attendanceEditModal");
+        if (!record || !modal) { return; }
+        byId("attendanceEditId").value = record.id;
+        byId("attendanceEditEmployee").textContent = (record.name || "員工") + "（" + (record.account || "") + "）";
+        byId("attendanceEditClockIn").value = datetimeLocalValue(record.clockIn);
+        byId("attendanceEditClockOut").value = datetimeLocalValue(record.clockOut || Date.now());
+        modal.style.display = "flex";
+    }
+
+    function closeAdminEditor() {
+        var modal = byId("attendanceEditModal");
+        if (modal) { modal.style.display = "none"; }
+    }
+
+    function saveAdminEditor() {
+        var id = byId("attendanceEditId").value;
+        var clockIn = new Date(byId("attendanceEditClockIn").value).getTime();
+        var clockOut = new Date(byId("attendanceEditClockOut").value).getTime();
+        var button = byId("attendanceEditSave");
+        if (!clockIn || !clockOut || clockOut <= clockIn) {
+            alert("下班時間必須晚於上班時間");
+            return;
+        }
+        button.disabled = true;
+        button.textContent = "儲存中…";
+        api().adminUpdate(id, clockIn, clockOut).then(function () {
+            closeAdminEditor();
+            return loadAdminReport();
+        }).then(function () {
+            alert("打卡時間已修改，工時已重新計算");
+        }).catch(function (error) {
+            alert(error && error.message || "修改失敗");
+        }).then(function () {
+            button.disabled = false;
+            button.textContent = "儲存修改";
+        });
+    }
+
+    function deleteAdminRecord(id) {
+        var record = adminRecords[id];
+        if (!record || !confirm("確定刪除「" + record.name + "」這筆打卡紀錄嗎？\n刪除後無法復原。")) { return; }
+        api().adminDelete(id).then(function () {
+            return loadAdminReport();
+        }).then(function () {
+            alert("打卡紀錄已刪除");
+        }).catch(function (error) {
+            alert(error && error.message || "刪除失敗");
+        });
     }
 
     function loadAdminReport() {
@@ -204,6 +266,8 @@
     function deactivate() {
         activeRole = "";
         statusData = null;
+        adminRecords = {};
+        closeAdminEditor();
         if (minuteTimer) { clearInterval(minuteTimer); minuteTimer = null; }
     }
 
@@ -216,8 +280,19 @@
         if (byId("attendanceClockOutButton")) { byId("attendanceClockOutButton").addEventListener("click", function () { performClock("out"); }); }
         if (byId("attendanceRefreshButton")) { byId("attendanceRefreshButton").addEventListener("click", function () { refreshStatus(); refreshMine(); }); }
         if (byId("attendanceReportButton")) { byId("attendanceReportButton").addEventListener("click", loadAdminReport); }
+        if (byId("attendanceAdminList")) {
+            byId("attendanceAdminList").addEventListener("click", function (event) {
+                var edit = event.target.getAttribute("data-attendance-edit");
+                var remove = event.target.getAttribute("data-attendance-delete");
+                if (edit) { openAdminEditor(edit); }
+                if (remove) { deleteAdminRecord(remove); }
+            });
+        }
+        if (byId("attendanceEditClose")) { byId("attendanceEditClose").addEventListener("click", closeAdminEditor); }
+        if (byId("attendanceEditCancel")) { byId("attendanceEditCancel").addEventListener("click", closeAdminEditor); }
+        if (byId("attendanceEditSave")) { byId("attendanceEditSave").addEventListener("click", saveAdminEditor); }
     }
 
-    window.MonsterAttendanceUI = { version: "FIX32", activate: activate, deactivate: deactivate, loadAdminReport: loadAdminReport };
+    window.MonsterAttendanceUI = { version: "FIX33", activate: activate, deactivate: deactivate, loadAdminReport: loadAdminReport };
     if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
 }());
