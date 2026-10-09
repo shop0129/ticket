@@ -51,6 +51,20 @@
 
     function api() { return window.MonsterFirebaseAttendance || null; }
 
+    function publishGateState() {
+        var open = statusData && statusData.status === "open" && statusData.active;
+        var detail = {
+            role: activeRole || "",
+            ready: statusData !== null,
+            clockedIn: Boolean(open),
+            clockIn: open ? Number(statusData.active.clockIn || 0) : 0
+        };
+        window.MonsterAttendanceState = detail;
+        try {
+            window.dispatchEvent(new CustomEvent("monster:attendance-state", { detail: detail }));
+        } catch (error) {}
+    }
+
     function renderStatus() {
         var open = statusData && statusData.status === "open" && statusData.active;
         var title = byId("attendanceStatusTitle");
@@ -59,6 +73,7 @@
         var outButton = byId("attendanceClockOutButton");
         var card = byId("attendanceStatusCard");
         var elapsed;
+        publishGateState();
         if (!title || !detail || !inButton || !outButton || !card) { return; }
         if (open) {
             elapsed = Math.max(0, Math.floor((Date.now() - Number(statusData.active.clockIn || Date.now())) / 60000));
@@ -255,6 +270,8 @@
 
     function activate(role) {
         activeRole = role || "staff";
+        statusData = null;
+        publishGateState();
         setMessage("", "");
         refreshStatus();
         refreshMine();
@@ -268,6 +285,7 @@
         statusData = null;
         adminRecords = {};
         closeAdminEditor();
+        publishGateState();
         if (minuteTimer) { clearInterval(minuteTimer); minuteTimer = null; }
     }
 
@@ -293,6 +311,6 @@
         if (byId("attendanceEditSave")) { byId("attendanceEditSave").addEventListener("click", saveAdminEditor); }
     }
 
-    window.MonsterAttendanceUI = { version: "FIX33", activate: activate, deactivate: deactivate, loadAdminReport: loadAdminReport };
+    window.MonsterAttendanceUI = { version: "FIX35", activate: activate, deactivate: deactivate, loadAdminReport: loadAdminReport, getState: function () { return window.MonsterAttendanceState || {}; } };
     if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", init); } else { init(); }
 }());

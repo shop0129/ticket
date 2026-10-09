@@ -109,6 +109,7 @@ function renderCenter(){
 function expectedExit(o,now){if(o.timeMode==='unlimited')return null;var mins=Math.max(10,Number(o.playMinutes||120));if(o.fixedExitTime){var p=String(o.fixedExitTime).split(':');var d=new Date(now);d.setHours(Number(p[0]||0),Number(p[1]||0),0,0);return d.getTime();}return now+mins*60000;}
 function updateTicketInstances(list,action,now,who){return (list||[]).map(function(t){var n=Object.assign({},t);if(action==='enter'&&(n.status||'waiting')==='waiting'){n.status='playing';n.checkedInAt=now;n.checkedInBy=who;}if(action==='exit'&&n.status==='playing'){n.status='finished';n.checkedOutAt=now;n.checkedOutBy=who;}return n;});}
 function updateStatus(action){
+ if(window.MonsterAttendanceGate&&!MonsterAttendanceGate.requireClockIn())return;
  var o=currentFound.order, current=orderStatus(o);
  if(o.cancelled||current==='cancelled'){message('此訂單已作廢，不能操作',false);return;}
  var desired=action==='enter'?'playing':'finished';

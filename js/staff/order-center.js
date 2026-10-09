@@ -873,6 +873,10 @@
 
     function enterSelectedOrder(){
 
+        if(window.MonsterAttendanceGate && !MonsterAttendanceGate.requireClockIn()){
+            return;
+        }
+
         var order =
         selectedOrder();
 
@@ -1116,6 +1120,10 @@
     }
 
     function exitSelectedOrder(){
+
+        if(window.MonsterAttendanceGate && !MonsterAttendanceGate.requireClockIn()){
+            return;
+        }
 
         var order =
         selectedOrder();

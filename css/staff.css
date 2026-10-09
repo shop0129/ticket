@@ -424,6 +424,26 @@ input{
     font-weight:700;
 }
 
+.attendance-lock-banner{
+    display:none;
+    margin-bottom:16px;
+    padding:14px 16px;
+    border:2px solid #e3a928;
+    border-radius:15px;
+    background:#fff7dc;
+    color:#714e00;
+}
+.attendance-lock-banner strong,
+.attendance-lock-banner span{ display:block; }
+.attendance-lock-banner strong{ font-size:19px; }
+.attendance-lock-banner span{ margin-top:5px; line-height:1.5; font-weight:700; }
+.attendance-operation-locked .attendance-lock-banner{ display:block; }
+.attendance-operation-locked > :not(.attendance-lock-banner){
+    opacity:.42;
+    pointer-events:none;
+    user-select:none;
+}
+
 .attendance-employee-totals{
     display:grid;
     grid-template-columns:repeat(2,minmax(0,1fr));

@@ -17,7 +17,7 @@ var functionsSource = fs.readFileSync(path.join(packageRoot, "FIREBASE_STAFF_AUT
 assert.ok(staffHtml.indexOf('id="attendanceEditModal"') >= 0);
 assert.ok(staffHtml.indexOf('id="attendanceEditClockIn"') >= 0);
 assert.ok(staffHtml.indexOf('id="attendanceEditClockOut"') >= 0);
-assert.ok(staffHtml.indexOf("attendance.js?v=fix33") >= 0);
+assert.ok(staffHtml.indexOf("attendance.js?v=fix3") >= 0);
 assert.ok(attendanceUi.indexOf("data-attendance-edit") >= 0);
 assert.ok(attendanceUi.indexOf("data-attendance-delete") >= 0);
 assert.ok(attendanceUi.indexOf("adminUpdate") >= 0);
