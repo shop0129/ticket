@@ -1,4 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX35 Clock-In Required
+// 小怪獸售票機 V7.8.3.3 FIX37 Taiwan Business Day
+// Preserved FIX35 cache marker: 7833-fix35-clock-in-required-20261010-1
 // Preserved FIX34 cache marker: 7833-fix34-single-order-delete-20261010-1
 // Preserved FIX33 cache marker: 7833-fix33-attendance-admin-edit-20261010-1
 // Preserved FIX32 cache marker: 7833-fix32-employee-attendance-20261010-1
@@ -23,7 +24,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix35-clock-in-required-20261010-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix37-taipei-business-day-20261012-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

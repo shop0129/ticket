@@ -28,6 +28,8 @@
     var ordersReady = false;
     var membersReady = false;
     var writeTimer = null;
+    var TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
+    var activeDateKey = "";
 
     window.MonsterDashboardCloud =
         window.MonsterDashboardCloud || {};
@@ -51,34 +53,84 @@
         );
     }
 
+    function taipeiParts(value){
+
+        var date = new Date(
+            Number(value == null ? Date.now() : value) +
+            TAIPEI_OFFSET_MS
+        );
+
+        return {
+            year:date.getUTCFullYear(),
+            month:date.getUTCMonth() + 1,
+            day:date.getUTCDate()
+        };
+    }
+
+    function dateKeyFromTimestamp(value){
+
+        var parts = taipeiParts(value);
+
+        return parts.year + "-" +
+        padNumber(parts.month) + "-" +
+        padNumber(parts.day);
+    }
+
+    function normalizeDateKey(value){
+
+        var match = String(value || "")
+        .match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+
+        return match
+        ? match[1] + "-" + padNumber(match[2]) + "-" + padNumber(match[3])
+        : "";
+    }
+
+    function recordDateKey(record, fallbackFields){
+
+        var fields = fallbackFields || ["createdAt","timestamp","dateTime"];
+        var dateKey = normalizeDateKey(record && record.date);
+
+        if(dateKey){
+            return dateKey;
+        }
+
+        for(var index = 0; index < fields.length; index++){
+            var raw = record && record[fields[index]];
+            var milliseconds = raw && raw.seconds
+            ? Number(raw.seconds) * 1000
+            : Number(raw);
+
+            if(isFinite(milliseconds) && milliseconds > 1000000000){
+                return dateKeyFromTimestamp(milliseconds);
+            }
+
+            if(typeof raw === "string"){
+                var parsed = Date.parse(raw);
+                if(isFinite(parsed)){
+                    return dateKeyFromTimestamp(parsed);
+                }
+            }
+        }
+
+        return "";
+    }
+
     function getTodayText(){
 
-        return new Date()
-        .toLocaleDateString("zh-TW");
+        var parts = taipeiParts();
+
+        return parts.year + "/" + parts.month + "/" + parts.day;
     }
 
     function getTodayKey(){
 
-        var date = new Date();
-
-        return (
-            date.getFullYear() +
-            "-" +
-            padNumber(date.getMonth() + 1) +
-            "-" +
-            padNumber(date.getDate())
-        );
+        return dateKeyFromTimestamp(Date.now());
     }
 
     function getMonthKey(){
 
-        var date = new Date();
-
-        return (
-            date.getFullYear() +
-            "-" +
-            padNumber(date.getMonth() + 1)
-        );
+        return getTodayKey().slice(0,7);
     }
 
     function isNormalOrder(order){
@@ -222,16 +274,8 @@
 
     function calculateSummaries(){
 
-        var todayText =
-        getTodayText();
-
-        var monthText =
-        todayText.split("/");
-
-        var monthPrefix =
-        monthText.length >= 2
-        ? monthText[0] + "/" + monthText[1] + "/"
-        : "";
+        var todayKey = getTodayKey();
+        var monthKey = getMonthKey();
 
         var today =
         createSummary();
@@ -257,18 +301,16 @@
                 order
             );
 
-            if(
-                monthPrefix &&
-                String(order.date || "")
-                .indexOf(monthPrefix) === 0
-            ){
+            var orderKey = recordDateKey(order);
+
+            if(orderKey.slice(0,7) === monthKey){
                 addOrderToSummary(
                     month,
                     order
                 );
             }
 
-            if(order.date === todayText){
+            if(orderKey === todayKey){
 
                 addOrderToSummary(
                     today,
@@ -290,15 +332,16 @@
                 return;
             }
 
-            if(member.joinDate === todayText){
+            var memberKey = normalizeDateKey(member.joinDate) ||
+            recordDateKey(member,["createdAt","joinedAt"]);
+
+            if(memberKey === todayKey){
 
                 today.newMembers++;
             }
 
             if(
-                monthPrefix &&
-                String(member.joinDate || "")
-                .indexOf(monthPrefix) === 0
+                memberKey.slice(0,7) === monthKey
             ){
                 month.newMembers++;
             }
@@ -434,8 +477,16 @@
             return;
         }
 
-        var summary =
-        data.summary;
+        if(data.dateKey && data.dateKey !== getTodayKey()){
+            data = {
+                date:getTodayText(),
+                dateKey:getTodayKey(),
+                summary:createSummary()
+            };
+            scheduleDashboardWrite();
+        }
+
+        var summary = data.summary;
 
         updateText(
             "dashboardDate",
@@ -554,6 +605,8 @@
         window.MonsterCloud.database
         .ref(DASHBOARD_PATH);
 
+        activeDateKey = getTodayKey();
+
         orderRef.on(
             "value",
             function(snapshot){
@@ -658,5 +711,31 @@
             scheduleDashboardWrite();
         }
     );
+
+    function refreshBusinessDate(){
+
+        var nextDateKey = getTodayKey();
+
+        if(activeDateKey !== nextDateKey){
+            activeDateKey = nextDateKey;
+            applyCloudDashboard({
+                date:getTodayText(),
+                dateKey:nextDateKey,
+                summary:createSummary()
+            });
+        }
+
+        scheduleDashboardWrite();
+    }
+
+    setInterval(refreshBusinessDate,30000);
+
+    document.addEventListener("visibilitychange",function(){
+        if(!document.hidden){
+            refreshBusinessDate();
+        }
+    });
+
+    window.addEventListener("pageshow",refreshBusinessDate);
 
 })();
