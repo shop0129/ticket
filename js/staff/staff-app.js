@@ -275,19 +275,75 @@
         showLogin();
     }
 
+    function taipeiDashboardDate(){
+
+        var date = new Date(
+            Date.now() +
+            (8 * 60 * 60 * 1000)
+        );
+
+        var year = date.getUTCFullYear();
+        var month = date.getUTCMonth() + 1;
+        var day = date.getUTCDate();
+
+        function pad(value){
+            return Number(value) < 10
+            ? "0" + value
+            : String(value);
+        }
+
+        return {
+            key:year + "-" + pad(month) + "-" + pad(day),
+            text:year + "/" + month + "/" + day
+        };
+    }
+
+    function dashboardDateKey(data){
+
+        var raw = data && (
+            data.dateKey ||
+            data.date
+        );
+
+        var match = String(raw || "")
+        .match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
+
+        if(!match){
+            return "";
+        }
+
+        return match[1] + "-" +
+        (Number(match[2]) < 10 ? "0" : "") + Number(match[2]) + "-" +
+        (Number(match[3]) < 10 ? "0" : "") + Number(match[3]);
+    }
+
     function renderDashboard(){
 
+        var taipeiToday =
+        taipeiDashboardDate();
+
+        var cloudDateKey =
+        dashboardDateKey(
+            dashboardCurrent
+        );
+
+        var isPreviousDay =
+        cloudDateKey &&
+        cloudDateKey !== taipeiToday.key;
+
         var data =
+        !isPreviousDay &&
         dashboardCurrent &&
         dashboardCurrent.summary
         ? dashboardCurrent.summary
         : {};
 
         var date =
+        !isPreviousDay &&
         dashboardCurrent &&
         dashboardCurrent.date
         ? dashboardCurrent.date
-        : new Date().toLocaleDateString("zh-TW");
+        : taipeiToday.text;
 
         byId("staffDashboardDate").textContent =
         date + " 雲端即時概況";
