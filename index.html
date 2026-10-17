@@ -32,7 +32,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="icon" type="image/png" sizes="192x192" href="images/pwa/icon-192.png">
 <!-- Preserved regression marker: css/style.css?v=7833fix26f -->
 <link rel="stylesheet" href="css/style.css?v=7833fix27b">
-<link rel="stylesheet" href="css/admin-ui.css?v=73e3">
+<!-- Preserved cache marker: css/admin-ui.css?v=73e3 -->
+<link rel="stylesheet" href="css/admin-ui.css?v=fix40">
 <link rel="stylesheet" href="css/pwa.css?v=73f1">
 <link rel="stylesheet" href="css/cash-bridge.css?v=7833fix11">
 <link rel="stylesheet" href="css/linepay-scanner.css?v=7833fix26f">
@@ -383,6 +384,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                 <button id="dashboardPeriodToday" class="dashboard-period-btn active" onclick="setDashboardPeriod('today')">今日</button>
                 <button id="dashboardPeriodMonth" class="dashboard-period-btn" onclick="setDashboardPeriod('month')">本月</button>
                 <button id="dashboardPeriodAll" class="dashboard-period-btn" onclick="setDashboardPeriod('all')">累積</button>
+                <button id="dashboardPeriodCustom" class="dashboard-period-btn" onclick="setDashboardPeriod('custom')">指定日期</button>
+            </div>
+            <div id="dashboardCustomRange" class="dashboard-custom-range">
+                <label>開始日期<input id="dashboardDateFrom" type="date"></label>
+                <label>結束日期<input id="dashboardDateTo" type="date"></label>
+                <button type="button" onclick="applyDashboardDateRange()">查詢業績</button>
             </div>
             <div id="dashboardRealtimeStatus" class="dashboard-realtime-status">● 即時更新</div>
         </div>
@@ -393,7 +400,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
                 <div class="dashboard-summary-icon">💰</div>
 
-                <div class="dashboard-summary-label">
+                <div id="dashboardIncomeLabel" class="dashboard-summary-label">
                     今日總收入
                 </div>
 
@@ -409,7 +416,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
                 <div class="dashboard-summary-icon">🎫</div>
 
-                <div class="dashboard-summary-label">
+                <div id="dashboardTicketsLabel" class="dashboard-summary-label">
                     今日售票
                 </div>
 
@@ -538,7 +545,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
                 <div class="dashboard-summary-icon">✨</div>
 
-                <div class="dashboard-summary-label">
+                <div id="dashboardNewMembersLabel" class="dashboard-summary-label">
                     今日新會員
                 </div>
 
@@ -1803,7 +1810,8 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/cart.js?v=7627"></script>
     
 <script src="js/modules/operation.js?v=771"></script>
-<script src="js/modules/dashboard.js?v=73f2"></script>
+<!-- Preserved cache marker: js/modules/dashboard.js?v=73f2 -->
+<script src="js/modules/dashboard.js?v=fix40"></script>
 <script src="js/modules/roleManager.js?v=fix31"></script>
 <script src="js/cloud/firebase-role-auth.js?v=fix31"></script>
 <script src="js/cloud/auth.js?v=fix31"></script>

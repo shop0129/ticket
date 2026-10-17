@@ -4,6 +4,8 @@ function getDashboardOrderAmount(order) {
     return Number(order && order.paidAmount != null ? order.paidAmount : (order && order.amount || 0));
 }
 var dashboardPeriod = "today";
+var dashboardCustomFrom = "";
+var dashboardCustomTo = "";
 
 function formatDashboardAmount(value) {
     return Number(value || 0).toLocaleString("zh-TW");
@@ -14,15 +16,51 @@ function dashboardParseDate(value) {
     if (!parts) return null;
     return new Date(Number(parts[1]), Number(parts[2]) - 1, Number(parts[3]));
 }
+function dashboardPad(value) {
+    return Number(value) < 10 ? "0" + Number(value) : String(Number(value));
+}
+function dashboardDateKeyFromDate(date) {
+    return date.getFullYear() + "-" + dashboardPad(date.getMonth() + 1) + "-" + dashboardPad(date.getDate());
+}
+function dashboardNormalizeDateKey(value) {
+    var parts = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
+    return parts ? parts[1] + "-" + dashboardPad(parts[2]) + "-" + dashboardPad(parts[3]) : "";
+}
+function dashboardRecordDateKey(record) {
+    var direct = dashboardNormalizeDateKey(record && (record.date || record.joinDate));
+    var fields = ["createdAt", "timestamp", "dateTime", "linePayPaidAt"];
+    var index;
+    var raw;
+    var number;
+    var parsed;
+    if (direct) return direct;
+    for (index = 0; index < fields.length; index++) {
+        raw = record && record[fields[index]];
+        if (raw && raw.seconds) raw = Number(raw.seconds) * 1000;
+        number = Number(raw);
+        if (isFinite(number) && number > 1000000000) {
+            if (number < 100000000000) number *= 1000;
+            return dashboardDateKeyFromDate(new Date(number));
+        }
+        if (typeof raw === "string") {
+            parsed = Date.parse(raw);
+            if (isFinite(parsed)) return dashboardDateKeyFromDate(new Date(parsed));
+        }
+    }
+    return "";
+}
 function dashboardOrderInPeriod(order, period) {
     if (period === "all") return true;
-    var date = dashboardParseDate(order.date);
-    if (!date) return false;
-    var now = new Date();
+    var key = dashboardRecordDateKey(order || {});
+    var todayKey = dashboardDateKeyFromDate(new Date());
+    if (!key) return false;
     if (period === "month") {
-        return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth();
+        return key.slice(0, 7) === todayKey.slice(0, 7);
     }
-    return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+    if (period === "custom") {
+        return !!dashboardCustomFrom && !!dashboardCustomTo && key >= dashboardCustomFrom && key <= dashboardCustomTo;
+    }
+    return key === todayKey;
 }
 function getDashboardPeriodOrders(includeCancelled) {
     return (Array.isArray(salesHistory) ? salesHistory : []).filter(function(order){
@@ -31,17 +69,57 @@ function getDashboardPeriodOrders(includeCancelled) {
 }
 function setDashboardPeriod(period) {
     dashboardPeriod = period || "today";
-    ["today","month","all"].forEach(function(key){
-        var id = key === "today" ? "dashboardPeriodToday" : key === "month" ? "dashboardPeriodMonth" : "dashboardPeriodAll";
+    if (dashboardPeriod === "custom") {
+        prepareDashboardCustomRange();
+    }
+    ["today","month","all","custom"].forEach(function(key){
+        var ids = {today:"dashboardPeriodToday",month:"dashboardPeriodMonth",all:"dashboardPeriodAll",custom:"dashboardPeriodCustom"};
+        var id = ids[key];
         var button = document.getElementById(id);
         if (button) button.classList.toggle("active", dashboardPeriod === key);
     });
+    var range = document.getElementById("dashboardCustomRange");
+    if (range) range.classList.toggle("show", dashboardPeriod === "custom");
     renderAdminDashboard();
+}
+function prepareDashboardCustomRange() {
+    var todayKey = dashboardDateKeyFromDate(new Date());
+    var fromInput = document.getElementById("dashboardDateFrom");
+    var toInput = document.getElementById("dashboardDateTo");
+    if (!dashboardCustomFrom) dashboardCustomFrom = todayKey.slice(0, 8) + "01";
+    if (!dashboardCustomTo) dashboardCustomTo = todayKey;
+    if (fromInput) fromInput.value = dashboardCustomFrom;
+    if (toInput) toInput.value = dashboardCustomTo;
+}
+function applyDashboardDateRange() {
+    var fromInput = document.getElementById("dashboardDateFrom");
+    var toInput = document.getElementById("dashboardDateTo");
+    var from = dashboardNormalizeDateKey(fromInput && fromInput.value);
+    var to = dashboardNormalizeDateKey(toInput && toInput.value);
+    if (!from || !to) {
+        alert("請選擇開始日期與結束日期");
+        return;
+    }
+    if (from > to) {
+        alert("開始日期不能晚於結束日期");
+        return;
+    }
+    dashboardCustomFrom = from;
+    dashboardCustomTo = to;
+    dashboardPeriod = "custom";
+    setDashboardPeriod("custom");
+}
+function dashboardPeriodName() {
+    if (dashboardPeriod === "month") return "本月";
+    if (dashboardPeriod === "all") return "累積";
+    if (dashboardPeriod === "custom") return "指定期間";
+    return "今日";
 }
 function dashboardPeriodLabel() {
     var now = new Date();
     if (dashboardPeriod === "month") return now.getFullYear() + " 年 " + (now.getMonth()+1) + " 月營運概況";
     if (dashboardPeriod === "all") return "累積營運概況";
+    if (dashboardPeriod === "custom") return dashboardCustomFrom.replace(/-/g,"/") + " ～ " + dashboardCustomTo.replace(/-/g,"/") + " 營運概況";
     return now.toLocaleDateString("zh-TW") + " 今日營運概況";
 }
 function dashboardItemQuantity(item) {
@@ -119,7 +197,11 @@ function renderAdminDashboard() {
     var memberIncome=members.reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
     var nonMemberIncome=income-memberIncome;
     var newMembers=(typeof memberData!=="undefined"&&Array.isArray(memberData)?memberData:[]).filter(function(member){return dashboardOrderInPeriod({date:member.joinDate},dashboardPeriod);}).length;
+    var periodName=dashboardPeriodName();
     dashboardSetText('dashboardDate',dashboardPeriodLabel());
+    dashboardSetText('dashboardIncomeLabel',periodName+'總收入');
+    dashboardSetText('dashboardTicketsLabel',periodName+'售票');
+    dashboardSetText('dashboardNewMembersLabel',periodName+'新會員');
     dashboardSetText('dashboardIncome','NT$'+formatDashboardAmount(income));
     dashboardSetText('dashboardTickets',dashboardTicketCount(normal)+' 張');
     dashboardSetText('dashboardCash','NT$'+formatDashboardAmount(cash));
