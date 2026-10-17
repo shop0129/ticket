@@ -27,7 +27,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix40-dashboard-date-range-20261018-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix41-mobile-dashboard-date-range-20261018-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
