@@ -37,6 +37,16 @@ async function flushPromises() {
     var health = { registered: false, environment: "sandbox", apiVersion: "offline-v4" };
     var callableNames = [];
     var locked = false;
+    var secondaryUser = { uid: "linepay-device-uid", isAnonymous: true };
+    var secondaryAuth = {
+        currentUser: secondaryUser,
+        setPersistence: function () { return Promise.resolve(); },
+        signOut: function () { this.currentUser = null; return Promise.resolve(); },
+        signInAnonymously: function () {
+            this.currentUser = secondaryUser;
+            return Promise.resolve({ user: secondaryUser });
+        }
+    };
     var childIds = [
         "linePayScanCard",
         "linePayScanTitle",
@@ -68,7 +78,7 @@ async function flushPromises() {
         Promise: Promise,
         setTimeout: function (handler) { handler(); return 1; },
         clearTimeout: function () {},
-        setInterval: function () { return 2; },
+        setInterval: function (handler) { handler(); return 2; },
         clearInterval: function () {},
         prompt: function () { return null; },
         alert: function () {},
@@ -82,10 +92,16 @@ async function flushPromises() {
         MonsterPayment: {
             setLocked: function (value) { locked = !!value; }
         },
+        MONSTER_FIREBASE_CONFIG: { projectId: "monsterticket" },
         firebase: {
             functions: true,
+            initializeApp: function () { return this.app(); },
+            auth: Object.assign(function () { return secondaryAuth; }, {
+                Auth: { Persistence: { LOCAL: "local" } }
+            }),
             app: function () {
                 return {
+                    auth: function () { return secondaryAuth; },
                     functions: function () {
                         return {
                             httpsCallable: function (name) {

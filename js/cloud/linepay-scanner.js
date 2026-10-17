@@ -1,11 +1,13 @@
-// 小怪獸售票機 V7.8.3.3 FIX26F
+// 小怪獸售票機 V7.8.3.3 FIX39
 // LINE Pay Offline API v4：USB HID 掃描客人 My Code
 // 金鑰只存在 Firebase Secret；前端不保存 Channel Secret。
+// LINE Pay 使用獨立 Firebase App 與匿名裝置身分，不受店長／員工登入登出影響。
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
 
     var REGION = "asia-east1";
+    var DEVICE_APP_NAME = "monsterLinePayDeviceV1";
     var ACTIVE_KEY = "monsterLinePayScannerTransactionV1";
     var MAX_BUFFER = 512;
     var POLL_MS = 1800;
@@ -15,6 +17,8 @@
     var submitTimer = null;
     var pollTimer = null;
     var functionsInstance = null;
+    var deviceApp = null;
+    var deviceReadyPromise = null;
 
     function loadJson(key) {
         try {
@@ -206,12 +210,86 @@
         updateScanProgress(message);
     }
 
-    function callable(name, data) {
-        return waitForCloud().then(function () {
-            if (!window.firebase || !firebase.functions) {
-                throw new Error("Firebase Functions SDK 尚未載入");
+    function waitForFirebaseSdk() {
+        return new Promise(function (resolve, reject) {
+            var finished = false;
+            var attempts = 0;
+            var timer = setInterval(function () {
+                attempts++;
+                if (
+                    window.firebase &&
+                    firebase.initializeApp &&
+                    firebase.auth &&
+                    firebase.functions &&
+                    window.MONSTER_FIREBASE_CONFIG
+                ) {
+                    if (finished) return;
+                    finished = true;
+                    clearInterval(timer);
+                    resolve();
+                    return;
+                }
+                if (attempts >= 75) {
+                    if (finished) return;
+                    finished = true;
+                    clearInterval(timer);
+                    reject(new Error("Firebase 登入逾時，請檢查網路"));
+                }
+            }, 200);
+        });
+    }
+
+    function getOrCreateDeviceApp() {
+        try {
+            return firebase.app(DEVICE_APP_NAME);
+        } catch (error) {
+            return firebase.initializeApp(
+                window.MONSTER_FIREBASE_CONFIG,
+                DEVICE_APP_NAME
+            );
+        }
+    }
+
+    function ensureLinePayDevice() {
+        if (deviceReadyPromise) return deviceReadyPromise;
+
+        deviceReadyPromise = waitForFirebaseSdk().then(function () {
+            var auth;
+            deviceApp = getOrCreateDeviceApp();
+            auth = deviceApp.auth();
+
+            return auth.setPersistence(
+                firebase.auth.Auth.Persistence.LOCAL
+            ).then(function () {
+                var current = auth.currentUser;
+                if (current && current.isAnonymous) return current;
+                if (current) {
+                    return auth.signOut().then(function () {
+                        return auth.signInAnonymously();
+                    }).then(function (credential) {
+                        return credential.user;
+                    });
+                }
+                return auth.signInAnonymously().then(function (credential) {
+                    return credential.user;
+                });
+            });
+        }).then(function (user) {
+            if (!user || !user.uid) {
+                throw new Error("LINE Pay 裝置登入失敗");
             }
-            if (!functionsInstance) functionsInstance = firebase.app().functions(REGION);
+            functionsInstance = deviceApp.functions(REGION);
+            return user;
+        }).catch(function (error) {
+            deviceReadyPromise = null;
+            throw error;
+        });
+
+        return deviceReadyPromise;
+    }
+
+    function callable(name, data) {
+        return ensureLinePayDevice().then(function () {
             return functionsInstance.httpsCallable(name)(data || {});
         }).then(function (result) {
             return result && result.data ? result.data : {};
@@ -776,7 +854,9 @@
         },
         checkBackend: checkBackend,
         clearRegistration: function () {
-            functionsInstance = null;
+            functionsInstance = deviceApp
+                ? deviceApp.functions(REGION)
+                : null;
         },
         _test: {
             extractOneTimeKey: extractOneTimeKey,
@@ -784,7 +864,8 @@
             setActive: function (value) { active = value; saveActive(); },
             shouldCaptureScannerKey: shouldCaptureScannerKey,
             hasSubmittedPaymentEvidence: hasSubmittedPaymentEvidence,
-            clearUnfundedTransaction: clearUnfundedTransaction
+            clearUnfundedTransaction: clearUnfundedTransaction,
+            ensureLinePayDevice: ensureLinePayDevice
         }
     };
 

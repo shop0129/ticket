@@ -1,4 +1,5 @@
-// 小怪獸售票機 V7.8.3.3 FIX38 Staff Dashboard Date Rollover
+// 小怪獸售票機 V7.8.3.3 FIX39 LinePay Device Identity
+// Preserved FIX38 cache marker: fix38-staff-dashboard-date
 // Preserved FIX37 cache marker: fix37-taipei-business-day
 // Preserved FIX35 cache marker: 7833-fix35-clock-in-required-20261010-1
 // Preserved FIX34 cache marker: 7833-fix34-single-order-delete-20261010-1
@@ -25,7 +26,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix38-staff-dashboard-date-20261012-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix39-linepay-device-identity-20261018-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
