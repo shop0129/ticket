@@ -27,7 +27,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix44-mobile-image-protection-20261019-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix45-mobile-image-display-20261019-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
