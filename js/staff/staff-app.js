@@ -570,6 +570,40 @@
         .innerHTML = "";
     }
 
+    function activePrepaidEntries(member){
+        var now = Date.now();
+        return (Array.isArray(member && member.prepaidEntries) ? member.prepaidEntries : []).filter(function(entry){
+            return entry && Number(entry.remaining || 0) > 0 && (!Number(entry.expiresAt || 0) || Number(entry.expiresAt) >= now);
+        });
+    }
+
+    function prepaidDate(value){
+        if(!Number(value || 0)){ return "無期限"; }
+        return new Date(Number(value)).toLocaleDateString("zh-TW");
+    }
+
+    function redeemPrepaidEntry(entryId,button){
+        var member = selectedMember();
+        var entry = activePrepaidEntries(member).filter(function(item){ return item.id === entryId; })[0];
+        if(!member || !entry){ alert("找不到可使用的預存次數，請重新整理"); return; }
+        if(window.MonsterAttendanceGate && !MonsterAttendanceGate.requireClockIn()){ return; }
+        if(!confirm("確定使用「" + (entry.title || "預存入場") + "」1 次？\n\n目前剩餘 " + Number(entry.remaining || 0) + " 次，使用後會由售票機自動列印收據。")){ return; }
+        if(!window.firebase || !firebase.functions){ alert("雲端扣次功能尚未連線"); return; }
+        var requestId = "redeem_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+        if(button){ button.disabled = true; button.textContent = "處理中…"; }
+        firebase.functions("asia-east1").httpsCallable("staffPrepaidV1Redeem")({
+            memberId:member.id,
+            entryId:entryId,
+            requestId:requestId
+        }).then(function(result){
+            var data = result && result.data || {};
+            alert("✅ 已使用 1 次預存入場\n剩餘 " + Number(data.remaining || 0) + " 次\n收據已送到售票機列印佇列");
+        }).catch(function(error){
+            if(button){ button.disabled = false; button.textContent = "使用 1 次並列印"; }
+            alert("扣次失敗：" + (error && error.message ? error.message : "請稍後再試"));
+        });
+    }
+
     function renderMemberDetail(){
 
         var member =
@@ -590,6 +624,10 @@
         : [];
 
         var historyHtml = "";
+        var prepaidEntries = activePrepaidEntries(member);
+        var prepaidHtml = prepaidEntries.length ? prepaidEntries.map(function(entry){
+            return '<div class="staff-prepaid-row"><div><strong>'+escapeText(entry.title || "預存入場")+'</strong><span>有效至 '+escapeText(prepaidDate(entry.expiresAt))+'・已使用 '+Number(entry.used || 0)+' 次</span></div><div><b>剩餘 '+Number(entry.remaining || 0)+' 次</b><button type="button" class="staff-success-button staff-prepaid-use" data-prepaid-entry="'+escapeText(entry.id)+'">使用 1 次並列印</button></div></div>';
+        }).join("") : '<div class="staff-empty-card">目前沒有可使用的預存入場次數</div>';
 
         if(history.length === 0){
 
@@ -740,6 +778,11 @@
 </div>
 
 <div class="staff-point-history-card">
+    <div class="staff-subsection-title">🎟️ 預存入場次數</div>
+    ${prepaidHtml}
+</div>
+
+<div class="staff-point-history-card">
 
     <div class="staff-subsection-title">
         🎁 玩具點數紀錄
@@ -756,6 +799,10 @@
             "click",
             openToyPointModal
         );
+
+        Array.prototype.slice.call(document.querySelectorAll("[data-prepaid-entry]")).forEach(function(button){
+            button.addEventListener("click",function(){ redeemPrepaidEntry(button.getAttribute("data-prepaid-entry"),button); });
+        });
 
         if(currentRole === "admin"){
 

@@ -70,6 +70,17 @@ function validatePaymentItems(items) {
             if (typeof renderTicketCatalog === "function") renderTicketCatalog();
             throw new Error("「" + ((ticket && ticket.title) || "票券") + "」" + (sale.label || "目前無法購買"));
         }
+        if (ticket.prepaidBundleEnabled === true) {
+            if (!window.currentMember || !currentMember.id) {
+                throw new Error("購買預存入場套票前，請先搜尋並選擇會員");
+            }
+            if (!ticket.prepaidTargetTicketId || !ticketData[ticket.prepaidTargetTicketId]) {
+                throw new Error("「" + (ticket.title || "預存套票") + "」尚未設定預存使用票券，請由店長先完成設定");
+            }
+            if (Number(ticket.prepaidStoredCount || 0) < 1) {
+                throw new Error("預存套票的剩餘次數設定不正確");
+            }
+        }
     });
 }
 

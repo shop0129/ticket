@@ -15,7 +15,7 @@ function updateStats(stats, ticket, item) {
     if (!stats || !ticket || !item)
         return;
     stats.tickets =
-        Number(stats.tickets || 0) + 1;
+        Number(stats.tickets || 0) + Math.max(0, Number(item.reportTicketCount != null ? item.reportTicketCount : 1));
     stats.income =
         Number(stats.income || 0) +
             Number(ticket.price || 0);

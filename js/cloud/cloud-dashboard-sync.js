@@ -138,7 +138,9 @@
         return (
             order &&
             !order.deleted &&
-            order.status !== "cancel"
+            order.status !== "cancel" &&
+            order.excludeFromSalesReport !== true &&
+            order.prepaidRedemption !== true
         );
     }
 
@@ -150,8 +152,10 @@
     }
 
     function countOrderTickets(order){
-
-        return getOrderItems(order).length;
+        if(order && order.prepaidRedemption === true){ return 0; }
+        return getOrderItems(order).reduce(function(total,item){
+            return total + Math.max(0,Number(item && item.reportTicketCount != null ? item.reportTicketCount : 1));
+        },0);
     }
 
     function getOrderToyCounts(order){
@@ -217,7 +221,7 @@
         order
     ){
 
-        if(!order || order.deleted){
+        if(!order || order.deleted || order.excludeFromSalesReport === true || order.prepaidRedemption === true){
             return;
         }
 

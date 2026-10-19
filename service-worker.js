@@ -27,7 +27,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix42-mobile-dashboard-cloud-load-20261018-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix43-prepaid-entry-20261019-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -90,6 +90,7 @@ var CORE_ASSETS = [
     "./js/cloud/firebase-attendance-service.js",
     "./js/cloud/linepay-scanner.js",
     "./js/cloud/member-portal-admin.js",
+    "./js/cloud/prepaid-print-queue.js",
     "./js/cloud/v71-migration.js",
     "./js/config/data.js",
     "./js/config/state.js",

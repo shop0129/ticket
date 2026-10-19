@@ -814,6 +814,14 @@ input{
     margin-top:20px;
 }
 
+.staff-prepaid-row{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid #e7edf2}
+.staff-prepaid-row:last-child{border-bottom:0}
+.staff-prepaid-row>div{display:flex;flex-direction:column;gap:5px}
+.staff-prepaid-row span{color:#71808d;font-size:13px}
+.staff-prepaid-row b{color:#0b8750;font-size:18px;text-align:right}
+.staff-prepaid-row .staff-prepaid-use{padding:9px 12px;font-size:14px}
+@media(max-width:560px){.staff-prepaid-row{align-items:stretch;flex-direction:column}.staff-prepaid-row b{text-align:left}.staff-prepaid-row .staff-prepaid-use{width:100%}}
+
 .staff-point-history-card{
     margin-top:20px;
     padding:20px;

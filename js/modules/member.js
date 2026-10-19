@@ -527,6 +527,57 @@ function calculateConsumePoints(amount) {
     if (window.ConsumePoints) return ConsumePoints.earn(amount);
     return Math.floor(Number(amount || 0) / CONSUME_POINT_RATE);
 }
+function applyPrepaidBundlePurchase(member, order) {
+    if (!member || !order || !Array.isArray(order.items)) return;
+    member.prepaidEntries = Array.isArray(member.prepaidEntries) ? member.prepaidEntries : [];
+    member.toyPointHistory = Array.isArray(member.toyPointHistory) ? member.toyPointHistory : [];
+    order.prepaidPackageGrants = Array.isArray(order.prepaidPackageGrants) ? order.prepaidPackageGrants : [];
+    order.items.forEach(function (item, itemIndex) {
+        if (!item || item.prepaidBundleEnabled !== true) return;
+        var targetId = String(item.prepaidTargetTicketId || "");
+        var target = (typeof ticketData !== "undefined" && ticketData[targetId]) || {};
+        var storedCount = Math.max(1, Math.floor(Number(item.prepaidStoredCount || 3)));
+        var toyPoints = Math.max(0, Math.floor(Number(item.prepaidToyPoints || 0)));
+        var validityDays = Math.max(1, Math.floor(Number(item.prepaidValidityDays || 180)));
+        var purchasedAt = Number(order.createdAt || Date.now());
+        var entryId = "prepaid_" + String(order.orderNo || purchasedAt).replace(/[^A-Za-z0-9_-]/g, "_") + "_" + itemIndex;
+        if (member.prepaidEntries.some(function (entry) { return entry && entry.id === entryId; })) return;
+        var targetSnapshot = window.MonsterTicketDataSync
+            ? MonsterTicketDataSync.snapshot(targetId, target)
+            : Object.assign({ id: targetId }, JSON.parse(JSON.stringify(target)));
+        targetSnapshot.price = 0;
+        targetSnapshot.toy = "none";
+        targetSnapshot.prepaidBundleEnabled = false;
+        member.prepaidEntries.unshift({
+            id: entryId,
+            sourceOrderNo: order.orderNo || "",
+            sourceTicketId: item.id || "",
+            targetTicketId: targetId,
+            title: target.title || item.title || "預存入場",
+            remaining: storedCount,
+            granted: storedCount,
+            used: 0,
+            purchasedAt: purchasedAt,
+            expiresAt: purchasedAt + validityDays * 86400000,
+            ticketSnapshot: targetSnapshot,
+            history: []
+        });
+        if (toyPoints > 0) {
+            member.toyPoints = Number(member.toyPoints || 0) + toyPoints;
+            member.toyPointHistory.unshift({
+                id: "toy_" + purchasedAt + "_prepaid_" + itemIndex,
+                date: new Date(purchasedAt).toLocaleString("zh-TW"),
+                amount: toyPoints,
+                reason: "預存套票一次發放",
+                orderNo: order.orderNo || "",
+                operator: memberOperatorName(),
+                balance: member.toyPoints
+            });
+        }
+        item.reportTicketCount = storedCount + 1;
+        order.prepaidPackageGrants.push({ entryId: entryId, storedCount: storedCount, toyPoints: toyPoints });
+    });
+}
 function applyMemberPurchase(amount, order, pointUse) {
     if (!currentMember) return;
     var member = memberData.find(function(item){ return item.id === currentMember.id; });
@@ -544,6 +595,7 @@ function applyMemberPurchase(amount, order, pointUse) {
     member.points = Number(member.points || 0) + earnedPoints;
     member.lastPurchaseDate = new Date().toLocaleString("zh-TW");
     if (earnedPoints > 0) member.pointHistory.unshift({id:"point_"+Date.now()+"_earn",date:new Date().toLocaleString("zh-TW"),amount:earnedPoints,reason:"消費累積",orderNo:(order&&order.orderNo)||"",operator:memberOperatorName(),balance:member.points});
+    applyPrepaidBundlePurchase(member, order);
     if (order) { order.earnedPoints=earnedPoints; order.usedPoints=usedPoints; order.pointDiscount=Number(pointUse.discount||0); order.paidAmount=spend; order.memberLevel=getMemberLevel(member).name; saveSalesHistory(); }
     currentMember=member; saveMembers(); if(window.ConsumePoints) ConsumePoints.render();
 }
@@ -562,12 +614,26 @@ function canRollbackMemberOrder(order) {
     var earnedPoints = Number(order.earnedPoints || 0);
     var toyPoints = Number(((_a = order.toyPointConversion) === null || _a === void 0 ? void 0 : _a.points) ||
         0);
+    var prepaidGrants = Array.isArray(order.prepaidPackageGrants) ? order.prepaidPackageGrants : [];
+    var prepaidToyPoints = prepaidGrants.reduce(function (sum, grant) { return sum + Number(grant.toyPoints || 0); }, 0);
+    var prepaidEntries = Array.isArray(member.prepaidEntries) ? member.prepaidEntries : [];
+    if (prepaidGrants.some(function (grant) {
+        var entry = prepaidEntries.find(function (candidate) { return candidate && candidate.id === grant.entryId; });
+        return entry && Number(entry.used || 0) > 0;
+    })) {
+        alert("❌ 此預存套票已有入場次數被使用，無法直接作廢。");
+        return false;
+    }
     if (Number(member.points || 0) + Number(order.usedPoints || 0) < earnedPoints) {
         alert("❌ 會員消費點數已被使用，無法直接作廢此訂單。請先由店長調整點數。");
         return false;
     }
     if (member.toyPoints < toyPoints) {
         alert("❌ 此訂單轉入的玩具點數已被使用，無法直接作廢。請先補足玩具點數。");
+        return false;
+    }
+    if (Number(member.toyPoints || 0) < toyPoints + prepaidToyPoints) {
+        alert("❌ 此套票發放的玩具點數已被使用，無法直接作廢。請先補足玩具點數。");
         return false;
     }
     return true;
@@ -586,6 +652,13 @@ function rollbackMemberPurchase(order) {
     var earnedPoints = Number(order.earnedPoints || 0);
     var toyPoints = Number(((_a = order.toyPointConversion) === null || _a === void 0 ? void 0 : _a.points) ||
         0);
+    var prepaidGrants = Array.isArray(order.prepaidPackageGrants) ? order.prepaidPackageGrants : [];
+    var prepaidToyPoints = prepaidGrants.reduce(function (sum, grant) { return sum + Number(grant.toyPoints || 0); }, 0);
+    if (prepaidGrants.length && Array.isArray(member.prepaidEntries)) {
+        member.prepaidEntries = member.prepaidEntries.filter(function (entry) {
+            return !prepaidGrants.some(function (grant) { return entry && entry.id === grant.entryId; });
+        });
+    }
     member.totalSpend =
         Math.max(0, Number(member.totalSpend || 0) -
             Number(order.paidAmount != null ? order.paidAmount : order.amount || 0));
@@ -593,7 +666,7 @@ function rollbackMemberPurchase(order) {
         Math.max(0, Number(member.points || 0) - earnedPoints) + Number(order.usedPoints || 0);
     member.toyPoints =
         Math.max(0, Number(member.toyPoints || 0) -
-            toyPoints);
+            (toyPoints + prepaidToyPoints));
     if (Number(order.usedPoints || 0) > 0) {
         member.pointHistory.unshift({id:"point_"+Date.now()+"_refund",date:new Date().toLocaleString("zh-TW"),amount:Number(order.usedPoints||0),reason:"訂單作廢退回折抵點數",orderNo:order.orderNo||"",operator:memberOperatorName(),balance:member.points});
     }
@@ -613,6 +686,17 @@ function rollbackMemberPurchase(order) {
             date: new Date().toLocaleString("zh-TW"),
             amount: -toyPoints,
             reason: "訂單作廢扣回",
+            orderNo: order.orderNo || "",
+            operator: memberOperatorName(),
+            balance: member.toyPoints
+        });
+    }
+    if (prepaidToyPoints > 0) {
+        member.toyPointHistory.unshift({
+            id: "toy_" + Date.now() + "_prepaid_refund",
+            date: new Date().toLocaleString("zh-TW"),
+            amount: -prepaidToyPoints,
+            reason: "預存套票作廢扣回",
             orderNo: order.orderNo || "",
             operator: memberOperatorName(),
             balance: member.toyPoints
