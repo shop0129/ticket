@@ -56,7 +56,7 @@ var callablePromise;
 if(!user||user.isAnonymous){callablePromise=Promise.reject(new Error('手機的店長登入已失效，請關閉後台並重新登入 MANAGER'));}
 else{
   callablePromise=user.getIdToken(true).then(function(){
-    return firebase.functions('asia-east1').httpsCallable('staffOrdersV1AdminDelete')({id:id});
+    return firebase.app().functions('asia-east1').httpsCallable('staffOrdersV1AdminDelete')({id:id});
   });
 }
 var timeout=new Promise(function(resolve,reject){setTimeout(function(){reject(new Error('手機連線逾時，請確認網路後再試一次'));},15000);});

@@ -29,8 +29,8 @@ expect(manager.includes('getIdToken(true)'), 'fresh mobile auth token missing');
 expect(manager.includes("alert('刪除失敗：'+message)"), 'visible mobile delete failure missing');
 expect(manager.includes("alert('已刪除「'+label+'」"), 'visible mobile delete success missing');
 expect(index.includes('receipt-printer.js?v=7833fix47'), 'kiosk FIX47 printer cache bust missing');
-expect(index.includes('prepaid-print-queue.js?v=7833fix47'), 'kiosk FIX47 queue cache bust missing');
-expect(staff.includes('enterprise-manager.js?v=fix47'), 'staff FIX47 cache bust missing');
-expect(sw.includes('7833-fix47a-mobile-prepaid-timeout-20261022-1'), 'latest service-worker cache missing');
+expect(index.includes('prepaid-print-queue.js?v=7833fix47b'), 'kiosk latest queue cache bust missing');
+expect(staff.includes('enterprise-manager.js?v=fix47b'), 'staff latest cache bust missing');
+expect(sw.includes('7833-fix47b-firebase-region-callable-20261022-1'), 'latest service-worker cache missing');
 
 console.log('FIX47 print and mobile delete recovery tests passed');

@@ -24,8 +24,8 @@ expect(orderTools.includes('.once("value")'), 'member rebind must refresh cloud 
 expect(orderTools.includes('是否立即新增會員並自動綁定'), 'member create prompt missing');
 expect(staffApp.includes('MonsterStaffMemberManager'), 'quick member manager bridge missing');
 expect(staffApp.includes('memberCreatedCallback'), 'auto-bind callback missing');
-expect(index.includes('prepaid-print-queue.js?v=7833fix47'), 'index latest queue version missing');
+expect(index.includes('prepaid-print-queue.js?v=7833fix47b'), 'index latest queue version missing');
 expect(staff.includes('order-tools.js?v=fix46'), 'staff FIX46 order tools version missing');
-expect(sw.includes('7833-fix47a-mobile-prepaid-timeout-20261022-1'), 'latest service-worker cache missing');
+expect(sw.includes('7833-fix47b-firebase-region-callable-20261022-1'), 'latest service-worker cache missing');
 
 console.log('FIX46 cloud print, delete and member bind tests passed');

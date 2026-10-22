@@ -183,11 +183,11 @@
     function start(cloud) {
         if (started || !cloud || !cloud.database || !window.firebase || !firebase.functions) return;
         started = true;
-        claimJob = firebase.functions("asia-east1").httpsCallable("prepaidPrintV1Claim");
-        claimNextJob = firebase.functions("asia-east1").httpsCallable("prepaidPrintV1ClaimNext");
-        completeJob = firebase.functions("asia-east1").httpsCallable("prepaidPrintV1Complete");
-        statusJob = firebase.functions("asia-east1").httpsCallable("prepaidPrintV1Status");
-        retryJob = firebase.functions("asia-east1").httpsCallable("prepaidPrintV1Retry");
+        claimJob = firebase.app().functions("asia-east1").httpsCallable("prepaidPrintV1Claim");
+        claimNextJob = firebase.app().functions("asia-east1").httpsCallable("prepaidPrintV1ClaimNext");
+        completeJob = firebase.app().functions("asia-east1").httpsCallable("prepaidPrintV1Complete");
+        statusJob = firebase.app().functions("asia-east1").httpsCallable("prepaidPrintV1Status");
+        retryJob = firebase.app().functions("asia-east1").httpsCallable("prepaidPrintV1Retry");
         cloud.database.ref(ROOT + "/printJobs").on("child_added", function (snapshot) {
             var job = snapshot.val() || {};
             if (job.status === "pending" || (job.status === "printing" && Date.now() - Number(job.claimedAt || 0) > 180000)) {

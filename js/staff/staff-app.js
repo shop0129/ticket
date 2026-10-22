@@ -612,7 +612,7 @@
         var callPromise = (!user || user.isAnonymous)
             ? Promise.reject(new Error("店長／員工登入已失效，請重新登入"))
             : user.getIdToken(true).then(function(){
-                return firebase.functions("asia-east1").httpsCallable("staffPrepaidV1Redeem")({
+                return firebase.app().functions("asia-east1").httpsCallable("staffPrepaidV1Redeem")({
                     memberId:member.id,
                     entryId:entryId,
                     requestId:requestId

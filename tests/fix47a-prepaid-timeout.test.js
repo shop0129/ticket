@@ -15,7 +15,7 @@ expect(app.includes('PREPAID_TIMEOUT'), 'redemption timeout error missing');
 expect(app.includes('getIdToken(true)'), 'fresh staff token missing');
 expect(app.includes('不會重複扣次'), 'safe retry explanation missing');
 expect(app.includes('button.disabled = false; button.textContent = "使用 1 次並列印"'), 'button recovery missing');
-expect(staff.includes('staff-app.js?v=fix47a'), 'staff FIX47A cache bust missing');
-expect(sw.includes('7833-fix47a-mobile-prepaid-timeout-20261022-1'), 'FIX47A cache missing');
+expect(staff.includes('staff-app.js?v=fix47b'), 'staff latest cache bust missing');
+expect(sw.includes('7833-fix47b-firebase-region-callable-20261022-1'), 'latest cache missing');
 
 console.log('FIX47A prepaid timeout recovery tests passed');
