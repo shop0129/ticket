@@ -64,6 +64,30 @@
         return MonsterReceiptPrinter.ensureReady(allowPrompt);
     }
 
+    function withConnectionTimeout(promise) {
+        return Promise.race([
+            promise,
+            new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    var error = new Error("收據機連線沒有回應，請重新輸入 Controller 配對碼");
+                    error.code = "CONTROLLER_TIMEOUT";
+                    reject(error);
+                }, 10000);
+            })
+        ]);
+    }
+
+    function reconnectPrinter() {
+        if (!window.MonsterReceiptPrinter) return;
+        MonsterReceiptPrinter.clearPairing();
+        printerReady(true).then(function () {
+            lastStatus = null;
+            pollNext(true);
+        }).catch(function (error) {
+            showStatus("收據機尚未連接：" + errorText(error), "error", "重新輸入配對碼", reconnectPrinter);
+        });
+    }
+
     function finish(jobId, success, error) {
         return completeJob({
             jobId: jobId,
@@ -78,7 +102,7 @@
     function claimAndPrint(jobId) {
         if (processing[jobId] || !claimJob || !completeJob) return;
         processing[jobId] = true;
-        printerReady(Date.now() - lastPairingPromptAt > 60000).then(function () {
+        withConnectionTimeout(printerReady(Date.now() - lastPairingPromptAt > 60000)).then(function () {
             return claimJob({ jobId: jobId });
         }).then(function (result) {
             var data = result && result.data || {};
@@ -100,7 +124,7 @@
         }).catch(function (error) {
             delete processing[jobId];
             lastPairingPromptAt = Date.now();
-            showStatus("預存收據尚未列印：" + errorText(error), "error", "重新嘗試", function () { claimAndPrint(jobId); });
+            showStatus("預存收據尚未列印：" + errorText(error), "error", "連接收據機並重試", reconnectPrinter);
             console.error("[PrepaidPrintQueue]", error);
         });
     }
@@ -149,9 +173,9 @@
         if (!Number(lastStatus.pendingCount || 0)) return Promise.resolve(false);
         showStatus("收到 " + Number(lastStatus.pendingCount) + " 張待列印預存入場收據，正在連接收據機…", "wait");
         var allowPrompt = manual === true || Date.now() - lastPairingPromptAt > 60000;
-        return printerReady(allowPrompt).then(function () { return true; }).catch(function (error) {
+        return withConnectionTimeout(printerReady(allowPrompt)).then(function () { return true; }).catch(function (error) {
             lastPairingPromptAt = Date.now();
-            showStatus("預存收據等待列印：" + errorText(error), "error", "連接收據機並重試", function () { pollNext(true); });
+            showStatus("預存收據等待列印：" + errorText(error), "error", "連接收據機並重試", reconnectPrinter);
             return false;
         });
     }

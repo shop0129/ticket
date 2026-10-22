@@ -67,6 +67,22 @@
         return true;
     }
 
+    // FIX47E：可由售票機專用網址重新寫入目前 Controller 配對碼。
+    // 寫入後立即清掉網址參數，避免配對碼留在網址列與重新整理紀錄。
+    function importPairingKeyFromUrl() {
+        var match = String(window.location.search || "").match(/[?&]receiptPair=(\d{8})(?:&|$)/);
+        if (!match || !savePairingKey(match[1])) return false;
+        try {
+            var cleaned = String(window.location.href)
+                .replace(/([?&])receiptPair=\d{8}(&?)/, function (_, lead, tail) {
+                    return lead === "?" && tail ? "?" : (lead === "?" ? "" : (tail ? "&" : ""));
+                })
+                .replace(/[?&]$/, "");
+            window.history.replaceState(null, document.title, cleaned);
+        } catch (ignore) {}
+        return true;
+    }
+
     function clearPairingKey() {
         localStorage.removeItem(PAIRING_KEY);
     }
@@ -271,4 +287,6 @@
         printOrder: printOrder,
         buildRequest: buildRequest
     };
+
+    importPairingKeyFromUrl();
 }());
