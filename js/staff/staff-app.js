@@ -599,8 +599,9 @@
         };
     }
 
-    // FIX47D：Callable 無法對到舊會員節點時，直接在目前監聽的會員節點安全扣次。
-    // requestId marker 讓逾時重試也不會重複扣除。
+    // FIX48：Callable 無法對到舊會員節點時，直接在目前監聽的會員節點安全扣次。
+    // requestId marker 讓逾時重試也不會重複扣除。預存入場只建立等待入場訂單，
+    // 不建立列印工作；店員直接在手機驗票中心確認入場。
     function redeemPrepaidEntryDirect(member,entryId,requestId){
         var root = config.firebaseRoot || "monsterTicket/v1";
         var memberKey = selectedMemberId || member.id;
@@ -664,12 +665,10 @@
                 excludeFromSalesReport:true,source:"staff_prepaid_direct",operatorName:operatorName(),
                 createdAt:Number(redemption.usedAt || now),updatedAt:Date.now()
             };
-            var job = {id:orderId,orderId:orderId,orderNo:orderNo,status:"pending",requestedAt:Date.now(),requestedBy:operatorName(),attempts:0};
-            return Promise.all([
-                firebase.database().ref(root + "/orders/" + orderId).transaction(function(current){ return current || order; },undefined,false),
-                firebase.database().ref(root + "/printJobs/" + orderId).transaction(function(current){ return current || job; },undefined,false)
-            ]).then(function(){
-                return {data:{success:true,orderId:orderId,orderNo:orderNo,remaining:Number(redemption.remaining || 0),printStatus:"pending",fallback:true}};
+            return firebase.database().ref(root + "/orders/" + orderId).transaction(function(current){
+                return current || order;
+            },undefined,false).then(function(){
+                return {data:{success:true,orderId:orderId,orderNo:orderNo,remaining:Number(redemption.remaining || 0),printStatus:"not_required",admissionStatus:"waiting",fallback:true}};
             });
         });
     }
@@ -679,7 +678,7 @@
         var entry = activePrepaidEntries(member).filter(function(item){ return item.id === entryId; })[0];
         if(!member || !entry){ alert("找不到可使用的預存次數，請重新整理"); return; }
         if(window.MonsterAttendanceGate && !MonsterAttendanceGate.requireClockIn()){ return; }
-        if(!confirm("確定使用「" + (entry.title || "預存入場") + "」1 次？\n\n目前剩餘 " + Number(entry.remaining || 0) + " 次，使用後會由售票機自動列印收據。")){ return; }
+        if(!confirm("確定使用「" + (entry.title || "預存入場") + "」1 次？\n\n目前剩餘 " + Number(entry.remaining || 0) + " 次。使用後會加入手機後台的「等待入場」，不會列印收據。")){ return; }
         if(!window.firebase || !firebase.functions){ alert("雲端扣次功能尚未連線"); return; }
         var pendingKey = "monsterPrepaidRedeemPendingV1";
         var pending = null;
@@ -722,10 +721,10 @@
         Promise.race([callPromise,timeoutPromise]).then(function(result){
             var data = result && result.data || {};
             try{ localStorage.removeItem(pendingKey); }catch(ignoreRemove){}
-            if(button){ button.disabled = false; button.textContent = "使用 1 次並列印"; }
-            alert("✅ 已使用 1 次預存入場\n剩餘 " + Number(data.remaining || 0) + " 次\n收據已送到售票機列印佇列");
+            if(button){ button.disabled = false; button.textContent = "使用 1 次並等待入場"; }
+            alert("✅ 已使用 1 次預存入場\n剩餘 " + Number(data.remaining || 0) + " 次\n已加入「等待入場」，請到驗票中心確認入場");
         }).catch(function(error){
-            if(button){ button.disabled = false; button.textContent = "使用 1 次並列印"; }
+            if(button){ button.disabled = false; button.textContent = "使用 1 次並等待入場"; }
             var code = String(error && error.code || "");
             var message = error && error.message ? error.message : "請稍後再試";
             if(code === "PREPAID_TIMEOUT"){
@@ -761,7 +760,7 @@
         var historyHtml = "";
         var prepaidEntries = activePrepaidEntries(member);
         var prepaidHtml = prepaidEntries.length ? prepaidEntries.map(function(entry){
-            return '<div class="staff-prepaid-row"><div><strong>'+escapeText(entry.title || "預存入場")+'</strong><span>有效至 '+escapeText(prepaidDate(entry.expiresAt))+'・已使用 '+Number(entry.used || 0)+' 次</span></div><div><b>剩餘 '+Number(entry.remaining || 0)+' 次</b><button type="button" class="staff-success-button staff-prepaid-use" data-prepaid-entry="'+escapeText(entry.id)+'">使用 1 次並列印</button></div></div>';
+            return '<div class="staff-prepaid-row"><div><strong>'+escapeText(entry.title || "預存入場")+'</strong><span>有效至 '+escapeText(prepaidDate(entry.expiresAt))+'・已使用 '+Number(entry.used || 0)+' 次</span></div><div><b>剩餘 '+Number(entry.remaining || 0)+' 次</b><button type="button" class="staff-success-button staff-prepaid-use" data-prepaid-entry="'+escapeText(entry.id)+'">使用 1 次並等待入場</button></div></div>';
         }).join("") : '<div class="staff-empty-card">目前沒有可使用的預存入場次數</div>';
 
         if(history.length === 0){
