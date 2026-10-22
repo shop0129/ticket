@@ -25,10 +25,10 @@ var index = read("index.html");
 ok(index.indexOf("V7.8.3.3 · FIX13 STARTUP + CASH + BACK RECOVERY") >= 0, "index exposes current FIX13 version");
 ok(index.indexOf('id="receiptPrintRecovery"') >= 0, "receipt recovery panel exists");
 ok(index.indexOf("css/receipt-printer.css?v=7833fix7") >= 0, "receipt CSS is loaded");
-ok(index.indexOf("js/hardware/receipt-printer.js?v=7833fix7") >= 0, "receipt bridge is loaded");
+ok(index.indexOf("js/hardware/receipt-printer.js?v=7833fix47") >= 0, "receipt bridge is loaded");
 ok(
-    index.indexOf("js/hardware/receipt-printer.js?v=7833fix7") <
-        index.indexOf("js/hardware/cash-bridge.js?v=7833fix13"),
+    index.indexOf("js/hardware/receipt-printer.js?v=7833fix47") <
+        index.indexOf("js/hardware/cash-bridge.js?v=7833fix24"),
     "receipt bridge loads before the cash bridge"
 );
 

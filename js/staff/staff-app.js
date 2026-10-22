@@ -594,18 +594,54 @@
         if(window.MonsterAttendanceGate && !MonsterAttendanceGate.requireClockIn()){ return; }
         if(!confirm("確定使用「" + (entry.title || "預存入場") + "」1 次？\n\n目前剩餘 " + Number(entry.remaining || 0) + " 次，使用後會由售票機自動列印收據。")){ return; }
         if(!window.firebase || !firebase.functions){ alert("雲端扣次功能尚未連線"); return; }
-        var requestId = "redeem_" + Date.now() + "_" + Math.floor(Math.random() * 1000000);
+        var pendingKey = "monsterPrepaidRedeemPendingV1";
+        var pending = null;
+        try{ pending = JSON.parse(localStorage.getItem(pendingKey) || "null"); }catch(ignore){ pending = null; }
+        if(!pending || pending.memberId !== member.id || pending.entryId !== entryId || Date.now() - Number(pending.createdAt || 0) > 15 * 60 * 1000){
+            pending = {
+                memberId:member.id,
+                entryId:entryId,
+                requestId:"redeem_" + Date.now() + "_" + Math.floor(Math.random() * 1000000),
+                createdAt:Date.now()
+            };
+            try{ localStorage.setItem(pendingKey,JSON.stringify(pending)); }catch(ignoreSave){}
+        }
+        var requestId = pending.requestId;
         if(button){ button.disabled = true; button.textContent = "處理中…"; }
-        firebase.functions("asia-east1").httpsCallable("staffPrepaidV1Redeem")({
-            memberId:member.id,
-            entryId:entryId,
-            requestId:requestId
-        }).then(function(result){
+        var user = firebase.auth && firebase.auth().currentUser;
+        var callPromise = (!user || user.isAnonymous)
+            ? Promise.reject(new Error("店長／員工登入已失效，請重新登入"))
+            : user.getIdToken(true).then(function(){
+                return firebase.functions("asia-east1").httpsCallable("staffPrepaidV1Redeem")({
+                    memberId:member.id,
+                    entryId:entryId,
+                    requestId:requestId
+                });
+            });
+        var timeoutPromise = new Promise(function(resolve,reject){
+            setTimeout(function(){
+                var timeoutError = new Error("雲端超過 18 秒沒有回覆");
+                timeoutError.code = "PREPAID_TIMEOUT";
+                reject(timeoutError);
+            },18000);
+        });
+        Promise.race([callPromise,timeoutPromise]).then(function(result){
             var data = result && result.data || {};
+            try{ localStorage.removeItem(pendingKey); }catch(ignoreRemove){}
+            if(button){ button.disabled = false; button.textContent = "使用 1 次並列印"; }
             alert("✅ 已使用 1 次預存入場\n剩餘 " + Number(data.remaining || 0) + " 次\n收據已送到售票機列印佇列");
         }).catch(function(error){
             if(button){ button.disabled = false; button.textContent = "使用 1 次並列印"; }
-            alert("扣次失敗：" + (error && error.message ? error.message : "請稍後再試"));
+            var code = String(error && error.code || "");
+            var message = error && error.message ? error.message : "請稍後再試";
+            if(code === "PREPAID_TIMEOUT"){
+                alert("雲端暫時沒有回覆，按鈕已恢復。\n\n請先等待會員次數更新；如果次數沒有改變，可以再按一次。系統會沿用同一筆編號，不會重複扣次。");
+            }else{
+                if(code.indexOf("failed-precondition") >= 0 || code.indexOf("invalid-argument") >= 0 || code.indexOf("unauthenticated") >= 0 || code.indexOf("permission-denied") >= 0){
+                    try{ localStorage.removeItem(pendingKey); }catch(ignoreFailureRemove){}
+                }
+                alert("扣次失敗：" + message);
+            }
         });
     }
 
