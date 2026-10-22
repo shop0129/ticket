@@ -587,6 +587,93 @@
         return new Date(Number(value)).toLocaleDateString("zh-TW");
     }
 
+    function prepaidTaipeiParts(milliseconds){
+        var date = new Date(Number(milliseconds || Date.now()) + 8 * 60 * 60 * 1000);
+        function pad(value){ return String(value).padStart(2,"0"); }
+        return {
+            year:String(date.getUTCFullYear()),
+            month:pad(date.getUTCMonth() + 1),
+            day:pad(date.getUTCDate()),
+            hour:pad(date.getUTCHours()),
+            minute:pad(date.getUTCMinutes())
+        };
+    }
+
+    // FIX47D：Callable 無法對到舊會員節點時，直接在目前監聽的會員節點安全扣次。
+    // requestId marker 讓逾時重試也不會重複扣除。
+    function redeemPrepaidEntryDirect(member,entryId,requestId){
+        var root = config.firebaseRoot || "monsterTicket/v1";
+        var memberKey = selectedMemberId || member.id;
+        var memberRef = firebase.database().ref(root + "/members/" + memberKey);
+        var orderId = "prepaid_" + requestId;
+        var now = Date.now();
+
+        return memberRef.transaction(function(current){
+            if(!current || current.deleted){ return; }
+            current.prepaidRedeemRequests = current.prepaidRedeemRequests || {};
+            if(current.prepaidRedeemRequests[requestId]){ return current; }
+            var entries = current.prepaidEntries && typeof current.prepaidEntries === "object" ? current.prepaidEntries : [];
+            var entryKey = Object.keys(entries).filter(function(key){
+                return entries[key] && String(entries[key].id || "") === String(entryId);
+            })[0];
+            if(entryKey === undefined){ return; }
+            var entry = entries[entryKey];
+            if(Number(entry.remaining || 0) < 1){ return; }
+            if(Number(entry.expiresAt || 0) && Number(entry.expiresAt) < now){ return; }
+            entry.remaining = Number(entry.remaining || 0) - 1;
+            entry.used = Number(entry.used || 0) + 1;
+            entry.history = Array.isArray(entry.history) ? entry.history : [];
+            entry.history.unshift({requestId:requestId,orderId:orderId,usedAt:now,operatorName:operatorName(),remaining:entry.remaining});
+            current.prepaidEntries = entries;
+            current.prepaidRedeemRequests[requestId] = {orderId:orderId,entryId:entryId,remaining:entry.remaining,usedAt:now};
+            current.updatedAt = now;
+            current.updatedBy = operatorName();
+            return current;
+        },undefined,false).then(function(result){
+            var updated = result && result.snapshot && result.snapshot.val();
+            var redemption = updated && updated.prepaidRedeemRequests && updated.prepaidRedeemRequests[requestId];
+            if(!result || !result.committed || !updated || !redemption){
+                throw new Error("預存次數不足、已過期，或會員資料不存在");
+            }
+            var entries = updated.prepaidEntries && typeof updated.prepaidEntries === "object" ? updated.prepaidEntries : [];
+            var usedEntry = Object.keys(entries).map(function(key){ return entries[key]; }).filter(function(item){
+                return item && String(item.id || "") === String(entryId);
+            })[0];
+            if(!usedEntry){ throw new Error("找不到預存入場項目"); }
+            var ticket = JSON.parse(JSON.stringify(usedEntry.ticketSnapshot || {}));
+            var parts = prepaidTaipeiParts(redemption.usedAt || now);
+            var numeric = String(orderId).replace(/\D/g,"").slice(-6).padStart(6,"0");
+            var orderNo = "P" + parts.year + parts.month + parts.day + numeric;
+            var shortCode = "A" + String(orderNo).replace(/\D/g,"").slice(-5).padStart(5,"0");
+            var qrToken = ("prepaid" + requestId).replace(/[^A-Za-z0-9]/g,"").slice(-24).padStart(24,"0");
+            ticket.id = ticket.id || usedEntry.targetTicketId || "prepaid-admission";
+            ticket.title = String(ticket.title || usedEntry.title || "預存入場") + "（預存，剩餘 " + Number(redemption.remaining || 0) + " 次）";
+            ticket.price = 0;
+            ticket.toy = "none";
+            ticket.prepaidBundleEnabled = false;
+            ticket.reportTicketCount = 0;
+            ticket.reward = [Number(ticket.token || 0) > 0 ? "token" : "",ticket.canEnter === false ? "" : "band"].filter(Boolean).join(",");
+            var order = {
+                id:orderId,cloudId:orderId,orderNo:orderNo,shortCode:shortCode,qrToken:qrToken,qrVersion:1,
+                qrPayload:"MGV1:" + orderId + ":" + qrToken,validationStatus:"waiting",
+                ticketInstances:[{ticketInstanceId:shortCode + "-01-01",ticketId:ticket.id,title:ticket.title,status:"waiting",checkedInAt:null,checkedOutAt:null}],
+                date:parts.year + "/" + parts.month + "/" + parts.day,time:parts.hour + ":" + parts.minute,
+                payment:"預存入場",amount:0,originalAmount:0,paidAmount:0,status:"normal",items:[ticket],
+                memberId:memberKey,memberNo:updated.memberNo || "",memberName:updated.name || "",memberPhone:updated.phone || "",
+                prepaidRedemption:true,prepaidEntryId:entryId,prepaidRemaining:Number(redemption.remaining || 0),
+                excludeFromSalesReport:true,source:"staff_prepaid_direct",operatorName:operatorName(),
+                createdAt:Number(redemption.usedAt || now),updatedAt:Date.now()
+            };
+            var job = {id:orderId,orderId:orderId,orderNo:orderNo,status:"pending",requestedAt:Date.now(),requestedBy:operatorName(),attempts:0};
+            return Promise.all([
+                firebase.database().ref(root + "/orders/" + orderId).transaction(function(current){ return current || order; },undefined,false),
+                firebase.database().ref(root + "/printJobs/" + orderId).transaction(function(current){ return current || job; },undefined,false)
+            ]).then(function(){
+                return {data:{success:true,orderId:orderId,orderNo:orderNo,remaining:Number(redemption.remaining || 0),printStatus:"pending",fallback:true}};
+            });
+        });
+    }
+
     function redeemPrepaidEntry(entryId,button){
         var member = selectedMember();
         var entry = activePrepaidEntries(member).filter(function(item){ return item.id === entryId; })[0];
@@ -617,6 +704,13 @@
                     entryId:entryId,
                     requestId:requestId
                 });
+            }).catch(function(error){
+                var code = String(error && error.code || "");
+                var message = String(error && error.message || "");
+                if(code.indexOf("failed-precondition") >= 0 && message.indexOf("預存次數") >= 0){
+                    return redeemPrepaidEntryDirect(member,entryId,requestId);
+                }
+                throw error;
             });
         var timeoutPromise = new Promise(function(resolve,reject){
             setTimeout(function(){
