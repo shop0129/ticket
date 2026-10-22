@@ -14,6 +14,10 @@
     var pollBusy = false;
     var lastPairingPromptAt = 0;
     var lastStatus = null;
+    // Keep a visible connection failure on screen. The 4-second queue poll must
+    // not replace the recovery button with another short-lived "connecting"
+    // message before the operator has time to press it.
+    var connectionErrorLocked = false;
 
     function ensureStatusBox() {
         var box = document.getElementById("prepaidPrintQueueStatus");
@@ -79,11 +83,14 @@
 
     function reconnectPrinter() {
         if (!window.MonsterReceiptPrinter) return;
+        connectionErrorLocked = false;
         MonsterReceiptPrinter.clearPairing();
         printerReady(true).then(function () {
+            connectionErrorLocked = false;
             lastStatus = null;
             pollNext(true);
         }).catch(function (error) {
+            connectionErrorLocked = true;
             showStatus("收據機尚未連接：" + errorText(error), "error", "重新輸入配對碼", reconnectPrinter);
         });
     }
@@ -124,6 +131,7 @@
         }).catch(function (error) {
             delete processing[jobId];
             lastPairingPromptAt = Date.now();
+            connectionErrorLocked = true;
             showStatus("預存收據尚未列印：" + errorText(error), "error", "連接收據機並重試", reconnectPrinter);
             console.error("[PrepaidPrintQueue]", error);
         });
@@ -143,6 +151,7 @@
         }).then(function (result) {
             delete processing[jobId];
             if (result && result.status === "printed") {
+                connectionErrorLocked = false;
                 showStatus("預存入場收據已列印完成", "ok");
                 hideStatusLater();
             }
@@ -171,10 +180,12 @@
             return Promise.resolve(false);
         }
         if (!Number(lastStatus.pendingCount || 0)) return Promise.resolve(false);
+        if (connectionErrorLocked) return Promise.resolve(false);
         showStatus("收到 " + Number(lastStatus.pendingCount) + " 張待列印預存入場收據，正在連接收據機…", "wait");
         var allowPrompt = manual === true || Date.now() - lastPairingPromptAt > 60000;
         return withConnectionTimeout(printerReady(allowPrompt)).then(function () { return true; }).catch(function (error) {
             lastPairingPromptAt = Date.now();
+            connectionErrorLocked = true;
             showStatus("預存收據等待列印：" + errorText(error), "error", "連接收據機並重試", reconnectPrinter);
             return false;
         });

@@ -28,7 +28,8 @@
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
 // Preserved regression markers: 7833-fix47b-firebase-region-callable-20261022-1 / 7833-fix47d-direct-prepaid-fallback-20261023-1
-var CACHE_NAME = CACHE_PREFIX + "7833-fix47e-receipt-pair-recovery-20261023-1";
+// Preserved FIX47E cache marker: 7833-fix47e-receipt-pair-recovery-20261023-1
+var CACHE_NAME = CACHE_PREFIX + "7833-fix47f-sticky-printer-recovery-20261023-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
