@@ -1,10 +1,12 @@
-// 小怪獸售票機 V7.8.3.3 FIX47
+// 小怪獸售票機 V7.8.3.3 FIX47G
 // 55mm 實體收據列印橋接（/dev/ttyS4 · 9600 · GB18030）
 // Android WebView 61 相容（ES5）
 (function () {
     "use strict";
 
-    var BASE_URL = "http://127.0.0.1:8765/v1";
+    // FIX47G: Some older kiosk WebViews leave cross-origin fetch() pending
+    // forever. Use XMLHttpRequest first and try both loopback host names.
+    var BASE_URLS = ["http://127.0.0.1:8765/v1", "http://localhost:8765/v1"];
     var PAIRING_KEY = "monsterCashBridgePairingKeyV1";
     var API_TIMEOUT_MS = 7000;
 
@@ -12,8 +14,77 @@
         return String(localStorage.getItem(PAIRING_KEY) || "").trim();
     }
 
-    function api(path, options) {
-        options = options || {};
+    function parseResponse(status, text) {
+        var data;
+        try { data = text ? JSON.parse(text) : {}; }
+        catch (error) { data = { ok: false, message: "印表機回覆格式錯誤" }; }
+        if (status < 200 || status >= 300) {
+            var failure = new Error(data.message || ("印表機錯誤 HTTP " + status));
+            failure.code = data.code || "HTTP_" + status;
+            failure.receipt = data;
+            throw failure;
+        }
+        return data;
+    }
+
+    function xhrRequest(baseUrl, path, options) {
+        return new Promise(function (resolve, reject) {
+            var xhr = new XMLHttpRequest();
+            var settled = false;
+            var timer;
+
+            function finish(error, data) {
+                if (settled) return;
+                settled = true;
+                clearTimeout(timer);
+                if (error) reject(error);
+                else resolve(data);
+            }
+
+            try {
+                xhr.open(options.method || "GET", baseUrl + path, true);
+                xhr.timeout = API_TIMEOUT_MS;
+                xhr.setRequestHeader("X-Monster-Bridge-Key", pairingKey());
+                xhr.setRequestHeader("Content-Type", "application/json");
+            } catch (openError) {
+                openError.code = openError.code || "CONTROLLER_CONNECTION_FAILED";
+                finish(openError);
+                return;
+            }
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState !== 4 || settled) return;
+                try { finish(null, parseResponse(Number(xhr.status || 0), xhr.responseText || "")); }
+                catch (responseError) { finish(responseError); }
+            };
+            xhr.onerror = function () {
+                var error = new Error("無法連接售票機 Controller");
+                error.code = "CONTROLLER_CONNECTION_FAILED";
+                finish(error);
+            };
+            xhr.ontimeout = function () {
+                var error = new Error("收據機控制器連線逾時，請確認 Controller 正在執行");
+                error.code = "CONTROLLER_TIMEOUT";
+                finish(error);
+            };
+            timer = setTimeout(function () {
+                var error;
+                if (settled) return;
+                try { xhr.abort(); } catch (ignore) {}
+                error = new Error("收據機控制器連線逾時，請確認 Controller 正在執行");
+                error.code = "CONTROLLER_TIMEOUT";
+                finish(error);
+            }, API_TIMEOUT_MS + 500);
+            try {
+                xhr.send(options.body !== undefined ? JSON.stringify(options.body) : null);
+            } catch (sendError) {
+                sendError.code = sendError.code || "CONTROLLER_CONNECTION_FAILED";
+                finish(sendError);
+            }
+        });
+    }
+
+    function fetchRequest(baseUrl, path, options) {
         var request = {
             method: options.method || "GET",
             cache: "no-store",
@@ -23,39 +94,27 @@
             }
         };
         if (options.body !== undefined) request.body = JSON.stringify(options.body);
-        return new Promise(function (resolve, reject) {
-            var completed = false;
-            var timer = setTimeout(function () {
-                var timeoutError;
-                if (completed) return;
-                completed = true;
-                timeoutError = new Error("收據機控制器連線逾時，請確認 Controller 正在執行");
-                timeoutError.code = "CONTROLLER_TIMEOUT";
-                reject(timeoutError);
-            }, API_TIMEOUT_MS);
-            fetch(BASE_URL + path, request).then(function (response) {
-            return response.text().then(function (text) {
-                var data;
-                try { data = text ? JSON.parse(text) : {}; }
-                catch (error) { data = { ok: false, message: "印表機回覆格式錯誤" }; }
-                if (!response.ok) {
-                    var failure = new Error(data.message || ("印表機錯誤 HTTP " + response.status));
-                    failure.code = data.code || "HTTP_" + response.status;
-                    failure.receipt = data;
-                    throw failure;
-                }
-                return data;
+        return fetch(baseUrl + path, request).then(function (response) {
+            return response.text().then(function (responseText) {
+                return parseResponse(response.status, responseText);
             });
-            }).then(function (data) {
-                if (completed) return;
-                completed = true;
-                clearTimeout(timer);
-                resolve(data);
-            }).catch(function (error) {
-                if (completed) return;
-                completed = true;
-                clearTimeout(timer);
-                reject(error);
+        });
+    }
+
+    function requestAt(baseUrl, path, options) {
+        if (typeof XMLHttpRequest !== "undefined") return xhrRequest(baseUrl, path, options);
+        return fetchRequest(baseUrl, path, options);
+    }
+
+    function api(path, options) {
+        options = options || {};
+        return requestAt(BASE_URLS[0], path, options).catch(function (firstError) {
+            if (firstError && (firstError.code === "PAIRING_REQUIRED" || firstError.code === "HTTP_401" || firstError.code === "HTTP_403")) {
+                throw firstError;
+            }
+            return requestAt(BASE_URLS[1], path, options).catch(function (secondError) {
+                secondError.message = (secondError.message || "無法連接售票機 Controller") + "（已嘗試 127.0.0.1 與 localhost）";
+                throw secondError;
             });
         });
     }
@@ -279,7 +338,7 @@
     }
 
     window.MonsterReceiptPrinter = {
-        version: "1.2-fix47-cloud-receipt-recovery",
+        version: "1.3-fix47g-xhr-loopback-fallback",
         hasPairing: function () { return /^\d{8}$/.test(pairingKey()); },
         getStatus: function () { return api("/printer/status"); },
         ensureReady: ensureReady,
