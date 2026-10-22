@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX7
+// 小怪獸售票機 V7.8.3.3 FIX47
 // 55mm 實體收據列印橋接（/dev/ttyS4 · 9600 · GB18030）
 // Android WebView 61 相容（ES5）
 (function () {
@@ -6,6 +6,7 @@
 
     var BASE_URL = "http://127.0.0.1:8765/v1";
     var PAIRING_KEY = "monsterCashBridgePairingKeyV1";
+    var API_TIMEOUT_MS = 7000;
 
     function pairingKey() {
         return String(localStorage.getItem(PAIRING_KEY) || "").trim();
@@ -22,7 +23,17 @@
             }
         };
         if (options.body !== undefined) request.body = JSON.stringify(options.body);
-        return fetch(BASE_URL + path, request).then(function (response) {
+        return new Promise(function (resolve, reject) {
+            var completed = false;
+            var timer = setTimeout(function () {
+                var timeoutError;
+                if (completed) return;
+                completed = true;
+                timeoutError = new Error("收據機控制器連線逾時，請確認 Controller 正在執行");
+                timeoutError.code = "CONTROLLER_TIMEOUT";
+                reject(timeoutError);
+            }, API_TIMEOUT_MS);
+            fetch(BASE_URL + path, request).then(function (response) {
             return response.text().then(function (text) {
                 var data;
                 try { data = text ? JSON.parse(text) : {}; }
@@ -35,6 +46,70 @@
                 }
                 return data;
             });
+            }).then(function (data) {
+                if (completed) return;
+                completed = true;
+                clearTimeout(timer);
+                resolve(data);
+            }).catch(function (error) {
+                if (completed) return;
+                completed = true;
+                clearTimeout(timer);
+                reject(error);
+            });
+        });
+    }
+
+    function savePairingKey(value) {
+        value = String(value || "").replace(/\s/g, "");
+        if (!/^\d{8}$/.test(value)) return false;
+        localStorage.setItem(PAIRING_KEY, value);
+        return true;
+    }
+
+    function clearPairingKey() {
+        localStorage.removeItem(PAIRING_KEY);
+    }
+
+    function promptPairingKey() {
+        var entered = prompt(
+            "收到待列印的預存入場收據。\n\n請輸入 Controller 畫面上的 8 位數配對碼。",
+            ""
+        );
+        if (entered === null) {
+            var cancelled = new Error("尚未輸入 8 位數配對碼");
+            cancelled.code = "PAIRING_CANCELLED";
+            return Promise.reject(cancelled);
+        }
+        if (!savePairingKey(entered)) {
+            var invalid = new Error("配對碼必須是 8 位數字");
+            invalid.code = "PAIRING_REQUIRED";
+            return Promise.reject(invalid);
+        }
+        return api("/printer/status").catch(function (error) {
+            if (error && (error.code === "PAIRING_REQUIRED" || error.code === "HTTP_401" || error.code === "HTTP_403")) {
+                clearPairingKey();
+                error.message = "配對碼不正確，請查看 Controller 畫面後重新輸入";
+            }
+            throw error;
+        });
+    }
+
+    function ensureReady(allowPrompt) {
+        if (!/^\d{8}$/.test(pairingKey())) {
+            if (allowPrompt === false) {
+                var missing = new Error("尚未輸入 8 位數配對碼");
+                missing.code = "PAIRING_REQUIRED";
+                return Promise.reject(missing);
+            }
+            return promptPairingKey();
+        }
+        return api("/printer/status").catch(function (error) {
+            if (error && (error.code === "PAIRING_REQUIRED" || error.code === "HTTP_401" || error.code === "HTTP_403")) {
+                clearPairingKey();
+                if (allowPrompt !== false) return promptPairingKey();
+            }
+            throw error;
         });
     }
 
@@ -188,9 +263,11 @@
     }
 
     window.MonsterReceiptPrinter = {
-        version: "1.1-fix7-controller110-receipt",
+        version: "1.2-fix47-cloud-receipt-recovery",
         hasPairing: function () { return /^\d{8}$/.test(pairingKey()); },
         getStatus: function () { return api("/printer/status"); },
+        ensureReady: ensureReady,
+        clearPairing: clearPairingKey,
         printOrder: printOrder,
         buildRequest: buildRequest
     };

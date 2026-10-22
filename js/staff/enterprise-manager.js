@@ -1,7 +1,7 @@
 (function(){
 'use strict';
 var ROOT='monsterTicket/v1';
-var orders=[], tickets={}, ticketImages={}, period='today', customDateFrom='', customDateTo='', ordersRef=null, ticketsRef=null, imagesRef=null, dataStarted=false, authWatchStarted=false;
+var orders=[], tickets={}, ticketImages={}, period='today', customDateFrom='', customDateTo='', ordersRef=null, ticketsRef=null, imagesRef=null, dataStarted=false, authWatchStarted=false, deleteListenerBound=false;
 function el(id){return document.getElementById(id);} function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function money(v){return 'NT$'+Number(v||0).toLocaleString('zh-TW');}
 function notify(msg,ok){var n=el('enterpriseToast');if(!n)return; n.textContent=msg;n.className='enterprise-toast show '+(ok===false?'error':'success');setTimeout(function(){n.className='enterprise-toast';},2200); if(window.navigator&&navigator.vibrate)navigator.vibrate(ok===false?[60,40,60]:35); try{var a=document.getElementById(ok===false?'clickSound':'successSound');if(a){a.currentTime=0;a.play().catch(function(){});}}catch(e){}
@@ -44,28 +44,40 @@ function collectTickets(){document.querySelectorAll('.enterprise-ticket').forEac
 function addTicket(){collectTickets();normalizeTicketOrder();var id='custom_'+Date.now();tickets[id]={title:'新票券',price:0,token:0,toy:'none',category:'other',enable:true,image:'ticket-bg.webp',description:'',pickupItems:[],pickupItemsText:'',pickupNote:'',custom:true,canEnter:false,admissionRequired:false,timeMode:'none',playHours:2,playMinutes:0,fixedExitTime:'',prepaidBundleEnabled:false,prepaidTargetTicketId:'',prepaidStoredCount:3,prepaidToyPoints:4,prepaidValidityDays:180,sortOrder:sortedTicketIds().length};renderTickets();setTimeout(function(){var c=document.querySelector('[data-id="'+id+'"]');if(c)c.scrollIntoView({behavior:'smooth'});},30);}
 function ticketAction(e){var btn=e.target.closest('[data-act]');if(!btn)return;collectTickets();normalizeTicketOrder();var card=btn.closest('.enterprise-ticket'),id=card.dataset.id,act=btn.dataset.act,ids=sortedTicketIds(),i=ids.indexOf(id);if(act==='delete'){if(!confirm('確定刪除「'+(tickets[id].title||id)+'」？'))return;delete tickets[id];normalizeTicketOrder();}else if(act==='copy'){var nid='custom_'+Date.now();tickets[nid]=JSON.parse(JSON.stringify(tickets[id]));tickets[nid].title=(tickets[id].title||'票券')+' 複製';tickets[nid].custom=true;tickets[nid].sortOrder=ids.length;}else if(act==='bottom'){if(i<0||i===ids.length-1)return;ids.splice(i,1);ids.push(id);ids.forEach(function(k,order){tickets[k].sortOrder=order;});}else{var j=i+(act==='up'?-1:1);if(j<0||j>=ids.length)return;var tmp=ids[i];ids[i]=ids[j];ids[j]=tmp;ids.forEach(function(k,order){tickets[k].sortOrder=order;});}renderTickets();}
 function deleteSingleOrder(id,button){
-if(!adminOnly()){notify('只有店長可以刪除訂單',false);return;}
+if(!adminOnly()){alert('只有店長可以刪除訂單');notify('只有店長可以刪除訂單',false);return;}
 var target=orders.find(function(o){return String(o.id||o.cloudId||'')===String(id||'');});
-if(!target){notify('找不到這筆訂單，請重新整理',false);return;}
+if(!target){alert('找不到這筆訂單，請按「重新整理」後再試一次');notify('找不到這筆訂單，請重新整理',false);return;}
 var label=target.orderNo||target.number||id;
 if(!confirm('確定刪除訂單「'+label+'」？\n\n刪除後會從營業額、票數及報表中扣除，且無法復原。'))return;
-if(!window.firebase||!firebase.functions){notify('雲端刪除功能尚未連線',false);return;}
-if(button){button.disabled=true;button.textContent='刪除中…';}
-var callable=firebase.functions('asia-east1').httpsCallable('staffOrdersV1AdminDelete')({id:id});
-var timeout=new Promise(function(resolve,reject){setTimeout(function(){reject(new Error('後端回應逾時'));},12000);});
-Promise.race([callable,timeout]).catch(function(callableError){
+if(!window.firebase||!firebase.functions||!firebase.auth){alert('雲端刪除功能尚未連線，請確認手機網路後重開後台');notify('雲端刪除功能尚未連線',false);return;}
+if(button){if(button.getAttribute('data-deleting')==='1')return;button.setAttribute('data-deleting','1');button.disabled=true;button.textContent='刪除中…';}
+var user=firebase.auth().currentUser;
+var callablePromise;
+if(!user||user.isAnonymous){callablePromise=Promise.reject(new Error('手機的店長登入已失效，請關閉後台並重新登入 MANAGER'));}
+else{
+  callablePromise=user.getIdToken(true).then(function(){
+    return firebase.functions('asia-east1').httpsCallable('staffOrdersV1AdminDelete')({id:id});
+  });
+}
+var timeout=new Promise(function(resolve,reject){setTimeout(function(){reject(new Error('手機連線逾時，請確認網路後再試一次'));},15000);});
+Promise.race([callablePromise,timeout]).catch(function(callableError){
   if(!ordersRef)throw callableError;
-  return ordersRef.child(id).update({deleted:true,status:'deleted',deletedAt:Date.now(),updatedAt:Date.now(),deletedBy:'manager',deleteFallback:true}).then(function(){return {data:{success:true,fallback:true}};});
+  return ordersRef.child(id).update({deleted:true,status:'deleted',deletedAt:Date.now(),updatedAt:Date.now(),deletedBy:user&&user.uid||'manager',deleteFallback:true}).then(function(){return {data:{success:true,fallback:true}};}).catch(function(){throw callableError;});
 }).then(function(result){
   orders=orders.filter(function(o){return String(o.id||o.cloudId||'')!==String(id);});
   renderDashboard();
   notify('已刪除 '+label+'，報表已重新扣除',true);
+  alert('已刪除「'+label+'」\n營業額、票數及報表已重新扣除。');
 }).catch(function(err){
-  if(button){button.disabled=false;button.textContent='🗑 刪除';}
-  notify('刪除失敗：'+(err&&err.message?err.message:'請稍後再試'),false);
+  var message=err&&err.message?err.message:'請稍後再試';
+  alert('刪除失敗：'+message);
+  notify('刪除失敗：'+message,false);
+}).then(function(){
+  if(button){button.removeAttribute('data-deleting');button.disabled=false;button.textContent='🗑 刪除';}
 });
 }
-function orderDeleteAction(e){var btn=e.target.closest&&e.target.closest('[data-order-delete]');if(!btn)return;deleteSingleOrder(btn.getAttribute('data-order-delete'),btn);}
+function closestDeleteButton(target){while(target&&target!==document){if(target.getAttribute&&target.getAttribute('data-order-delete')!==null)return target;target=target.parentNode;}return null;}
+function orderDeleteAction(e){var btn=closestDeleteButton(e.target);if(!btn)return;e.preventDefault();e.stopPropagation();deleteSingleOrder(btn.getAttribute('data-order-delete'),btn);}
 function resetAllOrders(){
 if(!adminOnly()){notify('只有店長可以重置訂單紀錄',false);return;}
 var first=confirm('⚠️ 確定要清除所有訂單紀錄？\n\n包含點餐機、Staff 與 Dashboard 的訂單資料，且無法復原。');
@@ -112,7 +124,7 @@ if(ordersRef){
 }
 function saveTickets(){collectTickets();normalizeTicketOrder();if(window.MonsterTicketDataSync)tickets=MonsterTicketDataSync.normalizeMap(tickets);var titles={};for(var id in tickets){var title=(tickets[id].title||'').trim();if(!title){notify('票券名稱不可空白',false);return;}if(titles[title]){notify('票券名稱重複：'+title,false);return;}titles[title]=true;if(tickets[id].prepaidBundleEnabled===true){if(!tickets[id].prepaidTargetTicketId||!tickets[tickets[id].prepaidTargetTicketId]){notify('預存套票「'+title+'」必須選擇預存使用票券',false);return;}tickets[id].prepaidStoredCount=Math.max(1,Math.floor(Number(tickets[id].prepaidStoredCount||3)));tickets[id].prepaidToyPoints=Math.max(0,Math.floor(Number(tickets[id].prepaidToyPoints||0)));tickets[id].prepaidValidityDays=Math.max(1,Math.floor(Number(tickets[id].prepaidValidityDays||180)));tickets[id].toy='none';tickets[id].canEnter=true;tickets[id].admissionRequired=true;}var tm=tickets[id].timeMode||'duration';tickets[id].playHours=Math.min(99,Math.max(1,Number(tickets[id].playHours||2)));tickets[id].playMinutes=tm==='duration'?tickets[id].playHours*60:0;tickets[id].hour=tm==='duration'?tickets[id].playHours:0;tickets[id].fixedExitTime=tm==='fixed'?(tickets[id].fixedExitTime||'18:00'):'';if(tickets[id].canEnter===false)tickets[id].timeMode='none';if(window.MonsterRewardEngine)tickets[id]=MonsterRewardEngine.normalizeTicket(tickets[id]);tickets[id].reward=[Number(tickets[id].token)>0?'token':'',tickets[id].toy&&tickets[id].toy!=='none'?'toy':'',tickets[id].canEnter!==false?'band':'',tickets[id].pickupItems&&tickets[id].pickupItems.length?'pickup':''].filter(Boolean).join(',');}
 localStorage.setItem('ticketData',JSON.stringify(tickets));if(ticketsRef){var map={};Object.keys(tickets).forEach(function(id){map[id]=Object.assign({id:id,updatedAt:Date.now(),updatedBy:(window.currentUser&&window.currentUser.name)||'manager'},tickets[id]);});ticketsRef.once('value').then(function(snapshot){var cloud=snapshot.val()||{};Object.keys(map).forEach(function(id){if(cloud[id]&&cloud[id].image)map[id].image=cloud[id].image;});return ticketsRef.set(map);}).then(function(){notify('票券設定已儲存並同步（圖片已保留）');}).catch(function(){notify('已存本機，但雲端同步失敗',false);});}else notify('票券設定已儲存在本機');}
-function bind(){document.querySelectorAll('[data-enterprise-open]').forEach(function(b){b.addEventListener('click',function(){openPanel(b.dataset.enterpriseOpen);});});el('enterpriseClose').addEventListener('click',closePanel);el('enterpriseOverlay').addEventListener('click',function(e){if(e.target===this)closePanel();});document.querySelectorAll('.enterprise-period [data-period]').forEach(function(b){b.addEventListener('click',function(){setPeriod(b.dataset.period);});});el('ticketSearch').addEventListener('input',renderTickets);el('ticketCategory').addEventListener('change',renderTickets);el('ticketStatus').addEventListener('change',renderTickets);el('ticketAdd').addEventListener('click',addTicket);el('ticketSave').addEventListener('click',saveTickets);el('enterpriseTicketList').addEventListener('click',ticketAction);el('dashRefresh').addEventListener('click',renderDashboard);if(el('dashDateApply'))el('dashDateApply').addEventListener('click',applyCustomRange);if(el('dashRecent'))el('dashRecent').addEventListener('click',orderDeleteAction);var resetBtn=el('dashResetOrders');if(resetBtn)resetBtn.addEventListener('click',resetAllOrders);}
+function bind(){document.querySelectorAll('[data-enterprise-open]').forEach(function(b){b.addEventListener('click',function(){openPanel(b.dataset.enterpriseOpen);});});el('enterpriseClose').addEventListener('click',closePanel);el('enterpriseOverlay').addEventListener('click',function(e){if(e.target===this)closePanel();});document.querySelectorAll('.enterprise-period [data-period]').forEach(function(b){b.addEventListener('click',function(){setPeriod(b.dataset.period);});});el('ticketSearch').addEventListener('input',renderTickets);el('ticketCategory').addEventListener('change',renderTickets);el('ticketStatus').addEventListener('change',renderTickets);el('ticketAdd').addEventListener('click',addTicket);el('ticketSave').addEventListener('click',saveTickets);el('enterpriseTicketList').addEventListener('click',ticketAction);el('dashRefresh').addEventListener('click',renderDashboard);if(el('dashDateApply'))el('dashDateApply').addEventListener('click',applyCustomRange);if(!deleteListenerBound){deleteListenerBound=true;document.addEventListener('click',orderDeleteAction,true);}var resetBtn=el('dashResetOrders');if(resetBtn)resetBtn.addEventListener('click',resetAllOrders);}
 document.addEventListener('DOMContentLoaded',function(){bind();startData();});
 window.MonsterEnterpriseManager={open:openPanel,close:closePanel,renderDashboard:renderDashboard,renderTickets:renderTickets,resetAllOrders:resetAllOrders,deleteSingleOrder:deleteSingleOrder,setPeriod:setPeriod,applyCustomRange:applyCustomRange};
 })();

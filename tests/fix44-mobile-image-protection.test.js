@@ -13,7 +13,7 @@ ok(manager.indexOf("if(k==='image')return") >= 0, 'mobile collector must not edi
 ok(manager.indexOf("ticketsRef.once('value')") >= 0, 'save must read cloud before writing');
 ok(manager.indexOf("map[id].image=cloud[id].image") >= 0, 'save must preserve cloud image');
 ok(manager.indexOf('圖片已保留') >= 0, 'success message must confirm image protection');
-ok(/enterprise-manager\.js\?v=fix4[456]/.test(staff), 'staff must load FIX44 or newer manager');
-ok(/7833-fix4[456]-/.test(sw), 'service worker cache must be FIX44 or newer');
+ok(/enterprise-manager\.js\?v=fix4[4567]/.test(staff), 'staff must load FIX44 or newer manager');
+ok(/7833-fix4[4567]-/.test(sw), 'service worker cache must be FIX44 or newer');
 
 console.log('FIX44 mobile image protection tests passed');

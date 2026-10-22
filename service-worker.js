@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX40 Dashboard Date Range
+// 小怪獸售票機 V7.8.3.3 FIX47 Print + Mobile Delete Recovery
 // Preserved FIX39 cache marker: fix39-linepay-device-identity
 // Preserved FIX38 cache marker: fix38-staff-dashboard-date
 // Preserved FIX37 cache marker: fix37-taipei-business-day
@@ -27,7 +27,7 @@
 "use strict";
 
 var CACHE_PREFIX = "monster-ticket-pwa-";
-var CACHE_NAME = CACHE_PREFIX + "7833-fix46-cloud-print-delete-member-bind-20261022-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix47-print-mobile-delete-recovery-20261022-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",

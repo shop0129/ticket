@@ -17,15 +17,15 @@ const functionsSource = fs.readFileSync(path.join(project, 'FIREBASE_STAFF_AUTH/
 
 expect(functionsSource.includes('exports.prepaidPrintV1ClaimNext'), 'missing proactive print claim callable');
 expect(queue.includes('prepaidPrintV1ClaimNext'), 'kiosk does not call proactive print claim');
-expect(queue.includes('setInterval(pollNext, 3000)'), 'kiosk print polling interval missing');
-expect(manager.includes("new Error('後端回應逾時')"), 'order delete timeout missing');
+expect(queue.includes('setInterval(function () { pollNext(false); }, 4000)'), 'kiosk print polling interval missing');
+expect(manager.includes("new Error('手機連線逾時，請確認網路後再試一次')"), 'order delete timeout missing');
 expect(manager.includes('deleteFallback:true'), 'order delete fallback missing');
 expect(orderTools.includes('.once("value")'), 'member rebind must refresh cloud members');
 expect(orderTools.includes('是否立即新增會員並自動綁定'), 'member create prompt missing');
 expect(staffApp.includes('MonsterStaffMemberManager'), 'quick member manager bridge missing');
 expect(staffApp.includes('memberCreatedCallback'), 'auto-bind callback missing');
-expect(index.includes('prepaid-print-queue.js?v=7833fix46'), 'index FIX46 queue version missing');
+expect(index.includes('prepaid-print-queue.js?v=7833fix47'), 'index latest queue version missing');
 expect(staff.includes('order-tools.js?v=fix46'), 'staff FIX46 order tools version missing');
-expect(sw.includes('7833-fix46-cloud-print-delete-member-bind-20261022-1'), 'FIX46 service-worker cache missing');
+expect(sw.includes('7833-fix47-print-mobile-delete-recovery-20261022-1'), 'latest service-worker cache missing');
 
 console.log('FIX46 cloud print, delete and member bind tests passed');
