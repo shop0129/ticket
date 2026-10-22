@@ -15,6 +15,7 @@
     var membersMap = {};
     var selectedMemberId = "";
     var toyPointMode = "add";
+    var memberCreatedCallback = null;
 
     var loginPage;
     var homePage;
@@ -409,11 +410,13 @@
 
     function searchMembers(){
 
-        var keyword =
+        var rawKeyword =
         byId("staffMemberSearchInput")
         .value
-        .trim()
-        .toLowerCase();
+        .trim();
+
+        var keyword = rawKeyword.toLowerCase();
+        var phoneKeyword = normalizePhone(rawKeyword);
 
         if(!keyword){
 
@@ -431,7 +434,7 @@
         memberArray()
         .filter(function(member){
 
-            return [
+            var text = [
                 member.name,
                 member.phone,
                 member.memberNo
@@ -439,6 +442,8 @@
             .join(" ")
             .toLowerCase()
             .indexOf(keyword) !== -1;
+            var phoneMatch = phoneKeyword.length >= 4 && normalizePhone(member.phone).indexOf(phoneKeyword) !== -1;
+            return text || phoneMatch;
         })
         .slice(0,30);
 
@@ -852,6 +857,13 @@
         .style.display = "flex";
     }
 
+    function openQuickMemberCreate(prefillPhone, callback){
+        memberCreatedCallback = typeof callback === "function" ? callback : null;
+        openMemberModal(null);
+        byId("staffEditMemberPhone").value = normalizePhone(prefillPhone);
+        setTimeout(function(){ byId("staffEditMemberName").focus(); }, 50);
+    }
+
     function closeMemberModal(){
 
         byId("staffMemberModal")
@@ -890,7 +902,7 @@
         memberArray().forEach(function(member){
 
             if(
-                member.phone === phone &&
+                normalizePhone(member.phone) === phone &&
                 member.id !== id
             ){
                 duplicate = true;
@@ -985,6 +997,12 @@
             }
 
             closeMemberModal();
+
+            if(isNew && memberCreatedCallback){
+                var callback = memberCreatedCallback;
+                memberCreatedCallback = null;
+                try{ callback(data); }catch(callbackError){ console.error(callbackError); }
+            }
 
             alert(
                 id === selectedMemberId
@@ -1605,6 +1623,12 @@
             }
         });
     }
+
+    window.MonsterStaffMemberManager = {
+        openCreate:openQuickMemberCreate,
+        normalizePhone:normalizePhone,
+        members:memberArray
+    };
 
     window.addEventListener(
         "load",

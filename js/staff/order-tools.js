@@ -108,15 +108,14 @@
 
     function findMember(keyword){
 
-        keyword =
-        String(keyword || "")
-        .trim()
-        .toLowerCase();
+        var rawKeyword = String(keyword || "").trim();
+        keyword = rawKeyword.toLowerCase();
+        var phoneKeyword = rawKeyword.replace(/\D/g,"");
 
         return memberList()
         .filter(function(member){
 
-            return [
+            var textMatch = [
                 member.name,
                 member.phone,
                 member.memberNo
@@ -124,6 +123,53 @@
             .join(" ")
             .toLowerCase()
             .indexOf(keyword) !== -1;
+            var phoneMatch = phoneKeyword.length >= 4 && String(member.phone || "").replace(/\D/g,"").indexOf(phoneKeyword) !== -1;
+            return textMatch || phoneMatch;
+        });
+    }
+
+    function applyMemberBinding(member){
+        return orderRef()
+        .update({
+            memberId:member.id || member.__id,
+            memberName:member.name || "",
+            memberPhone:member.phone || "",
+            updatedAt:Date.now()
+        })
+        .then(function(){
+            logAction(
+                "bind_member",
+                "補綁會員：" + member.name + " " + (member.phone || "")
+            );
+            alert("已補綁會員：" + member.name);
+        });
+    }
+
+    function handleMemberMatches(matches,keyword){
+        if(matches.length === 0){
+            if(!confirm("找不到會員。\n\n是否立即新增會員並自動綁定這筆訂單？")){ return; }
+            if(window.MonsterStaffMemberManager && typeof MonsterStaffMemberManager.openCreate === "function"){
+                MonsterStaffMemberManager.openCreate(keyword,function(member){
+                    applyMemberBinding(member).catch(function(error){
+                        alert("會員已新增，但補綁失敗：" + (error && error.message ? error.message : "請稍後再試"));
+                    });
+                });
+            }else{
+                alert("快速新增會員尚未載入，請回到會員中心新增");
+            }
+            return;
+        }
+
+        var member = matches[0];
+        if(matches.length > 1){
+            var message = "找到多位會員，將綁定第一位：\n\n" +
+                matches.slice(0,5).map(function(row,index){
+                    return (index+1) + ". " + row.name + " " + (row.phone || "");
+                }).join("\n");
+            if(!confirm(message)){ return; }
+        }
+        applyMemberBinding(member).catch(function(error){
+            alert("補綁會員失敗：" + (error && error.message ? error.message : "請檢查網路"));
         });
     }
 
@@ -138,60 +184,15 @@
             return;
         }
 
-        var matches =
-        findMember(keyword);
-
-        if(matches.length === 0){
-
-            alert("找不到會員");
-            return;
-        }
-
-        var member = matches[0];
-
-        if(
-            matches.length > 1
-        ){
-            var message =
-            "找到多位會員，將綁定第一位：\n\n" +
-            matches.slice(0,5)
-            .map(function(row,index){
-                return (
-                    (index+1) + ". " +
-                    row.name + " " +
-                    (row.phone || "")
-                );
-            }).join("\n");
-
-            if(!confirm(message)){
-                return;
-            }
-        }
-
-        orderRef()
-        .update({
-            memberId:
-            member.id || member.__id,
-            memberName:
-            member.name || "",
-            memberPhone:
-            member.phone || "",
-            updatedAt:Date.now()
+        firebase.database()
+        .ref(ROOT + "/members")
+        .once("value")
+        .then(function(snapshot){
+            membersMap = snapshot.val() || {};
+            handleMemberMatches(findMember(keyword),keyword);
         })
-        .then(function(){
-
-            logAction(
-                "bind_member",
-                "補綁會員：" +
-                member.name +
-                " " +
-                (member.phone || "")
-            );
-
-            alert(
-                "已補綁會員：" +
-                member.name
-            );
+        .catch(function(){
+            handleMemberMatches(findMember(keyword),keyword);
         });
     }
 

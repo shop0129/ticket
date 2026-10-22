@@ -29,7 +29,7 @@ assert(functionsSource.indexOf("Number(job.attempts || 0) < 3") >= 0, "print ret
 assert(functionsSource.indexOf("job.claimedBy !== device.uid") >= 0, "only claiming device may complete a print job");
 assert(dashboard.indexOf("order.prepaidRedemption === true") >= 0, "cloud dashboard must exclude redemptions");
 assert(enterprise.indexOf("o.prepaidRedemption===true") >= 0, "manager dashboard must exclude redemptions");
-assert(html.indexOf("prepaid-print-queue.js?v=7833fix43") >= 0, "kiosk must load print queue");
+assert(/prepaid-print-queue\.js\?v=7833fix4[36]/.test(html), "kiosk must load FIX43 or newer print queue");
 assert(serviceWorker.indexOf("./js/cloud/prepaid-print-queue.js") >= 0, "print queue must be cached");
 
 console.log("FIX43 prepaid entry regression tests passed");

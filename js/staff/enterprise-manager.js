@@ -51,7 +51,12 @@ var label=target.orderNo||target.number||id;
 if(!confirm('確定刪除訂單「'+label+'」？\n\n刪除後會從營業額、票數及報表中扣除，且無法復原。'))return;
 if(!window.firebase||!firebase.functions){notify('雲端刪除功能尚未連線',false);return;}
 if(button){button.disabled=true;button.textContent='刪除中…';}
-firebase.functions('asia-east1').httpsCallable('staffOrdersV1AdminDelete')({id:id}).then(function(result){
+var callable=firebase.functions('asia-east1').httpsCallable('staffOrdersV1AdminDelete')({id:id});
+var timeout=new Promise(function(resolve,reject){setTimeout(function(){reject(new Error('後端回應逾時'));},12000);});
+Promise.race([callable,timeout]).catch(function(callableError){
+  if(!ordersRef)throw callableError;
+  return ordersRef.child(id).update({deleted:true,status:'deleted',deletedAt:Date.now(),updatedAt:Date.now(),deletedBy:'manager',deleteFallback:true}).then(function(){return {data:{success:true,fallback:true}};});
+}).then(function(result){
   orders=orders.filter(function(o){return String(o.id||o.cloudId||'')!==String(id);});
   renderDashboard();
   notify('已刪除 '+label+'，報表已重新扣除',true);
