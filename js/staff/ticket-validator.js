@@ -118,7 +118,19 @@ function updateStatus(action){
  var desired=action==='enter'?'playing':'finished';
  if(action==='enter'&&current!=='waiting'){message('此訂單不是等待入場狀態',false);return;}
  if(action==='exit'&&current!=='playing'){message('此訂單不是遊玩中狀態',false);return;}
- if(!confirm(action==='enter'?'確認此訂單全部入場？':'確認此訂單全部離場？'))return;
+ var forceCapacity=false, capacityInfo=null;
+ if(action==='enter'&&window.MonsterOrderCenter&&typeof MonsterOrderCenter.getVenueState==='function'){
+   var venue=MonsterOrderCenter.getVenueState()||{}, a0=actor(), role=String(a0.role||(window.MonsterAuth&&MonsterAuth.getCurrentRole&&MonsterAuth.getCurrentRole())||'').toLowerCase();
+   var entering=Math.max(1,Number(o.playerCount||1))+(venue.countGuardians?Math.max(0,Number(o.guardianCount||0)):0);
+   var currentPlayers=Math.max(0,Number(venue.currentPlayers||0)), maxPlayers=Math.max(1,Number(venue.maxPlayers||40));
+   if(currentPlayers+entering>maxPlayers){
+     capacityInfo={current:currentPlayers,entering:entering,max:maxPlayers,overBy:Math.max(0,currentPlayers+entering-maxPlayers)};
+     if(role!=='admin'&&role!=='manager'){message('場內已滿，請由店長強制入場',false);alert('目前場內 '+currentPlayers+' 人\\n此訂單需 '+entering+' 個名額\\n上限 '+maxPlayers+' 人\\n\\n請由店長處理。');return;}
+     if(!confirm('目前場內 '+currentPlayers+' 人\\n此訂單需 '+entering+' 個名額\\n上限 '+maxPlayers+' 人\\n\\n確定由店長強制入場？'))return;
+     forceCapacity=true;
+   }
+ }
+ if(!forceCapacity&&!confirm(action==='enter'?'確認此訂單全部入場？':'確認此訂單全部離場？'))return;
 
  var now=Date.now(), a=actor(), who=a.name||a.displayName||a.account||'staff';
  var ref=firebase.database().ref(ROOT+'/orders/'+currentFound.id), before=current;
@@ -134,6 +146,9 @@ function updateStatus(action){
    var next=window.MonsterTicketStatusEngine?MonsterTicketStatusEngine.transitionOrder(latest,desired,opts):Object.assign({},latest,{playStatus:desired,validationStatus:desired,updatedAt:now,ticketInstances:updateTicketInstances(latest.ticketInstances,action,now,who)});
    if(action==='enter'){
      next.entryOperator=who;next.enteredBy=who;next.checkedInAt=now;next.checkedInBy=who;
+     if(forceCapacity&&capacityInfo){
+       next.capacityOverride={forced:true,currentPlayers:capacityInfo.current,enteringCount:capacityInfo.entering,maxPlayers:capacityInfo.max,overBy:capacityInfo.overBy,operator:who,operatorId:a.id||'',createdAt:now};
+     }
    }else{
      next.exitOperator=who;next.exitedBy=who;next.checkedOutAt=now;next.checkedOutBy=who;
    }
@@ -143,7 +158,7 @@ function updateStatus(action){
    if(!committed){message('訂單狀態已被其他裝置更新，請重新查詢',false);return;}
    var latest=snapshot&&snapshot.val?snapshot.val():null;
    if(latest){currentFound.order=latest;}
-   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?'ticket.checkIn':'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,engineVersion:'7.6.0'}).catch(function(){});
+   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix52'}).catch(function(){});
    message(action==='enter'?'已完成入場':'已完成離場',true);
    renderCenter();showResult(currentFound);renderHub();
  });
@@ -268,3 +283,4 @@ function bind(){ensureModal();var b=byId('staffQuickLookupButton'),i=byId('staff
 document.addEventListener('DOMContentLoaded',bind);
 window.MonsterTicketValidator={findOrder:findOrder,lookup:lookup,openCenter:openCenter,closeCenter:closeCenter,startScan:startScan,renderHub:renderHub,setFilter:function(v){activeFilter=v;renderHub();}};
 })();
+

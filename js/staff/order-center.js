@@ -877,151 +877,126 @@
             return;
         }
 
-        var order =
-        selectedOrder();
+        var order = selectedOrder();
 
         if(!order){
             return;
         }
 
-        var players =
-        Math.max(
+        currentRole = getRole();
+
+        var players = Math.max(
             1,
-            Number(
-                byId("staffOrderPlayerCount")
-                .value
-            ) || 1
+            Number(byId("staffOrderPlayerCount").value) || 1
         );
 
-        var guardians =
-        Math.max(
+        var guardians = Math.max(
             0,
-            Number(
-                byId("staffOrderGuardianCount")
-                .value
-            ) || 0
+            Number(byId("staffOrderGuardianCount").value) || 0
         );
 
         var minutes =
-        order.timeMode === "unlimited"
-        ? 0
-        : Math.max(
-            10,
-            Number(
-                byId("staffOrderPlayMinutes")
-                .value
-            ) || 120
-        );
+            order.timeMode === "unlimited"
+            ? 0
+            : Math.max(
+                10,
+                Number(byId("staffOrderPlayMinutes").value) || 120
+            );
 
         var enteringCount =
-        players +
-        (
-            venueSettings.countGuardians
-            ? guardians
-            : 0
-        );
+            players +
+            (
+                venueSettings.countGuardians
+                ? guardians
+                : 0
+            );
 
-        var maxPlayers =
-        Number(
+        var maxPlayers = Number(
             venueSettings.maxPlayers ||
             config.defaultMaxPlayers ||
             40
         );
 
-        var ordersRef =
-        firebase.database()
-        .ref(ROOT + "/orders");
+        var currentPlayers = calculateCurrentPlayers();
+        var exceedsCapacity =
+            currentPlayers + enteringCount > maxPlayers;
+        var canForce =
+            currentRole === "admin" ||
+            currentRole === "manager";
+        var forceCapacity = false;
 
-        var blockedInfo = null;
+        if(exceedsCapacity){
+            if(!canForce){
+                alert(
+                    "目前場內 " + currentPlayers +
+                    " 人\n此訂單需 " + enteringCount +
+                    " 個名額\n上限 " + maxPlayers +
+                    " 人\n\n場內人數已滿，請由店長處理。"
+                );
+                return;
+            }
 
-        ordersRef.transaction(
-            function(currentOrders){
+            if(!confirm(
+                "目前場內 " + currentPlayers +
+                " 人\n此訂單需 " + enteringCount +
+                " 個名額\n上限 " + maxPlayers +
+                " 人\n\n確定由店長強制入場？"
+            )){
+                return;
+            }
 
-                currentOrders =
-                currentOrders || {};
+            forceCapacity = true;
+        }
 
-                var currentOrder =
-                currentOrders[
-                    selectedOrderId
-                ];
+        var button = byId("staffEnterOrderButton");
+        if(button){
+            button.disabled = true;
+            button.textContent =
+                forceCapacity
+                ? "強制入場處理中…"
+                : "入場處理中…";
+        }
 
-                if(
-                    !currentOrder ||
-                    currentOrder.deleted
-                ){
+        var now = Date.now();
+        var blockedReason = "";
+        var orderRef = firebase.database()
+            .ref(ROOT + "/orders/" + selectedOrderId);
+
+        orderRef.transaction(
+            function(currentOrder){
+                if(!currentOrder || currentOrder.deleted){
+                    blockedReason = "missing";
                     return;
                 }
 
-                if(
-                    getOrderStatus(currentOrder) ===
-                    "playing"
-                ){
-                    return currentOrders;
-                }
+                var status = getOrderStatus(currentOrder);
 
-                var currentPlayers = 0;
-
-                Object.keys(currentOrders)
-                .forEach(function(id){
-
-                    var row =
-                    currentOrders[id];
-
-                    if(
-                        row &&
-                        !row.deleted &&
-                        getOrderStatus(row) ===
-                        "playing"
-                    ){
-                        currentPlayers +=
-                        Number(
-                            row.playerCount || 0
-                        ) +
-                        (
-                            venueSettings.countGuardians
-                            ? Number(
-                                row.guardianCount || 0
-                            )
-                            : 0
-                        );
-                    }
-                });
-
-                if(
-                    currentPlayers +
-                    enteringCount >
-                    maxPlayers
-                ){
-                    blockedInfo = {
-                        current:currentPlayers,
-                        entering:enteringCount,
-                        max:maxPlayers
-                    };
-
+                if(status === "playing"){
+                    blockedReason = "already";
                     return;
                 }
 
-                var now = Date.now();
+                if(status !== "waiting"){
+                    blockedReason = "status";
+                    return;
+                }
 
                 var expectedExit =
-                window.MonsterOrderLifecycle &&
-                typeof window.MonsterOrderLifecycle
-                .expectedExitTimestamp ===
-                "function"
-                ? window.MonsterOrderLifecycle
-                .expectedExitTimestamp(
-                    now,
-                    minutes,
-                    currentOrder.fixedExitTime || "",
-                    currentOrder.timeMode ||
-                    "duration"
-                )
-                : (
-                    currentOrder.timeMode ===
-                    "unlimited"
-                    ? null
-                    : now + minutes * 60000
-                );
+                    window.MonsterOrderLifecycle &&
+                    typeof window.MonsterOrderLifecycle
+                    .expectedExitTimestamp === "function"
+                    ? window.MonsterOrderLifecycle
+                    .expectedExitTimestamp(
+                        now,
+                        minutes,
+                        currentOrder.fixedExitTime || "",
+                        currentOrder.timeMode || "duration"
+                    )
+                    : (
+                        currentOrder.timeMode === "unlimited"
+                        ? null
+                        : now + minutes * 60000
+                    );
 
                 if(window.MonsterTicketStatusEngine){
                     currentOrder = MonsterTicketStatusEngine.transitionOrder(
@@ -1038,81 +1013,98 @@
                     currentOrder.validationStatus = "playing";
                 }
 
-                currentOrder.playerCount =
-                players;
+                currentOrder.playerCount = players;
+                currentOrder.guardianCount = guardians;
+                currentOrder.playMinutes = minutes;
+                currentOrder.entryTime = now;
+                currentOrder.expectedExitTime = expectedExit;
+                currentOrder.exitTime = null;
+                currentOrder.enteredBy = operatorName();
+                currentOrder.enteredById = currentActor().id || "";
+                currentOrder.enteredByRole = currentActor().role || currentRole;
+                currentOrder.updatedAt = now;
 
-                currentOrder.guardianCount =
-                guardians;
+                if(forceCapacity){
+                    currentOrder.capacityOverride = {
+                        forced:true,
+                        currentPlayers:currentPlayers,
+                        enteringCount:enteringCount,
+                        maxPlayers:maxPlayers,
+                        overBy:Math.max(
+                            0,
+                            currentPlayers + enteringCount - maxPlayers
+                        ),
+                        operator:operatorName(),
+                        operatorId:currentActor().id || "",
+                        createdAt:now
+                    };
+                }
 
-                currentOrder.playMinutes =
-                minutes;
-
-                currentOrder.entryTime =
-                now;
-
-                currentOrder.expectedExitTime =
-                expectedExit;
-
-                currentOrder.exitTime =
-                null;
-
-                currentOrder.enteredBy =
-                operatorName();
-
-                currentOrder.enteredById =
-                currentActor().id || "";
-
-                currentOrder.enteredByRole =
-                currentActor().role || currentRole;
-
-                currentOrder.updatedAt =
-                now;
-
-                currentOrders[
-                    selectedOrderId
-                ] = currentOrder;
-
-                return currentOrders;
+                return currentOrder;
             },
-            function(error,committed){
+            function(error,committed,snapshot){
+                if(button && document.body.contains(button)){
+                    button.disabled = false;
+                    button.textContent = "▶ 確認入場";
+                }
 
                 if(error){
-
                     alert(
-                        "入場失敗，請檢查網路"
+                        "入場失敗：" +
+                        (error.message || "請檢查網路")
                     );
                     return;
                 }
 
                 if(!committed){
-
-                    if(blockedInfo){
-
-                        alert(
-                            "目前場內 " +
-                            blockedInfo.current +
-                            " 人\n此訂單需 " +
-                            blockedInfo.entering +
-                            " 個名額\n上限 " +
-                            blockedInfo.max +
-                            " 人\n\n場內人數已滿，請先候位。"
-                        );
-
+                    if(blockedReason === "already"){
+                        alert("此訂單已經入場，不會重複計算。");
+                    }else if(blockedReason === "status"){
+                        alert("此訂單已不是等待入場狀態，請重新整理。");
                     }else{
-
-                        alert(
-                            "訂單狀態已變更，請重新整理"
-                        );
+                        alert("找不到這筆訂單，請重新整理。");
                     }
-
                     return;
                 }
 
+                var latest =
+                    snapshot && snapshot.val
+                    ? snapshot.val()
+                    : order;
+
                 if(window.MonsterAuth){
                     MonsterAuth.audit(
-                        "order.enter",
-                        "確認入場：" + (order.queueNumber || order.orderNo || ""),
-                        {source:"staff",targetType:"order",targetId:selectedOrderId}
+                        forceCapacity
+                        ? "order.force_enter"
+                        : "order.enter",
+                        (
+                            forceCapacity
+                            ? "店長強制入場："
+                            : "確認入場："
+                        ) +
+                        (
+                            latest.queueNumber ||
+                            latest.orderNo ||
+                            ""
+                        ),
+                        {
+                            source:"staff",
+                            targetType:"order",
+                            targetId:selectedOrderId,
+                            forced:forceCapacity,
+                            currentPlayers:currentPlayers,
+                            enteringCount:enteringCount,
+                            maxPlayers:maxPlayers
+                        }
+                    );
+                }
+
+                if(forceCapacity){
+                    alert(
+                        "✅ 店長強制入場完成\n" +
+                        "入場後場內共 " +
+                        (currentPlayers + enteringCount) +
+                        " 人"
                     );
                 }
             }
@@ -1534,3 +1526,4 @@
     );
 
 })();
+
