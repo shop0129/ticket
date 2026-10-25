@@ -19,6 +19,9 @@ var activeReceiptPrintToken = 0;
 var RECEIPT_PROGRESS_LIMIT = 94;
 var RECEIPT_PROGRESS_RAMP_MS = 3600;
 var RECEIPT_PROGRESS_MIN_VISIBLE_MS = 1150;
+// FIX50: keep an independent completion watchdog. showPage() may clear the
+// visible countdown interval, but it must never strand a paid customer here.
+var completedReceiptHomeTimer = null;
 
 function setReceiptProgressText(value) {
     var text = String(value);
@@ -104,6 +107,8 @@ function updateSuccessItems() {
 // =========================================
 function resetPrintDisplay() {
     clearInterval(countdownTimer);
+    clearTimeout(completedReceiptHomeTimer);
+    completedReceiptHomeTimer = null;
     clearInterval(activeReceiptProgressTimer);
     activeReceiptProgressTimer = null;
     if (activeReceiptProgressFrame !== null) {
@@ -348,43 +353,94 @@ function openReceiptPrintRecovery() {
 // =========================================
 // 列印完成倒數
 // =========================================
-function startReturnCountdown() {
-    var sec = systemData.printDelay;
+function finishCompletedOrderAndReturn() {
+    var successPage = document.getElementById("successPage");
+    var homePage = document.getElementById("homePage");
+    var index;
+
     clearInterval(countdownTimer);
+    clearTimeout(completedReceiptHomeTimer);
+    completedReceiptHomeTimer = null;
+
+    // A different page was deliberately opened; do not pull it back to Home.
+    if (!successPage || !successPage.classList.contains("active")) return false;
+
+    countdownNumber.innerHTML = "";
+    if (typeof paymentInProgress !== "undefined") paymentInProgress = false;
+    if (typeof setPaymentButtonsDisabled === "function") {
+        setPaymentButtonsDisabled(false);
+    } else {
+        if (linePayBtn) linePayBtn.disabled = false;
+        if (cashBtn) cashBtn.disabled = false;
+    }
+    if (typeof resetCurrentMemberSelection === "function") {
+        resetCurrentMemberSelection();
+    }
+    cart = [];
+    if (typeof updateCartPanel === "function") updateCartPanel();
+    if (paymentArea) paymentArea.style.display = "none";
+    if (checkoutBtn) checkoutBtn.style.display = "block";
+
+    if (isReprint) {
+        isReprint = false;
+        index = salesHistory.findIndex(function (order) {
+            return order.orderNo === currentPrintOrder.orderNo;
+        });
+        openOrderDetail(index);
+        return true;
+    }
+
+    // The order is saved and the receipt completion screen is already visible.
+    // Route directly so an ACK retry cannot leave the customer on this screen.
+    document.querySelectorAll(".page").forEach(function (page) {
+        page.classList.remove("active");
+    });
+    if (!homePage) return false;
+    homePage.classList.add("active");
+    if (typeof markHomeStable === "function") {
+        markHomeStable("receipt-complete-fix50");
+    }
+    if (typeof resetIdleTimer === "function") resetIdleTimer();
+    if (typeof notifyNativeHome === "function") {
+        notifyNativeHome("receipt-complete-fix50");
+    } else if (
+        window.MonsterNativeKiosk &&
+        typeof window.MonsterNativeKiosk.showHome === "function"
+    ) {
+        try { window.MonsterNativeKiosk.showHome("receipt-complete-fix50"); }
+        catch (ignore) {}
+    }
+    return true;
+}
+
+function startReturnCountdown() {
+    var configured = Number(systemData && systemData.printDelay);
+    var sec = isFinite(configured) && configured > 0
+        ? Math.max(1, Math.round(configured))
+        : 3;
+    var deadline = Date.now() + sec * 1000;
+
+    clearInterval(countdownTimer);
+    clearTimeout(completedReceiptHomeTimer);
     countdownNumber.innerHTML = sec;
+
+    // Independent watchdog: unlike countdownTimer, general page routing does
+    // not clear this timer. It is intentionally slightly later than the label.
+    completedReceiptHomeTimer = setTimeout(function () {
+        finishCompletedOrderAndReturn();
+    }, sec * 1000 + 700);
+
     countdownTimer = setInterval(function () {
-        sec--;
-        if (sec > 0) {
-            countdownNumber.innerHTML = sec;
+        var remaining = Math.max(
+            0,
+            Math.ceil((deadline - Date.now()) / 1000)
+        );
+        if (remaining > 0) {
+            countdownNumber.innerHTML = remaining;
             return;
         }
-        clearInterval(countdownTimer);
-        linePayBtn.disabled = false;
-        cashBtn.disabled = false;
-        if (typeof resetPaymentLock ===
-            "function") {
-            resetPaymentLock();
-        }
-        if (typeof resetCurrentMemberSelection === "function")
-            resetCurrentMemberSelection();
-        // 清空購物車
-        cart = [];
-        updateCartPanel();
-        // 收起付款區
-        paymentArea.style.display = "none";
-        checkoutBtn.style.display = "block";
-        if (isReprint) {
-            isReprint = false;
-            var index = salesHistory.findIndex(function (order) {
-                return order.orderNo ===
-                    currentPrintOrder.orderNo;
-            });
-            openOrderDetail(index);
-        }
-        else {
-            showPage("homePage");
-        }
-    }, 1000);
+        finishCompletedOrderAndReturn();
+    }, 250);
 }
 // =========================================
 // 啟動列印動畫
@@ -436,3 +492,4 @@ function startPrintAnimation() {
             return { ok: false, error: error };
         });
 }
+
