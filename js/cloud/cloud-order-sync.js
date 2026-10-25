@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
+// 小怪獸售票機 V7.8.3.3 FIX49 Kiosk Lightweight Sync
 // 訂單／售票紀錄雲端同步
 // Firebase Realtime Database + localStorage 離線備援
 // Android WebView 61 相容版
@@ -24,9 +24,27 @@
     var writeTimer = null;
     var lastOrderMap = {};
     var lastCloudUpdateAt = 0;
+    var localCacheTimer = null;
+    var screenRefreshTimer = null;
+    var lightweightKioskMode = isKioskLightMode();
 
     window.MonsterOrderCloud =
         window.MonsterOrderCloud || {};
+
+    function isKioskLightMode(){
+        var ua = String(navigator.userAgent || "");
+        return !!(
+            window.MonsterNativeKiosk ||
+            /;\s*wv\)/i.test(ua) ||
+            /Android\s+(?:7|8|9)(?:\.|;)/i.test(ua) ||
+            /(?:^|[?&])kioskLite=1(?:&|$)/.test(location.search || "")
+        );
+    }
+
+    function activePageId(){
+        var page = document.querySelector(".page.active");
+        return page ? page.id : "";
+    }
 
     function cloneValue(value){
         return JSON.parse(JSON.stringify(value));
@@ -258,7 +276,7 @@
 
         var detail = {
             source:source || "cloud",
-            count:mapToArray(map || {}).length,
+            count:Array.isArray(salesHistory) ? salesHistory.length : 0,
             updatedAt:Date.now()
         };
 
@@ -274,42 +292,57 @@
         }
     }
 
-    function refreshOrderScreens(){
+    function refreshOrderScreensNow(){
 
-        if(typeof renderSalesHistory === "function"){
+        var pageId = activePageId();
+
+        if(pageId === "salesHistoryPage" && typeof renderSalesHistory === "function"){
             renderSalesHistory();
         }
 
-        if(typeof renderAdminDashboard === "function"){
+        if(pageId === "adminHomePage" && typeof renderAdminDashboard === "function"){
             renderAdminDashboard();
         }
 
-        if(typeof renderShiftReport === "function"){
-            var page =
-            document.getElementById("shiftReportPage");
-
-            if(
-                page &&
-                page.classList.contains("active")
-            ){
-                renderShiftReport();
-            }
+        if(pageId === "shiftReportPage" && typeof renderShiftReport === "function"){
+            renderShiftReport();
         }
 
-        if(
-            typeof renderMemberList === "function" &&
-            document.getElementById("memberManagerPage")
-        ){
+        if(pageId === "memberManagerPage" && typeof renderMemberList === "function"){
             renderMemberList();
         }
 
-        if(
-            typeof renderMemberHistory === "function" &&
-            typeof currentMemberHistoryId !== "undefined" &&
-            currentMemberHistoryId
-        ){
+        if(pageId === "memberHistoryPage" && typeof renderMemberHistory === "function" &&
+            typeof currentMemberHistoryId !== "undefined" && currentMemberHistoryId){
             renderMemberHistory();
         }
+    }
+
+    function refreshOrderScreens(){
+        if(!lightweightKioskMode){
+            refreshOrderScreensNow();
+            return;
+        }
+        if(screenRefreshTimer) clearTimeout(screenRefreshTimer);
+        screenRefreshTimer = setTimeout(function(){
+            screenRefreshTimer = null;
+            refreshOrderScreensNow();
+        },250);
+    }
+
+    function saveLocalOrderCache(){
+        var save = function(){
+            localCacheTimer = null;
+            try{
+                localStorage.setItem("salesHistory",JSON.stringify(salesHistory));
+            }catch(error){}
+        };
+        if(!lightweightKioskMode){
+            save();
+            return;
+        }
+        if(localCacheTimer) clearTimeout(localCacheTimer);
+        localCacheTimer = setTimeout(save,300);
     }
 
     function applyCloudMap(map){
@@ -319,12 +352,11 @@
         salesHistory = mapToArray(map);
         window.salesHistory = salesHistory;
 
-        localStorage.setItem(
-            "salesHistory",
-            JSON.stringify(salesHistory)
-        );
+        saveLocalOrderCache();
 
-        lastOrderMap = cloneValue(map);
+        // The Firebase snapshot is immutable for this callback. Avoid one full
+        // JSON clone on old kiosk WebViews while keeping desktop behavior intact.
+        lastOrderMap = lightweightKioskMode ? map : cloneValue(map);
         lastCloudUpdateAt = Date.now();
 
         applyingCloud = false;
@@ -635,6 +667,7 @@
         return {
             initialized:initialized,
             pendingWrite:pendingWrite,
+            lightweightKioskMode:lightweightKioskMode,
             lastCloudUpdateAt:lastCloudUpdateAt,
             localCount:
             Array.isArray(salesHistory)
@@ -679,3 +712,4 @@
     );
 
 })();
+

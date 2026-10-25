@@ -1,7 +1,7 @@
-// 小怪獸售票機 V7.8.3.3 FIX24
-// FIX24 preserves accepted cash while allowing ticket browsing during a
-// zero-cash boot cancellation. Starting a new cash payment remains blocked
-// until Controller 113 has cleared the previous zero-cash session.
+// 小怪獸售票機 V7.8.3.3 FIX49
+// FIX49 keeps only payment-risk transactions blocking ticket entry.
+// A zero-cash stale transaction is reconciled in the background and never
+// prevents customers from browsing tickets; cash start still verifies it.
 // GitHub Pages/PWA -> Android localhost cash controller bridge
 // Android WebView 61 相容（ES5）
 (function () {
@@ -29,7 +29,7 @@
     var bootRecoveryRetryTimer = null;
     var bootRecoveryRetryAttempt = 0;
     // Preserved regression marker: OVERLAY_FIX_VERSION = "fix16"
-    var OVERLAY_FIX_VERSION = "fix24";
+    var OVERLAY_FIX_VERSION = "fix49";
     var BOOT_CANCEL_POLL_MS = 500;
     var BOOT_CANCEL_MAX_POLLS = 20;
     var BOOT_PAIRING_POLL_MS = 350;
@@ -1304,30 +1304,26 @@
             return hasAcceptedCashEvidence(active);
         },
         blocksTicketBrowsing: function () {
-            // A transaction recovered from boot with no accepted cash may keep
-            // cancelling in background while the customer browses ticket cards.
-            // The actual cash-payment entry point still verifies and blocks it.
+            // FIX49: only real payment risk blocks Start. A stale transaction
+            // with zero accepted cash may keep reconciling in the background.
+            // startCashPayment() verifies/clears it again before opening hardware.
             if (pendingContext) return true;
             if (!active || active.state === "COMPLETED") return false;
-            if (hasAcceptedCashEvidence(active)) return true;
-            return !bootHomeReleasePending;
+            return hasAcceptedCashEvidence(active);
         },
         hasBlockingTransaction: function () {
             return !!pendingContext || !!(
-                bootRecoveryResolved &&
                 active &&
                 active.state !== "COMPLETED" &&
-                (
-                    !bootHomeReleasePending ||
-                    hasAcceptedCashEvidence(active)
-                )
+                hasAcceptedCashEvidence(active)
             );
         },
         isStartBlocked: function () {
             return !!pendingContext || !!(
                 active &&
-                active.state !== "COMPLETED"
-            ) || !bootRecoveryResolved;
+                active.state !== "COMPLETED" &&
+                hasAcceptedCashEvidence(active)
+            );
         },
         shouldKeepHomeDuringBootRecovery: function () {
             return !!(
@@ -1407,3 +1403,4 @@
         setTimeout(recoverWhenBridgeReady, 0);
     }
 })();
+

@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
+// 小怪獸售票機 V7.8.3.3 FIX49 Kiosk Lightweight Dashboard
 // Dashboard 雲端即時統計
 // Firebase Realtime Database
 // Android WebView 61 相容版
@@ -30,9 +30,20 @@
     var writeTimer = null;
     var TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
     var activeDateKey = "";
+    var lightweightKioskMode = isKioskLightMode();
 
     window.MonsterDashboardCloud =
         window.MonsterDashboardCloud || {};
+
+    function isKioskLightMode(){
+        var ua = String(navigator.userAgent || "");
+        return !!(
+            window.MonsterNativeKiosk ||
+            /;\s*wv\)/i.test(ua) ||
+            /Android\s+(?:7|8|9)(?:\.|;)/i.test(ua) ||
+            /(?:^|[?&])kioskLite=1(?:&|$)/.test(location.search || "")
+        );
+    }
 
     function cloneValue(value){
 
@@ -440,6 +451,12 @@
 
     function scheduleDashboardWrite(){
 
+        // The old RK3288 kiosk only consumes the compact dashboard/current node.
+        // Phones and desktop managers keep the full historical calculation.
+        if(lightweightKioskMode){
+            return;
+        }
+
         if(writeTimer){
             clearTimeout(writeTimer);
         }
@@ -611,6 +628,11 @@
 
         activeDateKey = getTodayKey();
 
+        if(lightweightKioskMode){
+            listenDashboardCurrent();
+            return;
+        }
+
         orderRef.on(
             "value",
             function(snapshot){
@@ -668,6 +690,7 @@
         return {
             ordersReady:ordersReady,
             membersReady:membersReady,
+            lightweightKioskMode:lightweightKioskMode,
             orderCount:
             Object.keys(
                 cloudOrders || {}
@@ -743,3 +766,4 @@
     window.addEventListener("pageshow",refreshBusinessDate);
 
 })();
+
