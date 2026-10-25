@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX49 Kiosk Lightweight Sync
+// 小怪獸售票機 V7.8.3.3 FIX51 True Kiosk Lightweight Sync
 // 訂單／售票紀錄雲端同步
 // Firebase Realtime Database + localStorage 離線備援
 // Android WebView 61 相容版
@@ -444,13 +444,18 @@
         .then(function(){
 
             lastCloudUpdateAt = Date.now();
+            Object.keys(map || {}).forEach(function(id){
+                lastOrderMap[id] = cloneValue(map[id]);
+            });
             notifyOrderUpdate("local-upload",map);
 
             setSyncStatus(
                 "訂單已同步",
-                "售票紀錄 " +
-                mapToArray(map).length +
-                " 筆，已保存至雲端",
+                lightweightKioskMode
+                ? "本次新增或異動訂單已保存至雲端"
+                : "售票紀錄 " +
+                  mapToArray(map).length +
+                  " 筆，已保存至雲端",
                 "online"
             );
         })
@@ -471,6 +476,56 @@
         });
     }
 
+    function collectLightweightChanges(){
+
+        var currentMap = arrayToMap(salesHistory);
+        var changedMap = {};
+        var now = Date.now();
+        var deviceId =
+        window.MonsterCloud &&
+        window.MonsterCloud.uid
+        ? window.MonsterCloud.uid
+        : "local";
+
+        Object.keys(currentMap)
+        .forEach(function(id){
+
+            var current = currentMap[id];
+            var previous = lastOrderMap[id];
+
+            if(
+                !previous ||
+                comparableOrder(current) !==
+                comparableOrder(previous)
+            ){
+                if(!current.createdAt){
+                    current.createdAt = now;
+                }
+                current.updatedAt = now;
+                current.updatedBy = deviceId;
+                current.deleted = false;
+                changedMap[id] = current;
+            }
+        });
+
+        Object.keys(lastOrderMap)
+        .forEach(function(id){
+            if(!currentMap[id]){
+                changedMap[id] = {
+                    cloudId:id,
+                    orderNo:lastOrderMap[id].orderNo || id,
+                    deleted:true,
+                    updatedAt:now,
+                    updatedBy:deviceId
+                };
+            }
+        });
+
+        // Do not rewrite the whole local order cache here. saveSalesHistory()
+        // already saved the current operation before notifying cloud sync.
+        return changedMap;
+    }
+
     function scheduleUpload(delay){
 
         if(writeTimer){
@@ -478,6 +533,13 @@
         }
 
         writeTimer = setTimeout(function(){
+
+            if(lightweightKioskMode){
+                uploadMap(
+                    collectLightweightChanges()
+                );
+                return;
+            }
 
             var map = stampLocalChanges(
                 arrayToMap(salesHistory)
@@ -591,6 +653,31 @@
         resetRef =
         window.MonsterCloud.database
         .ref(RESET_PATH);
+
+        // FIX51: the kiosk must never subscribe to the complete orders node.
+        // It only uploads records changed on this device and listens to the
+        // tiny reset marker. Desktop and phone managers retain full sync.
+        if(lightweightKioskMode){
+            initialized = true;
+            resetRef.on(
+                "value",
+                function(resetSnapshot){
+                    clearLocalAfterGlobalReset(resetSnapshot.val());
+                },
+                function(error){
+                    console.error(
+                        "[MonsterOrderCloud] reset read error:",
+                        error
+                    );
+                }
+            );
+            setSyncStatus(
+                "售票機輕量模式",
+                "新訂單即時上傳，不下載完整歷史訂單",
+                "online"
+            );
+            return;
+        }
 
         function attachOrderListener(){
             orderRef.on(
