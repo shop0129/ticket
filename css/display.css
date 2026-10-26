@@ -180,26 +180,30 @@ html,body{
     height:100%;
     margin:0;
     padding:.7vh .75vw;
-    grid-template-columns:.28fr 1.35fr .9fr .72fr;
-    gap:.45vw;
+    grid-template-columns:.24fr 1.42fr 1.04fr .88fr;
+    gap:.35vw;
 }
 .display-grid-single .display-index{
     font-size:1.05vw;
 }
 .display-grid-single .display-queue{
     min-width:0;
-    font-size:1.65vw;
+    font-size:1.85vw;
     white-space:nowrap;
 }
 .display-grid-single .display-queue small{
     font-size:.72em;
 }
 .display-grid-single .display-time{
-    font-size:1.08vw;
+    font-size:1.35vw;
+    font-weight:800;
+    color:#f5f8fa;
     white-space:nowrap;
 }
 .display-grid-single .display-status{
-    font-size:1.25vw;
+    font-size:1.65vw;
+    line-height:1.05;
+    text-shadow:0 1px 2px rgba(0,0,0,.55);
     white-space:nowrap;
 }
 .display-grid-single .display-empty{
