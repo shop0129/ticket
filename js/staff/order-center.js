@@ -26,9 +26,12 @@
     var started = false;
     var bound = false;
     var authWatchStarted = false;
+    var ordersRootRef = null;
     var ordersRef = null;
     var settingsRef = null;
     var lastOrderUpdateAt = 0;
+    var syncedTaipeiDay = "";
+    var dayChangeTimer = null;
 
     function byId(id){
         return document.getElementById(id);
@@ -52,6 +55,41 @@
         return Number(value) < 10
         ? "0" + value
         : String(value);
+    }
+
+    function taipeiDayKey(value){
+
+        var date =
+        new Date(
+            Number(value || Date.now()) +
+            8 * 60 * 60 * 1000
+        );
+
+        return (
+            date.getUTCFullYear() +
+            "-" +
+            pad(date.getUTCMonth() + 1) +
+            "-" +
+            pad(date.getUTCDate())
+        );
+    }
+
+    function taipeiDayStart(value){
+
+        var date =
+        new Date(
+            Number(value || Date.now()) +
+            8 * 60 * 60 * 1000
+        );
+
+        return (
+            Date.UTC(
+                date.getUTCFullYear(),
+                date.getUTCMonth(),
+                date.getUTCDate()
+            ) -
+            8 * 60 * 60 * 1000
+        );
     }
 
     function timeText(value){
@@ -158,10 +196,49 @@
             "● 即時同步 " +
             new Date(lastOrderUpdateAt)
             .toLocaleTimeString("zh-TW") +
-            "｜" +
+            "｜今日 " +
             Object.keys(ordersMap).length +
             " 筆訂單",
             false
+        );
+    }
+
+    function attachTodayOrders(){
+
+        if(!ordersRootRef){
+            return;
+        }
+
+        var today = taipeiDayKey();
+
+        if(ordersRef && syncedTaipeiDay === today){
+            return;
+        }
+
+        if(ordersRef){
+            ordersRef.off(
+                "value",
+                applyOrdersSnapshot
+            );
+        }
+
+        syncedTaipeiDay = today;
+        ordersMap = {};
+
+        ordersRef =
+        ordersRootRef
+        .orderByChild("createdAt")
+        .startAt(taipeiDayStart());
+
+        updateLiveStatus(
+            "● 正在同步今日訂單…",
+            false
+        );
+
+        ordersRef.on(
+            "value",
+            applyOrdersSnapshot,
+            handleOrderReadError
         );
     }
 
@@ -1379,6 +1456,8 @@
         var button =
         byId("staffOrderRefreshButton");
 
+        attachTodayOrders();
+
         if(!ordersRef){
             updateLiveStatus(
                 "● Firebase 尚未完成登入，正在重試",
@@ -1454,16 +1533,18 @@
             }
         );
 
-        ordersRef =
+        ordersRootRef =
         firebase.database()
         .ref(ROOT + "/orders");
 
-        ordersRef
-        .on(
-            "value",
-            applyOrdersSnapshot,
-            handleOrderReadError
-        );
+        attachTodayOrders();
+
+        if(!dayChangeTimer){
+            dayChangeTimer = setInterval(
+                attachTodayOrders,
+                60 * 1000
+            );
+        }
 
         bind();
     }
