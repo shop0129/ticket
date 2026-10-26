@@ -1074,8 +1074,37 @@
                     "duration"
                 );
 
-                current.playStatus =
-                "playing";
+                if(window.MonsterTicketStatusEngine){
+                    current =
+                    MonsterTicketStatusEngine.transitionOrder(
+                        current,
+                        "playing",
+                        {
+                            now:now,
+                            actor:operatorName(),
+                            expectedExitTime:expected
+                        }
+                    );
+                }else{
+                    current.playStatus = "playing";
+                    current.validationStatus = "playing";
+                    current.ticketStatus = "playing";
+                    current.ticketInstances =
+                    (
+                        Array.isArray(current.ticketInstances)
+                        ? current.ticketInstances
+                        : []
+                    ).map(function(ticket){
+                        var nextTicket =
+                        Object.assign({},ticket || {});
+                        nextTicket.status = "playing";
+                        nextTicket.playStatus = "playing";
+                        nextTicket.validationStatus = "playing";
+                        nextTicket.checkedInAt = now;
+                        nextTicket.checkedInBy = operatorName();
+                        return nextTicket;
+                    });
+                }
 
                 current.entryTime =
                 now;
@@ -1463,3 +1492,4 @@ ${isVoidedOrder ? `<div class="staff-void-protection-banner">🚫 此訂單已�
     );
 
 })();
+

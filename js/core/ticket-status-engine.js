@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.6.0｜Ticket Status Engine
+// 小怪獸售票機 V7.8.3.3 FIX56｜Ticket Status Engine
 (function (global) {
     "use strict";
 
@@ -39,6 +39,29 @@
             return STATUS.NOT_REQUIRED;
         }
 
+        // 訂單層級是店長入／離場操作的最終狀態。
+        // 舊訂單可能已經是 playing，但 ticketInstances 或
+        // validationStatus 仍停在 waiting；重新登入時不可被舊欄位蓋回。
+        var explicitStates = [
+            order.playStatus,
+            order.ticketStatus,
+            order.validationStatus
+        ];
+        for (var index = 0; index < explicitStates.length; index++) {
+            var rawState = explicitStates[index];
+            var explicitState = normalize(rawState);
+            if (rawState && explicitState !== STATUS.WAITING) {
+                return explicitState;
+            }
+        }
+
+        if (Number(order.exitTime || order.checkedOutAt || 0) > 0) {
+            return STATUS.FINISHED;
+        }
+        if (Number(order.entryTime || order.checkedInAt || 0) > 0) {
+            return STATUS.PLAYING;
+        }
+
         var tickets = admissionTickets(order);
         if (tickets.length) {
             var states = tickets.map(ticketStatus);
@@ -55,13 +78,22 @@
         return (Array.isArray(tickets) ? tickets : []).map(function (ticket) {
             var next = Object.assign({}, ticket);
             var state = ticketStatus(next);
-            if (target === STATUS.PLAYING && state === STATUS.WAITING) {
+            if (
+                target === STATUS.PLAYING &&
+                state !== STATUS.CANCELLED &&
+                state !== STATUS.FINISHED &&
+                state !== STATUS.NOT_REQUIRED
+            ) {
                 next.status = STATUS.PLAYING;
                 next.playStatus = STATUS.PLAYING;
                 next.validationStatus = STATUS.PLAYING;
                 next.checkedInAt = now;
                 next.checkedInBy = actor || "staff";
-            } else if (target === STATUS.FINISHED && state === STATUS.PLAYING) {
+            } else if (
+                target === STATUS.FINISHED &&
+                state !== STATUS.CANCELLED &&
+                state !== STATUS.NOT_REQUIRED
+            ) {
                 next.status = STATUS.FINISHED;
                 next.playStatus = STATUS.FINISHED;
                 next.validationStatus = STATUS.FINISHED;
@@ -146,7 +178,7 @@
     }
 
     global.MonsterTicketStatusEngine = {
-        VERSION: "7.6.0",
+        VERSION: "7.8.3.3-FIX56",
         STATUS: STATUS,
         normalize: normalize,
         getTicketStatus: ticketStatus,
@@ -157,3 +189,4 @@
         timer: timer
     };
 })(window);
+

@@ -1262,6 +1262,22 @@
                 }else{
                     currentOrder.playStatus = "playing";
                     currentOrder.validationStatus = "playing";
+                    currentOrder.ticketStatus = "playing";
+                    currentOrder.ticketInstances =
+                    (
+                        Array.isArray(currentOrder.ticketInstances)
+                        ? currentOrder.ticketInstances
+                        : []
+                    ).map(function(ticket){
+                        var nextTicket =
+                        Object.assign({},ticket || {});
+                        nextTicket.status = "playing";
+                        nextTicket.playStatus = "playing";
+                        nextTicket.validationStatus = "playing";
+                        nextTicket.checkedInAt = now;
+                        nextTicket.checkedInBy = operatorName();
+                        return nextTicket;
+                    });
                 }
 
                 currentOrder.playerCount = players;
@@ -1423,6 +1439,22 @@
                 }else{
                     current.playStatus = "finished";
                     current.validationStatus = "finished";
+                    current.ticketStatus = "finished";
+                    current.ticketInstances =
+                    (
+                        Array.isArray(current.ticketInstances)
+                        ? current.ticketInstances
+                        : []
+                    ).map(function(ticket){
+                        var nextTicket =
+                        Object.assign({},ticket || {});
+                        nextTicket.status = "finished";
+                        nextTicket.playStatus = "finished";
+                        nextTicket.validationStatus = "finished";
+                        nextTicket.checkedOutAt = exitNow;
+                        nextTicket.checkedOutBy = operatorName();
+                        return nextTicket;
+                    });
                     current.exitTime = exitNow;
                 }
 
@@ -1475,13 +1507,54 @@
             "/orders/" +
             selectedOrderId
         )
-        .update({
-            playStatus:"waiting",
-            entryTime:null,
-            expectedExitTime:null,
-            exitTime:null,
-            updatedAt:Date.now(),
-            updatedBy:operatorName()
+        .transaction(function(current){
+
+            if(!current || current.deleted){
+                return;
+            }
+
+            var resetAt = Date.now();
+
+            if(window.MonsterTicketStatusEngine){
+                current =
+                MonsterTicketStatusEngine.transitionOrder(
+                    current,
+                    "waiting",
+                    {
+                        now:resetAt,
+                        actor:operatorName()
+                    }
+                );
+            }else{
+                current.playStatus = "waiting";
+                current.validationStatus = "waiting";
+                current.ticketStatus = "waiting";
+                current.ticketInstances =
+                (
+                    Array.isArray(current.ticketInstances)
+                    ? current.ticketInstances
+                    : []
+                ).map(function(ticket){
+                    var nextTicket =
+                    Object.assign({},ticket || {});
+                    nextTicket.status = "waiting";
+                    nextTicket.playStatus = "waiting";
+                    nextTicket.validationStatus = "waiting";
+                    nextTicket.checkedInAt = null;
+                    nextTicket.checkedInBy = null;
+                    nextTicket.checkedOutAt = null;
+                    nextTicket.checkedOutBy = null;
+                    return nextTicket;
+                });
+                current.entryTime = null;
+                current.expectedExitTime = null;
+                current.exitTime = null;
+            }
+
+            current.updatedAt = resetAt;
+            current.updatedBy = operatorName();
+
+            return current;
         })
         .then(function(){
             if(window.MonsterAuth){
