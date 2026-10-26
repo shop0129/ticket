@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.2
+// 小怪獸售票機 V7.8.3.3 FIX55
 // Lobby / Play 電視即時看板
 // =========================================
 (function(){
@@ -7,6 +7,7 @@
     "use strict";
 
     var ROOT = "monsterTicket/v1";
+    var DISPLAY_ROW_LIMIT = 12;
     var mode =
     document.body.getAttribute("data-display-mode") ||
     "play";
@@ -172,7 +173,7 @@
             box.innerHTML='<div class="display-empty">目前沒有遊玩中的訂單</div>';
             return;
         }
-        box.innerHTML=rows.slice(0,12).map(function(order,index){
+        box.innerHTML=rows.slice(0,DISPLAY_ROW_LIMIT).map(function(order,index){
             var r=remaining(order);
             return `
 <div class="display-row">
@@ -347,3 +348,4 @@
     .then(start);
 
 })();
+

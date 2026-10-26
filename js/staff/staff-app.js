@@ -12,6 +12,7 @@
 
     var currentRole = "";
     var dashboardCurrent = null;
+    var todayOrdersSummary = null;
     var membersMap = {};
     var selectedMemberId = "";
     var toyPointMode = "add";
@@ -332,12 +333,34 @@
         cloudDateKey &&
         cloudDateKey !== taipeiToday.key;
 
-        var data =
+        var cloudSummary =
         !isPreviousDay &&
         dashboardCurrent &&
         dashboardCurrent.summary
         ? dashboardCurrent.summary
         : {};
+
+        var data = {};
+
+        Object.keys(cloudSummary)
+        .forEach(function(key){
+            data[key] = cloudSummary[key];
+        });
+
+        if(todayOrdersSummary){
+
+            [
+                "income",
+                "normalOrders",
+                "ticketCount",
+                "memberOrders",
+                "cancelledOrders"
+            ].forEach(function(key){
+
+                data[key] =
+                Number(todayOrdersSummary[key] || 0);
+            });
+        }
 
         var date =
         !isPreviousDay &&
@@ -379,6 +402,27 @@
                 fields[id];
             }
         });
+    }
+
+    function receiveTodayOrdersSummary(event){
+
+        var detail =
+        event && event.detail
+        ? event.detail
+        : {};
+
+        if(
+            detail.dateKey &&
+            detail.dateKey !==
+            taipeiDashboardDate().key
+        ){
+            return;
+        }
+
+        todayOrdersSummary =
+        detail.summary || null;
+
+        renderDashboard();
     }
 
     function memberArray(){
@@ -1740,6 +1784,11 @@
         cloudBadge =
         byId("staffCloudBadge");
 
+        window.addEventListener(
+            "monster:today-orders-summary",
+            receiveTodayOrdersSummary
+        );
+
         bindEvents();
         startFirebase();
 
@@ -1765,3 +1814,4 @@
     );
 
 })();
+

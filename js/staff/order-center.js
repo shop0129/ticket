@@ -178,6 +178,150 @@
         status.textContent = text || "";
     }
 
+    function isCancelledForSummary(order){
+
+        var status =
+        String(
+            order &&
+            (order.status || order.orderStatus) ||
+            ""
+        ).toLowerCase();
+
+        return (
+            status === "cancel" ||
+            status === "cancelled" ||
+            (order && order.cancelled === true) ||
+            (order && order.voided === true)
+        );
+    }
+
+    function orderAmountForSummary(order){
+
+        if(!order){
+            return 0;
+        }
+
+        return Number(
+            order.paidAmount != null
+            ? order.paidAmount
+            : (
+                order.amount ||
+                order.total ||
+                order.totalAmount ||
+                0
+            )
+        ) || 0;
+    }
+
+    function itemTicketCount(item){
+
+        if(item && item.reportTicketCount != null){
+            return Math.max(
+                0,
+                Number(item.reportTicketCount) || 0
+            );
+        }
+
+        return Math.max(
+            1,
+            Number(
+                item &&
+                (item.qty || item.quantity) ||
+                1
+            ) || 1
+        );
+    }
+
+    function calculateTodaySalesSummary(){
+
+        var summary = {
+            income:0,
+            normalOrders:0,
+            cancelledOrders:0,
+            ticketCount:0,
+            memberOrders:0
+        };
+
+        Object.keys(ordersMap || {})
+        .forEach(function(id){
+
+            var order = ordersMap[id];
+
+            if(
+                !order ||
+                order.deleted ||
+                order.excludeFromSalesReport === true ||
+                order.prepaidRedemption === true
+            ){
+                return;
+            }
+
+            if(isCancelledForSummary(order)){
+                summary.cancelledOrders++;
+                return;
+            }
+
+            summary.income +=
+            orderAmountForSummary(order);
+
+            summary.normalOrders++;
+
+            if(order.memberId){
+                summary.memberOrders++;
+            }
+
+            if(Array.isArray(order.items)){
+                summary.ticketCount +=
+                order.items.reduce(function(total,item){
+                    return total + itemTicketCount(item);
+                },0);
+            }else{
+                summary.ticketCount +=
+                Math.max(
+                    0,
+                    Number(
+                        order.ticketCount ||
+                        order.people ||
+                        1
+                    ) || 0
+                );
+            }
+        });
+
+        return summary;
+    }
+
+    function publishTodaySalesSummary(){
+
+        var detail = {
+            dateKey:taipeiDayKey(),
+            summary:calculateTodaySalesSummary(),
+            updatedAt:Date.now()
+        };
+
+        try{
+            window.dispatchEvent(
+                new CustomEvent(
+                    "monster:today-orders-summary",
+                    {detail:detail}
+                )
+            );
+        }catch(error){
+
+            var event =
+            document.createEvent("CustomEvent");
+
+            event.initCustomEvent(
+                "monster:today-orders-summary",
+                false,
+                false,
+                detail
+            );
+
+            window.dispatchEvent(event);
+        }
+    }
+
     function applyOrdersSnapshot(snapshot){
 
         ordersMap =
@@ -191,6 +335,8 @@
         if(selectedOrderId){
             renderOrderDetail();
         }
+
+        publishTodaySalesSummary();
 
         updateLiveStatus(
             "● 即時同步 " +
@@ -259,6 +405,8 @@
         if(selectedOrderId === orderId){
             renderOrderDetail();
         }
+
+        publishTodaySalesSummary();
 
         updateLiveStatus(
             "● 入場狀態已立即更新｜" +
@@ -1597,6 +1745,8 @@
         getOrders:function(){
             return ordersMap;
         },
+        getTodaySalesSummary:
+        calculateTodaySalesSummary,
         applyOrderUpdate:applyOrderUpdate,
         refresh:refreshOrdersNow,
         getSyncInfo:function(){
