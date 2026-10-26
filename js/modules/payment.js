@@ -201,12 +201,25 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
         window.currentPrintOrder = existing;
         return { order: existing, created: false };
     }
-    var now = new Date(context.createdAt || Date.now());
+    var orderTimestamp = Number(context.createdAt || Date.now());
+    var taipeiNow = new Date(orderTimestamp + 8 * 60 * 60 * 1000);
+    var taipeiYear = taipeiNow.getUTCFullYear();
+    var taipeiMonth = taipeiNow.getUTCMonth() + 1;
+    var taipeiDay = taipeiNow.getUTCDate();
+    var taipeiHour = taipeiNow.getUTCHours();
+    var taipeiMinute = taipeiNow.getUTCMinutes();
+    var businessDate =
+        taipeiYear + "-" +
+        String(taipeiMonth).padStart(2, "0") + "-" +
+        String(taipeiDay).padStart(2, "0");
     var pointUse = context.pointUse || { points: 0, discount: 0 };
     var order = Object.assign({
         orderNo: context.orderNo,
-        date: now.toLocaleDateString("zh-TW"),
-        time: now.toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" }),
+        date: taipeiYear + "/" + taipeiMonth + "/" + taipeiDay,
+        businessDate: businessDate,
+        time:
+            String(taipeiHour).padStart(2, "0") + ":" +
+            String(taipeiMinute).padStart(2, "0"),
         payment: paymentType,
         amount: Number(context.amount) || 0,
         originalAmount: Number(context.originalAmount) || Number(context.amount) || 0,
@@ -216,7 +229,7 @@ function savePaymentSalesRecord(paymentType, context, hardware) {
     }, clonePaymentValue(context.memberInfo || {}), {
         items: clonePaymentValue(context.items || []),
         status: "normal",
-        createdAt: context.createdAt || Date.now(),
+        createdAt: orderTimestamp,
         updatedAt: Date.now()
     });
     if (hardware && paymentType === "現金") {
@@ -413,3 +426,4 @@ function bindPaymentButton(button, paymentType) {
 
 bindPaymentButton(linePayBtn, "LINE Pay");
 bindPaymentButton(cashBtn, "現金");
+

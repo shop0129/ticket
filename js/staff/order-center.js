@@ -165,6 +165,32 @@
         );
     }
 
+    // Firebase transaction 完成後先把最新單筆訂單套用到手機畫面，
+    // 不必等待整個 orders 節點的下一次 value 快照。
+    function applyOrderUpdate(orderId,latestOrder){
+
+        if(!orderId || !latestOrder){
+            return;
+        }
+
+        ordersMap[orderId] = latestOrder;
+        lastOrderUpdateAt = Date.now();
+
+        renderOrderList();
+        updateCapacityCards();
+
+        if(selectedOrderId === orderId){
+            renderOrderDetail();
+        }
+
+        updateLiveStatus(
+            "● 入場狀態已立即更新｜" +
+            new Date(lastOrderUpdateAt)
+            .toLocaleTimeString("zh-TW"),
+            false
+        );
+    }
+
     function handleOrderReadError(error){
 
         console.error(
@@ -1072,6 +1098,11 @@
                     ? snapshot.val()
                     : order;
 
+                applyOrderUpdate(
+                    selectedOrderId,
+                    latest
+                );
+
                 if(window.MonsterAuth){
                     MonsterAuth.audit(
                         forceCapacity
@@ -1485,6 +1516,7 @@
         getOrders:function(){
             return ordersMap;
         },
+        applyOrderUpdate:applyOrderUpdate,
         refresh:refreshOrdersNow,
         getSyncInfo:function(){
             return {

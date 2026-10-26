@@ -12,7 +12,7 @@ function closePanel(){var p=el('enterpriseOverlay');if(p)p.style.display='none';
 function taipeiDateKey(ms){var d=new Date(Number(ms||Date.now())+8*60*60*1000);return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')+'-'+String(d.getUTCDate()).padStart(2,'0');}
 function normalizedDateKey(v){var m=String(v||'').match(/(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);return m?m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0'):'';}
 function parseOrderDate(o){var raw=o.createdAt||o.timestamp||o.dateTime; if(typeof raw==='number')return new Date(raw); if(raw&&raw.seconds)return new Date(raw.seconds*1000); if(typeof raw==='string'){var parsed=new Date(raw);if(!isNaN(parsed.getTime()))return parsed;} if(o.date){var s=String(o.date)+' '+String(o.time||'00:00'); var d=new Date(s.replace(/-/g,'/')); if(!isNaN(d))return d;} return null;}
-function orderDateKey(o){var fromDate=normalizedDateKey(o.date);if(fromDate)return fromDate;var d=parseOrderDate(o);return d?taipeiDateKey(d.getTime()):'';}
+function orderDateKey(o){var explicit=normalizedDateKey(o.businessDate||o.operatingDate||o.saleDate);if(explicit)return explicit;var d=parseOrderDate(o);if(d)return taipeiDateKey(d.getTime());return normalizedDateKey(o.date);}
 function inPeriod(o){if(period==='all')return true;var key=orderDateKey(o),today=taipeiDateKey();if(!key)return false;if(period==='month')return key.slice(0,7)===today.slice(0,7);if(period==='custom')return !!customDateFrom&&!!customDateTo&&key>=customDateFrom&&key<=customDateTo;return key===today;}
 function isCancelled(o){return o.status==='cancel'||o.status==='cancelled'||o.cancelled===true||o.voided===true;}
 function amount(o){return Number(o.paidAmount != null ? o.paidAmount : (o.amount||o.total||o.totalAmount||0));}
@@ -128,3 +128,4 @@ function bind(){document.querySelectorAll('[data-enterprise-open]').forEach(func
 document.addEventListener('DOMContentLoaded',function(){bind();startData();});
 window.MonsterEnterpriseManager={open:openPanel,close:closePanel,renderDashboard:renderDashboard,renderTickets:renderTickets,resetAllOrders:resetAllOrders,deleteSingleOrder:deleteSingleOrder,setPeriod:setPeriod,applyCustomRange:applyCustomRange};
 })();
+

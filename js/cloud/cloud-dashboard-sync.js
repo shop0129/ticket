@@ -100,7 +100,14 @@
     function recordDateKey(record, fallbackFields){
 
         var fields = fallbackFields || ["createdAt","timestamp","dateTime"];
-        var dateKey = normalizeDateKey(record && record.date);
+        var dateKey = normalizeDateKey(
+            record &&
+            (
+                record.businessDate ||
+                record.operatingDate ||
+                record.saleDate
+            )
+        );
 
         if(dateKey){
             return dateKey;
@@ -124,7 +131,7 @@
             }
         }
 
-        return "";
+        return normalizeDateKey(record && record.date);
     }
 
     function getTodayText(){
@@ -766,4 +773,5 @@
     window.addEventListener("pageshow",refreshBusinessDate);
 
 })();
+
 

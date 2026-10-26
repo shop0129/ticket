@@ -157,8 +157,13 @@ function updateStatus(action){
    if(error){message('操作失敗：'+(error.message||'請檢查網路'),false);return;}
    if(!committed){message('訂單狀態已被其他裝置更新，請重新查詢',false);return;}
    var latest=snapshot&&snapshot.val?snapshot.val():null;
-   if(latest){currentFound.order=latest;}
-   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix52'}).catch(function(){});
+   if(latest){
+     currentFound.order=latest;
+     if(window.MonsterOrderCenter&&typeof MonsterOrderCenter.applyOrderUpdate==='function'){
+       MonsterOrderCenter.applyOrderUpdate(currentFound.id,latest);
+     }
+   }
+   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix53'}).catch(function(){});
    message(action==='enter'?'已完成入場':'已完成離場',true);
    renderCenter();showResult(currentFound);renderHub();
  });

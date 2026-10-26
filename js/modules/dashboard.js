@@ -20,14 +20,15 @@ function dashboardPad(value) {
     return Number(value) < 10 ? "0" + Number(value) : String(Number(value));
 }
 function dashboardDateKeyFromDate(date) {
-    return date.getFullYear() + "-" + dashboardPad(date.getMonth() + 1) + "-" + dashboardPad(date.getDate());
+    var taipei = new Date(date.getTime() + 8 * 60 * 60 * 1000);
+    return taipei.getUTCFullYear() + "-" + dashboardPad(taipei.getUTCMonth() + 1) + "-" + dashboardPad(taipei.getUTCDate());
 }
 function dashboardNormalizeDateKey(value) {
     var parts = String(value || "").match(/(\d{4})\D+(\d{1,2})\D+(\d{1,2})/);
     return parts ? parts[1] + "-" + dashboardPad(parts[2]) + "-" + dashboardPad(parts[3]) : "";
 }
 function dashboardRecordDateKey(record) {
-    var direct = dashboardNormalizeDateKey(record && (record.date || record.joinDate));
+    var direct = dashboardNormalizeDateKey(record && (record.businessDate || record.operatingDate || record.saleDate));
     var fields = ["createdAt", "timestamp", "dateTime", "linePayPaidAt"];
     var index;
     var raw;
@@ -47,7 +48,7 @@ function dashboardRecordDateKey(record) {
             if (isFinite(parsed)) return dashboardDateKeyFromDate(new Date(parsed));
         }
     }
-    return "";
+    return dashboardNormalizeDateKey(record && (record.date || record.joinDate));
 }
 function dashboardOrderInPeriod(order, period) {
     if (period === "all") return true;
@@ -222,3 +223,4 @@ window.addEventListener("focus",renderAdminDashboard);
 window.addEventListener("storage",function(event){if(event.key==='salesHistory')renderAdminDashboard();});
 document.addEventListener('monster:orders-updated',renderAdminDashboard);
 renderAdminDashboard();
+
