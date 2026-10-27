@@ -1,7 +1,7 @@
 // V7 Phase 1 Legacy Build | js/modules/history.js
 // =========================================
-// 小怪獸售票機 V5.6.4
-// 售票紀錄模組
+// 小怪獸售票機 V7.8.3.3 FIX59
+// 售票紀錄按需載入：平常維持輕量，開啟本頁才讀取完整雲端紀錄
 // =========================================
 var __read = (this && this.__read) || function (o, n) {
     var m = typeof Symbol === "function" && o[Symbol.iterator];
@@ -30,12 +30,34 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 var salesHistoryList = document.getElementById("salesHistoryList");
 var orderDetailContent = document.getElementById("orderDetailContent");
+var historyCloudLoading = false;
 // =========================================
 // 開啟售票紀錄
 // =========================================
 function openSalesHistory() {
-    renderSalesHistory();
     showPage("salesHistoryPage");
+    if (historyCloudLoading) {
+        return;
+    }
+    if (window.MonsterOrderCloud &&
+        typeof window.MonsterOrderCloud.loadFullHistory === "function") {
+        historyCloudLoading = true;
+        if (salesHistoryList) {
+            salesHistoryList.innerHTML = '<div class="history-empty-card"><div class="history-empty-icon">☁️</div><div class="history-empty-title">正在載入完整售票紀錄</div><div class="history-empty-text">平常售票機只保留最近 30 筆，請稍候</div></div>';
+        }
+        window.MonsterOrderCloud.loadFullHistory().then(function () {
+            renderSalesHistory();
+        }).catch(function (error) {
+            renderSalesHistory();
+            if (window.MonsterCloud && typeof window.MonsterCloud.setStatus === "function") {
+                window.MonsterCloud.setStatus("warning", "完整紀錄載入失敗", (error && error.message) || "目前顯示最近 30 筆");
+            }
+        }).then(function () {
+            historyCloudLoading = false;
+        });
+        return;
+    }
+    renderSalesHistory();
 }
 // =========================================
 // 金額格式

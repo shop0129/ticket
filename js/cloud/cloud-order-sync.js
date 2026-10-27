@@ -1,6 +1,6 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX51 True Kiosk Lightweight Sync
-// 訂單／售票紀錄雲端同步
+// 小怪獸售票機 V7.8.3.3 FIX59
+// 售票機訂單輕量同步：啟動只保留最近 30 筆、單筆增量上傳、完整紀錄按需載入
 // Firebase Realtime Database + localStorage 離線備援
 // Android WebView 61 相容版
 // =========================================
@@ -24,30 +24,29 @@
     var writeTimer = null;
     var lastOrderMap = {};
     var lastCloudUpdateAt = 0;
-    var localCacheTimer = null;
-    var screenRefreshTimer = null;
-    var lightweightKioskMode = isKioskLightMode();
+    var RECENT_ORDER_LIMIT = 30;
+    var lightweightKioskMode = isLightweightKiosk();
+    var fullHistoryLoaded = false;
+    var orderListenerRef = null;
 
     window.MonsterOrderCloud =
         window.MonsterOrderCloud || {};
 
-    function isKioskLightMode(){
-        var ua = String(navigator.userAgent || "");
-        return !!(
-            window.MonsterNativeKiosk ||
-            /;\s*wv\)/i.test(ua) ||
-            /Android\s+(?:7|8|9)(?:\.|;)/i.test(ua) ||
-            /(?:^|[?&])kioskLite=1(?:&|$)/.test(location.search || "")
-        );
-    }
-
-    function activePageId(){
-        var page = document.querySelector(".page.active");
-        return page ? page.id : "";
-    }
-
     function cloneValue(value){
         return JSON.parse(JSON.stringify(value));
+    }
+
+    function isLightweightKiosk(){
+
+        var bodyApp =
+        document.body &&
+        document.body.getAttribute("data-pwa-app");
+
+        return !!(
+            bodyApp === "kiosk" ||
+            window.MonsterNativeKiosk ||
+            /(?:^|[?&])kioskLite=1(?:&|$)/.test(location.search || "")
+        );
     }
 
     function safeKey(value){
@@ -142,6 +141,41 @@
         return result;
     }
 
+    function limitOrderMap(map,limit){
+
+        var result = {};
+
+        mapToArray(map || {})
+        .slice(0,Math.max(1,Number(limit || RECENT_ORDER_LIMIT)))
+        .forEach(function(order,index){
+
+            var copy =
+            ensureOrderIdentity(
+                cloneValue(order),
+                index
+            );
+
+            result[copy.cloudId] = copy;
+        });
+
+        return result;
+    }
+
+    function compactMapIfNeeded(map){
+
+        if(
+            lightweightKioskMode &&
+            !fullHistoryLoaded
+        ){
+            return limitOrderMap(
+                map,
+                RECENT_ORDER_LIMIT
+            );
+        }
+
+        return map || {};
+    }
+
     function comparableOrder(order){
 
         var copy = cloneValue(order || {});
@@ -150,6 +184,28 @@
         delete copy.updatedBy;
 
         return JSON.stringify(copy);
+    }
+
+    function changedOrderMap(nextMap,previousMap){
+
+        var changes = {};
+
+        Object.keys(nextMap || {})
+        .forEach(function(id){
+
+            var next = nextMap[id];
+            var previous = previousMap && previousMap[id];
+
+            if(
+                !previous ||
+                comparableOrder(next) !==
+                comparableOrder(previous)
+            ){
+                changes[id] = cloneValue(next);
+            }
+        });
+
+        return changes;
     }
 
     function stampLocalChanges(currentMap){
@@ -276,7 +332,7 @@
 
         var detail = {
             source:source || "cloud",
-            count:Array.isArray(salesHistory) ? salesHistory.length : 0,
+            count:mapToArray(map || {}).length,
             updatedAt:Date.now()
         };
 
@@ -292,71 +348,70 @@
         }
     }
 
-    function refreshOrderScreensNow(){
+    function refreshOrderScreens(){
 
-        var pageId = activePageId();
+        var salesPage =
+        document.getElementById("salesHistoryPage");
 
-        if(pageId === "salesHistoryPage" && typeof renderSalesHistory === "function"){
+        var memberPage =
+        document.getElementById("memberManagerPage");
+
+        if(
+            typeof renderSalesHistory === "function" &&
+            salesPage &&
+            salesPage.classList.contains("active")
+        ){
             renderSalesHistory();
         }
 
-        if(pageId === "adminHomePage" && typeof renderAdminDashboard === "function"){
+        if(typeof renderAdminDashboard === "function"){
             renderAdminDashboard();
         }
 
-        if(pageId === "shiftReportPage" && typeof renderShiftReport === "function"){
-            renderShiftReport();
+        if(typeof renderShiftReport === "function"){
+            var page =
+            document.getElementById("shiftReportPage");
+
+            if(
+                page &&
+                page.classList.contains("active")
+            ){
+                renderShiftReport();
+            }
         }
 
-        if(pageId === "memberManagerPage" && typeof renderMemberList === "function"){
+        if(
+            typeof renderMemberList === "function" &&
+            memberPage &&
+            memberPage.classList.contains("active")
+        ){
             renderMemberList();
         }
 
-        if(pageId === "memberHistoryPage" && typeof renderMemberHistory === "function" &&
-            typeof currentMemberHistoryId !== "undefined" && currentMemberHistoryId){
+        if(
+            typeof renderMemberHistory === "function" &&
+            typeof currentMemberHistoryId !== "undefined" &&
+            currentMemberHistoryId
+        ){
             renderMemberHistory();
         }
-    }
-
-    function refreshOrderScreens(){
-        if(!lightweightKioskMode){
-            refreshOrderScreensNow();
-            return;
-        }
-        if(screenRefreshTimer) clearTimeout(screenRefreshTimer);
-        screenRefreshTimer = setTimeout(function(){
-            screenRefreshTimer = null;
-            refreshOrderScreensNow();
-        },250);
-    }
-
-    function saveLocalOrderCache(){
-        var save = function(){
-            localCacheTimer = null;
-            try{
-                localStorage.setItem("salesHistory",JSON.stringify(salesHistory));
-            }catch(error){}
-        };
-        if(!lightweightKioskMode){
-            save();
-            return;
-        }
-        if(localCacheTimer) clearTimeout(localCacheTimer);
-        localCacheTimer = setTimeout(save,300);
     }
 
     function applyCloudMap(map){
 
         applyingCloud = true;
 
+        map = compactMapIfNeeded(map || {});
+
         salesHistory = mapToArray(map);
         window.salesHistory = salesHistory;
 
-        saveLocalOrderCache();
+        localStorage.setItem(
+            "salesHistory",
+            JSON.stringify(salesHistory)
+        );
 
-        // The Firebase snapshot is immutable for this callback. Avoid one full
-        // JSON clone on old kiosk WebViews while keeping desktop behavior intact.
-        lastOrderMap = lightweightKioskMode ? map : cloneValue(map);
+        lastOrderMap = cloneValue(map);
         lastCloudUpdateAt = Date.now();
 
         applyingCloud = false;
@@ -423,7 +478,7 @@
         }
     }
 
-    function uploadMap(map){
+    function uploadMap(map,visibleCount){
 
         if(!orderRef){
             pendingWrite = true;
@@ -443,19 +498,22 @@
         .update(updates)
         .then(function(){
 
-            lastCloudUpdateAt = Date.now();
-            Object.keys(map || {}).forEach(function(id){
-                lastOrderMap[id] = cloneValue(map[id]);
+            Object.keys(map || {})
+            .forEach(function(id){
+                lastOrderMap[id] =
+                cloneValue(map[id]);
             });
+
+            lastCloudUpdateAt = Date.now();
             notifyOrderUpdate("local-upload",map);
 
             setSyncStatus(
                 "訂單已同步",
-                lightweightKioskMode
-                ? "本次新增或異動訂單已保存至雲端"
-                : "售票紀錄 " +
-                  mapToArray(map).length +
-                  " 筆，已保存至雲端",
+                "本次更新 " +
+                Object.keys(map || {}).length +
+                " 筆；售票機保留最近 " +
+                Number(visibleCount || salesHistory.length || 0) +
+                " 筆",
                 "online"
             );
         })
@@ -476,56 +534,6 @@
         });
     }
 
-    function collectLightweightChanges(){
-
-        var currentMap = arrayToMap(salesHistory);
-        var changedMap = {};
-        var now = Date.now();
-        var deviceId =
-        window.MonsterCloud &&
-        window.MonsterCloud.uid
-        ? window.MonsterCloud.uid
-        : "local";
-
-        Object.keys(currentMap)
-        .forEach(function(id){
-
-            var current = currentMap[id];
-            var previous = lastOrderMap[id];
-
-            if(
-                !previous ||
-                comparableOrder(current) !==
-                comparableOrder(previous)
-            ){
-                if(!current.createdAt){
-                    current.createdAt = now;
-                }
-                current.updatedAt = now;
-                current.updatedBy = deviceId;
-                current.deleted = false;
-                changedMap[id] = current;
-            }
-        });
-
-        Object.keys(lastOrderMap)
-        .forEach(function(id){
-            if(!currentMap[id]){
-                changedMap[id] = {
-                    cloudId:id,
-                    orderNo:lastOrderMap[id].orderNo || id,
-                    deleted:true,
-                    updatedAt:now,
-                    updatedBy:deviceId
-                };
-            }
-        });
-
-        // Do not rewrite the whole local order cache here. saveSalesHistory()
-        // already saved the current operation before notifying cloud sync.
-        return changedMap;
-    }
-
     function scheduleUpload(delay){
 
         if(writeTimer){
@@ -534,20 +542,23 @@
 
         writeTimer = setTimeout(function(){
 
-            if(lightweightKioskMode){
-                uploadMap(
-                    collectLightweightChanges()
-                );
-                return;
-            }
-
             var map = stampLocalChanges(
                 arrayToMap(salesHistory)
             );
 
+            var changes =
+            changedOrderMap(
+                map,
+                lastOrderMap
+            );
+
+            var visibleMap =
+            compactMapIfNeeded(map);
+
             applyingCloud = true;
 
-            salesHistory = mapToArray(map);
+            salesHistory =
+            mapToArray(visibleMap);
             window.salesHistory = salesHistory;
 
             localStorage.setItem(
@@ -557,7 +568,14 @@
 
             applyingCloud = false;
 
-            uploadMap(map);
+            if(Object.keys(changes).length){
+                uploadMap(
+                    changes,
+                    salesHistory.length
+                );
+            }else{
+                pendingWrite = false;
+            }
 
         },Math.max(
             0,
@@ -570,7 +588,39 @@
     function handleCloudValue(snapshot){
 
         var cloudMap = snapshot.val() || {};
-        var localMap = arrayToMap(salesHistory);
+        var localMap =
+        arrayToMap(salesHistory);
+
+        if(lightweightKioskMode){
+
+            if(applyingCloud){
+                return;
+            }
+
+            initialized = true;
+
+            var lightweightMerged =
+            mergeMaps(
+                localMap,
+                cloudMap
+            );
+
+            applyCloudMap(
+                lightweightMerged
+            );
+
+            setSyncStatus(
+                "訂單輕量同步",
+                fullHistoryLoaded
+                ? "完整售票紀錄已按需載入"
+                : "只保留最近 " +
+                  salesHistory.length +
+                  " 筆，舊訂單不會刪除",
+                "online"
+            );
+
+            return;
+        }
 
         if(!initialized){
 
@@ -654,33 +704,25 @@
         window.MonsterCloud.database
         .ref(RESET_PATH);
 
-        // FIX51: the kiosk must never subscribe to the complete orders node.
-        // It only uploads records changed on this device and listens to the
-        // tiny reset marker. Desktop and phone managers retain full sync.
-        if(lightweightKioskMode){
-            initialized = true;
-            resetRef.on(
-                "value",
-                function(resetSnapshot){
-                    clearLocalAfterGlobalReset(resetSnapshot.val());
-                },
-                function(error){
-                    console.error(
-                        "[MonsterOrderCloud] reset read error:",
-                        error
-                    );
-                }
-            );
-            setSyncStatus(
-                "售票機輕量模式",
-                "新訂單即時上傳，不下載完整歷史訂單",
-                "online"
-            );
-            return;
-        }
-
         function attachOrderListener(){
-            orderRef.on(
+
+            orderListenerRef =
+            orderRef;
+
+            if(
+                lightweightKioskMode &&
+                orderRef.orderByKey &&
+                typeof orderRef.orderByKey === "function"
+            ){
+                orderListenerRef =
+                orderRef
+                .orderByKey()
+                .limitToLast(
+                    RECENT_ORDER_LIMIT
+                );
+            }
+
+            orderListenerRef.on(
                 "value",
                 handleCloudValue,
                 function(error){
@@ -727,6 +769,125 @@
         setTimeout(attachOrdersOnce,0);
     }
 
+    function loadFullHistory(){
+
+        if(
+            !lightweightKioskMode ||
+            fullHistoryLoaded
+        ){
+            return Promise.resolve(
+                cloneValue(salesHistory || [])
+            );
+        }
+
+        if(!orderRef){
+            return Promise.reject({
+                code:"orders/not-ready",
+                message:"雲端訂單尚未連線，請稍後再試"
+            });
+        }
+
+        fullHistoryLoaded = true;
+
+        setSyncStatus(
+            "正在載入完整紀錄",
+            "只有開啟售票紀錄時才會下載舊訂單",
+            "connecting"
+        );
+
+        return orderRef
+        .once("value")
+        .then(function(snapshot){
+
+            var fullMap =
+            snapshot.val() || {};
+
+            applyCloudMap(fullMap);
+
+            setSyncStatus(
+                "完整紀錄已載入",
+                "共 " +
+                salesHistory.length +
+                " 筆；返回 Dashboard 後會恢復輕量模式",
+                "online"
+            );
+
+            return cloneValue(
+                salesHistory
+            );
+        })
+        .catch(function(error){
+
+            fullHistoryLoaded = false;
+
+            applyCloudMap(
+                limitOrderMap(
+                    arrayToMap(salesHistory),
+                    RECENT_ORDER_LIMIT
+                )
+            );
+
+            throw error;
+        });
+    }
+
+    function releaseFullHistory(){
+
+        if(
+            !lightweightKioskMode ||
+            !fullHistoryLoaded
+        ){
+            return;
+        }
+
+        fullHistoryLoaded = false;
+
+        applyCloudMap(
+            limitOrderMap(
+                arrayToMap(salesHistory),
+                RECENT_ORDER_LIMIT
+            )
+        );
+
+        setSyncStatus(
+            "訂單輕量同步",
+            "售票機已恢復最近 " +
+            salesHistory.length +
+            " 筆；雲端舊訂單完整保留",
+            "online"
+        );
+    }
+
+    function installHistoryReleaseGuard(){
+
+        var adminHome =
+        document.getElementById("adminHomePage");
+
+        if(
+            !lightweightKioskMode ||
+            !adminHome ||
+            !window.MutationObserver
+        ){
+            return;
+        }
+
+        new MutationObserver(function(){
+
+            if(
+                fullHistoryLoaded &&
+                adminHome.classList.contains("active")
+            ){
+                releaseFullHistory();
+            }
+        }).observe(
+            adminHome,
+            {
+                attributes:true,
+                attributeFilter:["class"]
+            }
+        );
+    }
+
     window.MonsterOrderCloud.onLocalSave =
     function(){
 
@@ -743,6 +904,12 @@
         scheduleUpload(0);
     };
 
+    window.MonsterOrderCloud.loadFullHistory =
+    loadFullHistory;
+
+    window.MonsterOrderCloud.releaseFullHistory =
+    releaseFullHistory;
+
     window.MonsterOrderCloud.applyGlobalReset =
     function(resetAt){
         clearLocalAfterGlobalReset(resetAt || Date.now());
@@ -754,8 +921,10 @@
         return {
             initialized:initialized,
             pendingWrite:pendingWrite,
-            lightweightKioskMode:lightweightKioskMode,
             lastCloudUpdateAt:lastCloudUpdateAt,
+            lightweightKioskMode:lightweightKioskMode,
+            recentOrderLimit:RECENT_ORDER_LIMIT,
+            fullHistoryLoaded:fullHistoryLoaded,
             localCount:
             Array.isArray(salesHistory)
             ? salesHistory.length
@@ -763,8 +932,38 @@
         };
     };
 
+    if(lightweightKioskMode){
+
+        salesHistory =
+        mapToArray(
+            limitOrderMap(
+                arrayToMap(salesHistory),
+                RECENT_ORDER_LIMIT
+            )
+        );
+
+        window.salesHistory =
+        salesHistory;
+
+        try{
+            localStorage.setItem(
+                "salesHistory",
+                JSON.stringify(salesHistory)
+            );
+        }catch(error){}
+    }
+
     lastOrderMap =
     arrayToMap(salesHistory);
+
+    if(document.readyState === "loading"){
+        document.addEventListener(
+            "DOMContentLoaded",
+            installHistoryReleaseGuard
+        );
+    }else{
+        installHistoryReleaseGuard();
+    }
 
     if(
         window.MonsterCloud &&
@@ -799,4 +998,3 @@
     );
 
 })();
-
