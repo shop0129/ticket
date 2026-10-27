@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.3 Phase 3F Part 1 Fix 1
+// 小怪獸售票機 V7.8.3.3 FIX60
 // Staff 訂單中心＋入離場＋容量候位
 // =========================================
 (function(){
@@ -32,6 +32,8 @@
     var lastOrderUpdateAt = 0;
     var syncedTaipeiDay = "";
     var dayChangeTimer = null;
+    var dashboardWriteTimer = null;
+    var lastDashboardSignature = "";
 
     function byId(id){
         return document.getElementById(id);
@@ -236,10 +238,17 @@
 
         var summary = {
             income:0,
+            cashIncome:0,
+            linePayIncome:0,
+            otherIncome:0,
             normalOrders:0,
             cancelledOrders:0,
             ticketCount:0,
-            memberOrders:0
+            memberOrders:0,
+            memberIncome:0,
+            nonMemberOrders:0,
+            nonMemberIncome:0,
+            updatedAt:Date.now()
         };
 
         Object.keys(ordersMap || {})
@@ -261,13 +270,36 @@
                 return;
             }
 
-            summary.income +=
+            var amount =
             orderAmountForSummary(order);
+
+            var payment = String(
+                order.payment ||
+                order.paymentMethod ||
+                ""
+            ).toLowerCase();
+
+            summary.income += amount;
 
             summary.normalOrders++;
 
             if(order.memberId){
                 summary.memberOrders++;
+                summary.memberIncome += amount;
+            }else{
+                summary.nonMemberOrders++;
+                summary.nonMemberIncome += amount;
+            }
+
+            if(payment.indexOf("line") >= 0){
+                summary.linePayIncome += amount;
+            }else if(
+                payment.indexOf("現金") >= 0 ||
+                payment.indexOf("cash") >= 0
+            ){
+                summary.cashIncome += amount;
+            }else{
+                summary.otherIncome += amount;
             }
 
             if(Array.isArray(order.items)){
@@ -291,6 +323,80 @@
         return summary;
     }
 
+    function scheduleDashboardSummaryWrite(detail){
+
+        if(
+            !window.firebase ||
+            !firebase.apps ||
+            !firebase.apps.length ||
+            !firebase.auth ||
+            !firebase.auth().currentUser
+        ){
+            return;
+        }
+
+        var signatureData = {};
+
+        Object.keys(detail.summary || {})
+        .forEach(function(key){
+            if(key !== "updatedAt"){
+                signatureData[key] = detail.summary[key];
+            }
+        });
+
+        var signature = JSON.stringify(signatureData);
+
+        if(signature === lastDashboardSignature){
+            return;
+        }
+
+        if(dashboardWriteTimer){
+            clearTimeout(dashboardWriteTimer);
+        }
+
+        dashboardWriteTimer = setTimeout(function(){
+
+            var summary = detail.summary || {};
+            var updates = {};
+            var fields = [
+                "income","cashIncome","linePayIncome","otherIncome",
+                "normalOrders","cancelledOrders","ticketCount",
+                "memberOrders","memberIncome",
+                "nonMemberOrders","nonMemberIncome","updatedAt"
+            ];
+
+            fields.forEach(function(field){
+                updates[
+                    "daily/" + detail.dateKey + "/" + field
+                ] = Number(summary[field] || 0);
+
+                updates[
+                    "current/summary/" + field
+                ] = Number(summary[field] || 0);
+            });
+
+            updates["current/date"] =
+            detail.dateKey.replace(/-/g,"/");
+            updates["current/dateKey"] = detail.dateKey;
+            updates["current/monthKey"] = detail.dateKey.slice(0,7);
+            updates["current/source"] = "staff-today-query";
+            updates["current/updatedAt"] = Date.now();
+
+            firebase.database()
+            .ref(ROOT + "/dashboard")
+            .update(updates)
+            .then(function(){
+                lastDashboardSignature = signature;
+            })
+            .catch(function(error){
+                console.error(
+                    "[MonsterOrderCenter] dashboard summary write error:",
+                    error
+                );
+            });
+        },120);
+    }
+
     function publishTodaySalesSummary(){
 
         var detail = {
@@ -298,6 +404,8 @@
             summary:calculateTodaySalesSummary(),
             updatedAt:Date.now()
         };
+
+        scheduleDashboardSummaryWrite(detail);
 
         try{
             window.dispatchEvent(

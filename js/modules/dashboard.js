@@ -1,4 +1,4 @@
-// V7.3 Phase 3F Part 2 | 完整營運 Dashboard
+// V7.8.3.3 FIX60 | 輕量雲端營運 Dashboard
 
 function getDashboardOrderAmount(order) {
     return Number(order && order.paidAmount != null ? order.paidAmount : (order && order.amount || 0));
@@ -187,10 +187,16 @@ function renderDashboardStaffSales(orders) {
     renderDashboardRanking('dashboardStaffSales',rows,'尚無員工銷售資料');
 }
 function dashboardSetText(id,value){var el=document.getElementById(id);if(el)el.textContent=value;}
+function dashboardCloudSummary() {
+    if (dashboardPeriod === "custom") return null;
+    if (!window.MonsterDashboardCloud || typeof MonsterDashboardCloud.getSummary !== "function") return null;
+    return MonsterDashboardCloud.getSummary(dashboardPeriod);
+}
 function renderAdminDashboard() {
     var all = getDashboardPeriodOrders(true);
-    var normal = all.filter(function(order){return order.status!=="cancel";});
-    var cancelled = all.filter(function(order){return order.status==="cancel";});
+    var reportable = all.filter(function(order){return order.excludeFromSalesReport!==true&&order.prepaidRedemption!==true;});
+    var normal = reportable.filter(function(order){return order.status!=="cancel"&&order.status!=="cancelled"&&order.cancelled!==true&&order.voided!==true;});
+    var cancelled = reportable.filter(function(order){return normal.indexOf(order)<0;});
     var income = normal.reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
     var cash = normal.filter(function(order){return String(order.payment||'').indexOf('現金')>=0;}).reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
     var line = normal.filter(function(order){return String(order.payment||'').toLowerCase().indexOf('line')>=0;}).reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
@@ -198,22 +204,39 @@ function renderAdminDashboard() {
     var memberIncome=members.reduce(function(sum,order){return sum+getDashboardOrderAmount(order);},0);
     var nonMemberIncome=income-memberIncome;
     var newMembers=(typeof memberData!=="undefined"&&Array.isArray(memberData)?memberData:[]).filter(function(member){return dashboardOrderInPeriod({date:member.joinDate},dashboardPeriod);}).length;
+    var normalOrders=normal.length;
+    var cancelledOrders=cancelled.length;
+    var ticketCount=dashboardTicketCount(normal);
+    var memberOrders=members.length;
+    var cloud=dashboardCloudSummary();
+    if(cloud){
+        income=Number(cloud.income||0);
+        cash=Number(cloud.cashIncome||0);
+        line=Number(cloud.linePayIncome||0);
+        normalOrders=Number(cloud.normalOrders||0);
+        cancelledOrders=Number(cloud.cancelledOrders||0);
+        ticketCount=Number(cloud.ticketCount||0);
+        memberOrders=Number(cloud.memberOrders||0);
+        memberIncome=Number(cloud.memberIncome||0);
+        nonMemberIncome=Number(cloud.nonMemberIncome||0);
+        newMembers=Number(cloud.newMembers||0);
+    }
     var periodName=dashboardPeriodName();
     dashboardSetText('dashboardDate',dashboardPeriodLabel());
     dashboardSetText('dashboardIncomeLabel',periodName+'總收入');
     dashboardSetText('dashboardTicketsLabel',periodName+'售票');
     dashboardSetText('dashboardNewMembersLabel',periodName+'新會員');
     dashboardSetText('dashboardIncome','NT$'+formatDashboardAmount(income));
-    dashboardSetText('dashboardTickets',dashboardTicketCount(normal)+' 張');
+    dashboardSetText('dashboardTickets',ticketCount+' 張');
     dashboardSetText('dashboardCash','NT$'+formatDashboardAmount(cash));
     dashboardSetText('dashboardLinePay','NT$'+formatDashboardAmount(line));
-    dashboardSetText('dashboardOrders',normal.length+' 筆');
-    dashboardSetText('dashboardCancelled',cancelled.length+' 筆');
-    dashboardSetText('dashboardMemberOrders',members.length+' 筆');
+    dashboardSetText('dashboardOrders',normalOrders+' 筆');
+    dashboardSetText('dashboardCancelled',cancelledOrders+' 筆');
+    dashboardSetText('dashboardMemberOrders',memberOrders+' 筆');
     dashboardSetText('dashboardMemberIncome','NT$'+formatDashboardAmount(memberIncome));
     dashboardSetText('dashboardNonMemberIncome','NT$'+formatDashboardAmount(nonMemberIncome));
     dashboardSetText('dashboardNewMembers',newMembers+' 人');
-    dashboardSetText('dashboardAverageOrder','NT$'+formatDashboardAmount(normal.length?Math.round(income/normal.length):0));
+    dashboardSetText('dashboardAverageOrder','NT$'+formatDashboardAmount(normalOrders?Math.round(income/normalOrders):0));
     dashboardSetText('dashboardTokens',dashboardTokenCount(normal)+' 枚');
     renderDashboardTopTickets(normal); renderDashboardHourlySales(normal); renderDashboardStaffSales(normal); renderDashboardRecentOrders();
     var status=document.getElementById('dashboardRealtimeStatus');if(status){status.textContent='● 已更新 '+new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});}
@@ -222,5 +245,6 @@ document.addEventListener("click",function(event){var button=event.target.closes
 window.addEventListener("focus",renderAdminDashboard);
 window.addEventListener("storage",function(event){if(event.key==='salesHistory')renderAdminDashboard();});
 document.addEventListener('monster:orders-updated',renderAdminDashboard);
+window.addEventListener('monster:dashboard-cloud-updated',renderAdminDashboard);
 renderAdminDashboard();
 

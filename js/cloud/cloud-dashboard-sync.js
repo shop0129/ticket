@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX49 Kiosk Lightweight Dashboard
+// 小怪獸售票機 V7.8.3.3 FIX60 Compact Dashboard Sync
 // Dashboard 雲端即時統計
 // Firebase Realtime Database
 // Android WebView 61 相容版
@@ -31,13 +31,23 @@
     var TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
     var activeDateKey = "";
     var lightweightKioskMode = isKioskLightMode();
+    var lightweightOrderQuery = null;
+    var compactSummaries = {
+        today:null,
+        month:null,
+        all:null
+    };
 
     window.MonsterDashboardCloud =
         window.MonsterDashboardCloud || {};
 
     function isKioskLightMode(){
         var ua = String(navigator.userAgent || "");
+        var bodyApp = document.body &&
+        document.body.getAttribute("data-pwa-app");
+
         return !!(
+            bodyApp === "kiosk" ||
             window.MonsterNativeKiosk ||
             /;\s*wv\)/i.test(ua) ||
             /Android\s+(?:7|8|9)(?:\.|;)/i.test(ua) ||
@@ -149,6 +159,17 @@
     function getMonthKey(){
 
         return getTodayKey().slice(0,7);
+    }
+
+    function getTodayStart(){
+
+        var parts = taipeiParts();
+
+        return Date.UTC(
+            parts.year,
+            parts.month - 1,
+            parts.day
+        ) - TAIPEI_OFFSET_MS;
     }
 
     function isNormalOrder(order){
@@ -456,11 +477,82 @@
         });
     }
 
+    function writeLightweightDashboard(){
+
+        if(!dashboardRef || !ordersReady){
+            return;
+        }
+
+        var today = createSummary();
+        var todayKey = getTodayKey();
+
+        Object.keys(cloudOrders || {})
+        .forEach(function(id){
+
+            var order = cloudOrders[id];
+
+            if(
+                order &&
+                !order.deleted &&
+                recordDateKey(order) === todayKey
+            ){
+                addOrderToSummary(today,order);
+            }
+        });
+
+        var previous =
+        compactSummaries.today ||
+        (
+            window.MonsterDashboardCloud.latestCurrent &&
+            window.MonsterDashboardCloud.latestCurrent.summary
+        ) || {};
+
+        // 會員數由手機端維護，售票機只更新訂單業績。
+        today.newMembers = Number(previous.newMembers || 0);
+
+        var current = {
+            date:getTodayText(),
+            dateKey:todayKey,
+            monthKey:getMonthKey(),
+            summary:today,
+            source:"kiosk-today-query",
+            updatedAt:Date.now()
+        };
+
+        var updates = {};
+        updates["daily/" + todayKey] = today;
+        updates["current"] = current;
+
+        dashboardRef.update(updates)
+        .then(function(){
+
+            setCloudStatus(
+                "Dashboard 已同步",
+                "今日業績已由雲端訂單更新",
+                "online"
+            );
+        })
+        .catch(function(error){
+
+            console.error(
+                "[MonsterDashboardCloud] lightweight write error:",
+                error
+            );
+        });
+    }
+
     function scheduleDashboardWrite(){
 
-        // The old RK3288 kiosk only consumes the compact dashboard/current node.
-        // Phones and desktop managers keep the full historical calculation.
         if(lightweightKioskMode){
+            if(writeTimer){
+                clearTimeout(writeTimer);
+            }
+
+            writeTimer = setTimeout(
+                writeLightweightDashboard,
+                80
+            );
+
             return;
         }
 
@@ -585,6 +677,30 @@
         window.MonsterDashboardCloud
         .latestCurrent =
         cloneValue(data);
+
+        compactSummaries.today =
+        cloneValue(summary);
+
+        notifyDashboardUpdate("today");
+    }
+
+    function notifyDashboardUpdate(period){
+
+        var detail = {
+            period:period || "today",
+            updatedAt:Date.now()
+        };
+
+        try{
+            window.dispatchEvent(
+                new CustomEvent(
+                    "monster:dashboard-cloud-updated",
+                    {detail:detail}
+                )
+            );
+        }catch(error){
+            // Android WebView 61 舊版相容。
+        }
     }
 
     function listenDashboardCurrent(){
@@ -606,6 +722,65 @@
 
                 console.error(
                     "[MonsterDashboardCloud] current read error:",
+                    error
+                );
+            }
+        );
+    }
+
+    function listenCompactPeriods(){
+
+        dashboardRef
+        .child("monthly/" + getMonthKey())
+        .on("value",function(snapshot){
+
+            compactSummaries.month =
+            snapshot.val() || null;
+
+            notifyDashboardUpdate("month");
+        });
+
+        dashboardRef
+        .child("allTime")
+        .on("value",function(snapshot){
+
+            compactSummaries.all =
+            snapshot.val() || null;
+
+            notifyDashboardUpdate("all");
+        });
+    }
+
+    function attachLightweightOrders(){
+
+        if(!orderRef){
+            return;
+        }
+
+        if(lightweightOrderQuery){
+            lightweightOrderQuery.off("value");
+        }
+
+        ordersReady = false;
+        cloudOrders = {};
+
+        lightweightOrderQuery =
+        orderRef
+        .orderByChild("createdAt")
+        .startAt(getTodayStart());
+
+        lightweightOrderQuery.on(
+            "value",
+            function(snapshot){
+
+                cloudOrders = snapshot.val() || {};
+                ordersReady = true;
+                scheduleDashboardWrite();
+            },
+            function(error){
+
+                console.error(
+                    "[MonsterDashboardCloud] today order read error:",
                     error
                 );
             }
@@ -637,6 +812,8 @@
 
         if(lightweightKioskMode){
             listenDashboardCurrent();
+            listenCompactPeriods();
+            attachLightweightOrders();
             return;
         }
 
@@ -712,6 +889,24 @@
         };
     };
 
+    window.MonsterDashboardCloud
+    .getSummary =
+    function(period){
+
+        var key =
+        period === "month"
+        ? "month"
+        : (
+            period === "all"
+            ? "all"
+            : "today"
+        );
+
+        return compactSummaries[key]
+        ? cloneValue(compactSummaries[key])
+        : null;
+    };
+
     if(
         window.MonsterCloud &&
         typeof window.MonsterCloud.onReady ===
@@ -757,6 +952,10 @@
                 dateKey:nextDateKey,
                 summary:createSummary()
             });
+
+            if(lightweightKioskMode){
+                attachLightweightOrders();
+            }
         }
 
         scheduleDashboardWrite();
