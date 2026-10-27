@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX57 Large Display Time Text
+// 小怪獸售票機 V7.8.3.3 FIX58 Kiosk Staff Attendance
 // Preserved FIX39 cache marker: fix39-linepay-device-identity
 // Preserved FIX38 cache marker: fix38-staff-dashboard-date
 // Preserved FIX37 cache marker: fix37-taipei-business-day
@@ -30,7 +30,7 @@ var CACHE_PREFIX = "monster-ticket-pwa-";
 // Preserved regression markers: 7833-fix47b-firebase-region-callable-20261022-1 / 7833-fix47d-direct-prepaid-fallback-20261023-1
 // Preserved FIX47E cache marker: 7833-fix47e-receipt-pair-recovery-20261023-1
 // Preserved test marker: fix47f-sticky-printer-recovery
-var CACHE_NAME = CACHE_PREFIX + "7833-fix57-large-display-time-text-20261026-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix58-kiosk-staff-attendance-20261027-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -49,6 +49,7 @@ var CORE_ASSETS = [
     "./css/linepay-scanner.css",
     "./css/member-portal.css",
     "./css/receipt-printer.css",
+    "./css/kiosk-attendance.css",
     "./css/display.css",
     "./css/pwa.css",
     "./css/staff.css",
@@ -119,6 +120,7 @@ var CORE_ASSETS = [
     "./js/modules/hardwareTest.js",
     "./js/modules/history.js",
     "./js/modules/imageManager.js",
+    "./js/modules/kioskAttendance.js",
     "./js/modules/member.js",
     "./js/modules/consumePoints.js",
     "./js/modules/operation.js",

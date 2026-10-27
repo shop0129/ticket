@@ -1,4 +1,4 @@
-// 小怪獸售票機 FIX32 - 雲端員工打卡服務
+// 小怪獸售票機 FIX58 - 售票機與手機共用雲端員工打卡服務
 (function () {
     "use strict";
 
@@ -21,7 +21,7 @@
     }
 
     window.MonsterFirebaseAttendance = {
-        version: "FIX32",
+        version: "FIX58",
         available: available,
         getStatus: function () { return call("staffAttendanceV1GetStatus", {}); },
         clockIn: function () { return call("staffAttendanceV1ClockIn", {}); },

@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX57 Large Display Time Text">
+<meta name="monster-app-version" content="V7.8.3.3 FIX58 Kiosk Staff Attendance">
 <!-- V7.8.3.3 · FIX29A CONTROLLER115 COIN RESET MANAGER -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27A MEMBER PIN PORTAL -->
@@ -39,6 +39,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/linepay-scanner.css?v=7833fix26f">
 <link rel="stylesheet" href="css/coin-manager.css?v=7833fix29a-coin-reset">
 <link rel="stylesheet" href="css/receipt-printer.css?v=7833fix7">
+<link rel="stylesheet" href="css/kiosk-attendance.css?v=7833fix58">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
@@ -378,6 +379,36 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
             </div>
 
         </div>
+
+        <section id="kioskAttendanceSection" class="kiosk-attendance-card" aria-labelledby="kioskAttendanceTitle">
+            <div class="kiosk-attendance-head">
+                <div>
+                    <h2 id="kioskAttendanceTitle">🕒 員工上下班打卡</h2>
+                    <p id="kioskAttendanceActor">登入後即可使用；時間以雲端伺服器為準</p>
+                </div>
+                <button id="kioskAttendanceRefresh" type="button" class="kiosk-attendance-refresh">↻ 更新</button>
+            </div>
+
+            <div id="kioskAttendanceStatus" class="kiosk-attendance-status is-loading">
+                <div class="kiosk-attendance-copy">
+                    <strong id="kioskAttendanceStatusTitle">讀取打卡狀態中…</strong>
+                    <span id="kioskAttendanceStatusDetail">請稍候</span>
+                </div>
+                <div class="kiosk-attendance-actions">
+                    <button id="kioskAttendanceClockIn" type="button" class="kiosk-attendance-button clock-in">上班打卡</button>
+                    <button id="kioskAttendanceClockOut" type="button" class="kiosk-attendance-button clock-out" hidden>下班打卡</button>
+                </div>
+            </div>
+
+            <div id="kioskAttendanceMessage" class="kiosk-attendance-message" aria-live="polite"></div>
+
+            <div class="kiosk-attendance-records-head">
+                <strong>我的本月打卡</strong>
+                <span id="kioskAttendanceSummary">讀取中…</span>
+            </div>
+            <div id="kioskAttendanceRecords" class="kiosk-attendance-records"></div>
+            <p class="kiosk-attendance-cloud-note">此處與手機店長後台共用同一份雲端打卡紀錄。</p>
+        </section>
 
         <div class="dashboard-period-toolbar">
             <div class="dashboard-period-tabs" role="tablist" aria-label="Dashboard 統計期間">
@@ -1740,7 +1771,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <script src="js/utils/legacy-polyfills.js?v=72c"></script>
 <!-- Preserved regression marker: js/core/enterprise-core.js?v=7833fix24 -->
-<script src="js/core/enterprise-core.js?v=7833fix57"></script>
+<script src="js/core/enterprise-core.js?v=7833fix58"></script>
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 
@@ -1821,9 +1852,11 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/roleManager.js?v=fix31"></script>
 <script src="js/cloud/firebase-role-auth.js?v=fix31"></script>
 <script src="js/cloud/auth.js?v=fix31"></script>
+<script src="js/cloud/firebase-attendance-service.js?v=fix58"></script>
 <script src="js/cloud/firebase-employee-service.js?v=fix31"></script>
 <script src="js/modules/employeeManager.js?v=fix31"></script>
 <script src="js/script.js?v=fix31"></script>
+<script src="js/modules/kioskAttendance.js?v=fix58"></script>
 
 <!-- FIX25 uses the single live Enterprise status badge. -->
 
