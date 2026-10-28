@@ -150,10 +150,14 @@ function deleteCustomTicket(id) {
         return;
     }
     var ticket = ticketData[id];
-    if (!ticket || !ticket.custom) {
+    if (!ticket) {
         return;
     }
-    if (!confirm("\u78BA\u5B9A\u522A\u9664\u300C".concat(ticket.title, "\u300D\uFF1F"))) {
+    if (Object.keys(ticketData || {}).length <= 1) {
+        alert("至少需要保留一張票券");
+        return;
+    }
+    if (!confirm("\u78BA\u5B9A\u522A\u9664\u300C".concat(ticket.title, "\u300D\u55CE\uFF1F\n\n刪除後會同步到手機與售票機。"))) {
         return;
     }
     delete ticketData[id];
@@ -351,6 +355,14 @@ function enhanceTicketManagerCards() {
         var card = document.querySelector('[data-ticket-manager-id="'+id+'"]');
         if (!card || card.querySelector('.ticket-quick-actions')) return;
         var actions = card.querySelector('.ticket-manager-actions'); if(!actions) return;
+        if (!actions.querySelector('.ticket-delete-btn')) {
+            var deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'ticket-delete-btn';
+            deleteButton.textContent = '🗑 刪除';
+            deleteButton.onclick = function(){ deleteCustomTicket(id); };
+            actions.appendChild(deleteButton);
+        }
         var quick = document.createElement('div'); quick.className='ticket-quick-actions';
         quick.innerHTML='<button type="button" onclick="duplicateTicket(\''+id+'\')">📄 複製</button><button type="button" onclick="moveTicket(\''+id+'\',-1)">⬆ 上移</button><button type="button" onclick="moveTicket(\''+id+'\',1)">⬇ 下移</button><button type="button" onclick="moveTicketToBottom(\''+id+'\')">⏬ 移至最下面</button>';
         actions.insertBefore(quick, actions.firstChild);

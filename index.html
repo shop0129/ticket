@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX60 Cloud Dashboard Sync">
+<meta name="monster-app-version" content="V7.8.3.3 FIX61 Ticket And Home Theme Sync">
 <!-- V7.8.3.3 · FIX29A CONTROLLER115 COIN RESET MANAGER -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27A MEMBER PIN PORTAL -->
@@ -40,6 +40,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/coin-manager.css?v=7833fix29a-coin-reset">
 <link rel="stylesheet" href="css/receipt-printer.css?v=7833fix7">
 <link rel="stylesheet" href="css/kiosk-attendance.css?v=7833fix58">
+<link rel="stylesheet" href="css/home-theme-manager.css?v=fix61">
 
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
@@ -53,6 +54,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <section id="homePage" class="page active">
 
     <img
+        id="homeThemeImage"
         src="images/home-bg.webp"
         class="home-bg"
         alt="">
@@ -683,6 +685,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                         class="dashboard-action-btn admin-only-action"
                         onclick="openTicketManager()">
                         🎫 票券管理
+                    </button>
+
+                    <button
+                        class="dashboard-action-btn admin-only-action"
+                        onclick="openHomeThemeManager()">
+                        🎨 首頁主題管理
                     </button>
 
                     <button
@@ -1771,7 +1779,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <script src="js/utils/legacy-polyfills.js?v=72c"></script>
 <!-- Preserved regression marker: js/core/enterprise-core.js?v=7833fix24 -->
-<script src="js/core/enterprise-core.js?v=7833fix60"></script>
+<script src="js/core/enterprise-core.js?v=7833fix61"></script>
 <script src="js/core/enterprise-bridge.js?v=740"></script>
 <script src="js/core/enterprise-guards.js?v=740"></script>
 
@@ -1803,8 +1811,9 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/imageManager.js?v=72c"></script>
 <script src="js/core/sale-rule-engine.js?v=781"></script>
 <script src="js/modules/ticketCatalog.js?v=7833fix24"></script>
-<script src="js/modules/ticketManager.js?v=782"></script>
+<script src="js/modules/ticketManager.js?v=7833fix61"></script>
 <script src="js/cloud/cloud-ticket-sync.js?v=72c"></script>  
+<script src="js/cloud/home-theme-manager.js?v=fix61"></script>
 <script src="js/modules/businessMode.js?v=7833fix26g"></script>    
 <script src="js/modules/systemSetting.js?v=7833fix26f"></script>
     
