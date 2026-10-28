@@ -1,5 +1,5 @@
-// V7 Phase 1 Legacy Build | js/modules/stats.js
-// FILE: js/modules/stats.js | V6.5 Legacy R2
+// 小怪獸售票機 V7.8.3.3 FIX62
+// 營運中心統一讀取 Dashboard 雲端摘要，本機統計只作離線備援。
 //==========================
 // 營運中心
 //==========================
@@ -7,6 +7,9 @@ function openTodayStats() {
     showPage("todayStatsPage");
     setStatsTabActive("today");
     renderStats(todayStats);
+    if (window.MonsterDashboardCloud && typeof MonsterDashboardCloud.forceRefresh === "function") {
+        MonsterDashboardCloud.forceRefresh();
+    }
 }
 // =========================================
 // 更新統計
@@ -41,6 +44,10 @@ function updateStats(stats, ticket, item) {
 function renderStats(data) {
     if (!data)
         return;
+    var sourceData = data;
+    var period = data === monthStats ? "month" : (data === totalStats ? "all" : "today");
+    var cloudData = getCloudStats(period, data);
+    data = cloudData || data;
     var values = {
         statsTickets: "".concat(formatStatsNumber(data.tickets), " \u5F35"),
         statsIncome: "NT$".concat(formatStatsNumber(data.income)),
@@ -56,8 +63,49 @@ function renderStats(data) {
                 values[id];
         }
     }
-    renderStatsDate(data);
+    renderStatsDate(sourceData);
 }
+
+function getCloudStats(period, fallback) {
+    if (!window.MonsterDashboardCloud || typeof MonsterDashboardCloud.getSummary !== "function") {
+        return fallback;
+    }
+    var summary = MonsterDashboardCloud.getSummary(period);
+    if (!summary) {
+        return fallback;
+    }
+    function cloudNumber(key, fallbackKey) {
+        return summary[key] !== undefined && summary[key] !== null
+            ? Number(summary[key] || 0)
+            : Number(fallback && fallback[fallbackKey] || 0);
+    }
+    return {
+        tickets: cloudNumber("ticketCount", "tickets"),
+        income: cloudNumber("income", "income"),
+        tokens: cloudNumber("tokens", "tokens"),
+        greenToy: cloudNumber("greenToys", "greenToy"),
+        redToy: cloudNumber("redToys", "redToy"),
+        parent: cloudNumber("parentTickets", "parent")
+    };
+}
+
+function refreshVisibleStatsFromCloud() {
+    var page = document.getElementById("todayStatsPage");
+    if (!page || !page.classList.contains("active")) {
+        return;
+    }
+    if (document.getElementById("monthTab") && document.getElementById("monthTab").classList.contains("active")) {
+        renderStats(monthStats);
+    }
+    else if (document.getElementById("totalTab") && document.getElementById("totalTab").classList.contains("active")) {
+        renderStats(totalStats);
+    }
+    else {
+        renderStats(todayStats);
+    }
+}
+
+window.addEventListener("monster:dashboard-cloud-updated", refreshVisibleStatsFromCloud);
 //==========================
 // 統計數字格式
 //==========================

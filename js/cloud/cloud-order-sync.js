@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX59
+// 小怪獸售票機 V7.8.3.3 FIX62
 // 售票機訂單輕量同步：啟動只保留最近 30 筆、單筆增量上傳、完整紀錄按需載入
 // Firebase Realtime Database + localStorage 離線備援
 // Android WebView 61 相容版
@@ -223,6 +223,12 @@
             var current = currentMap[id];
             var previous = lastOrderMap[id];
 
+            // 已刪除的訂單不可被舊的本機副本復活。
+            if(previous && previous.deleted){
+                currentMap[id] = cloneValue(previous);
+                return;
+            }
+
             if(!current.createdAt){
                 current.createdAt = now;
             }
@@ -280,6 +286,19 @@
 
             if(cloudOrder && !localOrder){
                 result[id] = cloneValue(cloudOrder);
+                return;
+            }
+
+            // 系統沒有「復原已刪除訂單」功能，因此刪除標記永遠優先。
+            // 避免手機刪除後，售票機快取再次把作廢訂單補回 Dashboard。
+            if(localOrder.deleted || cloudOrder.deleted){
+                if(localOrder.deleted && cloudOrder.deleted){
+                    result[id] = Number(localOrder.updatedAt || 0) > Number(cloudOrder.updatedAt || 0)
+                    ? cloneValue(localOrder)
+                    : cloneValue(cloudOrder);
+                }else{
+                    result[id] = cloneValue(localOrder.deleted ? localOrder : cloudOrder);
+                }
                 return;
             }
 
@@ -902,6 +921,27 @@
     window.MonsterOrderCloud.forceSync =
     function(){
         scheduleUpload(0);
+    };
+
+    window.MonsterOrderCloud.deleteOrder =
+    function(order){
+        if(!order){ return Promise.resolve(false); }
+        var copy = ensureOrderIdentity(cloneValue(order),0);
+        var id = copy.cloudId;
+        var tombstone = {
+            cloudId:id,
+            orderNo:copy.orderNo || id,
+            deleted:true,
+            status:"deleted",
+            deletedAt:Date.now(),
+            updatedAt:Date.now(),
+            updatedBy:window.MonsterCloud && window.MonsterCloud.uid ? window.MonsterCloud.uid : "manager"
+        };
+        if(!orderRef){
+            pendingWrite = true;
+            return Promise.resolve(false);
+        }
+        return orderRef.child(safeKey(id)).update(tombstone).then(function(){ return true; });
     };
 
     window.MonsterOrderCloud.loadFullHistory =

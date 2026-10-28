@@ -168,7 +168,7 @@ function deleteSalesHistory(clickEvent, index) {
     if (window.MonsterPermission && !MonsterPermission.requirePermission("order.cancel", "❌ 只有店長可以刪除售票紀錄")) {
         return;
     }
-    if (!confirm("確定要刪除這筆售票紀錄？")) {
+    if (!confirm("確定要永久刪除這筆售票紀錄？\n\n刪除後不會再出現在 Dashboard 與報表。")) {
         return;
     }
     if (!Array.isArray(salesHistory) ||
@@ -177,6 +177,11 @@ function deleteSalesHistory(clickEvent, index) {
         return;
     }
     var deletedOrder = salesHistory[index];
+    if (window.MonsterOrderCloud && typeof MonsterOrderCloud.deleteOrder === "function") {
+        MonsterOrderCloud.deleteOrder(deletedOrder).catch(function (error) {
+            console.error("[MonsterHistory] order tombstone write failed:", error);
+        });
+    }
     salesHistory.splice(index, 1);
     saveSalesHistory();
     if (window.MonsterAuth) {

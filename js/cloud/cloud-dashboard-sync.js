@@ -1,5 +1,5 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX60 Compact Dashboard Sync
+// 小怪獸售票機 V7.8.3.3 FIX62 Compact Dashboard Sync
 // Dashboard 雲端即時統計
 // Firebase Realtime Database
 // Android WebView 61 相容版
@@ -248,6 +248,8 @@
             greenToys:0,
             redToys:0,
             toyPointsConverted:0,
+            tokens:0,
+            parentTickets:0,
 
             newMembers:0,
 
@@ -289,6 +291,15 @@
 
         summary.toyPointsConverted +=
         toy.convertedPoints;
+
+        getOrderItems(order)
+        .forEach(function(item){
+            var quantity = Math.max(1,Number(item && (item.qty || item.quantity) || 1));
+            summary.tokens += Number(item && item.token || 0) * quantity;
+            if(item && item.id === "parent"){
+                summary.parentTickets += quantity;
+            }
+        });
 
         if(order.payment === "現金"){
 
