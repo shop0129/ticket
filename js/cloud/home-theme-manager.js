@@ -1,6 +1,6 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX66
-// 首頁主題圖庫：等待 Firebase 登入後同步、斷線自動恢復
+// 小怪獸售票機 V7.8.3.3 FIX67
+// 首頁主題圖庫：開機不閃舊圖、等待 Firebase 登入後同步、斷線自動恢復
 // =========================================
 (function(){
     "use strict";
@@ -41,6 +41,10 @@
         return byId("homeThemeImage") ||
         document.querySelector("#homePage .home-bg");
     }
+    function revealHomeImage(){
+        var home = byId("homePage");
+        if(home){ home.classList.add("home-theme-ready"); }
+    }
     function saveLocalActive(theme){
         try{
             localStorage.setItem(
@@ -56,12 +60,15 @@
         activeId = usable ? theme.id : DEFAULT_ID;
 
         if(image){
+            image.onload = function(){ revealHomeImage(); };
             image.src = src;
             image.setAttribute("data-home-theme-id",activeId);
             image.onerror = function(){
                 image.onerror = null;
+                image.onload = function(){ revealHomeImage(); };
                 image.src = DEFAULT_SRC;
             };
+            if(image.complete && image.naturalWidth){ revealHomeImage(); }
         }
 
         saveLocalActive({
@@ -75,10 +82,13 @@
     function loadLocalActive(){
         try{
             var saved = JSON.parse(localStorage.getItem(LOCAL_ACTIVE_KEY) || "null");
-            if(saved){
-                applyTheme(saved.id === DEFAULT_ID ? null : saved);
+            if(saved && saved.id !== DEFAULT_ID && (saved.imageData || saved.src)){
+                saved.imageData = saved.imageData || saved.src;
+                applyTheme(saved);
+                return true;
             }
         }catch(error){}
+        return false;
     }
     function updateCurrentLabel(){
         var label = byId("homeThemeCurrent");
@@ -419,8 +429,17 @@
 
     function init(){
         ensureModal();
-        loadLocalActive();
+        var localApplied = loadLocalActive();
         waitForCloud(0);
+        /* 離線或雲端長時間無回應時，仍可在 4 秒後顯示預設首頁。 */
+        if(!localApplied){
+            setTimeout(function(){
+                var home = byId("homePage");
+                if(home && !home.classList.contains("home-theme-ready")){
+                    applyTheme(null);
+                }
+            },4000);
+        }
         window.addEventListener("online",refreshActiveTheme);
         document.addEventListener("visibilitychange",function(){
             if(!document.hidden){ refreshActiveTheme(); }

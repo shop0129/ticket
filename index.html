@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX66 Cumulative Theme And Ticket Sync">
+<meta name="monster-app-version" content="V7.8.3.3 FIX67 No Old Home Flash">
 <!-- V7.8.3.3 · FIX29A CONTROLLER115 COIN RESET MANAGER -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27A MEMBER PIN PORTAL -->
@@ -42,6 +42,12 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/kiosk-attendance.css?v=7833fix58">
 <link rel="stylesheet" href="css/home-theme-manager.css?v=fix61">
 
+<style id="homeThemeBootStyle">
+/* FIX67：主題確認前不顯示內建舊圖，避免先閃舊首頁再跳新首頁。 */
+#homePage .home-bg { visibility: hidden; }
+#homePage.home-theme-ready .home-bg { visibility: visible; }
+</style>
+
 <link rel="stylesheet" href="css/mobile-enterprise.css?v=741-mobile1">
 </head>
 
@@ -58,6 +64,27 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
         src="images/home-bg.webp"
         class="home-bg"
         alt="">
+
+    <script>
+    /* FIX67：在其他程式載入前，立即套用上次已同步的自訂首頁。 */
+    (function () {
+        var image = document.getElementById("homeThemeImage");
+        var home = document.getElementById("homePage");
+        if (!image || !home) return;
+        try {
+            var saved = JSON.parse(localStorage.getItem("monsterHomeThemeActive") || "null");
+            var savedSource = saved && saved.id !== "default" &&
+                (saved.imageData || saved.src);
+            if (!savedSource) return;
+            image.onload = function () { home.classList.add("home-theme-ready"); };
+            image.src = savedSource;
+            image.setAttribute("data-home-theme-id", saved.id || "cached");
+            if (image.complete && image.naturalWidth) {
+                home.classList.add("home-theme-ready");
+            }
+        } catch (error) {}
+    }());
+    </script>
 
     <img
         src="images/btn-buy-default.png"
@@ -1813,7 +1840,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/ticketCatalog.js?v=7833fix24"></script>
 <script src="js/modules/ticketManager.js?v=7833fix61"></script>
 <script src="js/cloud/cloud-ticket-sync.js?v=72c"></script>  
-<script src="js/cloud/home-theme-manager.js?v=fix66"></script>
+<script src="js/cloud/home-theme-manager.js?v=fix67"></script>
 <script src="js/modules/businessMode.js?v=7833fix26g"></script>    
 <script src="js/modules/systemSetting.js?v=7833fix26f"></script>
     
@@ -1986,6 +2013,24 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                 }, 800);
             }).catch(function () {});
         }).catch(function () {});
+    }
+}());
+</script>
+<script>
+/* FIX67：右下角狀態標示跟隨目前實際安裝版本。 */
+(function () {
+    function updateVersionBadge() {
+        var badge = document.getElementById("monsterEnterpriseStatus");
+        if (!badge) return false;
+        badge.textContent = "V7.8.3.3 · FIX67 · ONLINE";
+        return true;
+    }
+    if (!updateVersionBadge()) {
+        var observer = new MutationObserver(function () {
+            if (updateVersionBadge()) observer.disconnect();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+        setTimeout(function () { observer.disconnect(); }, 15000);
     }
 }());
 </script>
