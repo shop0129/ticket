@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX63｜Ticket Validation Conflict Recovery
+// 小怪獸售票機 V7.8.3.3 FIX64｜Cross-Day Ticket Lookup
 (function(){
 'use strict';
 var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false, scanAudioContext=null;
@@ -186,7 +186,7 @@ function updateStatus(action){
        MonsterOrderCenter.applyOrderUpdate(currentFound.id,latest);
      }
    }
-   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix63'}).catch(function(){});
+   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix64'}).catch(function(){});
    message(action==='enter'?'已完成入場':'已完成離場',true);
    renderCenter();showResult(currentFound);renderHub();
  });
@@ -199,13 +199,19 @@ function normalizeScanValue(value){
  if(match)raw=match[0];
  return raw.replace(/[\r\n\t]/g,'').trim();
 }
+function canMergeIntoToday(order){
+ var status=orderStatus(order);
+ return isTodayOrder(order,status);
+}
 function openFreshFound(found){
  if(!found)return Promise.resolve(false);
  return firebase.database().ref(ROOT+'/orders/'+found.id).once('value').then(function(snapshot){
    var latest=snapshot&&snapshot.val?snapshot.val():null;
    if(!latest||latest.deleted){showResult(null);return false;}
    found.order=latest;
-   if(window.MonsterOrderCenter&&typeof MonsterOrderCenter.applyOrderUpdate==='function'){
+   // 昨日購買、今日才使用的票只載入驗票卡，不併入今日銷售清單；
+   // 完成入場後才由 transaction 的最新狀態加入今日場內資料。
+   if(canMergeIntoToday(latest)&&window.MonsterOrderCenter&&typeof MonsterOrderCenter.applyOrderUpdate==='function'){
      MonsterOrderCenter.applyOrderUpdate(found.id,latest);
    }
    showResult(found);openCenter(found);return true;
@@ -213,19 +219,81 @@ function openFreshFound(found){
    showResult(found);openCenter(found);return true;
  });
 }
+function firstRemoteOrder(snapshot,incomingToken){
+ var found=null;
+ if(!snapshot)return null;
+ snapshot.forEach(function(child){
+   if(found)return true;
+   var order=child.val()||{};
+   if(order.deleted)return false;
+   var expected=String(order.qrToken||'').trim();
+   if(incomingToken&&expected&&expected!==incomingToken)return false;
+   found={id:child.key,order:order,verified:!incomingToken||!expected||expected===incomingToken};
+   return true;
+ });
+ return found;
+}
+function remoteOrderQuery(field,value,incomingToken){
+ if(value==null||String(value).trim()==='')return Promise.resolve(null);
+ return firebase.database().ref(ROOT+'/orders')
+ .orderByChild(field).equalTo(value).limitToFirst(2).once('value')
+ .then(function(snapshot){return firstRemoteOrder(snapshot,incomingToken);})
+ .catch(function(){return null;});
+}
+function findRemoteOrder(value){
+ var raw=String(value||'').trim(), parsed=parseQr(raw);
+ var incomingToken=parsed?String(parsed.token||'').trim():'';
+ var orderKey=parsed?String(parsed.orderKey||'').trim():raw;
+ var normalized=normalizeOrderCode(orderKey);
+ var root=firebase.database().ref(ROOT+'/orders');
+ var chain=Promise.resolve(null);
+
+ // 新版 QR 的 orderKey 若正好是 Firebase key，先直接讀單筆，速度最快。
+ if(orderKey&&/^[A-Za-z0-9_-]+$/.test(orderKey)){
+   chain=root.child(orderKey).once('value').then(function(snapshot){
+     var order=snapshot.val();
+     if(!order||order.deleted)return null;
+     var expected=String(order.qrToken||'').trim();
+     if(incomingToken&&expected&&incomingToken!==expected)return null;
+     return {id:snapshot.key,order:order,verified:!incomingToken||!expected||incomingToken===expected};
+   }).catch(function(){return null;});
+ }
+
+ if(incomingToken){
+   chain=chain.then(function(found){
+     return found||remoteOrderQuery('qrToken',incomingToken,incomingToken);
+   });
+ }
+
+ ['orderNo','shortCode','queueNumber','qrOrderNo','receiptNo','orderCode'].forEach(function(field){
+   chain=chain.then(function(found){
+     if(found)return found;
+     return remoteOrderQuery(field,orderKey,incomingToken).then(function(exact){
+       if(exact||normalized===orderKey)return exact;
+       return remoteOrderQuery(field,normalized,incomingToken);
+     });
+   });
+ });
+ return chain;
+}
 function lookup(value, options){
  options=options||{};
  var normalized=normalizeScanValue(value), found=findOrder(normalized);
  if(found)return openFreshFound(found);
- // 訂單中心畫面可能已顯示舊快照，但快速驗票載入時機較早；先向 Firebase 重抓一次再判定。
- var refresh=window.MonsterOrderCenter&&MonsterOrderCenter.refresh;
- if(!options.skipRefresh&&typeof refresh==='function'){
-   return Promise.resolve(refresh()).catch(function(){}).then(function(){
-     var retry=findOrder(normalized);
-     return retry?openFreshFound(retry):(showResult(null),false);
-   });
- }
- showResult(null);return Promise.resolve(false);
+
+ // 今日清單找不到時，直接用 QR token／訂單號精準查雲端舊票，
+ // 不下載整份歷史訂單，維持手機後台輕量。
+ return findRemoteOrder(normalized).then(function(remoteFound){
+   if(remoteFound)return openFreshFound(remoteFound);
+   var refresh=window.MonsterOrderCenter&&MonsterOrderCenter.refresh;
+   if(!options.skipRefresh&&typeof refresh==='function'){
+     return Promise.resolve(refresh()).catch(function(){}).then(function(){
+       var retry=findOrder(normalized);
+       return retry?openFreshFound(retry):(showResult(null),false);
+     });
+   }
+   showResult(null);return false;
+ });
 }
 function prepareScanFeedback(){
  try{
@@ -323,5 +391,3 @@ function bind(){ensureModal();var b=byId('staffQuickLookupButton'),i=byId('staff
 document.addEventListener('DOMContentLoaded',bind);
 window.MonsterTicketValidator={findOrder:findOrder,lookup:lookup,openCenter:openCenter,closeCenter:closeCenter,startScan:startScan,renderHub:renderHub,setFilter:function(v){activeFilter=v;renderHub();}};
 })();
-
-
