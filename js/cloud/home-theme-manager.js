@@ -1,6 +1,6 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX61
-// 首頁主題圖庫：手機與售票機雲端同步、一鍵套用
+// 小怪獸售票機 V7.8.3.3 FIX65
+// 首頁主題圖庫：等待 Firebase 登入後同步、斷線自動恢復
 // =========================================
 (function(){
     "use strict";
@@ -16,6 +16,8 @@
     var items = {};
     var started = false;
     var modalReady = false;
+    var cloudReadyHooked = false;
+    var retryTimer = null;
 
     function byId(id){ return document.getElementById(id); }
     function escapeText(value){
@@ -112,7 +114,11 @@
         });
     }
     function getDatabase(){
-        if(window.MonsterCloud && window.MonsterCloud.database){
+        if(
+            window.MonsterCloud &&
+            window.MonsterCloud.database &&
+            window.MonsterCloud.uid
+        ){
             return window.MonsterCloud.database;
         }
         if(
@@ -123,22 +129,60 @@
         }
         return null;
     }
+    function scheduleRetry(){
+        if(retryTimer){ clearTimeout(retryTimer); }
+        retryTimer = setTimeout(function(){
+            retryTimer = null;
+            waitForCloud(0);
+        },1000);
+    }
+    function handleActiveTheme(snapshot){
+        loadActiveTheme(snapshot.val() || DEFAULT_ID);
+    }
+    function handleThemeReadError(error){
+        console.error("[MonsterHomeTheme] active read error:",error);
+        started = false;
+        themeRef = null;
+        scheduleRetry();
+    }
     function startSync(){
-        if(started){ return; }
+        if(started){ return true; }
         database = getDatabase();
-        if(!database){ return; }
+        if(!database){ return false; }
         started = true;
         themeRef = database.ref(ROOT);
-        themeRef.child("activeId").on("value",function(snapshot){
-            loadActiveTheme(snapshot.val() || DEFAULT_ID);
-        },function(error){
-            console.error("[MonsterHomeTheme] active read error:",error);
-        });
+        themeRef.child("activeId").on(
+            "value",
+            handleActiveTheme,
+            handleThemeReadError
+        );
+        return true;
     }
     function waitForCloud(attempt){
+        if(
+            !cloudReadyHooked &&
+            window.MonsterCloud &&
+            typeof window.MonsterCloud.onReady === "function"
+        ){
+            cloudReadyHooked = true;
+            window.MonsterCloud.onReady(function(){
+                started = false;
+                themeRef = null;
+                startSync();
+            });
+        }
         startSync();
-        if(started || Number(attempt || 0) >= 80){ return; }
+        if(started || Number(attempt || 0) >= 240){ return; }
         setTimeout(function(){ waitForCloud(Number(attempt || 0) + 1); },250);
+    }
+    function refreshActiveTheme(){
+        if(!themeRef){
+            waitForCloud(0);
+            return;
+        }
+        themeRef.child("activeId").once("value")
+        .then(handleActiveTheme)
+        .catch(handleThemeReadError);
     }
     function ensureModal(){
         if(modalReady || byId("homeThemeModal")){ return; }
@@ -377,6 +421,11 @@
         ensureModal();
         loadLocalActive();
         waitForCloud(0);
+        window.addEventListener("online",refreshActiveTheme);
+        document.addEventListener("visibilitychange",function(){
+            if(!document.hidden){ refreshActiveTheme(); }
+        });
+        window.addEventListener("focus",refreshActiveTheme);
     }
     if(document.readyState === "loading"){
         document.addEventListener("DOMContentLoaded",init);
@@ -384,3 +433,4 @@
         init();
     }
 })();
+
