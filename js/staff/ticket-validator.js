@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX64｜Cross-Day Ticket Lookup
+// 小怪獸售票機 V7.8.3.3 FIX66｜Cross-Day Ticket And Conflict Recovery
 (function(){
 'use strict';
 var ROOT='monsterTicket/v1', currentFound=null, stream=null, scanTimer=null, html5Scanner=null, activeFilter='playing', unsubscribeTimer=null, lastAlertSignature='', scanLocked=false, scanAudioContext=null;
@@ -186,7 +186,7 @@ function updateStatus(action){
        MonsterOrderCenter.applyOrderUpdate(currentFound.id,latest);
      }
    }
-   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix64'}).catch(function(){});
+   firebase.database().ref(ROOT+'/auditLogs').push({action:action==='enter'?(forceCapacity?'ticket.forceCheckIn':'ticket.checkIn'):'ticket.checkOut',orderId:currentFound.id,shortCode:(latest&&latest.shortCode)||o.shortCode||'',operatorName:who,createdAt:now,fromStatus:before,toStatus:desired,forced:forceCapacity,capacityInfo:capacityInfo||null,engineVersion:'7.8.3.3-fix66'}).catch(function(){});
    message(action==='enter'?'已完成入場':'已完成離場',true);
    renderCenter();showResult(currentFound);renderHub();
  });

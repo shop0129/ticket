@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 FIX63 Ticket Validation Conflict Recovery
+// 小怪獸售票機 V7.8.3.3 FIX66 Cumulative Theme And Ticket Sync
 // Preserved FIX39 cache marker: fix39-linepay-device-identity
 // Preserved FIX38 cache marker: fix38-staff-dashboard-date
 // Preserved FIX37 cache marker: fix37-taipei-business-day
@@ -30,7 +30,7 @@ var CACHE_PREFIX = "monster-ticket-pwa-";
 // Preserved regression markers: 7833-fix47b-firebase-region-callable-20261022-1 / 7833-fix47d-direct-prepaid-fallback-20261023-1
 // Preserved FIX47E cache marker: 7833-fix47e-receipt-pair-recovery-20261023-1
 // Preserved test marker: fix47f-sticky-printer-recovery
-var CACHE_NAME = CACHE_PREFIX + "7833-fix63-ticket-validation-conflict-recovery-20261029-1";
+var CACHE_NAME = CACHE_PREFIX + "7833-fix66-cumulative-theme-ticket-sync-20261030-1";
 var OFFLINE_PAGE = "./offline.html";
 var CORE_ASSETS = [
     "./index.html",
@@ -333,6 +333,7 @@ self.addEventListener("message", function (event) {
         event.source.postMessage({ type: "PWA_VERSION", version: CACHE_NAME });
     }
 });
+
 
 
 
