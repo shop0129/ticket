@@ -1,6 +1,7 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX55
+// 小怪獸售票機 V7.8.3.3 FIX68
 // Lobby / Play 電視即時看板
+// 人數上限先讀本機最後一次設定；無快取時等待雲端，避免先閃預設 40。
 // =========================================
 (function(){
 
@@ -13,10 +14,52 @@
     "play";
 
     var orders = {};
-    var venueSettings = {
-        maxPlayers:40,
+    var VENUE_SETTINGS_CACHE_KEY = "monsterTicketVenueSettingsV1";
+
+    function normalizeVenueSettings(value,allowDefault){
+        var source=value || {};
+        var maxPlayers=Number(source.maxPlayers);
+        if(!isFinite(maxPlayers) || maxPlayers < 1){
+            if(!allowDefault){return null;}
+            maxPlayers=40;
+        }
+        return {
+            maxPlayers:Math.max(1,Math.floor(maxPlayers)),
+            countGuardians:source.countGuardians === true
+        };
+    }
+
+    function readCachedVenueSettings(){
+        try{
+            return normalizeVenueSettings(
+                JSON.parse(localStorage.getItem(VENUE_SETTINGS_CACHE_KEY) || "null"),
+                false
+            );
+        }catch(error){
+            return null;
+        }
+    }
+
+    function cacheVenueSettings(value){
+        try{
+            localStorage.setItem(VENUE_SETTINGS_CACHE_KEY,JSON.stringify(value));
+        }catch(error){}
+    }
+
+    var cachedVenueSettings=readCachedVenueSettings();
+    var venueSettings=cachedVenueSettings || {
+        maxPlayers:null,
         countGuardians:false
     };
+    var venueSettingsReady=!!cachedVenueSettings;
+
+    function getMaxPlayers(){
+        if(!venueSettingsReady){return null;}
+        var maxPlayers=Number(venueSettings.maxPlayers);
+        return isFinite(maxPlayers) && maxPlayers > 0
+            ? Math.floor(maxPlayers)
+            : null;
+    }
 
     function esc(value){
         return String(value || "")
@@ -95,11 +138,18 @@
         var current =
         calculateCurrentPlayers();
 
-        var max =
-        Number(
-            venueSettings.maxPlayers ||
-            40
-        );
+        var max=getMaxPlayers();
+
+        if(max === null){
+            document.getElementById(
+                "displayCapacity"
+            ).textContent = "— / —";
+
+            document.getElementById(
+                "displayRemaining"
+            ).textContent = "載入人數設定…";
+            return;
+        }
 
         document.getElementById(
             "displayCapacity"
@@ -196,14 +246,10 @@
             box.innerHTML='<div class="display-empty">目前無候位</div>';
             return;
         }
-        var remainingCapacity =
-        Math.max(
-            0,
-            Number(
-                venueSettings.maxPlayers || 40
-            ) -
-            calculateCurrentPlayers()
-        );
+        var maxPlayers=getMaxPlayers();
+        var remainingCapacity = maxPlayers === null
+            ? 0
+            : Math.max(0,maxPlayers-calculateCurrentPlayers());
         box.innerHTML=rows.slice(0,10).map(function(order,index){
             var ready =
             index===0 &&
@@ -250,9 +296,12 @@
         .ref(ROOT+"/venue/settings")
         .on("value",function(snapshot){
 
-            venueSettings =
-            snapshot.val() ||
-            venueSettings;
+            venueSettings = normalizeVenueSettings(
+                snapshot.val(),
+                true
+            );
+            venueSettingsReady = true;
+            cacheVenueSettings(venueSettings);
 
             render();
         });
@@ -327,6 +376,9 @@
 
         setInterval(render,1000);
     }
+
+    // 先同步套用上次成功取得的設定；第一次使用則維持載入提示。
+    updateCapacity();
 
     if(
         !window.firebase ||
