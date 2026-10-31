@@ -1,6 +1,6 @@
 // =========================================
-// 小怪獸售票機 V7.8.3.3 FIX67
-// 首頁主題圖庫：開機不閃舊圖、等待 Firebase 登入後同步、斷線自動恢復
+// 小怪獸售票機 V7.8.3.3 FIX69
+// 首頁主題圖庫：舊版 WebView 管理視窗與持續雲端同步修正
 // =========================================
 (function(){
     "use strict";
@@ -17,6 +17,7 @@
     var started = false;
     var modalReady = false;
     var cloudReadyHooked = false;
+    var cloudAuthHooked = false;
     var retryTimer = null;
 
     function byId(id){ return document.getElementById(id); }
@@ -146,6 +147,21 @@
             waitForCloud(0);
         },1000);
     }
+    function hookFirebaseAuth(){
+        if(cloudAuthHooked || !window.firebase || !firebase.auth){ return; }
+        try{
+            cloudAuthHooked = true;
+            firebase.auth().onAuthStateChanged(function(user){
+                if(!user){ return; }
+                if(!started){
+                    startSync();
+                }
+                refreshActiveTheme();
+            });
+        }catch(error){
+            cloudAuthHooked = false;
+        }
+    }
     function handleActiveTheme(snapshot){
         loadActiveTheme(snapshot.val() || DEFAULT_ID);
     }
@@ -169,6 +185,7 @@
         return true;
     }
     function waitForCloud(attempt){
+        hookFirebaseAuth();
         if(
             !cloudReadyHooked &&
             window.MonsterCloud &&
@@ -182,7 +199,11 @@
             });
         }
         startSync();
-        if(started || Number(attempt || 0) >= 240){ return; }
+        if(started){ return; }
+        if(Number(attempt || 0) >= 240){
+            scheduleRetry();
+            return;
+        }
         setTimeout(function(){ waitForCloud(Number(attempt || 0) + 1); },250);
     }
     function refreshActiveTheme(){
@@ -232,8 +253,19 @@
         ensureModal();
         if(!started){ waitForCloud(0); }
         var modal = byId("homeThemeModal");
-        if(modal){ modal.style.display = "flex"; }
+        if(modal){
+            /* Android 8.1 舊 WebView 不支援 inset，必須明確指定四邊。 */
+            modal.style.top = "0";
+            modal.style.right = "0";
+            modal.style.bottom = "0";
+            modal.style.left = "0";
+            modal.style.width = "100%";
+            modal.style.height = "100%";
+            modal.style.display = "-webkit-flex";
+            modal.style.display = "flex";
+        }
         setStatus("");
+        refreshActiveTheme();
         loadThemeList();
     }
     function closeManager(){
@@ -305,7 +337,7 @@
         .then(function(){
             activeId = id || DEFAULT_ID;
             setStatus("✅ 首頁已切換，所有售票機會自動同步",false);
-            renderThemeList();
+            loadActiveTheme(activeId);
         })
         .catch(function(error){
             setStatus("切換失敗：" + (error.message || "請檢查網路"),true);
@@ -423,12 +455,29 @@
         open:openManager,
         close:closeManager,
         setActive:setActive,
+        refresh:refreshActiveTheme,
         getActiveId:function(){ return activeId; }
     };
     window.openHomeThemeManager = openManager;
 
+    function bindOpenButtons(){
+        var buttons = document.querySelectorAll("[data-home-theme-open]");
+        var index;
+        for(index = 0; index < buttons.length; index += 1){
+            if(buttons[index].getAttribute("data-home-theme-bound") === "1"){
+                continue;
+            }
+            buttons[index].setAttribute("data-home-theme-bound","1");
+            buttons[index].addEventListener("click",function(event){
+                if(event && event.preventDefault){ event.preventDefault(); }
+                openManager();
+            });
+        }
+    }
+
     function init(){
         ensureModal();
+        bindOpenButtons();
         var localApplied = loadLocalActive();
         waitForCloud(0);
         /* 離線或雲端長時間無回應時，仍可在 4 秒後顯示預設首頁。 */
@@ -441,6 +490,7 @@
             },4000);
         }
         window.addEventListener("online",refreshActiveTheme);
+        window.addEventListener("pageshow",refreshActiveTheme);
         document.addEventListener("visibilitychange",function(){
             if(!document.hidden){ refreshActiveTheme(); }
         });

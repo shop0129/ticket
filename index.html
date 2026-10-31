@@ -13,7 +13,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="小怪獸售票">
-<meta name="monster-app-version" content="V7.8.3.3 FIX68 Display Capacity No Flash">
+<meta name="monster-app-version" content="V7.8.3.3 FIX69 Home Theme WebView Repair">
 <!-- V7.8.3.3 · FIX29A CONTROLLER115 COIN RESET MANAGER -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27B CONSUME POINTS 10 STEP -->
 <!-- Preserved regression marker: V7.8.3.3 · FIX27A MEMBER PIN PORTAL -->
@@ -40,7 +40,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="stylesheet" href="css/coin-manager.css?v=7833fix29a-coin-reset">
 <link rel="stylesheet" href="css/receipt-printer.css?v=7833fix7">
 <link rel="stylesheet" href="css/kiosk-attendance.css?v=7833fix58">
-<link rel="stylesheet" href="css/home-theme-manager.css?v=fix61">
+<link rel="stylesheet" href="css/home-theme-manager.css?v=fix69">
 
 <style id="homeThemeBootStyle">
 /* FIX67：主題確認前不顯示內建舊圖，避免先閃舊首頁再跳新首頁。 */
@@ -715,8 +715,11 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
                     </button>
 
                     <button
+                        id="kioskHomeThemeOpenButton"
+                        type="button"
+                        data-home-theme-open="1"
                         class="dashboard-action-btn admin-only-action"
-                        onclick="openHomeThemeManager()">
+                        >
                         🎨 首頁主題管理
                     </button>
 
@@ -1840,7 +1843,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="js/modules/ticketCatalog.js?v=7833fix24"></script>
 <script src="js/modules/ticketManager.js?v=7833fix61"></script>
 <script src="js/cloud/cloud-ticket-sync.js?v=72c"></script>  
-<script src="js/cloud/home-theme-manager.js?v=fix67"></script>
+<script src="js/cloud/home-theme-manager.js?v=fix69"></script>
 <script src="js/modules/businessMode.js?v=7833fix26g"></script>    
 <script src="js/modules/systemSetting.js?v=7833fix26f"></script>
     
@@ -2022,7 +2025,7 @@ content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     function updateVersionBadge() {
         var badge = document.getElementById("monsterEnterpriseStatus");
         if (!badge) return false;
-        badge.textContent = "V7.8.3.3 · FIX68 · ONLINE";
+        badge.textContent = "V7.8.3.3 · FIX69 · ONLINE";
         return true;
     }
     if (!updateVersionBadge()) {
