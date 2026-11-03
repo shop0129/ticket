@@ -1,4 +1,4 @@
-// 小怪獸售票機 FIX35 - 員工未打卡禁止入場相關操作
+// 小怪獸售票機 FIX71 - 員工打卡狀態與入離場操作鎖同步
 (function () {
     "use strict";
 
@@ -15,8 +15,22 @@
 
     function state() { return window.MonsterAttendanceState || {}; }
 
+    function uiShowsWorking() {
+        var card = byId("attendanceStatusCard");
+        var title = byId("attendanceStatusTitle");
+        var cardClass = card ? " " + String(card.className || "") + " " : "";
+        return cardClass.indexOf(" is-working ") !== -1 ||
+            Boolean(title && String(title.textContent || "").replace(/^\s+|\s+$/g, "") === "上班中");
+    }
+
+    function isClockedIn() {
+        // FIX71：舊手機／舊 WebView 偶爾會讓全域狀態晚一步更新，
+        // 若打卡卡片已明確顯示上班中，就不可繼續把驗票按鈕鎖住。
+        return state().clockedIn === true || uiShowsWorking();
+    }
+
     function isBlocked() {
-        return role() === "staff" && state().clockedIn !== true;
+        return role() === "staff" && !isClockedIn();
     }
 
     function ensureBanner(section) {
@@ -62,6 +76,7 @@
 
     window.MonsterAttendanceGate = {
         isBlocked: isBlocked,
+        isClockedIn: isClockedIn,
         requireClockIn: function () {
             if (!isBlocked()) { return true; }
             showReminder();

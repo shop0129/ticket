@@ -440,7 +440,6 @@ input{
 .attendance-operation-locked .attendance-lock-banner{ display:block; }
 .attendance-operation-locked > :not(.attendance-lock-banner){
     opacity:.42;
-    pointer-events:none;
     user-select:none;
 }
 

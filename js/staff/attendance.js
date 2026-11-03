@@ -1,4 +1,4 @@
-// 小怪獸售票機 FIX33 - 員工打卡與店長編輯、刪除管理
+// 小怪獸售票機 FIX71 - 員工打卡狀態與入離場操作鎖同步
 (function () {
     "use strict";
 
@@ -63,6 +63,10 @@
         try {
             window.dispatchEvent(new CustomEvent("monster:attendance-state", { detail: detail }));
         } catch (error) {}
+        // FIX71：部分舊 WebView 的 CustomEvent 監聽偶爾未即時更新，直接同步一次操作鎖。
+        if (window.MonsterAttendanceGate && MonsterAttendanceGate.update) {
+            MonsterAttendanceGate.update();
+        }
     }
 
     function renderStatus() {
