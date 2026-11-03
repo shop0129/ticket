@@ -1,4 +1,4 @@
-// 小怪獸售票機 V7.8.3.3 Sprint 10
+// 小怪獸售票機 V7.8.3.3 FIX72｜0 元活動票直接出票
 // LINE Pay Offline API 掃碼＋本機硬體現金授權共用交易核心
 // Android WebView 61 相容（ES5）
 var countdownNumber = document.getElementById("countdownNumber");
@@ -55,6 +55,25 @@ function currentPaymentItems() {
         return [paymentTicketSnapshot(selectedTicket, ticketData[selectedTicket])];
     }
     return [];
+}
+
+function isZeroPriceOrder(context) {
+    return !!(
+        context &&
+        Array.isArray(context.items) &&
+        context.items.length > 0 &&
+        Number(context.originalAmount) === 0 &&
+        Number(context.amount) === 0
+    );
+}
+
+function isCurrentCheckoutFree() {
+    var items = currentPaymentItems();
+    if (!items.length) return false;
+    return items.every(function (item) {
+        var price = Number(item && item.price);
+        return isFinite(price) && price === 0;
+    });
 }
 
 function validatePaymentItems(items) {
@@ -119,7 +138,7 @@ function buildPaymentContext() {
     var originalAmount = items.reduce(function (sum, item) {
         return sum + Number(item.price || 0);
     }, 0);
-    if (!isFinite(originalAmount) || originalAmount <= 0) {
+    if (!isFinite(originalAmount) || originalAmount < 0) {
         throw new Error("找不到可付款的票券或金額");
     }
     var pointUse = currentPointUse();
@@ -348,16 +367,25 @@ function paymentSuccess(paymentType) {
         // 沒有任何付款模組持有交易時，解除上一筆中斷留下的假鎖定。
         resetPaymentLock();
     }
-    if (paymentType === "現金") {
-        if (window.MonsterCashBridge) {
-            window.MonsterCashBridge.startCashPayment();
-        } else {
-            alert("現金控制器尚未載入，請重新整理售票機");
-        }
-        return;
-    }
+    var context;
     try {
-        var context = buildPaymentContext();
+        context = buildPaymentContext();
+        // FIX72：純 0 元活動票不啟動現金控制器，也不送 LINE Pay。
+        // 仍走共用訂單、雲端同步、QR 驗票、統計與列印流程。
+        if (isZeroPriceOrder(context)) {
+            paymentInProgress = true;
+            setPaymentButtonsDisabled(true);
+            finalizePaymentContext("免費活動票", context, null);
+            return;
+        }
+        if (paymentType === "現金") {
+            if (window.MonsterCashBridge) {
+                window.MonsterCashBridge.startCashPayment();
+            } else {
+                throw new Error("現金控制器尚未載入，請重新整理售票機");
+            }
+            return;
+        }
         if (paymentType === "LINE Pay") {
             if (Number(context.amount || 0) === 0) {
                 finalizePointOnlyPayment(context);
@@ -408,6 +436,8 @@ window.MonsterPayment = {
     finalizeAuthorizedCash: finalizeAuthorizedCashPayment,
     finalizeAuthorizedLinePay: finalizeAuthorizedLinePayPayment,
     finalizePointOnly: finalizePointOnlyPayment,
+    isCurrentCheckoutFree: isCurrentCheckoutFree,
+    isZeroPriceOrder: isZeroPriceOrder,
     restoreFailedCashCheckout: restoreFailedCashCheckout,
     setLocked: function (locked) {
         paymentInProgress = !!locked;

@@ -132,19 +132,28 @@ function applyPaymentSetting() {
     // Cart
     var cartCash = document.getElementById("cartCashBtn");
     var cartLine = document.getElementById("cartLineBtn");
+    var freeCheckout = !!(
+        window.MonsterPayment &&
+        typeof MonsterPayment.isCurrentCheckoutFree === "function" &&
+        MonsterPayment.isCurrentCheckoutFree()
+    );
     if (cashBtn) {
-        cashBtn.disabled =
-            !systemData.payment.cash;
+        cashBtn.disabled = freeCheckout ? false : !systemData.payment.cash;
+        cashBtn.textContent = freeCheckout ? "🎁 免費領票" : "現金付款";
+        cashBtn.setAttribute("data-free-checkout", freeCheckout ? "1" : "0");
     }
     if (lineBtn) {
-        applyLinePayButtonSetting(lineBtn);
+        lineBtn.style.display = freeCheckout ? "none" : "";
+        if (!freeCheckout) applyLinePayButtonSetting(lineBtn);
     }
     if (cartCash) {
-        cartCash.disabled =
-            !systemData.payment.cash;
+        cartCash.disabled = freeCheckout ? false : !systemData.payment.cash;
+        cartCash.textContent = freeCheckout ? "🎁 免費領票" : "現金付款";
+        cartCash.setAttribute("data-free-checkout", freeCheckout ? "1" : "0");
     }
     if (cartLine) {
-        applyLinePayButtonSetting(cartLine);
+        cartLine.style.display = freeCheckout ? "none" : "";
+        if (!freeCheckout) applyLinePayButtonSetting(cartLine);
     }
 }
 
